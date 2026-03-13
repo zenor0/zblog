@@ -1,6 +1,42 @@
 import { test, expect, Page } from '@playwright/test'
+import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
+import { createPostPackageFiles } from '../helpers/createPostPackage'
 import { login } from '../helpers/login'
 import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
+
+async function submitImport(page: Page) {
+  const response = await Promise.all([
+    page.waitForResponse(
+      (candidate) =>
+        candidate.request().method() === 'POST' && candidate.url().includes('/api/post-package-import'),
+      {
+        timeout: 30_000,
+      },
+    ),
+    page.getByTestId('import-submit').click({ force: true }),
+  ])
+
+  expect(response[0]?.ok()).toBeTruthy()
+}
+
+async function waitForImportPanelReady(page: Page) {
+  await expect(page.getByTestId('import-panel')).toHaveAttribute('data-state', 'ready', {
+    timeout: 15_000,
+  })
+}
+
+async function openImportMenu(page: Page) {
+  await page.getByTestId('post-import-trigger').click()
+  await waitForImportPanelReady(page)
+}
+
+async function activateImportMode(page: Page, mode: 'mdship' | 'zip') {
+  const testID = mode === 'zip' ? 'import-mode-zip' : 'import-mode-mdship'
+
+  await page.getByTestId(testID).evaluate((element) => {
+    ;(element as HTMLButtonElement).click()
+  })
+}
 
 test.describe('Admin Panel', () => {
   let page: Page
@@ -37,5 +73,116 @@ test.describe('Admin Panel', () => {
     await expect(page).toHaveURL(/\/admin\/collections\/users\/[a-zA-Z0-9-_]+/)
     const editViewArtifact = page.locator('input[name="email"]')
     await expect(editViewArtifact).toBeVisible()
+  })
+
+  test('can open the posts collection and create view', async () => {
+    await page.goto('http://localhost:3000/admin/collections/posts')
+    await expect(page).toHaveURL('http://localhost:3000/admin/collections/posts')
+    await expect(page.locator('h1', { hasText: 'Posts' }).first()).toBeVisible()
+
+    await page.goto('http://localhost:3000/admin/collections/posts/create')
+    await expect(page.locator('input[name=\"slug\"]')).toBeVisible()
+    await expect(page.locator('input[name=\"title\"]')).toBeVisible()
+    await expect(page.getByTestId('post-import-trigger')).toBeVisible()
+  })
+
+  test('can open the import menu from the create flow', async () => {
+    await page.goto('http://localhost:3000/admin/collections/posts/create')
+    await expect(page.getByTestId('post-import-trigger')).toBeVisible()
+    await openImportMenu(page)
+    await expect(page.getByText('Import packaged content')).toBeVisible()
+  })
+
+  test('can open the translate menu from the document controls', async () => {
+    await page.goto('http://localhost:3000/admin/collections/posts/create')
+    await expect(page.getByTestId('translate-locale-trigger')).toBeVisible()
+    await page.getByTestId('translate-locale-trigger').click()
+    await expect(page.getByTestId('translate-locale-menu')).toBeVisible()
+    await expect(page.getByText('Machine translation')).toBeVisible()
+  })
+
+  test('can import and update a post package from the import dropdown', async () => {
+    const packageFiles = await createPostPackageFiles()
+    const initialPackage = await packageFiles.createVariant('imported-package-v1.zip', {
+      enTitle: 'Imported Package Demo',
+      slug: 'imported-package-demo',
+      zhTitle: '导入包示例文章',
+    })
+    const updatedPackage = await packageFiles.createVariant('imported-package-v2.zip', {
+      bodyAppendix: '第二次导入追加了这一段，用于验证整包更新会生成新的版本记录。',
+      enTitle: 'Imported Package Demo Revised',
+      slug: 'imported-package-demo',
+      zhTitle: '导入包示例文章（更新）',
+    })
+
+    try {
+      await page.goto('http://localhost:3000/admin/collections/posts/create')
+      await openImportMenu(page)
+
+      await activateImportMode(page, 'zip')
+      await expect(page.getByTestId('import-source-hint')).toHaveText('No ZIP selected.')
+      await page.setInputFiles('[data-testid="import-zip-input"]', initialPackage)
+      await submitImport(page)
+      await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
+
+      await expect(page.getByTestId('post-import-trigger')).toBeVisible()
+      await openImportMenu(page)
+      await activateImportMode(page, 'zip')
+      await page.setInputFiles('[data-testid="import-zip-input"]', updatedPackage)
+      await submitImport(page)
+      await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
+
+      await page.goto('http://localhost:3000/zh-CN/posts/imported-package-demo')
+      await expect(page.locator('h1').first()).toHaveText('导入包示例文章（更新）')
+      await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
+      await expect(page.getByText('第二次导入追加了这一段')).toBeVisible()
+
+      await page.goto('http://localhost:3000/zh-CN/posts/imported-package-demo/history')
+      await expect(page.locator('h1').first()).toHaveText('Version history')
+      await expect(page.getByText(/Version ID/).first()).toBeVisible()
+    } finally {
+      await packageFiles.cleanup()
+    }
+  })
+
+  test('can import and update an mdship workspace folder from the import dropdown', async () => {
+    const workspaceFiles = await createMDshipWorkspaceFiles()
+    const initialWorkspace = await workspaceFiles.createVariant('mdship-workspace-v1', {
+      title: 'MDship 导入示例文章',
+    })
+    const updatedWorkspace = await workspaceFiles.createVariant('mdship-workspace-v2', {
+      bodyAppendix: '这段文字来自第二次 mdship 工作区导入，用于验证更新版本。',
+      title: 'MDship 导入示例文章（更新）',
+    })
+
+    try {
+      await page.goto('http://localhost:3000/admin/collections/posts/create')
+      await openImportMenu(page)
+
+      await activateImportMode(page, 'mdship')
+      await page.getByTestId('import-slug-override').fill('mdship-import-demo')
+      await page.getByTestId('import-locale-override').selectOption('zh-CN')
+      await expect(page.getByTestId('import-source-hint')).toHaveText('No MDship folder selected.')
+
+      await page.setInputFiles('[data-testid="import-workspace-input"]', initialWorkspace)
+      await submitImport(page)
+      await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
+
+      await expect(page.getByTestId('post-import-trigger')).toBeVisible()
+      await openImportMenu(page)
+      await activateImportMode(page, 'mdship')
+      await page.getByTestId('import-slug-override').fill('mdship-import-demo')
+      await page.getByTestId('import-locale-override').selectOption('zh-CN')
+      await page.setInputFiles('[data-testid="import-workspace-input"]', updatedWorkspace)
+      await submitImport(page)
+      await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
+
+      await page.goto('http://localhost:3000/zh-CN/posts/mdship-import-demo')
+      await expect(page.locator('h1').first()).toHaveText('MDship 导入示例文章（更新）')
+      await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
+      await expect(page.getByText('这段文字来自第二次 mdship 工作区导入')).toBeVisible()
+    } finally {
+      await workspaceFiles.cleanup()
+    }
   })
 })

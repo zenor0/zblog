@@ -41,6 +41,8 @@ next-env.d.ts
 .env
 
 /media
+/.seed-assets
+/bibliography-files
 
 # Playwright
 node_modules/
@@ -48,3 +50,5 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+*.db
