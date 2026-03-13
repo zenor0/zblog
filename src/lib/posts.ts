@@ -1,11 +1,12 @@
 import type { TypeWithVersion } from 'payload'
 
-import type { BibliographyFile, Post } from '@/payload-types'
+import { isEditor } from '@/lib/access'
 import { loadBibliographyEntries, getReferencedEntries } from '@/lib/bibliography'
 import { buildCitationIndex } from '@/lib/citations'
 import { buildVersionDiff } from '@/lib/diff'
 import { defaultLocale, type AppLocale } from '@/lib/locales'
 import { getPayloadClient } from '@/lib/payload'
+import type { BibliographyFile, Post, User } from '@/payload-types'
 
 export type ResolvedPost = {
   bibliographyEntries: Awaited<ReturnType<typeof loadBibliographyEntries>>
@@ -15,10 +16,23 @@ export type ResolvedPost = {
   requestedLocale: AppLocale
   resolvedLocale: AppLocale
   sourcePost: Post | null
+  usedDraftAccess: boolean
   usedFallback: boolean
 }
 
 export type PostVersionRecord = TypeWithVersion<Post>
+
+function isRenderablePost(post: null | Post, allowUntitled: boolean) {
+  if (!post || typeof post.content !== 'string' || post.content.trim().length === 0) {
+    return false
+  }
+
+  if (allowUntitled) {
+    return true
+  }
+
+  return typeof post.title === 'string' && post.title.trim().length > 0
+}
 
 export async function getPublishedPosts(locale: AppLocale): Promise<Post[]> {
   const payload = await getPayloadClient()
@@ -41,27 +55,42 @@ export async function getPublishedPosts(locale: AppLocale): Promise<Post[]> {
 }
 
 export async function getPostBySlug(args: {
+  draft?: boolean
   locale: AppLocale
   slug: string
+  user?: null | User
 }): Promise<ResolvedPost | null> {
   const { locale, slug } = args
   const payload = await getPayloadClient()
+  const usedDraftAccess = Boolean(args.draft && isEditor(args.user))
+  const accessArgs = usedDraftAccess
+    ? {
+        user: args.user,
+      }
+    : {}
+  const where = {
+    ...(usedDraftAccess
+      ? {}
+      : {
+          _status: {
+            equals: 'published' as const,
+          },
+        }),
+    slug: {
+      equals: slug,
+    },
+  }
 
   const localizedResult = await payload.find({
     collection: 'posts',
     depth: 1,
+    draft: usedDraftAccess,
     fallbackLocale: false,
     limit: 1,
     locale,
     overrideAccess: false,
-    where: {
-      _status: {
-        equals: 'published',
-      },
-      slug: {
-        equals: slug,
-      },
-    },
+    ...accessArgs,
+    where,
   })
 
   const sourcePost = localizedResult.docs[0] ?? null
@@ -70,22 +99,17 @@ export async function getPostBySlug(args: {
   let resolvedLocale = locale
   let usedFallback = false
 
-  if (!post?.title || !post?.content) {
+  if (!isRenderablePost(post, usedDraftAccess)) {
     const fallbackResult = await payload.find({
       collection: 'posts',
       depth: 1,
+      draft: usedDraftAccess,
       fallbackLocale: false,
       limit: 1,
       locale: defaultLocale,
       overrideAccess: false,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-        slug: {
-          equals: slug,
-        },
-      },
+      ...accessArgs,
+      where,
     })
 
     post = fallbackResult.docs[0] ?? null
@@ -93,7 +117,7 @@ export async function getPostBySlug(args: {
     usedFallback = locale !== defaultLocale
   }
 
-  if (!post?.title || !post?.content) {
+  if (!isRenderablePost(post, usedDraftAccess)) {
     return null
   }
 
@@ -112,6 +136,85 @@ export async function getPostBySlug(args: {
     requestedLocale: locale,
     resolvedLocale,
     sourcePost,
+    usedDraftAccess,
+    usedFallback,
+  }
+}
+
+export async function getPostByID(args: {
+  draft?: boolean
+  id: number
+  locale: AppLocale
+  user?: null | User
+}): Promise<ResolvedPost | null> {
+  const { id, locale } = args
+  const payload = await getPayloadClient()
+  const usedDraftAccess = Boolean(args.draft && isEditor(args.user))
+  const accessArgs = usedDraftAccess
+    ? {
+        user: args.user,
+      }
+    : {}
+  const where = {
+    id: {
+      equals: id,
+    },
+  }
+
+  const localizedResult = await payload.find({
+    collection: 'posts',
+    depth: 1,
+    draft: usedDraftAccess,
+    fallbackLocale: false,
+    limit: 1,
+    locale,
+    overrideAccess: false,
+    ...accessArgs,
+    where,
+  })
+  const sourcePost = localizedResult.docs[0] ?? null
+
+  let post = sourcePost
+  let resolvedLocale = locale
+  let usedFallback = false
+
+  if (!isRenderablePost(post, usedDraftAccess) && locale !== defaultLocale) {
+    const fallbackResult = await payload.find({
+      collection: 'posts',
+      depth: 1,
+      draft: usedDraftAccess,
+      fallbackLocale: false,
+      limit: 1,
+      locale: defaultLocale,
+      overrideAccess: false,
+      ...accessArgs,
+      where,
+    })
+    post = fallbackResult.docs[0] ?? null
+    resolvedLocale = defaultLocale
+    usedFallback = true
+  }
+
+  if (!isRenderablePost(post, usedDraftAccess)) {
+    return null
+  }
+
+  const bibliographyFile =
+    post.bibliographyFile && typeof post.bibliographyFile === 'object'
+      ? (post.bibliographyFile as BibliographyFile)
+      : null
+  const bibliographyEntries = await loadBibliographyEntries(bibliographyFile)
+  const { entries, missingKeys } = getReferencedEntries(post.content, bibliographyEntries)
+
+  return {
+    bibliographyEntries: entries,
+    citationIndex: buildCitationIndex(post.content),
+    missingCitationKeys: missingKeys,
+    post,
+    requestedLocale: locale,
+    resolvedLocale,
+    sourcePost,
+    usedDraftAccess,
     usedFallback,
   }
 }

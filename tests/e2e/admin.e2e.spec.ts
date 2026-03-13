@@ -1,8 +1,71 @@
 import { test, expect, Page } from '@playwright/test'
+import config from '../../src/payload.config.js'
+import { getPayload } from 'payload'
 import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
 import { createPostPackageFiles } from '../helpers/createPostPackage'
 import { login } from '../helpers/login'
 import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
+
+async function cleanupDraftPreviewPost() {
+  const payload = await getPayload({ config })
+
+  await payload.delete({
+    collection: 'posts',
+    where: {
+      slug: {
+        equals: 'preview-draft-demo',
+      },
+    },
+  })
+}
+
+async function cleanupPostByID(id: number) {
+  const payload = await getPayload({ config })
+
+  await payload.delete({
+    collection: 'posts',
+    id,
+  })
+}
+
+async function seedDraftPreviewPost() {
+  const payload = await getPayload({ config })
+
+  await cleanupDraftPreviewPost()
+
+  const post = await payload.create({
+    collection: 'posts',
+    data: {
+      content: '# 预览草稿示例文章\n\n这一段只应该在 preview 中可见。',
+      excerpt: '只用于验证 preview 链路。',
+      slug: 'preview-draft-demo',
+      title: '预览草稿示例文章',
+    },
+    draft: true,
+  })
+
+  return {
+    id: post.id,
+    slug: 'preview-draft-demo',
+  }
+}
+
+async function seedUntitledDraftPreviewPost() {
+  const payload = await getPayload({ config })
+
+  const post = await payload.create({
+    collection: 'posts',
+    data: {
+      content: '这是一篇没有标题和 slug 的草稿，但仍然应该可以预览。',
+      excerpt: '用于验证无 slug 草稿预览链路。',
+    },
+    draft: true,
+  })
+
+  return {
+    id: post.id,
+  }
+}
 
 async function submitImport(page: Page) {
   const response = await Promise.all([
@@ -41,7 +104,9 @@ async function activateImportMode(page: Page, mode: 'mdship' | 'zip') {
 test.describe('Admin Panel', () => {
   let page: Page
 
-  test.beforeAll(async ({ browser }, testInfo) => {
+  test.beforeAll(async ({ browser }) => {
+    test.setTimeout(120_000)
+
     await seedTestUser()
 
     const context = await browser.newContext()
@@ -99,6 +164,44 @@ test.describe('Admin Panel', () => {
     await page.getByTestId('translate-locale-trigger').click()
     await expect(page.getByTestId('translate-locale-menu')).toBeVisible()
     await expect(page.getByText('Machine translation')).toBeVisible()
+  })
+
+  test('can preview a draft post through the frontend preview route', async () => {
+    const draftPost = await seedDraftPreviewPost()
+
+    try {
+      await page.goto(`http://localhost:3000/admin/collections/posts/${draftPost.id}`)
+      await expect(page.getByText('Preview')).toBeVisible()
+
+      await page.goto(
+        `http://localhost:3000/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`,
+      )
+
+      await expect(page).toHaveURL(`http://localhost:3000/zh-CN/posts/${draftPost.slug}`)
+      await expect(page.getByText('Preview mode')).toBeVisible()
+      await expect(page.locator('h1').first()).toHaveText('预览草稿示例文章')
+      await expect(page.getByText('这一段只应该在 preview 中可见。')).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Exit preview' })).toBeVisible()
+    } finally {
+      await cleanupDraftPreviewPost()
+    }
+  })
+
+  test('can preview an untitled draft without a slug', async () => {
+    const draftPost = await seedUntitledDraftPreviewPost()
+
+    try {
+      await page.goto(
+        `http://localhost:3000/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`,
+      )
+
+      await expect(page).toHaveURL(`http://localhost:3000/zh-CN/preview/posts/${draftPost.id}`)
+      await expect(page.locator('h1').first()).toHaveText('Untitled draft')
+      await expect(page.getByText('这是一篇没有标题和 slug 的草稿')).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Exit preview' })).toBeVisible()
+    } finally {
+      await cleanupPostByID(draftPost.id)
+    }
   })
 
   test('can import and update a post package from the import dropdown', async () => {

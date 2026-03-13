@@ -5,6 +5,7 @@ import { editorOnly, publishedOrEditor, publishedVersionsOrEditor } from '@/lib/
 import { loadBibliographyEntries } from '@/lib/bibliography'
 import { extractCitationKeys } from '@/lib/citations'
 import { defaultLocale } from '@/lib/locales'
+import { buildPostPreviewURL } from '@/lib/preview'
 import { slugify } from '@/lib/slugs'
 
 export const Posts: CollectionConfig = {
@@ -27,6 +28,18 @@ export const Posts: CollectionConfig = {
     },
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: 'Content',
+    preview: (doc, { locale }) => {
+      const id = doc?.id
+
+      if (!(typeof id === 'number' || typeof id === 'string')) {
+        return null
+      }
+
+      return buildPostPreviewURL({
+        id,
+        locale,
+      })
+    },
     useAsTitle: 'title',
   },
   endpoints: [autoTranslatePostEndpoint],

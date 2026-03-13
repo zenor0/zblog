@@ -240,6 +240,16 @@ pre {
   border-left-color: #4d79a6;
 }
 
+.notice--preview {
+  border-left-color: var(--foreground);
+}
+
+.notice--preview a {
+  color: var(--foreground);
+  font-weight: 600;
+  margin-left: 0.4rem;
+}
+
 .notice--warning {
   border-left-color: var(--warning);
   color: var(--warning);
