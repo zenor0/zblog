@@ -9,6 +9,7 @@ import { BibliographyFiles } from './collections/BibliographyFiles'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+import { SiteSettings } from './globals/SiteSettings'
 import { defaultLocale, supportedLocales } from './lib/locales'
 
 const filename = fileURLToPath(import.meta.url)
@@ -22,6 +23,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, BibliographyFiles, Posts],
+  globals: [SiteSettings],
   editor: lexicalEditor(),
   localization: {
     defaultLocale,

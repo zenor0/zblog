@@ -93,8 +93,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('zh-CN' | 'en') | ('zh-CN' | 'en')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: 'zh-CN' | 'en';
   widgets: {
     collections: CollectionsWidget;
@@ -589,6 +593,82 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * 配置首页头版文案以及前台底部展示的备案、版权和链接信息。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName: string;
+  homeHero?: {
+    eyebrow?: string | null;
+    title?: string | null;
+    description?: string | null;
+  };
+  footer?: {
+    note?: string | null;
+    owner?: string | null;
+    copyright?: string | null;
+    records?:
+      | {
+          label: string;
+          value: string;
+          href?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    links?:
+      | {
+          label: string;
+          href: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  homeHero?:
+    | T
+    | {
+        eyebrow?: T;
+        title?: T;
+        description?: T;
+      };
+  footer?:
+    | T
+    | {
+        note?: T;
+        owner?: T;
+        copyright?: T;
+        records?:
+          | T
+          | {
+              label?: T;
+              value?: T;
+              href?: T;
+              id?: T;
+            };
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

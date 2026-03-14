@@ -1,7 +1,7 @@
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { buildLocaleLinks, requireLocale } from '@/app/(frontend)/helpers'
+import { buildLocaleLinks, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
 import { PostArticle } from '@/components/frontend/PostArticle'
 import { getPostBySlug } from '@/lib/posts'
 import { getPreviewUser } from '@/lib/preview-user'
@@ -11,6 +11,7 @@ export default async function PostPage(props: {
 }) {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
   const preview = await draftMode()
   const previewUser = preview.isEnabled ? await getPreviewUser() : null
 
@@ -28,7 +29,7 @@ export default async function PostPage(props: {
   return (
     <PostArticle
       backHref={`/${locale}`}
-      backLabel="Back to index"
+      backLabel={copy.backToIndex}
       historyHref={`/${locale}/posts/${slug}/history`}
       locale={locale}
       localeLinks={buildLocaleLinks(`/posts/${slug}`)}

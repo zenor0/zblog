@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { formatLongDate, requireLocale } from '@/app/(frontend)/helpers'
+import { formatLongDate, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
 import { getPostBySlug, getPostVersionDiffs } from '@/lib/posts'
 
 export default async function PostHistoryPage(props: {
@@ -9,6 +9,7 @@ export default async function PostHistoryPage(props: {
 }) {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
   const post = await getPostBySlug({ locale, slug })
 
   if (!post) {
@@ -24,21 +25,19 @@ export default async function PostHistoryPage(props: {
     <div className="page-shell">
       <div className="page-topbar">
         <Link className="back-link" href={`/${locale}/posts/${slug}`}>
-          Back to article
+          {copy.backToArticle}
         </Link>
       </div>
 
       <section className="section">
         <div className="section-heading">
-          <h1>Version history</h1>
-          <p>
-            {post.post.title} · {versionDiffs.length} recorded versions
-          </p>
+          <h1>{copy.versionHistoryTitle}</h1>
+          <p>{copy.versionHistorySummary(post.post.title, versionDiffs.length)}</p>
         </div>
 
         {versionDiffs.length === 0 ? (
           <div className="empty-state">
-            <p>No version snapshots are available yet.</p>
+            <p>{copy.noVersions}</p>
           </div>
         ) : (
           <div className="version-stack">
@@ -48,12 +47,14 @@ export default async function PostHistoryPage(props: {
                   <div>
                     <h2>{formatLongDate(entry.version.updatedAt, post.resolvedLocale)}</h2>
                     <p>
-                      Version ID {entry.version.id}
-                      {entry.version.latest ? ' · Latest snapshot' : ''}
+                      {copy.versionID} {entry.version.id}
+                      {entry.version.latest ? ` · ${copy.latestSnapshot}` : ''}
                     </p>
                   </div>
                   <span className="version-chip">
-                    {entry.version.version._status === 'published' ? 'Published' : 'Draft'}
+                    {entry.version.version._status === 'published'
+                      ? copy.publishedLabel
+                      : copy.draftLabel}
                   </span>
                 </header>
 

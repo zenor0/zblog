@@ -1,7 +1,7 @@
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { requireLocale } from '@/app/(frontend)/helpers'
+import { getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
 import { PostArticle } from '@/components/frontend/PostArticle'
 import { supportedLocales } from '@/lib/locales'
 import { getPostByID } from '@/lib/posts'
@@ -13,6 +13,7 @@ export default async function PostPreviewPage(props: {
 }) {
   const { id: idParam, locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
   const preview = await draftMode()
 
   if (!preview.isEnabled) {
@@ -45,7 +46,7 @@ export default async function PostPreviewPage(props: {
   return (
     <PostArticle
       backHref={buildPostAdminPath(id)}
-      backLabel="Back to editor"
+      backLabel={copy.backToEditor}
       historyHref={
         resolved.post.slug ? `/${locale}/posts/${encodeURIComponent(resolved.post.slug)}/history` : null
       }

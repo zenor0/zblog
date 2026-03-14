@@ -1,23 +1,31 @@
 import Link from 'next/link'
 
-import { buildLocaleLinks, formatShortDate, requireLocale } from '@/app/(frontend)/helpers'
+import {
+  buildLocaleLinks,
+  formatShortDate,
+  getFrontendCopy,
+  requireLocale,
+} from '@/app/(frontend)/helpers'
 import { getPublishedPosts } from '@/lib/posts'
+import { getSiteSettings } from '@/lib/site-settings'
 
 export default async function LocalizedHomePage(props: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
+  const siteSettings = await getSiteSettings(locale)
   const posts = await getPublishedPosts(locale)
+  const heroEyebrow = siteSettings.homeHero?.eyebrow || siteSettings.siteName || copy.siteLabel
+  const heroTitle = siteSettings.homeHero?.title || copy.heroTitle
+  const heroDescription = siteSettings.homeHero?.description || copy.heroDescription
 
   return (
     <div className="page-shell">
       <header className="hero">
         <div className="hero-copy">
-          <span className="eyebrow">ZBlog CMS</span>
-          <h1>A quiet frontend for a multilingual, citation-aware blog.</h1>
-          <p>
-            Built on Payload. Markdown-first. Citation keys, BibTeX, attachments, machine
-            translation notices, and version diffs are surfaced without decorative noise.
-          </p>
+          <span className="eyebrow">{heroEyebrow}</span>
+          <h1>{heroTitle}</h1>
+          <p>{heroDescription}</p>
         </div>
         <nav aria-label="Locales" className="locale-nav">
           {buildLocaleLinks('').map((item) => (
@@ -34,37 +42,56 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
 
       <section className="section">
         <div className="section-heading">
-          <h2>Posts</h2>
-          <p>{posts.length} published entries</p>
+          <h2>{copy.postsHeading}</h2>
+          <p>{copy.publishedEntries(posts.length)}</p>
         </div>
 
         {posts.length === 0 ? (
           <div className="empty-state">
-            <p>No published posts yet. Create one in Payload admin and publish it.</p>
+            <p>{copy.noPublishedPosts}</p>
           </div>
         ) : (
           <div className="post-grid">
             {posts.map((post) => {
               const heroImage =
                 post.heroImage && typeof post.heroImage === 'object' ? post.heroImage : null
+              const heroImageURL = typeof heroImage?.url === 'string' ? heroImage.url : null
+              const hasHeroImage = Boolean(heroImageURL)
 
               return (
-                <article className="post-card" key={post.id}>
-                  {heroImage?.url ? (
+                <article
+                  className={hasHeroImage ? 'post-card post-card--with-image' : 'post-card post-card--text-only'}
+                  key={post.id}
+                >
+                  {hasHeroImage ? (
                     <div className="post-card__image">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img alt={heroImage.alt} src={heroImage.url} />
+                      <img alt={heroImage?.alt || post.title} src={heroImageURL ?? undefined} />
                     </div>
                   ) : null}
                   <div className="post-card__body">
-                    <div className="meta-row">
-                      <span>{formatShortDate(post.publishedAt ?? post.updatedAt, locale)}</span>
-                      <span>{post.translationStatus === 'machine' ? 'Machine draft' : 'Editorial'}</span>
+                    <div className="post-card__text">
+                      <div className="meta-row">
+                        <span className="meta-pill">
+                          {formatShortDate(post.publishedAt ?? post.updatedAt, locale)}
+                        </span>
+                        <span
+                          className={
+                            post.translationStatus === 'machine'
+                              ? 'meta-pill meta-pill--accent'
+                              : 'meta-pill'
+                          }
+                        >
+                          {post.translationStatus === 'machine'
+                            ? copy.machineStatus
+                            : copy.editorialStatus}
+                        </span>
+                      </div>
+                      <h3>
+                        <Link href={`/${locale}/posts/${post.slug}`}>{post.title}</Link>
+                      </h3>
+                      <p>{post.excerpt || copy.emptyExcerpt}</p>
                     </div>
-                    <h3>
-                      <Link href={`/${locale}/posts/${post.slug}`}>{post.title}</Link>
-                    </h3>
-                    <p>{post.excerpt || 'No excerpt provided yet.'}</p>
                     {post.tags?.length ? (
                       <ul className="tag-list">
                         {post.tags.map((tag) => (
