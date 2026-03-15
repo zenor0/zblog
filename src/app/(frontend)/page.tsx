@@ -1,7 +1,11 @@
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { defaultLocale } from '@/lib/locales'
+import { buildLocalePath, resolvePreferredLocale } from '@/lib/locales'
 
-export default function HomePage() {
-  redirect(`/${defaultLocale}`)
+export default async function HomePage() {
+  const requestHeaders = await headers()
+  const locale = resolvePreferredLocale(requestHeaders.get('accept-language'))
+
+  redirect(buildLocalePath(locale))
 }

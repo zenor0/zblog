@@ -1,17 +1,13 @@
-import { defaultLocale, isLocale, type AppLocale } from '@/lib/locales'
+import { buildLocalePath, defaultLocale, normalizeLocale, type AppLocale } from '@/lib/locales'
 
 export function resolvePreviewLocale(locale: null | string | undefined): AppLocale {
-  if (typeof locale === 'string' && isLocale(locale)) {
-    return locale
-  }
-
-  return defaultLocale
+  return normalizeLocale(locale) ?? defaultLocale
 }
 
 export function buildPostPath(args: { locale?: null | string; slug: string }) {
   const locale = resolvePreviewLocale(args.locale)
 
-  return `/${locale}/posts/${encodeURIComponent(args.slug)}`
+  return buildLocalePath(locale, `/posts/${encodeURIComponent(args.slug)}`)
 }
 
 export function buildPostDraftPreviewPath(args: {
@@ -20,7 +16,7 @@ export function buildPostDraftPreviewPath(args: {
 }) {
   const locale = resolvePreviewLocale(args.locale)
 
-  return `/${locale}/preview/posts/${encodeURIComponent(String(args.id))}`
+  return buildLocalePath(locale, `/preview/posts/${encodeURIComponent(String(args.id))}`)
 }
 
 export function buildPostPreviewURL(args: {

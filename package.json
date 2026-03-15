@@ -11,6 +11,7 @@
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "migrate:locales": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/migrate-locales.ts",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "seed:blog": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/seed-blog.ts",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
@@ -19,6 +20,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@formatjs/intl-localematcher": "^0.8.1",
     "@payloadcms/db-sqlite": "3.79.0",
     "@payloadcms/next": "3.79.0",
     "@payloadcms/richtext-lexical": "3.79.0",

@@ -1,7 +1,7 @@
 import { APIError, type Endpoint } from 'payload'
 
 import { isEditor } from '@/lib/access'
-import { defaultLocale, isLocale } from '@/lib/locales'
+import { defaultLocale, normalizeLocale } from '@/lib/locales'
 import { isTranslationConfigured, translateFields } from '@/lib/translation'
 
 type RequestBody = {
@@ -29,10 +29,10 @@ export const autoTranslatePostEndpoint: Endpoint = {
     }
 
     const body = ((await req.json?.().catch(() => ({}))) ?? {}) as RequestBody
-    const sourceLocale = typeof body.sourceLocale === 'string' ? body.sourceLocale : defaultLocale
-    const targetLocale = typeof body.targetLocale === 'string' ? body.targetLocale : ''
+    const sourceLocale = normalizeLocale(body.sourceLocale) ?? defaultLocale
+    const targetLocale = normalizeLocale(body.targetLocale)
 
-    if (!isLocale(sourceLocale) || !isLocale(targetLocale)) {
+    if (!targetLocale) {
       throw new APIError('Invalid locale.', 400)
     }
 

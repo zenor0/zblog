@@ -43,7 +43,7 @@ function buildZhMarkdown(variant: PackageVariant) {
   return `---
 title: ${variant.zhTitle}
 slug: ${variant.slug}
-locale: zh-CN
+locale: zh-Hans
 status: published
 excerpt: 用于验证整包导入、引用处理、媒体上传和版本历史。
 tags:
@@ -73,7 +73,7 @@ title: ${variant.enTitle}
 slug: ${variant.slug}
 locale: en
 translationStatus: reviewed
-translatedFromLocale: zh-CN
+translatedFromLocale: zh-Hans
 translationProvider: package-import
 ---
 # ${variant.enTitle}
@@ -89,7 +89,7 @@ export async function createPostPackageFiles() {
 
   async function writeVariant(fileName: string, variant: PackageVariant) {
     const archiveBytes = zipSync({
-      'zh-CN.md': strToU8(buildZhMarkdown(variant)),
+      'zh-hans.md': strToU8(buildZhMarkdown(variant)),
       'en.md': strToU8(buildEnMarkdown(variant)),
       'media/hero.svg': strToU8(heroSvg),
       'media/notes.txt': strToU8(attachmentText),

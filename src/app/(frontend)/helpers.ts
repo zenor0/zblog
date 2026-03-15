@@ -1,6 +1,13 @@
 import { notFound } from 'next/navigation'
 
-import { getLocaleLabel, isLocale, supportedLocales, type AppLocale } from '@/lib/locales'
+import {
+  buildLocalePath,
+  defaultLocale,
+  getLocaleLabel,
+  normalizeLocale,
+  supportedLocales,
+  type AppLocale,
+} from '@/lib/locales'
 
 type FrontendCopy = {
   attachments: string
@@ -48,7 +55,7 @@ type FrontendCopy = {
 }
 
 const frontendCopy: Record<AppLocale, FrontendCopy> = {
-  'zh-CN': {
+  'zh-Hans': {
     attachments: '附件',
     backToArticle: '返回文章',
     backToEditor: '返回编辑器',
@@ -141,11 +148,13 @@ const frontendCopy: Record<AppLocale, FrontendCopy> = {
 }
 
 export function requireLocale(locale: string): AppLocale {
-  if (!isLocale(locale)) {
+  const normalizedLocale = normalizeLocale(locale)
+
+  if (!normalizedLocale) {
     notFound()
   }
 
-  return locale
+  return normalizedLocale
 }
 
 export function formatLongDate(value: string | null | undefined, locale: AppLocale): string {
@@ -184,8 +193,8 @@ export function getFrontendCopy(locale: AppLocale): FrontendCopy {
 
 export function buildLocaleLinks(pathname: string) {
   return supportedLocales.map((locale) => ({
-    href: `/${locale.code}${pathname}`,
-    isDefault: locale.code === 'zh-CN',
+    href: buildLocalePath(locale.code, pathname),
+    isDefault: locale.code === defaultLocale,
     label: getLocaleLabel(locale.code),
     locale: locale.code,
   }))

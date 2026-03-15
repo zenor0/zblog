@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { buildLocaleLinks, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
 import { PostArticle } from '@/components/frontend/PostArticle'
+import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug } from '@/lib/posts'
 import { getPreviewUser } from '@/lib/preview-user'
 
@@ -28,12 +29,12 @@ export default async function PostPage(props: {
 
   return (
     <PostArticle
-      backHref={`/${locale}`}
+      backHref={buildLocalePath(locale)}
       backLabel={copy.backToIndex}
-      historyHref={`/${locale}/posts/${slug}/history`}
+      historyHref={buildLocalePath(locale, `/posts/${slug}/history`)}
       locale={locale}
       localeLinks={buildLocaleLinks(`/posts/${slug}`)}
-      previewExitPath={`/${locale}/posts/${slug}`}
+      previewExitPath={buildLocalePath(locale, `/posts/${slug}`)}
       resolved={resolved}
     />
   )

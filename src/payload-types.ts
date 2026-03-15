@@ -92,14 +92,14 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('zh-CN' | 'en') | ('zh-CN' | 'en')[];
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('zh-Hans' | 'en') | ('zh-Hans' | 'en')[];
   globals: {
     'site-settings': SiteSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
-  locale: 'zh-CN' | 'en';
+  locale: 'zh-Hans' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };

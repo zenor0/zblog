@@ -6,6 +6,7 @@ import {
   getFrontendCopy,
   requireLocale,
 } from '@/app/(frontend)/helpers'
+import { buildLocalePath } from '@/lib/locales'
 import { getPublishedPosts } from '@/lib/posts'
 import { getSiteSettings } from '@/lib/site-settings'
 
@@ -88,7 +89,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                         </span>
                       </div>
                       <h3>
-                        <Link href={`/${locale}/posts/${post.slug}`}>{post.title}</Link>
+                        <Link href={buildLocalePath(locale, `/posts/${post.slug}`)}>{post.title}</Link>
                       </h3>
                       <p>{post.excerpt || copy.emptyExcerpt}</p>
                     </div>

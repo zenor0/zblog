@@ -177,11 +177,11 @@ test.describe('Admin Panel', () => {
         `http://localhost:3000/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`,
       )
 
-      await expect(page).toHaveURL(`http://localhost:3000/zh-CN/posts/${draftPost.slug}`)
-      await expect(page.getByText('Preview mode')).toBeVisible()
+      await expect(page).toHaveURL(`http://localhost:3000/zh-hans/posts/${draftPost.slug}`)
+      await expect(page.getByText('预览模式')).toBeVisible()
       await expect(page.locator('h1').first()).toHaveText('预览草稿示例文章')
       await expect(page.getByText('这一段只应该在 preview 中可见。')).toBeVisible()
-      await expect(page.getByRole('link', { name: 'Exit preview' })).toBeVisible()
+      await expect(page.getByRole('link', { name: '退出预览' })).toBeVisible()
     } finally {
       await cleanupDraftPreviewPost()
     }
@@ -195,10 +195,10 @@ test.describe('Admin Panel', () => {
         `http://localhost:3000/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`,
       )
 
-      await expect(page).toHaveURL(`http://localhost:3000/zh-CN/preview/posts/${draftPost.id}`)
-      await expect(page.locator('h1').first()).toHaveText('Untitled draft')
+      await expect(page).toHaveURL(`http://localhost:3000/zh-hans/preview/posts/${draftPost.id}`)
+      await expect(page.locator('h1').first()).toHaveText('未命名草稿')
       await expect(page.getByText('这是一篇没有标题和 slug 的草稿')).toBeVisible()
-      await expect(page.getByRole('link', { name: 'Exit preview' })).toBeVisible()
+      await expect(page.getByRole('link', { name: '退出预览' })).toBeVisible()
     } finally {
       await cleanupPostByID(draftPost.id)
     }
@@ -235,14 +235,14 @@ test.describe('Admin Panel', () => {
       await submitImport(page)
       await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
 
-      await page.goto('http://localhost:3000/zh-CN/posts/imported-package-demo')
+      await page.goto('http://localhost:3000/zh-hans/posts/imported-package-demo')
       await expect(page.locator('h1').first()).toHaveText('导入包示例文章（更新）')
       await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
       await expect(page.getByText('第二次导入追加了这一段')).toBeVisible()
 
-      await page.goto('http://localhost:3000/zh-CN/posts/imported-package-demo/history')
-      await expect(page.locator('h1').first()).toHaveText('Version history')
-      await expect(page.getByText(/Version ID/).first()).toBeVisible()
+      await page.goto('http://localhost:3000/zh-hans/posts/imported-package-demo/history')
+      await expect(page.locator('h1').first()).toHaveText('版本历史')
+      await expect(page.getByText(/版本 ID/).first()).toBeVisible()
     } finally {
       await packageFiles.cleanup()
     }
@@ -264,7 +264,7 @@ test.describe('Admin Panel', () => {
 
       await activateImportMode(page, 'mdship')
       await page.getByTestId('import-slug-override').fill('mdship-import-demo')
-      await page.getByTestId('import-locale-override').selectOption('zh-CN')
+      await page.getByTestId('import-locale-override').selectOption('zh-Hans')
       await expect(page.getByTestId('import-source-hint')).toHaveText('No MDship folder selected.')
 
       await page.setInputFiles('[data-testid="import-workspace-input"]', initialWorkspace)
@@ -275,12 +275,12 @@ test.describe('Admin Panel', () => {
       await openImportMenu(page)
       await activateImportMode(page, 'mdship')
       await page.getByTestId('import-slug-override').fill('mdship-import-demo')
-      await page.getByTestId('import-locale-override').selectOption('zh-CN')
+      await page.getByTestId('import-locale-override').selectOption('zh-Hans')
       await page.setInputFiles('[data-testid="import-workspace-input"]', updatedWorkspace)
       await submitImport(page)
       await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
 
-      await page.goto('http://localhost:3000/zh-CN/posts/mdship-import-demo')
+      await page.goto('http://localhost:3000/zh-hans/posts/mdship-import-demo')
       await expect(page.locator('h1').first()).toHaveText('MDship 导入示例文章（更新）')
       await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
       await expect(page.getByText('这段文字来自第二次 mdship 工作区导入')).toBeVisible()

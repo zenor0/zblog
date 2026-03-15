@@ -10,7 +10,7 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { SiteSettings } from './globals/SiteSettings'
-import { defaultLocale, supportedLocales } from './lib/locales'
+import { defaultLocale, payloadLocales } from './lib/locales'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,7 +28,7 @@ export default buildConfig({
   localization: {
     defaultLocale,
     fallback: true,
-    locales: [...supportedLocales],
+    locales: payloadLocales,
   },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

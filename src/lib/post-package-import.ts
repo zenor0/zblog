@@ -6,7 +6,7 @@ import { unzip } from 'fflate'
 import matter from 'gray-matter'
 import type { Payload, PayloadRequest } from 'payload'
 
-import { isLocale, defaultLocale, type AppLocale } from '@/lib/locales'
+import { defaultLocale, normalizeLocale, type AppLocale } from '@/lib/locales'
 import { slugify } from '@/lib/slugs'
 import { extractCitationKeys } from '@/lib/citations'
 import type { BibliographyFile, Media, Post, User } from '@/payload-types'
@@ -360,9 +360,10 @@ async function readWorkspaceEntries(files: ImportedWorkspaceFile[]): Promise<Arc
 function parseMarkdownDocument(entry: ArchiveEntry): ParsedMarkdownDocument {
   const parsed = matter(entry.text ?? '')
   const frontmatter = parsed.data as Record<string, unknown>
-  const localeValue = typeof frontmatter.locale === 'string' ? frontmatter.locale : defaultLocale
+  const localeValue =
+    normalizeLocale(typeof frontmatter.locale === 'string' ? frontmatter.locale : defaultLocale) ?? null
 
-  if (!isLocale(localeValue)) {
+  if (!localeValue) {
     throw new Error(`Invalid locale "${String(frontmatter.locale)}" in ${entry.path}.`)
   }
 
@@ -421,9 +422,11 @@ function parseMarkdownDocument(entry: ArchiveEntry): ParsedMarkdownDocument {
     translatedAt:
       typeof frontmatter.translatedAt === 'string' ? frontmatter.translatedAt.trim() : undefined,
     translatedFromLocale:
-      typeof frontmatter.translatedFromLocale === 'string'
-        ? frontmatter.translatedFromLocale.trim()
-        : undefined,
+      normalizeLocale(
+        typeof frontmatter.translatedFromLocale === 'string'
+          ? frontmatter.translatedFromLocale
+          : undefined,
+      ) ?? undefined,
     translationProvider:
       typeof frontmatter.translationProvider === 'string'
         ? frontmatter.translationProvider.trim()

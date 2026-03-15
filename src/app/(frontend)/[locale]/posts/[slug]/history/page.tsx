@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { formatLongDate, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
+import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug, getPostVersionDiffs } from '@/lib/posts'
 
 export default async function PostHistoryPage(props: {
@@ -24,7 +25,7 @@ export default async function PostHistoryPage(props: {
   return (
     <div className="page-shell">
       <div className="page-topbar">
-        <Link className="back-link" href={`/${locale}/posts/${slug}`}>
+        <Link className="back-link" href={buildLocalePath(locale, `/posts/${slug}`)}>
           {copy.backToArticle}
         </Link>
       </div>

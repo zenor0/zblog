@@ -1,5 +1,8 @@
 import { IBM_Plex_Sans, Newsreader } from 'next/font/google'
 import React from 'react'
+
+import { defaultLocale } from '@/lib/locales'
+
 import './styles.css'
 
 const sans = IBM_Plex_Sans({
@@ -23,7 +26,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
 
   return (
-    <html lang="zh-CN">
+    <html lang={defaultLocale}>
       <body className={`${sans.variable} ${serif.variable}`}>
         <main className="site-root">{children}</main>
       </body>

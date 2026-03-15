@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import { isEditor } from '@/lib/access'
-import { isLocale } from '@/lib/locales'
+import { normalizeLocale } from '@/lib/locales'
 import { importPostPackage, importPostWorkspace, type ImportPostOverrides } from '@/lib/post-package-import'
 import type { User } from '@/payload-types'
 
@@ -18,8 +18,10 @@ function parseOverrides(formData: FormData): ImportPostOverrides {
     overrides.slug = slug.trim()
   }
 
-  if (typeof locale === 'string' && isLocale(locale)) {
-    overrides.locale = locale
+  const normalizedLocale = typeof locale === 'string' ? normalizeLocale(locale) : null
+
+  if (normalizedLocale) {
+    overrides.locale = normalizedLocale
   }
 
   if (typeof title === 'string' && title.trim()) {

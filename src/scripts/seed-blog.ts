@@ -256,7 +256,7 @@ async function seedPosts(
       title: '带引用与版本历史的示例文章（修订）',
     },
     id: citationPost.id,
-    locale: 'zh-CN',
+    locale: 'zh-Hans',
   })
 
   await payload.update({
@@ -267,7 +267,7 @@ async function seedPosts(
       excerpt: 'Machine-translated seeded content for locale switching.',
       title: 'Seed Post with Citations and Version History',
       translatedAt: new Date().toISOString(),
-      translatedFromLocale: 'zh-CN',
+      translatedFromLocale: 'zh-Hans',
       translationProvider: 'seed-script',
       translationStatus: 'machine',
     },
@@ -302,7 +302,7 @@ async function logSummary(payload: Awaited<ReturnType<typeof getPayload>>) {
     collection: 'posts',
     depth: 0,
     limit: 20,
-    locale: 'zh-CN',
+    locale: 'zh-Hans',
     overrideAccess: false,
     sort: 'slug',
     where: {
@@ -315,7 +315,7 @@ async function logSummary(payload: Awaited<ReturnType<typeof getPayload>>) {
   const versions = await payload.findVersions({
     collection: 'posts',
     limit: 20,
-    locale: 'zh-CN',
+    locale: 'zh-Hans',
     sort: '-updatedAt',
     where: {
       parent: {
