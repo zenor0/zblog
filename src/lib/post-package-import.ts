@@ -88,6 +88,8 @@ type ParsedPostPackage = {
   warnings: string[]
 }
 
+type PostDocumentID = Post['id']
+
 type AssetUsage = {
   alt?: string
   kind: 'asset' | 'attachment' | 'heroImage' | 'image'
@@ -168,9 +170,7 @@ function inferTitleFromMarkdown(markdown: string): string | undefined {
 
 function parseTags(value: unknown): string[] {
   if (Array.isArray(value)) {
-    return value
-      .map((item) => (typeof item === 'string' ? item.trim() : ''))
-      .filter(Boolean)
+    return value.map((item) => (typeof item === 'string' ? item.trim() : '')).filter(Boolean)
   }
 
   if (typeof value === 'string') {
@@ -208,9 +208,7 @@ function parseStringArray(value: unknown): string[] {
     return []
   }
 
-  return value
-    .map((item) => (typeof item === 'string' ? item.trim() : ''))
-    .filter(Boolean)
+  return value.map((item) => (typeof item === 'string' ? item.trim() : '')).filter(Boolean)
 }
 
 function parseAttachments(value: unknown): AttachmentInput[] {
@@ -291,9 +289,11 @@ async function readArchiveEntries(file: File): Promise<ArchiveEntry[]> {
     output.push({
       bytes: Buffer.from(contents),
       path: normalizedPath,
-      text: bibliographyExtensionPattern.test(normalizedPath) || markdownExtensionPattern.test(normalizedPath)
-        ? decoder.decode(contents)
-        : undefined,
+      text:
+        bibliographyExtensionPattern.test(normalizedPath) ||
+        markdownExtensionPattern.test(normalizedPath)
+          ? decoder.decode(contents)
+          : undefined,
     })
   }
 
@@ -348,9 +348,12 @@ async function readWorkspaceEntries(files: ImportedWorkspaceFile[]): Promise<Arc
     output.push({
       bytes: Buffer.from(bytes),
       path: workspacePath,
-      text: bibliographyExtensionPattern.test(workspacePath) || markdownExtensionPattern.test(workspacePath) || workspacePath.endsWith('.json')
-        ? decoder.decode(bytes)
-        : undefined,
+      text:
+        bibliographyExtensionPattern.test(workspacePath) ||
+        markdownExtensionPattern.test(workspacePath) ||
+        workspacePath.endsWith('.json')
+          ? decoder.decode(bytes)
+          : undefined,
     })
   }
 
@@ -361,7 +364,8 @@ function parseMarkdownDocument(entry: ArchiveEntry): ParsedMarkdownDocument {
   const parsed = matter(entry.text ?? '')
   const frontmatter = parsed.data as Record<string, unknown>
   const localeValue =
-    normalizeLocale(typeof frontmatter.locale === 'string' ? frontmatter.locale : defaultLocale) ?? null
+    normalizeLocale(typeof frontmatter.locale === 'string' ? frontmatter.locale : defaultLocale) ??
+    null
 
   if (!localeValue) {
     throw new Error(`Invalid locale "${String(frontmatter.locale)}" in ${entry.path}.`)
@@ -439,7 +443,8 @@ function resolveBibliographySource(
   documents: ParsedMarkdownDocument[],
   entries: Map<string, ArchiveEntry>,
 ): ParsedBibliographySource | null {
-  const sharedDocument = documents.find((document) => document.locale === defaultLocale) ?? documents[0]
+  const sharedDocument =
+    documents.find((document) => document.locale === defaultLocale) ?? documents[0]
 
   if (!sharedDocument) {
     return null
@@ -450,7 +455,10 @@ function resolveBibliographySource(
   }
 
   if (sharedDocument.bibliographyPath) {
-    const resolvedPath = resolvePackagePath(sharedDocument.directory, sharedDocument.bibliographyPath)
+    const resolvedPath = resolvePackagePath(
+      sharedDocument.directory,
+      sharedDocument.bibliographyPath,
+    )
 
     if (!resolvedPath) {
       throw new Error(`Invalid bibliography path "${sharedDocument.bibliographyPath}".`)
@@ -584,7 +592,10 @@ function parseMDshipPackage(args: {
   }
 }
 
-function parsePostPackage(entries: ArchiveEntry[], overrides?: ImportPostOverrides): ParsedPostPackage {
+function parsePostPackage(
+  entries: ArchiveEntry[],
+  overrides?: ImportPostOverrides,
+): ParsedPostPackage {
   const entryMap = buildEntryMap(entries)
   const mdshipManifest = parseMDshipManifest(entryMap)
 
@@ -607,7 +618,9 @@ function parsePostPackage(entries: ArchiveEntry[], overrides?: ImportPostOverrid
   const slugs = new Set(parsedDocuments.map((document) => document.slug))
 
   if (slugs.size !== 1) {
-    throw new Error('Archive must describe exactly one post slug. Split multi-post imports into separate packages.')
+    throw new Error(
+      'Archive must describe exactly one post slug. Split multi-post imports into separate packages.',
+    )
   }
 
   const documents = parsedDocuments.map((document) => ({
@@ -615,16 +628,21 @@ function parsePostPackage(entries: ArchiveEntry[], overrides?: ImportPostOverrid
     slug: overrides?.slug?.trim() || document.slug,
   }))
   const duplicateLocale = documents.find(
-    (document, index) => documents.findIndex((candidate) => candidate.locale === document.locale) !== index,
+    (document, index) =>
+      documents.findIndex((candidate) => candidate.locale === document.locale) !== index,
   )
 
   if (duplicateLocale) {
-    throw new Error(`Archive contains more than one markdown file for locale "${duplicateLocale.locale}".`)
+    throw new Error(
+      `Archive contains more than one markdown file for locale "${duplicateLocale.locale}".`,
+    )
   }
 
   const bibliography = resolveBibliographySource(documents, entryMap)
   const createLocale =
-    documents.find((document) => document.locale === defaultLocale)?.locale ?? documents[0]?.locale ?? defaultLocale
+    documents.find((document) => document.locale === defaultLocale)?.locale ??
+    documents[0]?.locale ??
+    defaultLocale
 
   return {
     bibliography,
@@ -664,10 +682,7 @@ function collectMarkdownAssetUsages(document: ParsedMarkdownDocument): AssetUsag
 function fileNameToLabel(filePath: string): string {
   const raw = path.posix.basename(filePath, path.posix.extname(filePath))
 
-  return raw
-    .replace(/[-_]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return raw.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 function buildAssetUsageMap(parsedPackage: ParsedPostPackage): Map<string, AssetUsage> {
@@ -808,11 +823,13 @@ async function findOneByField(args: {
 async function upsertBibliography(args: {
   bibliography: ParsedBibliographySource | null
   existingPost: Post | null
+  ownerPostID?: PostDocumentID
   payload: Payload
   slug: string
   user: User
 }): Promise<BibliographyFile | null> {
-  const { bibliography, existingPost, payload, slug } = args
+  const { bibliography, existingPost, ownerPostID, payload, slug } = args
+  const request = buildLocalRequest(args.user)
 
   if (!bibliography) {
     const relationValue = existingPost?.bibliographyFile
@@ -825,6 +842,9 @@ async function upsertBibliography(args: {
       return (await payload.findByID({
         collection: 'bibliography-files',
         id: relationValue,
+        overrideAccess: false,
+        req: request,
+        user: args.user,
       })) as BibliographyFile
     }
 
@@ -834,56 +854,77 @@ async function upsertBibliography(args: {
   const importKey = `${slug}:bibliography:${bibliography.path}`
   const nextFilename = `${slug}-${bibliography.filename}`
   const existingByImportKey =
-    ((await payload.find({
-      collection: 'bibliography-files',
-      depth: 0,
-      limit: 1,
-      where: {
-        importKey: {
-          equals: importKey,
+    ((
+      await payload.find({
+        collection: 'bibliography-files',
+        depth: 0,
+        limit: 1,
+        overrideAccess: false,
+        req: request,
+        user: args.user,
+        where: {
+          importKey: {
+            equals: importKey,
+          },
         },
-      },
-    }))?.docs[0] as BibliographyFile | undefined) ?? null
+      })
+    )?.docs[0] as BibliographyFile | undefined) ?? null
   const existingByFilename =
-    ((await payload.find({
-      collection: 'bibliography-files',
-      depth: 0,
-      limit: 1,
-      where: {
-        filename: {
-          equals: nextFilename,
+    ((
+      await payload.find({
+        collection: 'bibliography-files',
+        depth: 0,
+        limit: 1,
+        overrideAccess: false,
+        req: request,
+        user: args.user,
+        where: {
+          filename: {
+            equals: nextFilename,
+          },
         },
-      },
-    }))?.docs[0] as BibliographyFile | undefined) ?? null
+      })
+    )?.docs[0] as BibliographyFile | undefined) ?? null
 
-  const existingID =
-    existingByImportKey?.id ??
+  const existingID = (existingByImportKey?.id ??
     existingByFilename?.id ??
     (typeof existingPost?.bibliographyFile === 'number'
       ? existingPost.bibliographyFile
       : existingPost?.bibliographyFile && typeof existingPost.bibliographyFile === 'object'
         ? existingPost.bibliographyFile.id
-        : null)
+        : null)) as BibliographyFile['id'] | null
 
-  const data = {
+  const data: Pick<
+    BibliographyFile,
+    'description' | 'filename' | 'importKey' | 'source' | 'title'
+  > & {
+    ownerPost?: PostDocumentID
+  } = {
     description: bibliography.description,
     filename: nextFilename,
     importKey,
+    ...(ownerPostID !== undefined ? { ownerPost: ownerPostID } : {}),
     source: bibliography.source,
     title: bibliography.title,
   }
 
-  if (existingID) {
+  if (existingID !== null) {
     return (await payload.update({
       collection: 'bibliography-files',
       data,
       id: existingID,
-    })) as BibliographyFile
+      overrideAccess: false,
+      req: request,
+      user: args.user,
+    })) as unknown as BibliographyFile
   }
 
   return (await payload.create({
     collection: 'bibliography-files',
     data,
+    overrideAccess: false,
+    req: request,
+    user: args.user,
   })) as BibliographyFile
 }
 
@@ -916,6 +957,7 @@ async function writeTemporaryAsset(
 }
 
 async function upsertMediaAssets(args: {
+  ownerPostID?: PostDocumentID
   parsedPackage: ParsedPostPackage
   payload: Payload
   slug: string
@@ -929,7 +971,9 @@ async function upsertMediaAssets(args: {
     const archiveEntry = args.parsedPackage.entries.get(assetPath)
 
     if (!archiveEntry) {
-      throw new Error(`Asset "${assetPath}" referenced by the markdown was not found in the archive.`)
+      throw new Error(
+        `Asset "${assetPath}" referenced by the markdown was not found in the archive.`,
+      )
     }
 
     const importKey = `${args.slug}:asset:${assetPath}`
@@ -946,9 +990,12 @@ async function upsertMediaAssets(args: {
       buildImportedAssetFilename(args.slug, assetPath),
     )
     const alt = usage.alt || fileNameToLabel(assetPath) || path.posix.basename(assetPath)
-    const data = {
+    const data: Pick<Media, 'alt' | 'importKey'> & {
+      ownerPost?: PostDocumentID
+    } = {
       alt,
       importKey,
+      ...(args.ownerPostID !== undefined ? { ownerPost: args.ownerPostID } : {}),
     }
 
     const media = existingMedia
@@ -961,7 +1008,7 @@ async function upsertMediaAssets(args: {
           overwriteExistingFiles: true,
           req: buildLocalRequest(args.user),
           user: args.user,
-        })) as Media)
+        })) as unknown as Media)
       : ((await args.payload.create({
           collection: 'media',
           data,
@@ -975,6 +1022,54 @@ async function upsertMediaAssets(args: {
   }
 
   return uploadedMediaByPath
+}
+
+async function assignOwnedResourcesToPost(args: {
+  bibliographyDocument: BibliographyFile | null
+  payload: Payload
+  postID: PostDocumentID
+  uploadedMediaByPath: Map<string, Media>
+  user: User
+}): Promise<{
+  bibliographyDocument: BibliographyFile | null
+  uploadedMediaByPath: Map<string, Media>
+}> {
+  const request = buildLocalRequest(args.user)
+  const ownedMediaByPath = new Map<string, Media>()
+  let ownedBibliography = args.bibliographyDocument
+
+  if (args.bibliographyDocument?.id) {
+    ownedBibliography = (await args.payload.update({
+      collection: 'bibliography-files',
+      data: {
+        ownerPost: args.postID,
+      },
+      id: args.bibliographyDocument.id,
+      overrideAccess: false,
+      req: request,
+      user: args.user,
+    })) as unknown as BibliographyFile
+  }
+
+  for (const [assetPath, media] of args.uploadedMediaByPath.entries()) {
+    const ownedMedia = (await args.payload.update({
+      collection: 'media',
+      data: {
+        ownerPost: args.postID,
+      },
+      id: media.id,
+      overrideAccess: false,
+      req: request,
+      user: args.user,
+    })) as unknown as Media
+
+    ownedMediaByPath.set(assetPath, ownedMedia)
+  }
+
+  return {
+    bibliographyDocument: ownedBibliography,
+    uploadedMediaByPath: ownedMediaByPath,
+  }
 }
 
 function buildAttachmentData(
@@ -1090,14 +1185,16 @@ async function importPostEntries(args: {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zblog-post-package-'))
 
   try {
-    const bibliographyDocument = await upsertBibliography({
+    let bibliographyDocument = await upsertBibliography({
       bibliography,
       existingPost,
+      ownerPostID: existingPost?.id,
       payload: args.payload,
       slug: parsedPackage.slug,
       user: args.user,
     })
-    const uploadedMediaByPath = await upsertMediaAssets({
+    let uploadedMediaByPath = await upsertMediaAssets({
+      ownerPostID: existingPost?.id,
       parsedPackage,
       payload: args.payload,
       slug: parsedPackage.slug,
@@ -1122,23 +1219,29 @@ async function importPostEntries(args: {
     }
 
     if (sharedDocument.hasHeroImageField) {
-      sharedData.heroImage = sharedDocument.heroImagePath === null ? null : heroImage?.id ?? null
+      sharedData.heroImage = sharedDocument.heroImagePath === null ? null : (heroImage?.id ?? null)
     }
 
     if (sharedDocument.hasAttachmentsField) {
       sharedData.attachments = buildAttachmentData(sharedDocument, uploadedMediaByPath)
     }
 
-    if (bibliographyDocument || (sharedDocument.hasBibliographyField && sharedDocument.bibliographyPath === null)) {
+    if (
+      bibliographyDocument ||
+      (sharedDocument.hasBibliographyField && sharedDocument.bibliographyPath === null)
+    ) {
       sharedData.bibliographyFile =
         sharedDocument.hasBibliographyField && sharedDocument.bibliographyPath === null
           ? null
-          : bibliographyDocument?.id ?? null
+          : (bibliographyDocument?.id ?? null)
     }
 
     const effectiveStatus = sharedDocument.status
     const localizedDocuments = parsedPackage.documents.map((document) => ({
-      data: buildLocalizedPostData(document, rewriteMarkdownAssetLinks(document, uploadedMediaByPath)),
+      data: buildLocalizedPostData(
+        document,
+        rewriteMarkdownAssetLinks(document, uploadedMediaByPath),
+      ),
       locale: document.locale,
     }))
     const createDocument =
@@ -1196,6 +1299,14 @@ async function importPostEntries(args: {
         })) as Post
       }
     }
+
+    ;({ bibliographyDocument, uploadedMediaByPath } = await assignOwnedResourcesToPost({
+      bibliographyDocument,
+      payload: args.payload,
+      postID: post.id,
+      uploadedMediaByPath,
+      user: args.user,
+    }))
 
     for (const document of localizedDocuments) {
       if (!existingPost && document.locale === createDocument?.locale) {

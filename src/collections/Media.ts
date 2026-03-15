@@ -40,6 +40,17 @@ export const Media: CollectionConfig = {
       type: 'text',
       unique: true,
     },
+    {
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+      index: true,
+      maxDepth: 0,
+      name: 'ownerPost',
+      relationTo: 'posts',
+      type: 'relationship',
+    },
   ],
   upload: {
     staticDir: mediaUploadDir,

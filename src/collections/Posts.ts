@@ -1,12 +1,39 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 
 import { autoTranslatePostEndpoint } from '@/endpoints/posts/autoTranslatePost'
+import { captureOwnedResourcesBeforeDelete } from '@/hooks/posts/captureOwnedResourcesBeforeDelete'
+import { deleteOwnedResourcesAfterDelete } from '@/hooks/posts/deleteOwnedResourcesAfterDelete'
 import { editorOnly, publishedOrEditor, publishedVersionsOrEditor } from '@/lib/access'
 import { loadBibliographyEntries } from '@/lib/bibliography'
 import { extractCitationKeys } from '@/lib/citations'
 import { defaultLocale } from '@/lib/locales'
 import { buildPostPreviewURL } from '@/lib/preview'
 import { slugify } from '@/lib/slugs'
+
+function sharedOrCurrentPostOwnedFilter({ id }: { id?: number | string }): Where {
+  if (typeof id !== 'number' && typeof id !== 'string') {
+    return {
+      ownerPost: {
+        exists: false,
+      },
+    }
+  }
+
+  return {
+    or: [
+      {
+        ownerPost: {
+          exists: false,
+        },
+      },
+      {
+        ownerPost: {
+          equals: id,
+        },
+      },
+    ],
+  }
+}
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -81,6 +108,7 @@ export const Posts: CollectionConfig = {
                 description:
                   'Link a BibTeX source here. Citation keys used in the current locale content are validated against the stored bibliography text.',
               },
+              filterOptions: sharedOrCurrentPostOwnedFilter,
               name: 'bibliographyFile',
               relationTo: 'bibliography-files',
               type: 'relationship',
@@ -90,6 +118,7 @@ export const Posts: CollectionConfig = {
               type: 'array',
               fields: [
                 {
+                  filterOptions: sharedOrCurrentPostOwnedFilter,
                   name: 'file',
                   relationTo: 'media',
                   required: true,
@@ -176,6 +205,7 @@ export const Posts: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
+      filterOptions: sharedOrCurrentPostOwnedFilter,
       name: 'heroImage',
       relationTo: 'media',
       type: 'relationship',
@@ -207,6 +237,8 @@ export const Posts: CollectionConfig = {
     },
   ],
   hooks: {
+    afterDelete: [deleteOwnedResourcesAfterDelete],
+    beforeDelete: [captureOwnedResourcesBeforeDelete],
     beforeChange: [
       async ({ data, originalDoc, req }) => {
         const currentLocale = typeof req.locale === 'string' ? req.locale : defaultLocale

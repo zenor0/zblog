@@ -169,6 +169,7 @@ export interface Media {
   caption?: string | null;
   credit?: string | null;
   importKey?: string | null;
+  ownerPost?: (number | null) | Post;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -180,34 +181,6 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bibliography-files".
- */
-export interface BibliographyFile {
-  id: number;
-  title: string;
-  description?: string | null;
-  /**
-   * Compatibility field for the original BibTeX filename. New imports keep this unique, but the actual bibliography is stored as text below.
-   */
-  filename?: string | null;
-  /**
-   * Paste or import BibTeX source here. Citation validation reads directly from this text field.
-   */
-  source?: string | null;
-  importKey?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -249,6 +222,35 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bibliography-files".
+ */
+export interface BibliographyFile {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * Compatibility field for the original BibTeX filename. New imports keep this unique, but the actual bibliography is stored as text below.
+   */
+  filename?: string | null;
+  /**
+   * Paste or import BibTeX source here. Citation validation reads directly from this text field.
+   */
+  source?: string | null;
+  importKey?: string | null;
+  ownerPost?: (number | null) | Post;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -456,6 +458,7 @@ export interface MediaSelect<T extends boolean = true> {
   caption?: T;
   credit?: T;
   importKey?: T;
+  ownerPost?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -478,6 +481,7 @@ export interface BibliographyFilesSelect<T extends boolean = true> {
   filename?: T;
   source?: T;
   importKey?: T;
+  ownerPost?: T;
   url?: T;
   thumbnailURL?: T;
   mimeType?: T;

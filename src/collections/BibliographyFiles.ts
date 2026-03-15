@@ -59,6 +59,17 @@ export const BibliographyFiles: CollectionConfig = {
         hidden: true,
         readOnly: true,
       },
+      index: true,
+      maxDepth: 0,
+      name: 'ownerPost',
+      relationTo: 'posts',
+      type: 'relationship',
+    },
+    {
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
       name: 'url',
       type: 'text',
     },
