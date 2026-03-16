@@ -1,0 +1,50 @@
+{
+  "Article": {
+    "backToArticle": "返回文章",
+    "backToEditor": "返回编辑器",
+    "backToIndex": "返回列表",
+    "bibliographyMismatchIntro": "缺少以下引用键",
+    "bibliographyMismatchTitle": "引用文献不匹配",
+    "exitPreview": "退出预览",
+    "fallbackNotice": "由于 {requestedLocale} 版本内容不完整，当前改为展示 {resolvedLocale} 的源内容。",
+    "fallbackTitle": "回退语言",
+    "machineTranslationNotice": "当前 {locale} 页面由 {sourceLocale} 自动生成，作为正式版本前请先人工校对。",
+    "machineTranslationTitle": "机器翻译",
+    "postNotFoundTitle": "文章未找到",
+    "previewBody": "当前看到的是这篇文章的草稿前台预览效果。",
+    "previewTitle": "预览模式",
+    "readingTime": "{minutes, number} 分钟阅读",
+    "untitledDraft": "未命名草稿",
+    "untitledPost": "未命名文章",
+    "versionHistory": "版本历史"
+  },
+  "Common": {
+    "attachments": "附件",
+    "draftLabel": "草稿",
+    "editorialStatus": "编辑整理",
+    "latestSnapshot": "最新快照",
+    "localeNavigation": "语言",
+    "machineStatus": "机器翻译",
+    "publishedLabel": "已发布",
+    "referenceItem": "参考条目",
+    "references": "参考文献",
+    "siteLabel": "ZBlog",
+    "tags": "标签",
+    "unknownDate": "日期未知",
+    "unscheduled": "未安排",
+    "versionID": "版本 ID"
+  },
+  "HistoryPage": {
+    "noVersions": "目前还没有可用的版本快照。",
+    "title": "版本历史",
+    "versionHistorySummary": "{title} · 共 {count, number} 个版本"
+  },
+  "HomePage": {
+    "emptyExcerpt": "这篇文章暂时还没有摘要。",
+    "heroDescription": "这里会持续发布文章、笔记和项目更新。",
+    "heroTitle": "记录技术、产品与日常思考",
+    "noPublishedPosts": "还没有已发布文章。可以先在 Payload Admin 中创建并发布一篇。",
+    "postsHeading": "文章",
+    "publishedEntries": "已发布 {count, number} 篇"
+  }
+}

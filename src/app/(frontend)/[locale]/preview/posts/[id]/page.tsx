@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
-import { getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
+import { requireLocale } from '@/i18n/routing'
 import { PostArticle } from '@/components/frontend/PostArticle'
 import { buildLocalePath, supportedLocales } from '@/lib/locales'
 import { getPostByID } from '@/lib/posts'
@@ -15,7 +16,7 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const { locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const article = await getTranslations({ locale, namespace: 'Article' })
   const siteSettings = await getSiteSettings(locale)
 
   return {
@@ -23,7 +24,7 @@ export async function generateMetadata(props: {
       follow: false,
       index: false,
     },
-    title: `${copy.previewTitle} | ${siteSettings.siteName}`,
+    title: `${article('previewTitle')} | ${siteSettings.siteName}`,
   }
 }
 
@@ -32,7 +33,7 @@ export default async function PostPreviewPage(props: {
 }) {
   const { id: idParam, locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const article = await getTranslations({ locale, namespace: 'Article' })
   const preview = await draftMode()
 
   if (!preview.isEnabled) {
@@ -65,7 +66,7 @@ export default async function PostPreviewPage(props: {
   return (
     <PostArticle
       backHref={buildPostAdminPath(id)}
-      backLabel={copy.backToEditor}
+      backLabel={article('backToEditor')}
       historyHref={
         resolved.post.slug
           ? buildLocalePath(locale, `/posts/${encodeURIComponent(resolved.post.slug)}/history`)

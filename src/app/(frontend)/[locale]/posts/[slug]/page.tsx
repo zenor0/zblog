@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
-import { buildLocaleLinks, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
+import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
 import { PostArticle } from '@/components/frontend/PostArticle'
 import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug, getRenderablePostLocales } from '@/lib/posts'
@@ -15,6 +16,8 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
+  const article = await getTranslations({ locale, namespace: 'Article' })
+  const requestedSiteSettings = await getSiteSettings(locale)
   const resolved = await getPostBySlug({
     locale,
     slug,
@@ -26,7 +29,7 @@ export async function generateMetadata(props: {
         follow: false,
         index: false,
       },
-      title: 'Post not found | ZBlog',
+      title: `${article('postNotFoundTitle')} | ${requestedSiteSettings.siteName}`,
     }
   }
 
@@ -55,7 +58,7 @@ export default async function PostPage(props: {
 }) {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const article = await getTranslations({ locale, namespace: 'Article' })
   const preview = await draftMode()
   const previewUser = preview.isEnabled ? await getPreviewUser() : null
 
@@ -73,7 +76,7 @@ export default async function PostPage(props: {
   return (
     <PostArticle
       backHref={buildLocalePath(locale)}
-      backLabel={copy.backToIndex}
+      backLabel={article('backToIndex')}
       historyHref={buildLocalePath(locale, `/posts/${slug}/history`)}
       locale={locale}
       localeLinks={buildLocaleLinks(`/posts/${slug}`)}

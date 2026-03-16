@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
-import { estimateReadingTime, formatLongDate, getFrontendCopy } from '@/app/(frontend)/helpers'
+import { estimateReadingMinutes, formatLongDate } from '@/i18n/format'
 import type { ResolvedPost } from '@/lib/posts'
 import { getLocaleLabel, type AppLocale } from '@/lib/locales'
 import { MarkdownRenderer } from '@/lib/markdown'
@@ -12,68 +13,36 @@ type LocaleLink = {
   locale: AppLocale
 }
 
-type FrontendCopy = ReturnType<typeof getFrontendCopy>
-
 function PreviewNotice(props: {
-  copy: FrontendCopy
+  body: string
+  exitLabel: string
   exitHref: string
+  title: string
 }) {
-  const { copy, exitHref } = props
+  const { body, exitHref, exitLabel, title } = props
 
   return (
     <div className="notice notice--preview">
-      <strong>{copy.previewTitle}:</strong> {copy.previewBody} <Link href={exitHref}>{copy.exitPreview}</Link>
+      <strong>{title}:</strong> {body} <Link href={exitHref}>{exitLabel}</Link>
     </div>
   )
 }
 
 function TranslationNotice(props: {
-  copy: FrontendCopy
-  locale: string
-  requestedLocale: string
-  resolvedLocale: string
-  translatedFromLocale?: string | null
-  translationStatus?: string | null
-  usedFallback: boolean
+  message: string
+  title: string
+  tone: 'info' | 'warning'
 }) {
-  const {
-    copy,
-    locale,
-    requestedLocale,
-    resolvedLocale,
-    translatedFromLocale,
-    translationStatus,
-    usedFallback,
-  } = props
+  const { message, title, tone } = props
 
-  if (usedFallback) {
-    return (
-      <div className="notice notice--warning">
-        <strong>{copy.fallbackTitle}:</strong> {copy.fallbackBeforeRequested}
-        <code>{requestedLocale}</code>
-        {copy.fallbackBetweenLocales}
-        <code>{resolvedLocale}</code>
-        {copy.fallbackAfterResolved}
-      </div>
-    )
-  }
-
-  if (translationStatus === 'machine') {
-    return (
-      <div className="notice notice--info">
-        <strong>{copy.machineTranslationTitle}:</strong> {copy.machineTranslationBeforeLocale}
-        <code>{locale}</code>
-        {copy.machineTranslationBetweenLocales}
-        <code>{translatedFromLocale ?? resolvedLocale}</code>
-        {copy.machineTranslationAfterSource}
-      </div>
-    )
-  }
-
-  return null
+  return (
+    <div className={`notice notice--${tone}`}>
+      <strong>{title}:</strong> {message}
+    </div>
+  )
 }
 
-export function PostArticle(props: {
+export async function PostArticle(props: {
   backHref: string
   backLabel: string
   historyHref?: null | string
@@ -92,7 +61,8 @@ export function PostArticle(props: {
     usedDraftAccess,
     usedFallback,
   } = resolved
-  const copy = getFrontendCopy(locale)
+  const article = await getTranslations({ locale, namespace: 'Article' })
+  const common = await getTranslations({ locale, namespace: 'Common' })
   const heroImage = post.heroImage && typeof post.heroImage === 'object' ? post.heroImage : null
   const attachments = (post.attachments ?? []).filter(
     (item) => item.file && typeof item.file === 'object' && item.file.url,
@@ -102,14 +72,24 @@ export function PostArticle(props: {
     typeof post.title === 'string' && post.title.trim().length > 0
       ? post.title
       : usedDraftAccess
-        ? copy.untitledDraft
-        : copy.untitledPost
+        ? article('untitledDraft')
+        : article('untitledPost')
   const exitPreviewHref = buildExitPreviewURL(previewExitPath)
+  const fallbackMessage = usedFallback
+    ? article('fallbackNotice', {
+        requestedLocale: getLocaleLabel(resolved.requestedLocale),
+        resolvedLocale: getLocaleLabel(resolved.resolvedLocale),
+      })
+    : null
+  const machineTranslationMessage =
+    !fallbackMessage && sourcePost?.translationStatus === 'machine'
+      ? article('machineTranslationNotice', {
+          locale: getLocaleLabel(locale),
+          sourceLocale: getLocaleLabel(sourcePost.translatedFromLocale ?? resolved.resolvedLocale),
+        })
+      : null
   const showNotices =
-    usedDraftAccess ||
-    usedFallback ||
-    sourcePost?.translationStatus === 'machine' ||
-    missingCitationKeys.length > 0
+    usedDraftAccess || Boolean(fallbackMessage) || Boolean(machineTranslationMessage) || missingCitationKeys.length > 0
 
   return (
     <div className="page-shell">
@@ -117,7 +97,7 @@ export function PostArticle(props: {
         <Link className="back-link" href={backHref}>
           {backLabel}
         </Link>
-        <nav aria-label="Locales" className="locale-nav">
+        <nav aria-label={common('localeNavigation')} className="locale-nav">
           {localeLinks.map((item) => (
             <Link
               className={item.locale === locale ? 'locale-pill locale-pill--active' : 'locale-pill'}
@@ -134,12 +114,20 @@ export function PostArticle(props: {
         <header className="post-header">
           <div className="meta-row">
             <span className="meta-pill">
-              {formatLongDate(post.publishedAt ?? post.updatedAt, resolved.resolvedLocale)}
+              {formatLongDate({
+                fallback: common('unscheduled'),
+                locale: resolved.resolvedLocale,
+                value: post.publishedAt ?? post.updatedAt,
+              })}
             </span>
-            <span className="meta-pill">{estimateReadingTime(post.content, locale)}</span>
+            <span className="meta-pill">
+              {article('readingTime', {
+                minutes: estimateReadingMinutes(post.content),
+              })}
+            </span>
             {historyHref ? (
               <Link className="meta-pill meta-pill--link" href={historyHref}>
-                {copy.versionHistory}
+                {article('versionHistory')}
               </Link>
             ) : null}
           </div>
@@ -147,19 +135,32 @@ export function PostArticle(props: {
           {post.excerpt ? <p className="lede">{post.excerpt}</p> : null}
           {showNotices ? (
             <div className="notice-stack">
-              {usedDraftAccess ? <PreviewNotice copy={copy} exitHref={exitPreviewHref} /> : null}
-              <TranslationNotice
-                copy={copy}
-                locale={locale}
-                requestedLocale={resolved.requestedLocale}
-                resolvedLocale={resolved.resolvedLocale}
-                translatedFromLocale={sourcePost?.translatedFromLocale}
-                translationStatus={sourcePost?.translationStatus}
-                usedFallback={usedFallback}
-              />
+              {usedDraftAccess ? (
+                <PreviewNotice
+                  body={article('previewBody')}
+                  exitHref={exitPreviewHref}
+                  exitLabel={article('exitPreview')}
+                  title={article('previewTitle')}
+                />
+              ) : null}
+              {fallbackMessage ? (
+                <TranslationNotice
+                  message={fallbackMessage}
+                  title={article('fallbackTitle')}
+                  tone="warning"
+                />
+              ) : null}
+              {machineTranslationMessage ? (
+                <TranslationNotice
+                  message={machineTranslationMessage}
+                  title={article('machineTranslationTitle')}
+                  tone="info"
+                />
+              ) : null}
               {missingCitationKeys.length > 0 ? (
                 <div className="notice notice--danger">
-                  <strong>{copy.bibliographyMismatchTitle}:</strong> {copy.bibliographyMismatchIntro}{' '}
+                  <strong>{article('bibliographyMismatchTitle')}:</strong>{' '}
+                  {article('bibliographyMismatchIntro')}{' '}
                   {missingCitationKeys.map((key, index) => (
                     <span key={key}>
                       {index > 0 ? ' ' : null}
@@ -197,7 +198,7 @@ export function PostArticle(props: {
             <aside className="sidebar-stack">
               {post.tags?.length ? (
                 <section className="side-card">
-                  <h2>{copy.tags}</h2>
+                  <h2>{common('tags')}</h2>
                   <ul className="tag-list">
                     {post.tags.map((tag) => (
                       <li key={tag.id ?? tag.value}>{tag.value}</li>
@@ -208,7 +209,7 @@ export function PostArticle(props: {
 
               {attachments.length ? (
                 <section className="side-card">
-                  <h2>{copy.attachments}</h2>
+                  <h2>{common('attachments')}</h2>
                   <ul className="link-list">
                     {attachments.map((attachment) => {
                       const file = attachment.file as Exclude<typeof attachment.file, number>
@@ -228,7 +229,7 @@ export function PostArticle(props: {
 
               {bibliographyEntries.length ? (
                 <section className="side-card">
-                  <h2>{copy.references}</h2>
+                  <h2>{common('references')}</h2>
                   <ol className="reference-list">
                     {bibliographyEntries.map((entry, index) => (
                       <li id={`reference-${index + 1}`} key={entry.citationKey}>
@@ -236,7 +237,7 @@ export function PostArticle(props: {
                         <div>
                           <p>{entry.formatted}</p>
                           <span className="reference-meta">
-                            {entry.citationKey} · {entry.entryType || copy.referenceItem} ·{' '}
+                            {entry.citationKey} · {entry.entryType || common('referenceItem')} ·{' '}
                             {getLocaleLabel(resolved.resolvedLocale)}
                           </span>
                         </div>

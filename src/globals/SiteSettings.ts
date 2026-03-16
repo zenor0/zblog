@@ -1,5 +1,27 @@
 import type { GlobalConfig } from 'payload'
 
+const localizedHeroDefaults = {
+  en: {
+    description: 'A simple blog for articles, notes, and project updates.',
+    eyebrow: 'Personal Blog',
+    title: 'Notes on tech, products, and everyday work',
+  },
+  'zh-Hans': {
+    description: '这里会持续发布文章、笔记和项目更新。',
+    eyebrow: '个人博客',
+    title: '记录技术、产品与日常思考',
+  },
+} as const
+
+function getLocalizedHeroDefault(
+  locale: null | string | undefined,
+  field: keyof (typeof localizedHeroDefaults)['zh-Hans'],
+) {
+  const normalizedLocale = locale === 'en' ? 'en' : 'zh-Hans'
+
+  return localizedHeroDefaults[normalizedLocale][field]
+}
+
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site settings',
@@ -11,7 +33,7 @@ export const SiteSettings: GlobalConfig = {
     {
       name: 'siteName',
       type: 'text',
-      defaultValue: 'ZBlog CMS',
+      defaultValue: 'ZBlog',
       label: 'Site name',
       required: true,
     },
@@ -23,22 +45,21 @@ export const SiteSettings: GlobalConfig = {
         {
           name: 'eyebrow',
           type: 'text',
-          defaultValue: 'ZBlog CMS',
+          defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'eyebrow'),
           label: 'Eyebrow',
           localized: true,
         },
         {
           name: 'title',
           type: 'text',
-          defaultValue: '多语言文章、引用与版本记录。',
+          defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'title'),
           label: 'Title',
           localized: true,
         },
         {
           name: 'description',
           type: 'textarea',
-          defaultValue:
-            '基于 Payload，支持多语言文章、引用、附件与版本历史。界面尽量保持克制、清楚，把注意力留给内容本身。',
+          defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'description'),
           label: 'Description',
           localized: true,
         },

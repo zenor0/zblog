@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
-import {
-  buildLocaleLinks,
-  formatShortDate,
-  getFrontendCopy,
-  requireLocale,
-} from '@/app/(frontend)/helpers'
+import { formatShortDate } from '@/i18n/format'
+import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/lib/locales'
 import { getPublishedPosts } from '@/lib/posts'
 import { buildLocaleAlternates } from '@/lib/seo'
@@ -17,10 +14,10 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const { locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const home = await getTranslations({ locale, namespace: 'HomePage' })
   const siteSettings = await getSiteSettings(locale)
-  const title = siteSettings.homeHero?.title || copy.heroTitle
-  const description = siteSettings.homeHero?.description || copy.heroDescription
+  const title = siteSettings.homeHero?.title || home('heroTitle')
+  const description = siteSettings.homeHero?.description || home('heroDescription')
 
   return {
     alternates: buildLocaleAlternates({
@@ -34,12 +31,13 @@ export async function generateMetadata(props: {
 export default async function LocalizedHomePage(props: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const common = await getTranslations({ locale, namespace: 'Common' })
+  const home = await getTranslations({ locale, namespace: 'HomePage' })
   const siteSettings = await getSiteSettings(locale)
   const posts = await getPublishedPosts(locale)
-  const heroEyebrow = siteSettings.homeHero?.eyebrow || siteSettings.siteName || copy.siteLabel
-  const heroTitle = siteSettings.homeHero?.title || copy.heroTitle
-  const heroDescription = siteSettings.homeHero?.description || copy.heroDescription
+  const heroEyebrow = siteSettings.homeHero?.eyebrow || siteSettings.siteName || common('siteLabel')
+  const heroTitle = siteSettings.homeHero?.title || home('heroTitle')
+  const heroDescription = siteSettings.homeHero?.description || home('heroDescription')
 
   return (
     <div className="page-shell">
@@ -49,7 +47,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
           <h1>{heroTitle}</h1>
           <p>{heroDescription}</p>
         </div>
-        <nav aria-label="Locales" className="locale-nav">
+        <nav aria-label={common('localeNavigation')} className="locale-nav">
           {buildLocaleLinks('').map((item) => (
             <Link
               className={item.locale === locale ? 'locale-pill locale-pill--active' : 'locale-pill'}
@@ -64,13 +62,13 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
 
       <section className="section">
         <div className="section-heading">
-          <h2>{copy.postsHeading}</h2>
-          <p>{copy.publishedEntries(posts.length)}</p>
+          <h2>{home('postsHeading')}</h2>
+          <p>{home('publishedEntries', { count: posts.length })}</p>
         </div>
 
         {posts.length === 0 ? (
           <div className="empty-state">
-            <p>{copy.noPublishedPosts}</p>
+            <p>{home('noPublishedPosts')}</p>
           </div>
         ) : (
           <div className="post-grid">
@@ -95,7 +93,11 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                     <div className="post-card__text">
                       <div className="meta-row">
                         <span className="meta-pill">
-                          {formatShortDate(post.publishedAt ?? post.updatedAt, locale)}
+                          {formatShortDate({
+                            fallback: common('unknownDate'),
+                            locale,
+                            value: post.publishedAt ?? post.updatedAt,
+                          })}
                         </span>
                         <span
                           className={
@@ -105,14 +107,14 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                           }
                         >
                           {post.translationStatus === 'machine'
-                            ? copy.machineStatus
-                            : copy.editorialStatus}
+                            ? common('machineStatus')
+                            : common('editorialStatus')}
                         </span>
                       </div>
                       <h3>
                         <Link href={buildLocalePath(locale, `/posts/${post.slug}`)}>{post.title}</Link>
                       </h3>
-                      <p>{post.excerpt || copy.emptyExcerpt}</p>
+                      <p>{post.excerpt || home('emptyExcerpt')}</p>
                     </div>
                     {post.tags?.length ? (
                       <ul className="tag-list">

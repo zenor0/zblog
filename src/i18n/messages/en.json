@@ -1,0 +1,50 @@
+{
+  "Article": {
+    "backToArticle": "Back to article",
+    "backToEditor": "Back to editor",
+    "backToIndex": "Back to index",
+    "bibliographyMismatchIntro": "missing citation keys",
+    "bibliographyMismatchTitle": "Bibliography mismatch",
+    "exitPreview": "Exit preview",
+    "fallbackNotice": "The {requestedLocale} version is incomplete, so this page is rendering the {resolvedLocale} source instead.",
+    "fallbackTitle": "Fallback locale",
+    "machineTranslationNotice": "This {locale} page was generated from {sourceLocale}. Review before treating it as canonical.",
+    "machineTranslationTitle": "Machine translation",
+    "postNotFoundTitle": "Post not found",
+    "previewBody": "You are viewing the draft version of this article as it would render on the frontend.",
+    "previewTitle": "Preview mode",
+    "readingTime": "{minutes, number} min read",
+    "untitledDraft": "Untitled draft",
+    "untitledPost": "Untitled post",
+    "versionHistory": "Version history"
+  },
+  "Common": {
+    "attachments": "Attachments",
+    "draftLabel": "Draft",
+    "editorialStatus": "Editorial",
+    "latestSnapshot": "Latest snapshot",
+    "localeNavigation": "Locales",
+    "machineStatus": "Machine draft",
+    "publishedLabel": "Published",
+    "referenceItem": "reference",
+    "references": "References",
+    "siteLabel": "ZBlog",
+    "tags": "Tags",
+    "unknownDate": "Unknown date",
+    "unscheduled": "Unscheduled",
+    "versionID": "Version ID"
+  },
+  "HistoryPage": {
+    "noVersions": "No version snapshots are available yet.",
+    "title": "Version history",
+    "versionHistorySummary": "{title} · {count, number} recorded versions"
+  },
+  "HomePage": {
+    "emptyExcerpt": "No excerpt provided yet.",
+    "heroDescription": "A simple blog for articles, notes, and project updates.",
+    "heroTitle": "Notes on tech, products, and everyday work",
+    "noPublishedPosts": "No published posts yet. Create one in Payload admin and publish it.",
+    "postsHeading": "Posts",
+    "publishedEntries": "{count, number} published entries"
+  }
+}

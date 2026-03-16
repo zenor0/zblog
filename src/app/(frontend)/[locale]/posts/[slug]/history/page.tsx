@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
-import { formatLongDate, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
+import { formatLongDate } from '@/i18n/format'
+import { requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug, getPostVersionDiffs } from '@/lib/posts'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -10,9 +12,9 @@ import { getSiteSettings } from '@/lib/site-settings'
 export async function generateMetadata(props: {
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { locale: localeParam, slug } = await props.params
+  const { locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const history = await getTranslations({ locale, namespace: 'HistoryPage' })
   const siteSettings = await getSiteSettings(locale)
 
   return {
@@ -20,7 +22,7 @@ export async function generateMetadata(props: {
       follow: true,
       index: false,
     },
-    title: `${copy.versionHistoryTitle} | ${siteSettings.siteName}`,
+    title: `${history('title')} | ${siteSettings.siteName}`,
   }
 }
 
@@ -29,7 +31,9 @@ export default async function PostHistoryPage(props: {
 }) {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
-  const copy = getFrontendCopy(locale)
+  const article = await getTranslations({ locale, namespace: 'Article' })
+  const common = await getTranslations({ locale, namespace: 'Common' })
+  const history = await getTranslations({ locale, namespace: 'HistoryPage' })
   const post = await getPostBySlug({ locale, slug })
 
   if (!post) {
@@ -45,19 +49,19 @@ export default async function PostHistoryPage(props: {
     <div className="page-shell">
       <div className="page-topbar">
         <Link className="back-link" href={buildLocalePath(locale, `/posts/${slug}`)}>
-          {copy.backToArticle}
+          {article('backToArticle')}
         </Link>
       </div>
 
       <section className="section">
         <div className="section-heading">
-          <h1>{copy.versionHistoryTitle}</h1>
-          <p>{copy.versionHistorySummary(post.post.title, versionDiffs.length)}</p>
+          <h1>{history('title')}</h1>
+          <p>{history('versionHistorySummary', { count: versionDiffs.length, title: post.post.title })}</p>
         </div>
 
         {versionDiffs.length === 0 ? (
           <div className="empty-state">
-            <p>{copy.noVersions}</p>
+            <p>{history('noVersions')}</p>
           </div>
         ) : (
           <div className="version-stack">
@@ -65,16 +69,22 @@ export default async function PostHistoryPage(props: {
               <article className="version-card" key={entry.version.id}>
                 <header className="version-card__header">
                   <div>
-                    <h2>{formatLongDate(entry.version.updatedAt, post.resolvedLocale)}</h2>
+                    <h2>
+                      {formatLongDate({
+                        fallback: common('unscheduled'),
+                        locale: post.resolvedLocale,
+                        value: entry.version.updatedAt,
+                      })}
+                    </h2>
                     <p>
-                      {copy.versionID} {entry.version.id}
-                      {entry.version.latest ? ` · ${copy.latestSnapshot}` : ''}
+                      {common('versionID')} {entry.version.id}
+                      {entry.version.latest ? ` · ${common('latestSnapshot')}` : ''}
                     </p>
                   </div>
                   <span className="version-chip">
                     {entry.version.version._status === 'published'
-                      ? copy.publishedLabel
-                      : copy.draftLabel}
+                      ? common('publishedLabel')
+                      : common('draftLabel')}
                   </span>
                 </header>
 
