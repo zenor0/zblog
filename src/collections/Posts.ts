@@ -189,6 +189,48 @@ export const Posts: CollectionConfig = {
           ],
           label: 'Translations',
         },
+        {
+          fields: [
+            {
+              name: 'postInsights',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '/components/payload/PostInsights#PostInsights',
+                },
+              },
+            },
+            {
+              name: 'ownedBibliographyFiles',
+              type: 'join',
+              collection: 'bibliography-files',
+              on: 'ownerPost',
+              defaultLimit: 10,
+              defaultSort: '-updatedAt',
+              maxDepth: 0,
+              admin: {
+                allowCreate: false,
+                defaultColumns: ['title', 'filename', 'updatedAt'],
+              },
+              label: 'Owned bibliography files',
+            },
+            {
+              name: 'ownedMedia',
+              type: 'join',
+              collection: 'media',
+              on: 'ownerPost',
+              defaultLimit: 12,
+              defaultSort: '-updatedAt',
+              maxDepth: 0,
+              admin: {
+                allowCreate: false,
+                defaultColumns: ['filename', 'alt', 'updatedAt'],
+              },
+              label: 'Owned media',
+            },
+          ],
+          label: 'Insights',
+        },
       ],
     },
     {

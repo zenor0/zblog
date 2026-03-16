@@ -77,7 +77,12 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    posts: {
+      ownedBibliographyFiles: 'bibliography-files';
+      ownedMedia: 'media';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -210,6 +215,16 @@ export interface Post {
   translatedFromLocale?: string | null;
   translatedAt?: string | null;
   translationProvider?: string | null;
+  ownedBibliographyFiles?: {
+    docs?: (number | BibliographyFile)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  ownedMedia?: {
+    docs?: (number | Media)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   slug: string;
   heroImage?: (number | null) | Media;
   tags?:
@@ -514,6 +529,8 @@ export interface PostsSelect<T extends boolean = true> {
   translatedFromLocale?: T;
   translatedAt?: T;
   translationProvider?: T;
+  ownedBibliographyFiles?: T;
+  ownedMedia?: T;
   slug?: T;
   heroImage?: T;
   tags?:
