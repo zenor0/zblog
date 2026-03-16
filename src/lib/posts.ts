@@ -4,7 +4,7 @@ import { isEditor } from '@/lib/access'
 import { loadBibliographyEntries, getReferencedEntries } from '@/lib/bibliography'
 import { buildCitationIndex } from '@/lib/citations'
 import { buildVersionDiff } from '@/lib/diff'
-import { defaultLocale, type AppLocale } from '@/lib/locales'
+import { defaultLocale, localeCodes, type AppLocale } from '@/lib/locales'
 import { getPayloadClient } from '@/lib/payload'
 import type { BibliographyFile, Post, User } from '@/payload-types'
 
@@ -260,4 +260,51 @@ export async function getPostVersionDiffs(args: {
       version,
     }
   })
+}
+
+export async function getRenderablePostLocales(args: {
+  draft?: boolean
+  slug: string
+  user?: null | User
+}): Promise<AppLocale[]> {
+  const payload = await getPayloadClient()
+  const usedDraftAccess = Boolean(args.draft && isEditor(args.user))
+  const accessArgs = usedDraftAccess
+    ? {
+        user: args.user,
+      }
+    : {}
+  const where = {
+    ...(usedDraftAccess
+      ? {}
+      : {
+          _status: {
+            equals: 'published' as const,
+          },
+        }),
+    slug: {
+      equals: args.slug,
+    },
+  }
+
+  const locales = await Promise.all(
+    localeCodes.map(async (locale) => {
+      const result = await payload.find({
+        collection: 'posts',
+        depth: 0,
+        draft: usedDraftAccess,
+        fallbackLocale: false,
+        limit: 1,
+        locale,
+        overrideAccess: false,
+        ...accessArgs,
+        where,
+      })
+      const post = result.docs[0] ?? null
+
+      return isRenderablePost(post, usedDraftAccess) ? locale : null
+    }),
+  )
+
+  return locales.filter((locale): locale is AppLocale => Boolean(locale))
 }

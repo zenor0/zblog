@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import {
@@ -8,7 +9,27 @@ import {
 } from '@/app/(frontend)/helpers'
 import { buildLocalePath } from '@/lib/locales'
 import { getPublishedPosts } from '@/lib/posts'
+import { buildLocaleAlternates } from '@/lib/seo'
 import { getSiteSettings } from '@/lib/site-settings'
+
+export async function generateMetadata(props: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale: localeParam } = await props.params
+  const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
+  const siteSettings = await getSiteSettings(locale)
+  const title = siteSettings.homeHero?.title || copy.heroTitle
+  const description = siteSettings.homeHero?.description || copy.heroDescription
+
+  return {
+    alternates: buildLocaleAlternates({
+      canonicalLocale: locale,
+    }),
+    description,
+    title: `${title} | ${siteSettings.siteName}`,
+  }
+}
 
 export default async function LocalizedHomePage(props: { params: Promise<{ locale: string }> }) {
   const { locale: localeParam } = await props.params

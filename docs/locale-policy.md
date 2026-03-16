@@ -120,6 +120,23 @@ Implementation:
 - locale matching: [`@formatjs/intl-localematcher`](https://formatjs.github.io/docs/polyfills/intl-localematcher/)
 - redirect middleware: [`src/middleware.ts`](/home/zenor0/projects/zblog/src/middleware.ts)
 
+Priority order for locale resolution is:
+
+1. explicit locale in the URL
+2. stored locale preference cookie
+3. browser `Accept-Language`
+4. project default locale
+
+The browser header is only a negotiation input. It does not expand the set of supported content locales.
+
+## SEO and canonical URLs
+
+- Public locale URLs remain canonical and stable: `/en`, `/zh-hans`
+- Incoming legacy or non-canonical locale-like paths such as `/zh-cn` or `/en-us` redirect to the canonical slug when they map cleanly
+- Localized pages emit canonical and `hreflang` metadata for the supported variants
+- Fallback pages that render another locale's content are marked `noindex` and canonicalize to the actual source locale URL
+- The frontend also emits `Content-Language`, `robots.txt`, and `sitemap.xml`
+
 ## Runtime and storage rules
 
 - Payload localization uses canonical tags only.

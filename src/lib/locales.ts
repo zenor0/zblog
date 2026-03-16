@@ -1,5 +1,8 @@
 import { match } from '@formatjs/intl-localematcher'
 
+export const localeCookieName = 'zblog-locale'
+export const localeRequestHeaderName = 'x-zblog-locale'
+
 export const supportedLocales = [
   {
     aliases: ['zh-CN', 'zh-cn', 'zh-Hans-CN', 'zh-hans-cn'],
@@ -44,6 +47,20 @@ const localeLookup = new Map<string, AppLocaleDefinition>()
 function canonicalizeLocale(value: string): null | string {
   try {
     return Intl.getCanonicalLocales(value)[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+function parseLocale(value: string): null | Intl.Locale {
+  const canonical = canonicalizeLocale(value)
+
+  if (!canonical) {
+    return null
+  }
+
+  try {
+    return new Intl.Locale(canonical)
   } catch {
     return null
   }
@@ -95,11 +112,45 @@ export function resolveLocaleDefinition(value: null | string | undefined): AppLo
 }
 
 export function normalizeLocale(value: null | string | undefined): AppLocale | null {
-  return resolveLocaleDefinition(value)?.code ?? null
+  const exactMatch = resolveLocaleDefinition(value)
+
+  if (exactMatch) {
+    return exactMatch.code
+  }
+
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const parsedLocale = parseLocale(value)
+
+  if (!parsedLocale) {
+    return null
+  }
+
+  const language = parsedLocale.language.toLowerCase()
+  const script = parsedLocale.script?.toLowerCase()
+  const region = parsedLocale.region?.toUpperCase()
+
+  if (language === 'zh') {
+    if (script === 'hant' || region === 'HK' || region === 'MO' || region === 'TW') {
+      return null
+    }
+
+    return 'zh-Hans'
+  }
+
+  const languageOnlyLocale = supportedLocales.find(
+    (locale) => !locale.code.includes('-') && locale.code.toLowerCase() === language,
+  )
+
+  return languageOnlyLocale?.code ?? null
 }
 
 export function getLocaleSlug(value: AppLocale | null | string | undefined): AppLocaleSlug {
-  return resolveLocaleDefinition(value)?.slug ?? defaultLocaleSlug
+  const normalizedLocale = normalizeLocale(value)
+
+  return (normalizedLocale && supportedLocalesByCode.get(normalizedLocale)?.slug) ?? defaultLocaleSlug
 }
 
 export function buildLocalePath(locale: AppLocale | null | string | undefined, pathname = ''): string {
@@ -117,7 +168,9 @@ export function getLocaleLabel(locale: null | string | undefined): string {
     return ''
   }
 
-  return resolveLocaleDefinition(locale)?.label ?? locale
+  const normalizedLocale = normalizeLocale(locale)
+
+  return (normalizedLocale && supportedLocalesByCode.get(normalizedLocale)?.label) ?? locale
 }
 
 export function parseAcceptLanguageHeader(value: null | string | undefined): string[] {
@@ -180,16 +233,23 @@ export function parseAcceptLanguageHeader(value: null | string | undefined): str
 }
 
 export function matchPreferredLocale(preferredLocales: readonly string[]): AppLocale {
-  const supported = localeCodes as string[]
   const requestedLocales = preferredLocales
     .map((locale) => canonicalizeLocale(locale))
     .filter((locale): locale is string => Boolean(locale))
+
+  for (const locale of requestedLocales) {
+    const normalizedLocale = normalizeLocale(locale)
+
+    if (normalizedLocale) {
+      return normalizedLocale
+    }
+  }
 
   if (requestedLocales.length === 0) {
     return defaultLocale
   }
 
-  const matchedLocale = match(requestedLocales, supported, defaultLocale)
+  const matchedLocale = match(requestedLocales, localeCodes as string[], defaultLocale)
 
   return normalizeLocale(matchedLocale) ?? defaultLocale
 }

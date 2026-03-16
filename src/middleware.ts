@@ -1,36 +1,72 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import { buildLocalePath, getLocaleSlug, resolveLocaleDefinition, resolvePreferredLocale } from '@/lib/locales'
+import {
+  buildLocalePath,
+  getLocaleSlug,
+  localeCookieName,
+  localeRequestHeaderName,
+  normalizeLocale,
+  resolvePreferredLocale,
+} from '@/lib/locales'
+
+const localeCookieMaxAge = 60 * 60 * 24 * 365
+
+function persistLocale(response: NextResponse, locale: string) {
+  response.cookies.set(localeCookieName, locale, {
+    maxAge: localeCookieMaxAge,
+    path: '/',
+    sameSite: 'lax',
+  })
+  response.headers.set('Content-Language', locale)
+
+  return response
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const cookieLocale = normalizeLocale(request.cookies.get(localeCookieName)?.value)
 
   if (pathname === '/') {
-    const locale = resolvePreferredLocale(request.headers.get('accept-language'))
+    const locale = cookieLocale ?? resolvePreferredLocale(request.headers.get('accept-language'))
     const url = request.nextUrl.clone()
 
     url.pathname = buildLocalePath(locale)
 
-    return NextResponse.redirect(url)
+    const response = NextResponse.redirect(url)
+    response.headers.set('Vary', 'Accept-Language, Cookie')
+
+    return response
   }
 
   const [, firstSegment, ...remainingSegments] = pathname.split('/')
-  const resolvedLocale = resolveLocaleDefinition(firstSegment)
+  const normalizedLocale = normalizeLocale(firstSegment)
 
-  if (!resolvedLocale) {
+  if (!normalizedLocale) {
     return NextResponse.next()
   }
 
-  if (firstSegment === resolvedLocale.slug) {
-    return NextResponse.next()
+  const canonicalSlug = getLocaleSlug(normalizedLocale)
+  const requestHeaders = new Headers(request.headers)
+
+  requestHeaders.set(localeRequestHeaderName, normalizedLocale)
+
+  if (firstSegment === canonicalSlug) {
+    return persistLocale(
+      NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      }),
+      normalizedLocale,
+    )
   }
 
   const url = request.nextUrl.clone()
 
-  url.pathname = `/${getLocaleSlug(resolvedLocale.code)}${remainingSegments.length ? `/${remainingSegments.join('/')}` : ''}`
+  url.pathname = `/${canonicalSlug}${remainingSegments.length ? `/${remainingSegments.join('/')}` : ''}`
 
-  return NextResponse.redirect(url)
+  return persistLocale(NextResponse.redirect(url), normalizedLocale)
 }
 
 export const config = {

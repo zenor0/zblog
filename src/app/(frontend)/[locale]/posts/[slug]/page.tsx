@@ -1,11 +1,54 @@
+import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { buildLocaleLinks, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
 import { PostArticle } from '@/components/frontend/PostArticle'
 import { buildLocalePath } from '@/lib/locales'
-import { getPostBySlug } from '@/lib/posts'
+import { getPostBySlug, getRenderablePostLocales } from '@/lib/posts'
 import { getPreviewUser } from '@/lib/preview-user'
+import { buildLocaleAlternates } from '@/lib/seo'
+import { getSiteSettings } from '@/lib/site-settings'
+
+export async function generateMetadata(props: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale: localeParam, slug } = await props.params
+  const locale = requireLocale(localeParam)
+  const resolved = await getPostBySlug({
+    locale,
+    slug,
+  })
+
+  if (!resolved) {
+    return {
+      robots: {
+        follow: false,
+        index: false,
+      },
+      title: 'Post not found | ZBlog',
+    }
+  }
+
+  const availableLocales = await getRenderablePostLocales({ slug })
+  const canonicalLocale = resolved.usedFallback ? resolved.resolvedLocale : locale
+  const canonicalPath = `/posts/${encodeURIComponent(resolved.post.slug)}`
+  const siteSettings = await getSiteSettings(canonicalLocale)
+
+  return {
+    alternates: buildLocaleAlternates({
+      canonicalLocale,
+      locales: availableLocales.length ? availableLocales : [canonicalLocale],
+      pathname: canonicalPath,
+    }),
+    description: resolved.post.excerpt || undefined,
+    robots: {
+      follow: true,
+      index: !resolved.usedFallback,
+    },
+    title: `${resolved.post.title} | ${siteSettings.siteName}`,
+  }
+}
 
 export default async function PostPage(props: {
   params: Promise<{ locale: string; slug: string }>

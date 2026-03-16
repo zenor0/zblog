@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
@@ -7,6 +8,24 @@ import { buildLocalePath, supportedLocales } from '@/lib/locales'
 import { getPostByID } from '@/lib/posts'
 import { buildPostAdminPath, buildPostDraftPreviewPath } from '@/lib/preview'
 import { getPreviewUser } from '@/lib/preview-user'
+import { getSiteSettings } from '@/lib/site-settings'
+
+export async function generateMetadata(props: {
+  params: Promise<{ id: string; locale: string }>
+}): Promise<Metadata> {
+  const { locale: localeParam } = await props.params
+  const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
+  const siteSettings = await getSiteSettings(locale)
+
+  return {
+    robots: {
+      follow: false,
+      index: false,
+    },
+    title: `${copy.previewTitle} | ${siteSettings.siteName}`,
+  }
+}
 
 export default async function PostPreviewPage(props: {
   params: Promise<{ id: string; locale: string }>

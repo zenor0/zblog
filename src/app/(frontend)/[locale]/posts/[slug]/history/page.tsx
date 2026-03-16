@@ -1,9 +1,28 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { formatLongDate, getFrontendCopy, requireLocale } from '@/app/(frontend)/helpers'
 import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug, getPostVersionDiffs } from '@/lib/posts'
+import { getSiteSettings } from '@/lib/site-settings'
+
+export async function generateMetadata(props: {
+  params: Promise<{ locale: string; slug: string }>
+}): Promise<Metadata> {
+  const { locale: localeParam, slug } = await props.params
+  const locale = requireLocale(localeParam)
+  const copy = getFrontendCopy(locale)
+  const siteSettings = await getSiteSettings(locale)
+
+  return {
+    robots: {
+      follow: true,
+      index: false,
+    },
+    title: `${copy.versionHistoryTitle} | ${siteSettings.siteName}`,
+  }
+}
 
 export default async function PostHistoryPage(props: {
   params: Promise<{ locale: string; slug: string }>

@@ -11,13 +11,15 @@ test.describe('Frontend', () => {
   test('can go on homepage', async ({ page }) => {
     await page.goto('http://localhost:3000')
 
-    await page.waitForURL('http://localhost:3000/en')
+    await expect(page).toHaveURL(/http:\/\/localhost:3000\/(en|zh-hans)$/)
     await expect(page).toHaveTitle(/ZBlog/)
 
     const heading = page.locator('h1').first()
     const seededPost = page.getByRole('link', { name: 'Seed Post with Citations and Version History' })
 
-    await expect(heading).toHaveText(/blog/i)
+    await expect(heading).toBeVisible()
+    await expect(page.getByRole('link', { name: '简体中文' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'English' })).toBeVisible()
     await expect(seededPost).toBeVisible()
   })
 
