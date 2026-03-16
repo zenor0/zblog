@@ -599,7 +599,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * 配置首页头版文案以及前台底部展示的备案、版权和链接信息。
+ * Configure the homepage hero copy and the footer records, copyright, and links shown on the frontend.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".

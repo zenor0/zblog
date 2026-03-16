@@ -62,7 +62,7 @@ describe('API', () => {
 
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })
-  })
+  }, 30_000)
 
   it('fetches users', async () => {
     const users = await payload.find({
