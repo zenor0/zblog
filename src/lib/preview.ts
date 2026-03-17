@@ -1,10 +1,16 @@
+import type { Locale as PayloadLocale } from 'payload'
+
 import { buildLocalePath, defaultLocale, normalizeLocale, type AppLocale } from '@/lib/locales'
 
-export function resolvePreviewLocale(locale: null | string | undefined): AppLocale {
-  return normalizeLocale(locale) ?? defaultLocale
+type PreviewLocaleInput = null | PayloadLocale | string | undefined
+
+export function resolvePreviewLocale(locale: PreviewLocaleInput): AppLocale {
+  const localeCode = typeof locale === 'string' ? locale : locale?.code
+
+  return normalizeLocale(localeCode) ?? defaultLocale
 }
 
-export function buildPostPath(args: { locale?: null | string; slug: string }) {
+export function buildPostPath(args: { locale?: PreviewLocaleInput; slug: string }) {
   const locale = resolvePreviewLocale(args.locale)
 
   return buildLocalePath(locale, `/posts/${encodeURIComponent(args.slug)}`)
@@ -12,7 +18,7 @@ export function buildPostPath(args: { locale?: null | string; slug: string }) {
 
 export function buildPostDraftPreviewPath(args: {
   id: number | string
-  locale?: null | string
+  locale?: PreviewLocaleInput
 }) {
   const locale = resolvePreviewLocale(args.locale)
 
@@ -21,13 +27,35 @@ export function buildPostDraftPreviewPath(args: {
 
 export function buildPostPreviewURL(args: {
   id: number | string
-  locale?: null | string
+  locale?: PreviewLocaleInput
+}) {
+  return buildPostPreviewRequestURL(args)
+}
+
+export function buildPostLivePreviewURL(args: {
+  id: number | string
+  locale?: PreviewLocaleInput
+}) {
+  return buildPostPreviewRequestURL({
+    ...args,
+    view: 'live-preview',
+  })
+}
+
+function buildPostPreviewRequestURL(args: {
+  id: number | string
+  locale?: PreviewLocaleInput
+  view?: 'live-preview'
 }) {
   const params = new URLSearchParams({
     collection: 'posts',
     id: String(args.id),
     locale: resolvePreviewLocale(args.locale),
   })
+
+  if (args.view) {
+    params.set('view', args.view)
+  }
 
   return `/api/preview?${params.toString()}`
 }

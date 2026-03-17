@@ -15,6 +15,36 @@
   --info: #3f6288;
 }
 
+html[data-zblog-preview-theme='dark'] {
+  --background: #17120f;
+  --foreground: #f7efe5;
+  --muted: #cab8a7;
+  --border: rgba(247, 239, 229, 0.12);
+  --border-strong: rgba(247, 239, 229, 0.22);
+  --soft: rgba(221, 141, 85, 0.12);
+  --soft-strong: rgba(221, 141, 85, 0.18);
+  --accent: #e0945f;
+  --accent-strong: #f1b183;
+  --warning: #f2bf64;
+  --danger: #ff8f8f;
+  --info: #8db8e8;
+  color-scheme: dark;
+}
+
+html[data-zblog-preview-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-zblog-embedded-preview='true'] .page-shell {
+  width: min(1100px, calc(100vw - 1.25rem));
+  padding-top: clamp(0.75rem, 1.8vw, 1rem);
+}
+
+html[data-zblog-embedded-preview='true'] .page-topbar,
+html[data-zblog-embedded-preview='true'] .notice--preview {
+  display: none;
+}
+
 * {
   box-sizing: border-box;
 }

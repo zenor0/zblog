@@ -7,8 +7,16 @@ import { editorOnly, publishedOrEditor, publishedVersionsOrEditor } from '@/lib/
 import { loadBibliographyEntries } from '@/lib/bibliography'
 import { extractCitationKeys } from '@/lib/citations'
 import { defaultLocale } from '@/lib/locales'
-import { buildPostPreviewURL } from '@/lib/preview'
+import { buildPostLivePreviewURL, buildPostPreviewURL } from '@/lib/preview'
 import { slugify } from '@/lib/slugs'
+
+function resolveAdminDocumentID(value: unknown) {
+  if (typeof value === 'number' || typeof value === 'string') {
+    return value
+  }
+
+  return null
+}
 
 function sharedOrCurrentPostOwnedFilter({ id }: { id?: number | string }): Where {
   if (typeof id !== 'number' && typeof id !== 'string') {
@@ -52,13 +60,72 @@ export const Posts: CollectionConfig = {
           '/components/payload/TranslateLocaleAction#TranslateLocaleAction',
         ],
       },
+      views: {
+        edit: {
+          livePreview: {
+            Component: '/components/payload/PostLivePreviewView#PostLivePreviewView',
+          },
+        },
+      },
     },
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: 'Content',
-    preview: (doc, { locale }) => {
-      const id = doc?.id
+    livePreview: {
+      breakpoints: [
+        {
+          height: 844,
+          label: 'Phone · 390 × 844',
+          name: 'phone',
+          width: 390,
+        },
+        {
+          height: 390,
+          label: 'Phone Wide · 844 × 390',
+          name: 'phone-wide',
+          width: 844,
+        },
+        {
+          height: 1112,
+          label: 'Tablet · 834 × 1112',
+          name: 'tablet',
+          width: 834,
+        },
+        {
+          height: 834,
+          label: 'Tablet Wide · 1112 × 834',
+          name: 'tablet-wide',
+          width: 1112,
+        },
+        {
+          height: 800,
+          label: 'Laptop · 1280 × 800',
+          name: 'laptop',
+          width: 1280,
+        },
+        {
+          height: 900,
+          label: 'Desktop · 1440 × 900',
+          name: 'desktop',
+          width: 1440,
+        },
+      ],
+      url: ({ data, locale }) => {
+        const id = resolveAdminDocumentID(data?.id)
 
-      if (!(typeof id === 'number' || typeof id === 'string')) {
+        if (id === null) {
+          return null
+        }
+
+        return buildPostLivePreviewURL({
+          id,
+          locale,
+        })
+      },
+    },
+    preview: (doc, { locale }) => {
+      const id = resolveAdminDocumentID(doc?.id)
+
+      if (id === null) {
         return null
       }
 

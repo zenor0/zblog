@@ -33,6 +33,7 @@ export const GET = async (request: Request) => {
   const collection = requestURL.searchParams.get('collection')
   const idParam = requestURL.searchParams.get('id')
   const locale = resolvePreviewLocale(requestURL.searchParams.get('locale'))
+  const isLivePreview = requestURL.searchParams.get('view') === 'live-preview'
   const id = Number(idParam)
 
   if (collection !== 'posts' || !Number.isInteger(id)) {
@@ -60,9 +61,11 @@ export const GET = async (request: Request) => {
 
   preview.enable()
 
-  const destination = slug
-    ? buildPostPath({ locale, slug })
-    : buildPostDraftPreviewPath({ id, locale })
+  const destination = isLivePreview
+    ? buildPostDraftPreviewPath({ id, locale })
+    : slug
+      ? buildPostPath({ locale, slug })
+      : buildPostDraftPreviewPath({ id, locale })
 
   if (!destination) {
     return NextResponse.redirect(new URL(buildPostAdminPath(id), request.url))
