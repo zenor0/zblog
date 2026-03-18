@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
+import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { estimateReadingMinutes, formatLongDate } from '@/i18n/format'
+import { resolveMediaAsset } from '@/lib/media'
 import type { ResolvedPost } from '@/lib/posts'
 import { getLocaleLabel, type AppLocale } from '@/lib/locales'
 import { MarkdownRenderer } from '@/lib/markdown'
@@ -175,8 +177,7 @@ export async function PostArticle(props: {
 
         {heroImage?.url ? (
           <figure className="hero-figure">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt={heroImage.alt || displayTitle} src={heroImage.url} />
+            <MediaSurface alt={heroImage.alt || displayTitle} loading="eager" media={heroImage} variant="hero" />
             {heroImage.caption || heroImage.credit ? (
               <figcaption>
                 {heroImage.caption}
@@ -213,13 +214,35 @@ export async function PostArticle(props: {
                   <ul className="link-list">
                     {attachments.map((attachment) => {
                       const file = attachment.file as Exclude<typeof attachment.file, number>
+                      const asset = resolveMediaAsset({
+                        alt: attachment.label || file.alt || file.filename,
+                        media: file,
+                      })
+                      const typeLabel = asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
 
                       return (
-                        <li key={attachment.id ?? file.id}>
-                          <a href={file.url ?? '#'} rel="noreferrer" target="_blank">
-                            {attachment.label || file.filename || file.alt}
+                        <li className="attachment-item" key={attachment.id ?? file.id}>
+                          <a className="attachment-link-card" href={file.url ?? '#'} rel="noreferrer" target="_blank">
+                            <MediaSurface
+                              alt={attachment.label || file.alt || file.filename}
+                              asset={asset}
+                              variant="attachment"
+                            />
+                            <span className="attachment-link-card__body">
+                              <span className="attachment-link-card__title">
+                                {attachment.label || file.filename || file.alt}
+                              </span>
+                              <span className="attachment-link-card__meta">
+                                {typeLabel}
+                                {file.filename ? ` · ${file.filename}` : null}
+                              </span>
+                              {attachment.description ? (
+                                <span className="attachment-link-card__description">
+                                  {attachment.description}
+                                </span>
+                              ) : null}
+                            </span>
                           </a>
-                          {attachment.description ? <p>{attachment.description}</p> : null}
                         </li>
                       )
                     })}

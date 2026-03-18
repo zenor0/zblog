@@ -6,6 +6,8 @@ import remarkGfm from 'remark-gfm'
 import { visit } from 'unist-util-visit'
 
 import { parseCitationGroup } from '@/lib/citations'
+import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { resolveMediaAsset } from '@/lib/media'
 
 type MarkdownRendererProps = {
   citationIndex?: Map<string, number>
@@ -14,6 +16,29 @@ type MarkdownRendererProps = {
 
 const citationPattern = /\[@([^\]]+)\]/g
 const calloutKinds = new Set(['note', 'tip', 'warning', 'info'])
+
+function MarkdownImage(props: { alt?: null | string; src?: Blob | null | string }) {
+  const asset = resolveMediaAsset({
+    alt: props.alt,
+    src: typeof props.src === 'string' ? props.src : null,
+  })
+
+  if (!asset) {
+    return null
+  }
+
+  const media = <MediaSurface asset={asset} variant="inline" />
+
+  if (asset.kind === 'pdf' || asset.kind === 'unknown') {
+    return (
+      <a className="markdown-media-link" href={asset.downloadURL} rel="noreferrer" target="_blank">
+        {media}
+      </a>
+    )
+  }
+
+  return media
+}
 
 function calloutDirectivePlugin() {
   return (tree: unknown) => {
@@ -129,10 +154,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
             {children}
           </aside>
         ),
-        img: ({ alt, src }) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img alt={alt ?? ''} loading="lazy" src={src ?? ''} />
-        ),
+        img: ({ alt, src }) => <MarkdownImage alt={alt} src={src} />,
       }}
       remarkPlugins={[remarkGfm, remarkDirective, calloutDirectivePlugin, [citationPlugin, { citationIndex }]]}
     >

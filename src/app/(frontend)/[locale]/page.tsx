@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
+import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { formatShortDate } from '@/i18n/format'
 import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/lib/locales'
@@ -74,9 +75,10 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
           <div className="post-grid">
             {posts.map((post) => {
               const heroImage =
-                post.heroImage && typeof post.heroImage === 'object' ? post.heroImage : null
-              const heroImageURL = typeof heroImage?.url === 'string' ? heroImage.url : null
-              const hasHeroImage = Boolean(heroImageURL)
+                post.heroImage && typeof post.heroImage === 'object' && typeof post.heroImage.url === 'string'
+                  ? post.heroImage
+                  : null
+              const hasHeroImage = Boolean(heroImage)
 
               return (
                 <article
@@ -85,8 +87,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                 >
                   {hasHeroImage ? (
                     <div className="post-card__image">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img alt={heroImage?.alt || post.title} src={heroImageURL ?? undefined} />
+                      <MediaSurface alt={heroImage?.alt || post.title} loading="lazy" media={heroImage} variant="card" />
                     </div>
                   ) : null}
                   <div className="post-card__body">

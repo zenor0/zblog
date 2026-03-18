@@ -288,10 +288,112 @@ pre {
   margin: 0;
 }
 
-.post-card__image img {
+.media-surface {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(177, 92, 44, 0.08), rgba(177, 92, 44, 0.02)),
+    var(--soft);
+  color: var(--foreground);
+}
+
+.media-surface--card {
   width: 100%;
   aspect-ratio: 4 / 3;
+  border-radius: 0.9rem;
+}
+
+.media-surface--hero,
+.media-surface--inline,
+.media-surface--attachment {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+.media-surface--inline {
+  width: 100%;
+  margin: 1.35rem 0;
+}
+
+.media-surface--attachment {
+  aspect-ratio: 5 / 4;
+  border-radius: 0.9rem;
+}
+
+.media-surface__image {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+
+.media-surface--hero .media-surface__image {
+  max-height: 40rem;
+}
+
+.media-surface--inline .media-surface__image,
+.media-surface--attachment .media-surface__image {
+  object-fit: contain;
+  background:
+    linear-gradient(180deg, rgba(177, 92, 44, 0.04), rgba(177, 92, 44, 0)),
+    rgba(255, 255, 255, 0.7);
+}
+
+.media-surface__fallback {
+  display: grid;
+  gap: 0.55rem;
+  min-height: 100%;
+  padding: 1.2rem;
+  place-content: center;
+  text-align: center;
+}
+
+.media-surface--card .media-surface__fallback {
+  min-height: 12rem;
+}
+
+.media-surface--hero .media-surface__fallback {
+  min-height: 18rem;
+}
+
+.media-surface__extension,
+.media-surface__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(37, 26, 20, 0.78);
+  color: #fff9f3;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.media-surface__extension {
+  margin: 0 auto;
+}
+
+.media-surface__badge {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+}
+
+.media-surface__fallback-text {
+  max-width: 22ch;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.markdown-media-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .post-card__body {
@@ -445,10 +547,8 @@ pre {
   border-bottom: 1px solid var(--border);
 }
 
-.hero-figure img {
+.hero-figure .media-surface--hero {
   width: 100%;
-  max-height: 40rem;
-  object-fit: cover;
 }
 
 .hero-figure figcaption {
@@ -517,6 +617,42 @@ pre {
   display: grid;
   gap: 0.25rem;
   padding: 0.75rem 0 0;
+}
+
+.attachment-item {
+  padding-top: 0.85rem;
+}
+
+.attachment-link-card {
+  display: grid;
+  grid-template-columns: minmax(98px, 120px) minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  text-decoration: none;
+}
+
+.attachment-link-card__body {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.attachment-link-card__title {
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.attachment-link-card__meta,
+.attachment-link-card__description {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.attachment-link-card:hover .media-surface__badge,
+.markdown-media-link:hover .media-surface__badge {
+  background: var(--accent-strong);
 }
 
 .link-list li + li,
@@ -814,7 +950,7 @@ pre {
     justify-content: flex-start;
   }
 
-  .post-card__image img {
+  .media-surface--card {
     aspect-ratio: 16 / 10;
   }
 
@@ -846,6 +982,15 @@ pre {
   .page-topbar,
   .section-heading {
     align-items: flex-start;
+  }
+
+  .attachment-link-card {
+    grid-template-columns: 1fr;
+  }
+
+  .media-surface__badge {
+    top: 0.7rem;
+    right: 0.7rem;
   }
 
   .reference-list li {
