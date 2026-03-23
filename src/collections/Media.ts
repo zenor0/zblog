@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { deletePersistedPDFPreviewAfterDelete } from '@/hooks/media/deletePersistedPDFPreviewAfterDelete'
+import { syncPDFPreviewAfterChange } from '@/hooks/media/syncPDFPreviewAfterChange'
 import { anyone, editorOnly } from '@/lib/access'
 import { mediaUploadDir } from '@/lib/uploads'
 
@@ -35,6 +37,64 @@ export const Media: CollectionConfig = {
         position: 'sidebar',
         readOnly: true,
       },
+      name: 'previewSVGStatus',
+      options: [
+        {
+          label: 'Pending',
+          value: 'pending',
+        },
+        {
+          label: 'Ready',
+          value: 'ready',
+        },
+        {
+          label: 'Failed',
+          value: 'failed',
+        },
+      ],
+      type: 'select',
+    },
+    {
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+      name: 'previewSVGURL',
+      type: 'text',
+    },
+    {
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+      name: 'previewSVGFilename',
+      type: 'text',
+    },
+    {
+      admin: {
+        condition: (_, siblingData) => siblingData.previewSVGStatus === 'failed',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      name: 'previewSVGError',
+      type: 'textarea',
+    },
+    {
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        position: 'sidebar',
+        readOnly: true,
+      },
+      name: 'previewSVGGeneratedAt',
+      type: 'date',
+    },
+    {
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+      },
       index: true,
       name: 'importKey',
       type: 'text',
@@ -52,6 +112,10 @@ export const Media: CollectionConfig = {
       type: 'relationship',
     },
   ],
+  hooks: {
+    afterChange: [syncPDFPreviewAfterChange],
+    afterDelete: [deletePersistedPDFPreviewAfterDelete],
+  },
   upload: {
     staticDir: mediaUploadDir,
   },

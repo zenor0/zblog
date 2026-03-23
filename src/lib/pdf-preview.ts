@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
@@ -29,6 +29,18 @@ async function withPDFRenderSlot<T>(task: () => Promise<T>): Promise<T> {
     activePDFRenders -= 1
     pendingPDFRenders.shift()?.()
   }
+}
+
+async function readGeneratedPreviewSVG(outputBase: string, page: number): Promise<null | string> {
+  for (const candidate of [outputBase, `${outputBase}.svg`, `${outputBase}-${page}.svg`]) {
+    try {
+      return await readFile(candidate, 'utf8')
+    } catch {
+      continue
+    }
+  }
+
+  return null
 }
 
 function escapeXML(value: string): string {
@@ -109,14 +121,12 @@ export function buildPDFPreviewFallbackSVG(args: {
   })
 }
 
-export async function renderPDFPreviewSVG(args: {
-  debugReason?: null | string
-  filename?: null | string
+export async function convertPDFToSVG(args: {
   page: number
   pdfPath: string
   sourceURL: string
   watermarkToken?: null | string
-}): Promise<{ error?: null | string; svg: string; usedFallback: boolean }> {
+}): Promise<string> {
   return withPDFRenderSlot(async () => {
     const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'zblog-pdf-preview-'))
     const outputBase = path.join(tmpDir, 'preview')
@@ -138,39 +148,18 @@ export async function renderPDFPreviewSVG(args: {
         },
       )
 
-      let svg: null | string = null
-
-      for (const candidate of [outputBase, `${outputBase}.svg`, `${outputBase}-${args.page}.svg`]) {
-        try {
-          svg = await readFile(candidate, 'utf8')
-          break
-        } catch {
-          continue
-        }
-      }
+      const svg = await readGeneratedPreviewSVG(outputBase, args.page)
 
       if (!svg) {
         throw new Error('PDF preview output was not created.')
       }
 
-      return {
-        error: null,
-        svg: injectMetadata({
-          page: args.page,
-          sourceURL: args.sourceURL,
-          svg,
-          watermarkToken: args.watermarkToken,
-        }),
-        usedFallback: false,
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown PDF render failure'
-
-      return {
-        error: message,
-        svg: buildPDFPreviewFallbackSVG(args),
-        usedFallback: true,
-      }
+      return injectMetadata({
+        page: args.page,
+        sourceURL: args.sourceURL,
+        svg,
+        watermarkToken: args.watermarkToken,
+      })
     } finally {
       await rm(tmpDir, {
         force: true,
@@ -178,4 +167,55 @@ export async function renderPDFPreviewSVG(args: {
       })
     }
   })
+}
+
+export async function persistPDFPreviewSVG(args: {
+  page: number
+  pdfPath: string
+  previewPath: string
+  sourceURL: string
+}): Promise<{ error?: null | string; usedFallback: boolean }> {
+  try {
+    const svg = await convertPDFToSVG(args)
+
+    await mkdir(path.dirname(args.previewPath), {
+      recursive: true,
+    })
+    await writeFile(args.previewPath, svg, 'utf8')
+
+    return {
+      error: null,
+      usedFallback: false,
+    }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'Unknown PDF render failure',
+      usedFallback: true,
+    }
+  }
+}
+
+export async function renderPDFPreviewSVG(args: {
+  debugReason?: null | string
+  filename?: null | string
+  page: number
+  pdfPath: string
+  sourceURL: string
+  watermarkToken?: null | string
+}): Promise<{ error?: null | string; svg: string; usedFallback: boolean }> {
+  try {
+    return {
+      error: null,
+      svg: await convertPDFToSVG(args),
+      usedFallback: false,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown PDF render failure'
+
+    return {
+      error: message,
+      svg: buildPDFPreviewFallbackSVG(args),
+      usedFallback: true,
+    }
+  }
 }

@@ -11,7 +11,15 @@ type MediaSurfaceProps = {
   loading?: 'eager' | 'lazy'
   media?: null | Pick<
     Media,
-    'alt' | 'caption' | 'credit' | 'filename' | 'height' | 'mimeType' | 'url' | 'width'
+    | 'alt'
+    | 'caption'
+    | 'credit'
+    | 'filename'
+    | 'height'
+    | 'mimeType'
+    | 'previewSVGURL'
+    | 'url'
+    | 'width'
   >
   src?: null | string
   variant?: MediaVariant

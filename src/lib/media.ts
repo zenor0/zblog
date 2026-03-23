@@ -2,10 +2,11 @@ import path from 'node:path'
 
 import type { Media } from '@/payload-types'
 
-import { mediaUploadDir } from '@/lib/uploads'
+import { mediaPreviewDir, mediaUploadDir } from '@/lib/uploads'
 
 const localOrigin = 'http://zblog.local'
 const payloadMediaPrefixes = ['/api/media/file/', '/media/'] as const
+const pdfPreviewSuffixPattern = /\.page-(\d+)\.svg$/i
 
 export type MediaKind = 'image' | 'pdf' | 'unknown' | 'vector'
 
@@ -16,7 +17,15 @@ export type MediaRenderOptions = {
 
 type MediaLike = Pick<
   Media,
-  'alt' | 'caption' | 'credit' | 'filename' | 'height' | 'mimeType' | 'url' | 'width'
+  | 'alt'
+  | 'caption'
+  | 'credit'
+  | 'filename'
+  | 'height'
+  | 'mimeType'
+  | 'previewSVGURL'
+  | 'url'
+  | 'width'
 >
 
 export type ResolvedMediaAsset = {
@@ -32,6 +41,28 @@ export type ResolvedMediaAsset = {
   previewURL: null | string
   src: string
   width?: null | number
+}
+
+function usesDefaultPDFPreview(options: MediaRenderOptions = {}): boolean {
+  return (
+    (options.page === undefined || options.page === 1) &&
+    (!options.watermarkToken || options.watermarkToken.trim().length === 0)
+  )
+}
+
+function resolveSafePath(rootDir: string, relativePath: string): null | string {
+  if (relativePath.length === 0) {
+    return null
+  }
+
+  const resolvedPath = path.resolve(rootDir, relativePath)
+  const normalizedRoot = `${path.resolve(rootDir)}${path.sep}`
+
+  if (!resolvedPath.startsWith(normalizedRoot)) {
+    return null
+  }
+
+  return resolvedPath
 }
 
 function getPathnameFromSource(sourceURL: string): null | string {
@@ -108,6 +139,14 @@ export function inferMediaKind(args: {
 }
 
 export function buildMediaRenderURL(sourceURL: string, options: MediaRenderOptions = {}): string {
+  if (usesDefaultPDFPreview(options)) {
+    const previewURL = buildPDFPreviewURL(sourceURL, 1)
+
+    if (previewURL) {
+      return previewURL
+    }
+  }
+
   const searchParams = new URLSearchParams({
     src: sourceURL,
   })
@@ -121,6 +160,44 @@ export function buildMediaRenderURL(sourceURL: string, options: MediaRenderOptio
   }
 
   return `/api/media/render?${searchParams.toString()}`
+}
+
+export function buildPDFPreviewFilename(filename: string, page = 1): string {
+  return `${filename}.page-${page}.svg`
+}
+
+export function getSourceFilenameFromPDFPreviewFilename(previewFilename: string): null | string {
+  const match = previewFilename.match(pdfPreviewSuffixPattern)
+
+  if (!match) {
+    return null
+  }
+
+  const sourceFilename = previewFilename.slice(0, match.index)
+
+  return sourceFilename.length > 0 ? sourceFilename : null
+}
+
+export function buildPDFPreviewURL(sourceURL: string, page = 1): null | string {
+  const sourceFilename = getMediaFilename(sourceURL)
+
+  if (!sourceFilename) {
+    return null
+  }
+
+  const searchParams = new URLSearchParams({
+    filename: buildPDFPreviewFilename(sourceFilename, page),
+  })
+
+  return `/api/media/preview?${searchParams.toString()}`
+}
+
+export function resolveLocalMediaFilePath(filename: string): null | string {
+  return resolveSafePath(mediaUploadDir, filename)
+}
+
+export function resolveLocalMediaPreviewPath(previewFilename: string): null | string {
+  return resolveSafePath(mediaPreviewDir, previewFilename)
 }
 
 export function resolveMediaAsset(args: {
@@ -156,7 +233,14 @@ export function resolveMediaAsset(args: {
     height: args.media?.height ?? null,
     kind,
     mimeType: args.media?.mimeType ?? null,
-    previewURL: kind === 'pdf' ? buildMediaRenderURL(sourceURL, args.options) : kind === 'unknown' ? null : sourceURL,
+    previewURL:
+      kind === 'pdf'
+        ? usesDefaultPDFPreview(args.options)
+          ? args.media?.previewSVGURL ?? buildMediaRenderURL(sourceURL, args.options)
+          : buildMediaRenderURL(sourceURL, args.options)
+        : kind === 'unknown'
+          ? null
+          : sourceURL,
     src: sourceURL,
     width: args.media?.width ?? null,
   }
@@ -187,12 +271,5 @@ export function resolveLocalMediaPath(sourceURL: string): null | string {
     return null
   }
 
-  const resolvedPath = path.resolve(mediaUploadDir, relativePath)
-  const normalizedRoot = `${path.resolve(mediaUploadDir)}${path.sep}`
-
-  if (!resolvedPath.startsWith(normalizedRoot)) {
-    return null
-  }
-
-  return resolvedPath
+  return resolveSafePath(mediaUploadDir, relativePath)
 }

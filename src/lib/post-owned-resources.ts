@@ -3,6 +3,7 @@ import path from 'path'
 
 import type { PayloadRequest } from 'payload'
 
+import { removePersistedPDFPreview } from '@/lib/media-previews'
 import { mediaUploadDir } from '@/lib/uploads'
 
 type OwnedBibliographyResource = {
@@ -12,6 +13,7 @@ type OwnedBibliographyResource = {
 type OwnedMediaResource = {
   filename: null | string
   id: number | string
+  previewSVGFilename: null | string
 }
 
 export type OwnedPostResourcesSnapshot = {
@@ -113,6 +115,8 @@ async function collectOwnedMediaResources(args: {
       resources.push({
         filename: typeof doc.filename === 'string' ? doc.filename : null,
         id: doc.id,
+        previewSVGFilename:
+          typeof doc.previewSVGFilename === 'string' ? doc.previewSVGFilename : null,
       })
     }
 
@@ -194,6 +198,8 @@ async function collectImportedMediaResourcesBySlug(args: {
       resources.push({
         filename: typeof doc.filename === 'string' ? doc.filename : null,
         id: doc.id,
+        previewSVGFilename:
+          typeof doc.previewSVGFilename === 'string' ? doc.previewSVGFilename : null,
       })
     }
 
@@ -233,6 +239,7 @@ export async function deleteOwnedResourcesSnapshot(args: {
     })
 
     await deleteOwnedMediaFileFallback(media.filename)
+    await removePersistedPDFPreview(media.previewSVGFilename)
   }
 
   for (const bibliographyFile of args.snapshot.bibliographyFiles) {

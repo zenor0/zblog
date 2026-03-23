@@ -23,8 +23,29 @@ describe('media utilities', () => {
       downloadURL: '/media/report.pdf',
       extensionLabel: 'PDF',
       kind: 'pdf',
-      previewURL: '/api/media/render?src=%2Fmedia%2Freport.pdf',
+      previewURL: '/api/media/preview?filename=report.pdf.page-1.svg',
     })
+  })
+
+  it('keeps dynamic pdf rendering for non-default pages or watermarking', () => {
+    const asset = resolveMediaAsset({
+      media: {
+        alt: 'Quarterly report',
+        caption: null,
+        credit: null,
+        filename: 'report.pdf',
+        height: null,
+        mimeType: 'application/pdf',
+        previewSVGURL: '/api/media/preview?filename=report.pdf.page-1.svg',
+        url: '/media/report.pdf',
+        width: null,
+      },
+      options: {
+        page: 2,
+      },
+    })
+
+    expect(asset?.previewURL).toBe('/api/media/render?src=%2Fmedia%2Freport.pdf&page=2')
   })
 
   it('only resolves local upload paths inside the media directory', () => {

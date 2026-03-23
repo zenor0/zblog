@@ -27,7 +27,7 @@ type ResourceSummary = {
   media: number
 }
 
-type HeroImageSummary = Pick<Media, 'alt' | 'caption' | 'credit' | 'thumbnailURL' | 'url'>
+type HeroImageSummary = Pick<Media, 'alt' | 'caption' | 'credit' | 'previewSVGURL' | 'thumbnailURL' | 'url'>
 
 function getAccessOverride(reqUser: unknown) {
   return reqUser ? ({ overrideAccess: false as const } as const) : {}
@@ -161,6 +161,8 @@ function getHeroImage(value: Post['heroImage']): HeroImageSummary | null {
   const alt = 'alt' in value && typeof value.alt === 'string' ? value.alt : ''
   const caption = 'caption' in value && typeof value.caption === 'string' ? value.caption : null
   const credit = 'credit' in value && typeof value.credit === 'string' ? value.credit : null
+  const previewSVGURL =
+    'previewSVGURL' in value && typeof value.previewSVGURL === 'string' ? value.previewSVGURL : null
   const thumbnailURL =
     'thumbnailURL' in value && typeof value.thumbnailURL === 'string' ? value.thumbnailURL : null
   const url = 'url' in value && typeof value.url === 'string' ? value.url : null
@@ -169,13 +171,14 @@ function getHeroImage(value: Post['heroImage']): HeroImageSummary | null {
     alt,
     caption,
     credit,
+    previewSVGURL,
     thumbnailURL,
     url,
   }
 }
 
 function getPreviewURL(heroImage: HeroImageSummary | null): null | string {
-  return heroImage?.thumbnailURL ?? heroImage?.url ?? null
+  return heroImage?.previewSVGURL ?? heroImage?.thumbnailURL ?? heroImage?.url ?? null
 }
 
 function getLocaleNote(snapshot: LocaleSnapshot | null, activeLocale: AppLocale): null | string {

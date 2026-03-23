@@ -173,6 +173,11 @@ export interface Media {
   alt: string;
   caption?: string | null;
   credit?: string | null;
+  previewSVGStatus?: ('pending' | 'ready' | 'failed') | null;
+  previewSVGURL?: string | null;
+  previewSVGFilename?: string | null;
+  previewSVGError?: string | null;
+  previewSVGGeneratedAt?: string | null;
   importKey?: string | null;
   ownerPost?: (number | null) | Post;
   updatedAt: string;
@@ -472,6 +477,11 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
   credit?: T;
+  previewSVGStatus?: T;
+  previewSVGURL?: T;
+  previewSVGFilename?: T;
+  previewSVGError?: T;
+  previewSVGGeneratedAt?: T;
   importKey?: T;
   ownerPost?: T;
   updatedAt?: T;
