@@ -1,6 +1,7 @@
 import type { Media } from '@/payload-types'
 
 import { resolveMediaAsset, type ResolvedMediaAsset } from '@/lib/media'
+import { cn } from '@/lib/utils'
 
 type MediaVariant = 'attachment' | 'card' | 'hero' | 'inline'
 
@@ -25,10 +26,6 @@ type MediaSurfaceProps = {
   variant?: MediaVariant
 }
 
-function joinClasses(...values: Array<null | string | undefined>) {
-  return values.filter(Boolean).join(' ')
-}
-
 export function MediaSurface(props: MediaSurfaceProps) {
   const asset =
     props.asset ??
@@ -47,7 +44,7 @@ export function MediaSurface(props: MediaSurfaceProps) {
 
   return (
     <span
-      className={joinClasses('media-surface', `media-surface--${props.variant ?? 'card'}`, props.className)}
+      className={cn('media-surface', `media-surface--${props.variant ?? 'card'}`, props.className)}
       data-kind={asset.kind}
     >
       {asset.previewURL ? (

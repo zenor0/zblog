@@ -1,8 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ArrowLeftIcon, HistoryIcon } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
 import { formatLongDate } from '@/i18n/format'
 import { requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/lib/locales'
@@ -46,74 +51,123 @@ export default async function PostHistoryPage(props: {
   })
 
   return (
-    <div className="page-shell">
-      <div className="page-topbar">
-        <Link className="back-link" href={buildLocalePath(locale, `/posts/${slug}`)}>
-          {article('backToArticle')}
-        </Link>
+    <div className="page-frame frontend-shell">
+      <div className="mb-6 sm:mb-8">
+        <Button asChild size="sm" variant="ghost">
+          <Link href={buildLocalePath(locale, `/posts/${slug}`)}>
+            <ArrowLeftIcon data-icon="inline-start" />
+            {article('backToArticle')}
+          </Link>
+        </Button>
       </div>
 
-      <section className="section">
-        <div className="section-heading">
-          <h1>{history('title')}</h1>
-          <p>{history('versionHistorySummary', { count: versionDiffs.length, title: post.post.title })}</p>
-        </div>
+      <section className="flex flex-col gap-6">
+        <header className="flex flex-col gap-4 border-b pb-8">
+          <Badge variant="outline">
+            <HistoryIcon />
+            {history('title')}
+          </Badge>
+          <div className="flex flex-col gap-3">
+            <h1 className="font-serif text-4xl tracking-[-0.04em] sm:text-5xl">
+              {history('title')}
+            </h1>
+            <p className="text-base leading-8 text-foreground/68">
+              {history('versionHistorySummary', {
+                count: versionDiffs.length,
+                title: post.post.title,
+              })}
+            </p>
+          </div>
+        </header>
 
         {versionDiffs.length === 0 ? (
-          <div className="empty-state">
-            <p>{history('noVersions')}</p>
-          </div>
+          <p className="py-10 text-center text-sm leading-7 text-muted-foreground">
+            {history('noVersions')}
+          </p>
         ) : (
-          <div className="version-stack">
-            {versionDiffs.map((entry) => (
-              <article className="version-card" key={entry.version.id}>
-                <header className="version-card__header">
-                  <div>
-                    <h2>
-                      {formatLongDate({
-                        fallback: common('unscheduled'),
-                        locale: post.resolvedLocale,
-                        value: entry.version.updatedAt,
-                      })}
-                    </h2>
-                    <p>
-                      {common('versionID')} {entry.version.id}
-                      {entry.version.latest ? ` · ${common('latestSnapshot')}` : ''}
-                    </p>
-                  </div>
-                  <span className="version-chip">
-                    {entry.version.version._status === 'published'
-                      ? common('publishedLabel')
-                      : common('draftLabel')}
-                  </span>
-                </header>
+          <div className="flex flex-col">
+            {versionDiffs.map((entry) => {
+              const changedDiffs = entry.diffs.filter((diff) =>
+                diff.lines.some((line) => line.type !== 'unchanged'),
+              )
 
-                <div className="diff-stack">
-                  {entry.diffs
-                    .filter((diff) => diff.lines.some((line) => line.type !== 'unchanged'))
-                    .map((diff) => (
-                      <section className="diff-block" key={`${entry.version.id}-${diff.field}`}>
-                        <h3>{diff.field}</h3>
-                        <pre className="diff-pre">
-                          {diff.lines.map((line, index) => (
-                            <span
-                              className={`diff-line diff-line--${line.type}`}
-                              key={`${diff.field}-${index}`}
-                            >
-                              {line.type === 'added'
-                                ? '+ '
-                                : line.type === 'removed'
-                                  ? '- '
-                                  : '  '}
-                              {line.value}
-                            </span>
-                          ))}
-                        </pre>
-                      </section>
-                    ))}
-                </div>
-              </article>
-            ))}
+              return (
+                <section className="border-b py-6" key={entry.version.id}>
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex flex-col gap-2">
+                      <h2 className="font-serif text-2xl tracking-[-0.03em] sm:text-3xl">
+                        {formatLongDate({
+                          fallback: common('unscheduled'),
+                          locale: post.resolvedLocale,
+                          value: entry.version.updatedAt,
+                        })}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {common('versionID')} {entry.version.id}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Badge
+                        variant={
+                          entry.version.version._status === 'published' ? 'secondary' : 'outline'
+                        }
+                      >
+                        {entry.version.version._status === 'published'
+                          ? common('publishedLabel')
+                          : common('draftLabel')}
+                      </Badge>
+                      {entry.version.latest ? (
+                        <Badge variant="default">{common('latestSnapshot')}</Badge>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {changedDiffs.length === 0 ? (
+                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                      {common('versionID')} {entry.version.id}
+                    </p>
+                  ) : (
+                    <div className="mt-5 flex flex-col gap-5">
+                      {changedDiffs.map((diff, index) => (
+                        <div
+                          className="flex flex-col gap-3"
+                          key={`${entry.version.id}-${diff.field}`}
+                        >
+                          {index > 0 ? <Separator /> : null}
+                          <div className="flex flex-col gap-2">
+                            <h3 className="font-medium">{diff.field}</h3>
+                            <ScrollArea className="w-full border border-border/70">
+                              <pre className="min-w-full p-4 text-sm leading-7 whitespace-pre-wrap">
+                                {diff.lines.map((line, lineIndex) => (
+                                  <span
+                                    className={
+                                      line.type === 'added'
+                                        ? 'block text-primary'
+                                        : line.type === 'removed'
+                                          ? 'block text-destructive'
+                                          : 'block text-muted-foreground'
+                                    }
+                                    key={`${diff.field}-${lineIndex}`}
+                                  >
+                                    {line.type === 'added'
+                                      ? '+ '
+                                      : line.type === 'removed'
+                                        ? '- '
+                                        : '  '}
+                                    {line.value}
+                                  </span>
+                                ))}
+                              </pre>
+                            </ScrollArea>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )
+            })}
           </div>
         )}
       </section>

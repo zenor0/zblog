@@ -2,7 +2,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
+import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { formatShortDate } from '@/i18n/format'
 import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/lib/locales'
@@ -41,90 +44,123 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
   const heroDescription = siteSettings.homeHero?.description || home('heroDescription')
 
   return (
-    <div className="page-shell">
-      <header className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow">{heroEyebrow}</span>
-          <h1>{heroTitle}</h1>
-          <p>{heroDescription}</p>
+    <div className="page-frame frontend-shell">
+      <header className="flex flex-col gap-5 border-b pb-8 sm:gap-6 sm:pb-10">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex max-w-3xl flex-col gap-3">
+            <p className="section-kicker">{heroEyebrow}</p>
+            <h1 className="font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+              {heroTitle}
+            </h1>
+          </div>
+
+          <LocaleSwitcher
+            activeLocale={locale}
+            items={buildLocaleLinks('')}
+            label={common('localeNavigation')}
+          />
         </div>
-        <nav aria-label={common('localeNavigation')} className="locale-nav">
-          {buildLocaleLinks('').map((item) => (
-            <Link
-              className={item.locale === locale ? 'locale-pill locale-pill--active' : 'locale-pill'}
-              href={item.href}
-              key={item.locale}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+
+        <p className="max-w-2xl text-base leading-8 text-foreground/68 sm:text-lg">
+          {heroDescription}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          <span>{siteSettings.siteName}</span>
+          <Badge variant="secondary">{home('publishedEntries', { count: posts.length })}</Badge>
+        </div>
       </header>
 
-      <section className="section">
-        <div className="section-heading">
-          <h2>{home('postsHeading')}</h2>
-          <p>{home('publishedEntries', { count: posts.length })}</p>
+      <section className="mt-10 flex flex-col gap-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <p className="section-kicker">{siteSettings.siteName}</p>
+            <h2 className="font-serif text-2xl tracking-[-0.03em] sm:text-3xl">
+              {home('postsHeading')}
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {home('publishedEntries', { count: posts.length })}
+          </p>
         </div>
 
+        <Separator />
+
         {posts.length === 0 ? (
-          <div className="empty-state">
-            <p>{home('noPublishedPosts')}</p>
-          </div>
+          <p className="py-10 text-sm leading-7 text-muted-foreground">
+            {home('noPublishedPosts')}
+          </p>
         ) : (
-          <div className="post-grid">
+          <div className="flex flex-col">
             {posts.map((post) => {
               const heroImage =
-                post.heroImage && typeof post.heroImage === 'object' && typeof post.heroImage.url === 'string'
+                post.heroImage &&
+                typeof post.heroImage === 'object' &&
+                typeof post.heroImage.url === 'string'
                   ? post.heroImage
                   : null
-              const hasHeroImage = Boolean(heroImage)
 
               return (
                 <article
-                  className={hasHeroImage ? 'post-card post-card--with-image' : 'post-card post-card--text-only'}
+                  className="grid gap-4 border-b py-6 md:grid-cols-[minmax(0,1fr)_13rem] md:items-start"
                   key={post.id}
                 >
-                  {hasHeroImage ? (
-                    <div className="post-card__image">
-                      <MediaSurface alt={heroImage?.alt || post.title} loading="lazy" media={heroImage} variant="card" />
+                  <div className="flex min-w-0 flex-col gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline">
+                        {formatShortDate({
+                          fallback: common('unknownDate'),
+                          locale,
+                          value: post.publishedAt ?? post.updatedAt,
+                        })}
+                      </Badge>
+                      <Badge
+                        variant={post.translationStatus === 'machine' ? 'default' : 'secondary'}
+                      >
+                        {post.translationStatus === 'machine'
+                          ? common('machineStatus')
+                          : common('editorialStatus')}
+                      </Badge>
                     </div>
-                  ) : null}
-                  <div className="post-card__body">
-                    <div className="post-card__text">
-                      <div className="meta-row">
-                        <span className="meta-pill">
-                          {formatShortDate({
-                            fallback: common('unknownDate'),
-                            locale,
-                            value: post.publishedAt ?? post.updatedAt,
-                          })}
-                        </span>
-                        <span
-                          className={
-                            post.translationStatus === 'machine'
-                              ? 'meta-pill meta-pill--accent'
-                              : 'meta-pill'
-                          }
+
+                    <div className="flex flex-col gap-2">
+                      <h2 className="font-serif text-2xl leading-tight tracking-[-0.03em]">
+                        <Link
+                          className="transition-colors hover:text-primary"
+                          href={buildLocalePath(locale, `/posts/${post.slug}`)}
                         >
-                          {post.translationStatus === 'machine'
-                            ? common('machineStatus')
-                            : common('editorialStatus')}
-                        </span>
-                      </div>
-                      <h3>
-                        <Link href={buildLocalePath(locale, `/posts/${post.slug}`)}>{post.title}</Link>
-                      </h3>
-                      <p>{post.excerpt || home('emptyExcerpt')}</p>
+                          {post.title}
+                        </Link>
+                      </h2>
+                      <p className="text-sm leading-7 text-muted-foreground">
+                        {post.excerpt || home('emptyExcerpt')}
+                      </p>
                     </div>
+
                     {post.tags?.length ? (
-                      <ul className="tag-list">
+                      <div className="flex flex-wrap gap-2">
                         {post.tags.map((tag) => (
-                          <li key={tag.id ?? tag.value}>{tag.value}</li>
+                          <Badge key={tag.id ?? tag.value} variant="outline">
+                            {tag.value}
+                          </Badge>
                         ))}
-                      </ul>
+                      </div>
                     ) : null}
                   </div>
+
+                  {heroImage ? (
+                    <Link
+                      className="md:order-last"
+                      href={buildLocalePath(locale, `/posts/${post.slug}`)}
+                    >
+                      <MediaSurface
+                        alt={heroImage.alt || post.title}
+                        loading="lazy"
+                        media={heroImage}
+                        variant="card"
+                      />
+                    </Link>
+                  ) : null}
                 </article>
               )
             })}

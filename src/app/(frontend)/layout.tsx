@@ -5,13 +5,13 @@ import './styles.css'
 
 const sans = IBM_Plex_Sans({
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-sans-ui',
   weight: ['400', '500', '600'],
 })
 
 const serif = Newsreader({
   subsets: ['latin'],
-  variable: '--font-serif',
+  variable: '--font-serif-display',
   weight: ['400', '500', '600', '700'],
 })
 
@@ -20,7 +20,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   return (
     <div className={`${sans.variable} ${serif.variable}`}>
-      <main className="site-root">{children}</main>
+      <main>{children}</main>
     </div>
   )
 }
