@@ -3,6 +3,7 @@ import type { MetadataRoute } from 'next'
 import { buildLocalePath, localeCodes } from '@/lib/locales'
 import { getPayloadClient } from '@/lib/payload'
 import { buildAbsoluteURL } from '@/lib/seo'
+import { isPostIndexable } from '@/lib/posts'
 import type { Post } from '@/payload-types'
 
 function isSitemapRenderablePost(post: null | Post): post is Post {
@@ -13,7 +14,8 @@ function isSitemapRenderablePost(post: null | Post): post is Post {
       typeof post.title === 'string' &&
       post.title.trim().length > 0 &&
       typeof post.content === 'string' &&
-      post.content.trim().length > 0,
+      post.content.trim().length > 0 &&
+      isPostIndexable(post),
   )
 }
 

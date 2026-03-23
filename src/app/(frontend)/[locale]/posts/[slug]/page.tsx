@@ -8,7 +8,12 @@ import { PostArticle } from '@/components/frontend/PostArticle'
 import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug, getRenderablePostLocales } from '@/lib/posts'
 import { getPreviewUser } from '@/lib/preview-user'
-import { buildLocaleAlternates } from '@/lib/seo'
+import {
+  buildArticleStructuredData,
+  buildPageMetadata,
+  buildSeoDescription,
+  serializeStructuredData,
+} from '@/lib/seo'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export async function generateMetadata(props: {
@@ -37,20 +42,36 @@ export async function generateMetadata(props: {
   const canonicalLocale = resolved.usedFallback ? resolved.resolvedLocale : locale
   const canonicalPath = `/posts/${encodeURIComponent(resolved.post.slug)}`
   const siteSettings = await getSiteSettings(canonicalLocale)
+  const metaImage =
+    resolved.post.seo?.metaImage && typeof resolved.post.seo.metaImage === 'object'
+      ? resolved.post.seo.metaImage
+      : null
+  const heroImage =
+    resolved.post.heroImage && typeof resolved.post.heroImage === 'object' ? resolved.post.heroImage : null
+  const defaultSocialImage =
+    siteSettings.seo?.defaultSocialImage && typeof siteSettings.seo.defaultSocialImage === 'object'
+      ? siteSettings.seo.defaultSocialImage
+      : null
+  const shouldIndex = !resolved.usedFallback && !resolved.post.seo?.noindex
 
-  return {
-    alternates: buildLocaleAlternates({
-      canonicalLocale,
-      locales: availableLocales.length ? availableLocales : [canonicalLocale],
-      pathname: canonicalPath,
-    }),
-    description: resolved.post.excerpt || undefined,
+  return buildPageMetadata({
+    canonicalLocale,
+    content: resolved.post.content,
+    description: resolved.post.seo?.metaDescription || resolved.post.excerpt || undefined,
+    fallbackDescription: siteSettings.siteDescription,
+    fallbackImage: defaultSocialImage,
+    image: metaImage ?? heroImage,
+    locales: availableLocales.length ? availableLocales : [canonicalLocale],
+    openGraphType: 'article',
+    pathname: canonicalPath,
+    publishedTime: resolved.post.publishedAt ?? resolved.post.updatedAt,
     robots: {
       follow: true,
-      index: !resolved.usedFallback,
+      index: shouldIndex,
     },
-    title: `${resolved.post.title} | ${siteSettings.siteName}`,
-  }
+    siteName: siteSettings.siteName,
+    title: resolved.post.seo?.metaTitle || resolved.post.title,
+  })
 }
 
 export default async function PostPage(props: {
@@ -73,15 +94,53 @@ export default async function PostPage(props: {
     notFound()
   }
 
+  const siteSettings = await getSiteSettings(resolved.resolvedLocale)
+  const shouldRenderStructuredData = !resolved.usedFallback && !resolved.post.seo?.noindex
+  const structuredData = shouldRenderStructuredData
+    ? buildArticleStructuredData({
+        authorName: siteSettings.footer?.owner || siteSettings.siteName,
+        description: buildSeoDescription({
+          content: resolved.post.content,
+          fallback: siteSettings.siteDescription,
+          value: resolved.post.seo?.metaDescription || resolved.post.excerpt,
+        }),
+        image:
+          (resolved.post.seo?.metaImage && typeof resolved.post.seo.metaImage === 'object'
+            ? resolved.post.seo.metaImage
+            : null) ??
+          (resolved.post.heroImage && typeof resolved.post.heroImage === 'object' ? resolved.post.heroImage : null) ??
+          (siteSettings.seo?.defaultSocialImage && typeof siteSettings.seo.defaultSocialImage === 'object'
+            ? siteSettings.seo.defaultSocialImage
+            : null),
+        locale: resolved.resolvedLocale,
+        modifiedAt: resolved.post.updatedAt,
+        pathname: `/posts/${encodeURIComponent(resolved.post.slug)}`,
+        publishedAt: resolved.post.publishedAt,
+        siteDescription: siteSettings.siteDescription,
+        siteName: siteSettings.siteName,
+        title: resolved.post.seo?.metaTitle || resolved.post.title,
+      })
+    : null
+
   return (
-    <PostArticle
-      backHref={buildLocalePath(locale)}
-      backLabel={article('backToIndex')}
-      historyHref={buildLocalePath(locale, `/posts/${slug}/history`)}
-      locale={locale}
-      localeLinks={buildLocaleLinks(`/posts/${slug}`)}
-      previewExitPath={buildLocalePath(locale, `/posts/${slug}`)}
-      resolved={resolved}
-    />
+    <>
+      {structuredData ? (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: serializeStructuredData(structuredData),
+          }}
+          type="application/ld+json"
+        />
+      ) : null}
+      <PostArticle
+        backHref={buildLocalePath(locale)}
+        backLabel={article('backToIndex')}
+        historyHref={buildLocalePath(locale, `/posts/${slug}/history`)}
+        locale={locale}
+        localeLinks={buildLocaleLinks(`/posts/${slug}`)}
+        previewExitPath={buildLocalePath(locale, `/posts/${slug}`)}
+        resolved={resolved}
+      />
+    </>
   )
 }

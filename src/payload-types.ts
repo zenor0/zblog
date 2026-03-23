@@ -220,6 +220,24 @@ export interface Post {
   translatedFromLocale?: string | null;
   translatedAt?: string | null;
   translationProvider?: string | null;
+  seo?: {
+    /**
+     * Optional SEO title override for the current locale. Leave blank to reuse the post title.
+     */
+    metaTitle?: string | null;
+    /**
+     * Optional SEO description override for the current locale. Leave blank to reuse the excerpt or a summary derived from the post body.
+     */
+    metaDescription?: string | null;
+    /**
+     * Optional social sharing image override. Leave blank to reuse the hero image, then the site default image.
+     */
+    metaImage?: (number | null) | Media;
+    /**
+     * Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published posts.
+     */
+    noindex?: boolean | null;
+  };
   ownedBibliographyFiles?: {
     docs?: (number | BibliographyFile)[];
     hasNextPage?: boolean;
@@ -539,6 +557,14 @@ export interface PostsSelect<T extends boolean = true> {
   translatedFromLocale?: T;
   translatedAt?: T;
   translationProvider?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        metaImage?: T;
+        noindex?: T;
+      };
   ownedBibliographyFiles?: T;
   ownedMedia?: T;
   slug?: T;
@@ -634,10 +660,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: number;
   siteName: string;
+  siteDescription?: string | null;
   homeHero?: {
     eyebrow?: string | null;
     title?: string | null;
     description?: string | null;
+  };
+  seo?: {
+    /**
+     * Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.
+     */
+    homeTitle?: string | null;
+    /**
+     * Optional SEO description override for the localized homepage. Leave blank to reuse the site description.
+     */
+    homeDescription?: string | null;
+    defaultSocialImage?: (number | null) | Media;
   };
   footer?: {
     note?: string | null;
@@ -668,12 +706,20 @@ export interface SiteSetting {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  siteDescription?: T;
   homeHero?:
     | T
     | {
         eyebrow?: T;
         title?: T;
         description?: T;
+      };
+  seo?:
+    | T
+    | {
+        homeTitle?: T;
+        homeDescription?: T;
+        defaultSocialImage?: T;
       };
   footer?:
     | T

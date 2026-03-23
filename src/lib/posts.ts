@@ -34,6 +34,10 @@ function isRenderablePost(post: null | Post, allowUntitled: boolean) {
   return typeof post.title === 'string' && post.title.trim().length > 0
 }
 
+export function isPostIndexable(post: null | Post) {
+  return !post?.seo?.noindex
+}
+
 export async function getPublishedPosts(locale: AppLocale): Promise<Post[]> {
   const payload = await getPayloadClient()
   const result = await payload.find({
@@ -302,7 +306,7 @@ export async function getRenderablePostLocales(args: {
       })
       const post = result.docs[0] ?? null
 
-      return isRenderablePost(post, usedDraftAccess) ? locale : null
+      return isRenderablePost(post, usedDraftAccess) && (usedDraftAccess || isPostIndexable(post)) ? locale : null
     }),
   )
 

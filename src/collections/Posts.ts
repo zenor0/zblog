@@ -259,6 +259,61 @@ export const Posts: CollectionConfig = {
         {
           fields: [
             {
+              name: 'seo',
+              type: 'group',
+              fields: [
+                {
+                  name: 'metaTitle',
+                  type: 'text',
+                  admin: {
+                    description:
+                      'Optional SEO title override for the current locale. Leave blank to reuse the post title.',
+                  },
+                  localized: true,
+                  maxLength: 70,
+                  label: 'SEO title',
+                },
+                {
+                  name: 'metaDescription',
+                  type: 'textarea',
+                  admin: {
+                    description:
+                      'Optional SEO description override for the current locale. Leave blank to reuse the excerpt or a summary derived from the post body.',
+                  },
+                  localized: true,
+                  maxLength: 180,
+                  label: 'SEO description',
+                },
+                {
+                  admin: {
+                    description:
+                      'Optional social sharing image override. Leave blank to reuse the hero image, then the site default image.',
+                  },
+                  filterOptions: sharedOrCurrentPostOwnedFilter,
+                  name: 'metaImage',
+                  relationTo: 'media',
+                  type: 'relationship',
+                  label: 'Social image',
+                },
+                {
+                  name: 'noindex',
+                  type: 'checkbox',
+                  admin: {
+                    description:
+                      'Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published posts.',
+                  },
+                  defaultValue: false,
+                  localized: true,
+                  label: 'No index',
+                },
+              ],
+            },
+          ],
+          label: 'SEO',
+        },
+        {
+          fields: [
+            {
               name: 'postInsights',
               type: 'ui',
               admin: {

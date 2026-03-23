@@ -4,11 +4,13 @@ const localizedHeroDefaults = {
   en: {
     description: 'A simple blog for articles, notes, and project updates.',
     eyebrow: 'Personal Blog',
+    siteDescription: 'A bilingual blog about tech, products, and everyday work.',
     title: 'Notes on tech, products, and everyday work',
   },
   'zh-Hans': {
     description: '这里会持续发布文章、笔记和项目更新。',
     eyebrow: '个人博客',
+    siteDescription: '一个持续记录技术、产品与日常工作的双语博客。',
     title: '记录技术、产品与日常思考',
   },
 } as const
@@ -38,6 +40,13 @@ export const SiteSettings: GlobalConfig = {
       required: true,
     },
     {
+      name: 'siteDescription',
+      type: 'textarea',
+      defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'siteDescription'),
+      label: 'Site description',
+      localized: true,
+    },
+    {
       name: 'homeHero',
       type: 'group',
       label: 'Homepage hero',
@@ -62,6 +71,41 @@ export const SiteSettings: GlobalConfig = {
           defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'description'),
           label: 'Description',
           localized: true,
+        },
+      ],
+    },
+    {
+      name: 'seo',
+      type: 'group',
+      label: 'SEO & sharing',
+      fields: [
+        {
+          name: 'homeTitle',
+          type: 'text',
+          admin: {
+            description:
+              'Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.',
+          },
+          localized: true,
+          maxLength: 70,
+          label: 'Homepage SEO title',
+        },
+        {
+          name: 'homeDescription',
+          type: 'textarea',
+          admin: {
+            description:
+              'Optional SEO description override for the localized homepage. Leave blank to reuse the site description.',
+          },
+          localized: true,
+          maxLength: 180,
+          label: 'Homepage SEO description',
+        },
+        {
+          name: 'defaultSocialImage',
+          type: 'relationship',
+          relationTo: 'media',
+          label: 'Default social image',
         },
       ],
     },
