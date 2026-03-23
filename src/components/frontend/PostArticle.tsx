@@ -18,6 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { describeBibliographyEntry } from '@/lib/bibliography'
 import { resolveMediaAsset } from '@/lib/media'
 import type { ResolvedPost } from '@/lib/posts'
 import { getLocaleLabel, type AppLocale } from '@/lib/locales'
@@ -339,20 +340,72 @@ export async function PostArticle(props: {
                 </h2>
                 <ol className="flex flex-col">
                   {bibliographyEntries.map((entry, index) => (
-                    <li
-                      className="flex gap-3 border-b py-4 last:border-b-0"
-                      id={`reference-${index + 1}`}
-                      key={entry.citationKey}
-                    >
-                      <Badge variant="outline">[{index + 1}]</Badge>
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <p className="text-sm leading-7 text-foreground/82">{entry.formatted}</p>
-                        <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                          {entry.citationKey} · {entry.entryType || common('referenceItem')} ·{' '}
-                          {getLocaleLabel(resolved.resolvedLocale)}
-                        </span>
-                      </div>
-                    </li>
+                    (() => {
+                      const display = describeBibliographyEntry(entry)
+                      const displayYear = display.year || common('referenceNoDate')
+                      const roleLabel =
+                        display.creatorRole === 'editor'
+                          ? common('referenceRoleEditor')
+                          : display.creatorRole === 'translator'
+                            ? common('referenceRoleTranslator')
+                            : null
+                      const typeLabel =
+                        entry.entryType.trim().length > 0
+                          ? entry.entryType.replace(/-/g, ' ')
+                          : common('referenceItem')
+
+                      return (
+                        <li
+                          className="flex gap-3 border-b py-4 last:border-b-0"
+                          id={`reference-${index + 1}`}
+                          key={entry.citationKey}
+                        >
+                          <Badge variant="outline">[{index + 1}]</Badge>
+                          <div className="flex min-w-0 flex-1 flex-col gap-2">
+                            <p className="text-sm leading-7 text-foreground/82">
+                              {display.creators ? <>{display.creators}</> : null}
+                              {roleLabel && display.creators ? <> ({roleLabel})</> : null}
+                              <> {`(${displayYear}).`}</>
+                              {display.title ? <> {display.title}.</> : <> {common('referenceUntitled')}.</>}
+                            </p>
+
+                            {display.container || display.secondary.length || display.accessed ? (
+                              <div className="flex min-w-0 flex-col gap-1 text-sm leading-6 text-muted-foreground">
+                                {display.container ? <p>{display.container}</p> : null}
+                                {display.secondary.map((segment) => (
+                                  <p key={segment}>{segment}</p>
+                                ))}
+                                {display.accessed ? (
+                                  <p>{common('referenceAccessed', { date: display.accessed })}</p>
+                                ) : null}
+                              </div>
+                            ) : null}
+
+                            {display.links.length ? (
+                              <div className="flex flex-wrap gap-2">
+                                {display.links.map((link) => (
+                                  <a
+                                    className="text-xs uppercase tracking-[0.18em] text-primary underline-offset-4 hover:underline"
+                                    href={link.href}
+                                    key={`${entry.citationKey}-${link.label}`}
+                                    rel="noreferrer"
+                                    target="_blank"
+                                  >
+                                    {link.label}: {link.value}
+                                  </a>
+                                ))}
+                              </div>
+                            ) : null}
+
+                            <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                              {entry.citationKey} · {typeLabel}
+                              {roleLabel ? ` · ${roleLabel}` : ''} ·{' '}
+                              {getLocaleLabel(resolved.resolvedLocale)}
+                            </span>
+                          </div>
+                        </li>
+                      )
+                    })()
                   ))}
                 </ol>
               </section>
