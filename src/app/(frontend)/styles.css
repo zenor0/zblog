@@ -183,7 +183,9 @@ html[data-zblog-preview-theme='light'] {
 
   .article-copy h2,
   .article-copy h3,
-  .article-copy h4 {
+  .article-copy h4,
+  .article-copy h5,
+  .article-copy h6 {
     @apply font-serif text-foreground;
     text-wrap: balance;
   }
@@ -198,6 +200,15 @@ html[data-zblog-preview-theme='light'] {
 
   .article-copy h4 {
     @apply mt-8 text-lg font-semibold;
+  }
+
+  .article-copy h1[id],
+  .article-copy h2[id],
+  .article-copy h3[id],
+  .article-copy h4[id],
+  .article-copy h5[id],
+  .article-copy h6[id] {
+    scroll-margin-top: 5.5rem;
   }
 
   .article-copy p,

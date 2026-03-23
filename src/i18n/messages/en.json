@@ -14,6 +14,9 @@
     "previewBody": "You are viewing the draft version of this article as it would render on the frontend.",
     "previewTitle": "Preview mode",
     "readingTime": "{minutes, number} min read",
+    "readingProgress": "Reading progress",
+    "referencesCount": "{count, number} references",
+    "tableOfContents": "On this page",
     "untitledDraft": "Untitled draft",
     "untitledPost": "Untitled post",
     "versionHistory": "Version history"

@@ -5,25 +5,28 @@ import {
   FileWarningIcon,
   HistoryIcon,
   LanguagesIcon,
-  LibraryBigIcon,
   PaperclipIcon,
   SparklesIcon,
   TriangleAlertIcon,
 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
+import { CollapsibleReferenceSection } from '@/components/frontend/CollapsibleReferenceSection'
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { describeBibliographyEntry } from '@/lib/bibliography'
+import { extractMarkdownHeadings } from '@/lib/markdown-headings'
 import { resolveMediaAsset } from '@/lib/media'
 import type { ResolvedPost } from '@/lib/posts'
 import { getLocaleLabel, type AppLocale } from '@/lib/locales'
 import { MarkdownRenderer } from '@/lib/markdown'
 import { buildExitPreviewURL } from '@/lib/preview'
+import { cn } from '@/lib/utils'
 import { estimateReadingMinutes, formatLongDate } from '@/i18n/format'
 
 type LocaleLink = {
@@ -98,7 +101,9 @@ export async function PostArticle(props: {
   const attachments = (post.attachments ?? []).filter(
     (item) => item.file && typeof item.file === 'object' && item.file.url,
   )
-  const hasSidebar = Boolean(post.tags?.length || attachments.length || bibliographyEntries.length)
+  const allHeadings = extractMarkdownHeadings(post.content)
+  const tocHeadings = allHeadings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
+  const hasSupplementaryContent = Boolean(post.tags?.length || attachments.length || bibliographyEntries.length)
   const displayTitle =
     typeof post.title === 'string' && post.title.trim().length > 0
       ? post.title
@@ -145,7 +150,12 @@ export async function PostArticle(props: {
         />
       </div>
 
-      <article className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-8">
+      <article
+        className={cn(
+          'grid gap-6',
+          tocHeadings.length > 0 && 'xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-8',
+        )}
+      >
         <div className="flex min-w-0 flex-col gap-6">
           <header className="flex flex-col gap-5 border-b pb-8">
             <div className="flex flex-wrap items-center gap-2">
@@ -251,165 +261,194 @@ export async function PostArticle(props: {
             </figure>
           ) : null}
 
-          <section className="article-copy">
-            <MarkdownRenderer citationIndex={citationIndex} source={post.content} />
+          <section className="article-copy" data-post-reading-root="">
+            <MarkdownRenderer
+              citationIndex={citationIndex}
+              headings={allHeadings}
+              source={post.content}
+            />
           </section>
-        </div>
 
-        {hasSidebar ? (
-          <aside className="flex min-w-0 flex-col gap-8 border-t pt-8 xl:sticky xl:top-6 xl:self-start xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
-            {post.tags?.length ? (
-              <section className="flex flex-col gap-3">
-                <h2 className="flex items-center gap-2 text-base font-medium">
-                  <SparklesIcon />
-                  {common('tags')}
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <Badge key={tag.id ?? tag.value} variant="secondary">
-                      {tag.value}
-                    </Badge>
-                  ))}
-                </div>
-              </section>
-            ) : null}
+          {hasSupplementaryContent ? (
+            <div className="flex flex-col gap-8 border-t pt-8">
+              {post.tags?.length ? (
+                <section className="flex flex-col gap-3">
+                  <h2 className="flex items-center gap-2 text-base font-medium">
+                    <SparklesIcon />
+                    {common('tags')}
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag) => (
+                      <Badge key={tag.id ?? tag.value} variant="secondary">
+                        {tag.value}
+                      </Badge>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
 
-            {attachments.length ? (
-              <section className="flex flex-col gap-3">
-                <h2 className="flex items-center gap-2 text-base font-medium">
-                  <PaperclipIcon />
-                  {common('attachments')}
-                </h2>
-                <div className="flex flex-col">
-                  {attachments.map((attachment, index) => {
-                    const file = attachment.file as Exclude<typeof attachment.file, number>
-                    const asset = resolveMediaAsset({
-                      alt: attachment.label || file.alt || file.filename,
-                      media: file,
-                    })
-                    const typeLabel =
-                      asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
+              {attachments.length ? (
+                <section className="flex flex-col gap-3">
+                  <h2 className="flex items-center gap-2 text-base font-medium">
+                    <PaperclipIcon />
+                    {common('attachments')}
+                  </h2>
+                  <div className="flex flex-col">
+                    {attachments.map((attachment, index) => {
+                      const file = attachment.file as Exclude<typeof attachment.file, number>
+                      const asset = resolveMediaAsset({
+                        alt: attachment.label || file.alt || file.filename,
+                        media: file,
+                      })
+                      const typeLabel =
+                        asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
 
-                    return (
-                      <div key={attachment.id ?? file.id}>
-                        {index > 0 ? <Separator /> : null}
-                        <a
-                          className="group flex flex-col gap-4 py-4 transition-colors hover:text-primary sm:flex-row"
-                          href={file.url ?? '#'}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          <div className="sm:w-28 sm:flex-none">
-                            <MediaSurface
-                              alt={attachment.label || file.alt || file.filename}
-                              asset={asset}
-                              variant="attachment"
-                            />
-                          </div>
-                          <span className="flex min-w-0 flex-1 flex-col gap-2">
-                            <span className="flex flex-wrap items-center gap-2">
-                              <Badge variant="outline">{typeLabel}</Badge>
-                              {file.filename ? (
-                                <span className="truncate text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                  {file.filename}
+                      return (
+                        <div key={attachment.id ?? file.id}>
+                          {index > 0 ? <Separator /> : null}
+                          <a
+                            className="group flex flex-col gap-4 py-4 transition-colors hover:text-primary sm:flex-row"
+                            href={file.url ?? '#'}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            <div className="sm:w-28 sm:flex-none">
+                              <MediaSurface
+                                alt={attachment.label || file.alt || file.filename}
+                                asset={asset}
+                                variant="attachment"
+                              />
+                            </div>
+                            <span className="flex min-w-0 flex-1 flex-col gap-2">
+                              <span className="flex flex-wrap items-center gap-2">
+                                <Badge variant="outline">{typeLabel}</Badge>
+                                {file.filename ? (
+                                  <span className="truncate text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                                    {file.filename}
+                                  </span>
+                                ) : null}
+                              </span>
+                              <span className="font-medium leading-6 text-foreground transition-colors group-hover:text-primary">
+                                {attachment.label || file.filename || file.alt}
+                              </span>
+                              {attachment.description ? (
+                                <span className="text-sm leading-6 text-muted-foreground">
+                                  {attachment.description}
                                 </span>
                               ) : null}
                             </span>
-                            <span className="font-medium leading-6 text-foreground transition-colors group-hover:text-primary">
-                              {attachment.label || file.filename || file.alt}
-                            </span>
-                            {attachment.description ? (
-                              <span className="text-sm leading-6 text-muted-foreground">
-                                {attachment.description}
-                              </span>
-                            ) : null}
-                          </span>
-                        </a>
-                      </div>
-                    )
-                  })}
-                </div>
-              </section>
-            ) : null}
-
-            {bibliographyEntries.length ? (
-              <section className="flex flex-col gap-3">
-                <h2 className="flex items-center gap-2 text-base font-medium">
-                  <LibraryBigIcon />
-                  {common('references')}
-                </h2>
-                <ol className="flex flex-col">
-                  {bibliographyEntries.map((entry, index) => (
-                    (() => {
-                      const display = describeBibliographyEntry(entry)
-                      const displayYear = display.year || common('referenceNoDate')
-                      const roleLabel =
-                        display.creatorRole === 'editor'
-                          ? common('referenceRoleEditor')
-                          : display.creatorRole === 'translator'
-                            ? common('referenceRoleTranslator')
-                            : null
-                      const typeLabel =
-                        entry.entryType.trim().length > 0
-                          ? entry.entryType.replace(/-/g, ' ')
-                          : common('referenceItem')
-
-                      return (
-                        <li
-                          className="flex gap-3 border-b py-4 last:border-b-0"
-                          id={`reference-${index + 1}`}
-                          key={entry.citationKey}
-                        >
-                          <Badge variant="outline">[{index + 1}]</Badge>
-                          <div className="flex min-w-0 flex-1 flex-col gap-2">
-                            <p className="text-sm leading-7 text-foreground/82">
-                              {display.creators ? <>{display.creators}</> : null}
-                              {roleLabel && display.creators ? <> ({roleLabel})</> : null}
-                              <> {`(${displayYear}).`}</>
-                              {display.title ? <> {display.title}.</> : <> {common('referenceUntitled')}.</>}
-                            </p>
-
-                            {display.container || display.secondary.length || display.accessed ? (
-                              <div className="flex min-w-0 flex-col gap-1 text-sm leading-6 text-muted-foreground">
-                                {display.container ? <p>{display.container}</p> : null}
-                                {display.secondary.map((segment) => (
-                                  <p key={segment}>{segment}</p>
-                                ))}
-                                {display.accessed ? (
-                                  <p>{common('referenceAccessed', { date: display.accessed })}</p>
-                                ) : null}
-                              </div>
-                            ) : null}
-
-                            {display.links.length ? (
-                              <div className="flex flex-wrap gap-2">
-                                {display.links.map((link) => (
-                                  <a
-                                    className="text-xs uppercase tracking-[0.18em] text-primary underline-offset-4 hover:underline"
-                                    href={link.href}
-                                    key={`${entry.citationKey}-${link.label}`}
-                                    rel="noreferrer"
-                                    target="_blank"
-                                  >
-                                    {link.label}: {link.value}
-                                  </a>
-                                ))}
-                              </div>
-                            ) : null}
-
-                            <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                              {entry.citationKey} · {typeLabel}
-                              {roleLabel ? ` · ${roleLabel}` : ''} ·{' '}
-                              {getLocaleLabel(resolved.resolvedLocale)}
-                            </span>
-                          </div>
-                        </li>
+                          </a>
+                        </div>
                       )
-                    })()
-                  ))}
-                </ol>
-              </section>
-            ) : null}
+                    })}
+                  </div>
+                </section>
+              ) : null}
+
+              {bibliographyEntries.length ? (
+                <section className="flex flex-col gap-3">
+                  <CollapsibleReferenceSection
+                    countLabel={article('referencesCount', { count: bibliographyEntries.length })}
+                    label={common('references')}
+                  >
+                    <ol className="flex flex-col">
+                      {bibliographyEntries.map((entry, index) => (
+                        (() => {
+                          const display = describeBibliographyEntry(entry)
+                          const displayYear = display.year || common('referenceNoDate')
+                          const roleLabel =
+                            display.creatorRole === 'editor'
+                              ? common('referenceRoleEditor')
+                              : display.creatorRole === 'translator'
+                                ? common('referenceRoleTranslator')
+                                : null
+                          const typeLabel =
+                            entry.entryType.trim().length > 0
+                              ? entry.entryType.replace(/-/g, ' ')
+                              : common('referenceItem')
+
+                          return (
+                            <li
+                              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 border-b py-2.5 last:border-b-0"
+                              id={`reference-${index + 1}`}
+                              key={entry.citationKey}
+                            >
+                              <span className="pt-0.5 text-xs font-medium text-muted-foreground">
+                                [{index + 1}]
+                              </span>
+                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <p className="min-w-0 text-sm leading-6 text-foreground/82 wrap-anywhere">
+                                  {display.creators ? <>{display.creators}</> : null}
+                                  {roleLabel && display.creators ? <> ({roleLabel})</> : null}
+                                  <> {`(${displayYear}).`}</>
+                                  {display.title ? (
+                                    <> {display.title}.</>
+                                  ) : (
+                                    <> {common('referenceUntitled')}.</>
+                                  )}
+                                </p>
+
+                                {display.container || display.secondary.length || display.accessed ? (
+                                  <div className="flex min-w-0 flex-col gap-0.5 text-[13px] leading-5 text-muted-foreground">
+                                    {[display.container, ...display.secondary]
+                                      .filter((segment): segment is string => Boolean(segment))
+                                      .map((segment, segmentIndex) => (
+                                        <p className="wrap-anywhere" key={`${entry.citationKey}-${segmentIndex}`}>
+                                          {segment}
+                                        </p>
+                                      ))}
+                                    {display.accessed ? (
+                                      <p className="wrap-anywhere">
+                                        {common('referenceAccessed', { date: display.accessed })}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                ) : null}
+
+                                {display.links.length ? (
+                                  <p className="min-w-0 text-[13px] leading-5 text-muted-foreground">
+                                    {display.links.map((link, linkIndex) => (
+                                      <span key={`${entry.citationKey}-${link.label}`}>
+                                        {linkIndex > 0 ? <span className="px-1.5 text-border">·</span> : null}
+                                        <a
+                                          className="text-primary wrap-anywhere underline decoration-border/80 underline-offset-3 transition-colors hover:text-primary/80"
+                                          href={link.href}
+                                          rel="noreferrer"
+                                          target="_blank"
+                                        >
+                                          <span className="text-muted-foreground">{link.label}:</span>{' '}
+                                          {link.value}
+                                        </a>
+                                      </span>
+                                    ))}
+                                  </p>
+                                ) : null}
+
+                                <span className="min-w-0 text-[11px] leading-4 tracking-[0.12em] text-muted-foreground/85 wrap-anywhere">
+                                  {entry.citationKey} · {typeLabel}
+                                  {roleLabel ? ` · ${roleLabel}` : ''} ·{' '}
+                                  {getLocaleLabel(resolved.resolvedLocale)}
+                                </span>
+                              </div>
+                            </li>
+                          )
+                        })()
+                      ))}
+                    </ol>
+                  </CollapsibleReferenceSection>
+                </section>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        {tocHeadings.length ? (
+          <aside className="border-t pt-8 xl:sticky xl:top-6 xl:self-start xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+            <PostTableOfContents
+              headings={tocHeadings}
+              label={article('tableOfContents')}
+              progressLabel={article('readingProgress')}
+            />
           </aside>
         ) : null}
       </article>

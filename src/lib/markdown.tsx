@@ -1,16 +1,18 @@
 import { findAndReplace } from 'mdast-util-find-and-replace'
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkDirective from 'remark-directive'
 import remarkGfm from 'remark-gfm'
 import { visit } from 'unist-util-visit'
 
 import { parseCitationGroup } from '@/lib/citations'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { extractMarkdownHeadings, type MarkdownHeading } from '@/lib/markdown-headings'
 import { resolveMediaAsset } from '@/lib/media'
 
 type MarkdownRendererProps = {
   citationIndex?: Map<string, number>
+  headings?: MarkdownHeading[]
   source: string
 }
 
@@ -129,7 +131,27 @@ function citationPlugin(options: { citationIndex?: Map<string, number> } = {}) {
 }
 
 export function MarkdownRenderer(props: MarkdownRendererProps) {
-  const { citationIndex = new Map<string, number>(), source } = props
+  const { citationIndex = new Map<string, number>(), headings, source } = props
+  const resolvedHeadings = headings ?? extractMarkdownHeadings(source)
+  let headingCursor = 0
+
+  const renderHeading =
+    (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'): NonNullable<Components[typeof tag]> =>
+    ({ children, ...rest }) => {
+      const heading = resolvedHeadings[headingCursor]
+      const id = heading?.id
+      const Tag = tag
+
+      if (heading) {
+        headingCursor += 1
+      }
+
+      return (
+        <Tag {...rest} id={id}>
+          {children}
+        </Tag>
+      )
+    }
 
   return (
     <ReactMarkdown
@@ -154,6 +176,12 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
             {children}
           </aside>
         ),
+        h1: renderHeading('h1'),
+        h2: renderHeading('h2'),
+        h3: renderHeading('h3'),
+        h4: renderHeading('h4'),
+        h5: renderHeading('h5'),
+        h6: renderHeading('h6'),
         img: ({ alt, src }) => <MarkdownImage alt={alt} src={src} />,
       }}
       remarkPlugins={[remarkGfm, remarkDirective, calloutDirectivePlugin, [citationPlugin, { citationIndex }]]}

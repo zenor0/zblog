@@ -28,7 +28,12 @@ test.describe('Frontend', () => {
 
     await expect(page.locator('h1').first()).toHaveText('带引用与版本历史的示例文章（修订）')
     await expect(page.getByRole('link', { name: '版本历史' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: '参考文献' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '目录' })).toBeVisible()
+    await expect(page.locator('summary')).toContainText('参考文献')
+    await expect(page.getByText('Designing Blogs that Respect References')).toBeHidden()
+
+    await page.locator('summary').click()
+
     await expect(page.getByText('Designing Blogs that Respect References')).toBeVisible()
   })
 
