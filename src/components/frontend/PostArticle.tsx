@@ -12,6 +12,7 @@ import {
 import { getTranslations } from 'next-intl/server'
 
 import { CollapsibleReferenceSection } from '@/components/frontend/CollapsibleReferenceSection'
+import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
@@ -20,11 +21,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { describeBibliographyEntry } from '@/lib/bibliography'
+import { extractMarkdownMediaSources, MarkdownRenderer } from '@/lib/markdown'
 import { extractMarkdownHeadings } from '@/lib/markdown-headings'
-import { resolveMediaAsset } from '@/lib/media'
+import { resolveAttachmentDescription, resolveMediaAsset, resolveMediaCaption } from '@/lib/media'
+import { getPayloadClient } from '@/lib/payload'
 import type { ResolvedPost } from '@/lib/posts'
 import { getLocaleLabel, type AppLocale } from '@/lib/locales'
-import { MarkdownRenderer } from '@/lib/markdown'
 import { buildExitPreviewURL } from '@/lib/preview'
 import { cn } from '@/lib/utils'
 import { estimateReadingMinutes, formatLongDate } from '@/i18n/format'
@@ -102,6 +104,38 @@ export async function PostArticle(props: {
     (item) => item.file && typeof item.file === 'object' && item.file.url,
   )
   const allHeadings = extractMarkdownHeadings(post.content)
+  const markdownMediaSources = extractMarkdownMediaSources(post.content)
+  const markdownMediaBySource =
+    markdownMediaSources.length > 0
+      ? Object.fromEntries(
+          (
+            await (await getPayloadClient()).find({
+              collection: 'media',
+              depth: 0,
+              limit: markdownMediaSources.length,
+              overrideAccess: false,
+              select: {
+                alt: true,
+                caption: true,
+                credit: true,
+                filename: true,
+                height: true,
+                mimeType: true,
+                previewSVGURL: true,
+                url: true,
+                width: true,
+              },
+              where: {
+                url: {
+                  in: markdownMediaSources,
+                },
+              },
+            })
+          ).docs
+            .filter((media) => typeof media.url === 'string' && media.url.length > 0)
+            .map((media) => [media.url as string, media]),
+        )
+      : {}
   const tocHeadings = allHeadings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
   const hasSupplementaryContent = Boolean(post.tags?.length || attachments.length || bibliographyEntries.length)
   const displayTitle =
@@ -252,12 +286,15 @@ export async function PostArticle(props: {
                 media={heroImage}
                 variant="hero"
               />
-              {heroImage.caption || heroImage.credit ? (
-                <figcaption className="flex flex-wrap gap-2 text-sm leading-7 text-muted-foreground">
-                  {heroImage.caption ? <span>{heroImage.caption}</span> : null}
-                  {heroImage.credit ? <span>{heroImage.credit}</span> : null}
-                </figcaption>
-              ) : null}
+              <MediaDetails
+                caption={resolveMediaCaption({
+                  alt: heroImage.alt || displayTitle,
+                  caption: heroImage.caption,
+                })}
+                className="px-1"
+                credit={heroImage.credit}
+                creditPrefix={common('mediaCredit')}
+              />
             </figure>
           ) : null}
 
@@ -265,6 +302,7 @@ export async function PostArticle(props: {
             <MarkdownRenderer
               citationIndex={citationIndex}
               headings={allHeadings}
+              mediaBySource={markdownMediaBySource}
               source={post.content}
             />
           </section>
@@ -300,6 +338,10 @@ export async function PostArticle(props: {
                         alt: attachment.label || file.alt || file.filename,
                         media: file,
                       })
+                      const attachmentDescription = resolveAttachmentDescription({
+                        caption: file.caption,
+                        description: attachment.description,
+                      })
                       const typeLabel =
                         asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
 
@@ -331,11 +373,11 @@ export async function PostArticle(props: {
                               <span className="font-medium leading-6 text-foreground transition-colors group-hover:text-primary">
                                 {attachment.label || file.filename || file.alt}
                               </span>
-                              {attachment.description ? (
-                                <span className="text-sm leading-6 text-muted-foreground">
-                                  {attachment.description}
-                                </span>
-                              ) : null}
+                              <MediaDetails
+                                caption={attachmentDescription}
+                                credit={file.credit}
+                                creditPrefix={common('mediaCredit')}
+                              />
                             </span>
                           </a>
                         </div>

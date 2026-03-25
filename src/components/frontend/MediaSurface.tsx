@@ -27,6 +27,7 @@ type MediaSurfaceProps = {
 }
 
 export function MediaSurface(props: MediaSurfaceProps) {
+  const variant = props.variant ?? 'card'
   const asset =
     props.asset ??
     resolveMediaAsset({
@@ -44,17 +45,19 @@ export function MediaSurface(props: MediaSurfaceProps) {
 
   return (
     <span
-      className={cn('media-surface', `media-surface--${props.variant ?? 'card'}`, props.className)}
+      className={cn('media-surface', `media-surface--${variant}`, props.className)}
       data-kind={asset.kind}
     >
       {asset.previewURL ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt={asset.kind === 'pdf' ? `${asset.alt} PDF preview` : asset.alt}
-          className="media-surface__image"
+          className={cn('media-surface__image', `media-surface__image--${variant}`)}
           decoding="async"
+          height={asset.height ?? undefined}
           loading={props.loading ?? 'lazy'}
           src={asset.previewURL}
+          width={asset.width ?? undefined}
         />
       ) : (
         <span className="media-surface__fallback">

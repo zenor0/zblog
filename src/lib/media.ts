@@ -43,6 +43,12 @@ export type ResolvedMediaAsset = {
   width?: null | number
 }
 
+function normalizeMediaText(value?: null | string): null | string {
+  const normalized = value?.trim()
+
+  return normalized && normalized.length > 0 ? normalized : null
+}
+
 function usesDefaultPDFPreview(options: MediaRenderOptions = {}): boolean {
   return (
     (options.page === undefined || options.page === 1) &&
@@ -198,6 +204,21 @@ export function resolveLocalMediaFilePath(filename: string): null | string {
 
 export function resolveLocalMediaPreviewPath(previewFilename: string): null | string {
   return resolveSafePath(mediaPreviewDir, previewFilename)
+}
+
+export function resolveMediaCaption(args: {
+  alt?: null | string
+  caption?: null | string
+  title?: null | string
+}): null | string {
+  return normalizeMediaText(args.caption) ?? normalizeMediaText(args.title) ?? normalizeMediaText(args.alt)
+}
+
+export function resolveAttachmentDescription(args: {
+  caption?: null | string
+  description?: null | string
+}): null | string {
+  return normalizeMediaText(args.description) ?? normalizeMediaText(args.caption)
 }
 
 export function resolveMediaAsset(args: {

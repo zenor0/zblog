@@ -8,6 +8,7 @@ import {
 } from '@/lib/bibliography'
 import { buildCitationIndex, extractCitationKeys } from '@/lib/citations'
 import { buildTextDiff } from '@/lib/diff'
+import { extractMarkdownMediaSources } from '@/lib/markdown'
 
 const sampleBibliography = `
 @article{smith2024,
@@ -44,6 +45,19 @@ describe('content utilities', () => {
     expect(Array.from(buildCitationIndex(markdown).entries())).toEqual([
       ['smith2024', 1],
       ['chen2023', 2],
+    ])
+  })
+
+  it('extracts markdown media sources in first-seen order', () => {
+    const markdown = `
+![Hero](/media/hero.png "Hero caption")
+![PDF](/api/media/file/paper.pdf)
+![Hero again](/media/hero.png)
+`
+
+    expect(extractMarkdownMediaSources(markdown)).toEqual([
+      '/media/hero.png',
+      '/api/media/file/paper.pdf',
     ])
   })
 

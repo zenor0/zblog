@@ -5,41 +5,97 @@ import remarkDirective from 'remark-directive'
 import remarkGfm from 'remark-gfm'
 import { visit } from 'unist-util-visit'
 
+import type { Media } from '@/payload-types'
+
 import { parseCitationGroup } from '@/lib/citations'
+import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { extractMarkdownHeadings, type MarkdownHeading } from '@/lib/markdown-headings'
-import { resolveMediaAsset } from '@/lib/media'
+import { resolveMediaAsset, resolveMediaCaption } from '@/lib/media'
 
 type MarkdownRendererProps = {
   citationIndex?: Map<string, number>
   headings?: MarkdownHeading[]
+  mediaBySource?: Record<string, MarkdownMediaLike>
   source: string
 }
 
+type MarkdownMediaLike = Pick<
+  Media,
+  | 'alt'
+  | 'caption'
+  | 'credit'
+  | 'filename'
+  | 'height'
+  | 'mimeType'
+  | 'previewSVGURL'
+  | 'url'
+  | 'width'
+>
+
 const citationPattern = /\[@([^\]]+)\]/g
 const calloutKinds = new Set(['note', 'tip', 'warning', 'info'])
+const markdownImagePattern = /!\[[^\]]*]\((?:<([^>]+)>|([^\s)]+))(?:\s+(?:"[^"]*"|'[^']*'))?\)/g
 
-function MarkdownImage(props: { alt?: null | string; src?: Blob | null | string }) {
+export function extractMarkdownMediaSources(markdown: string): string[] {
+  const seen = new Set<string>()
+
+  for (const match of markdown.matchAll(markdownImagePattern)) {
+    const source = (match[1] ?? match[2] ?? '').trim()
+
+    if (!source || seen.has(source)) {
+      continue
+    }
+
+    seen.add(source)
+  }
+
+  return Array.from(seen)
+}
+
+function MarkdownImage(props: {
+  alt?: null | string
+  mediaBySource?: Record<string, MarkdownMediaLike>
+  src?: Blob | null | string
+  title?: null | string
+}) {
+  const source = typeof props.src === 'string' ? props.src : null
+  const media = source ? props.mediaBySource?.[source] ?? null : null
   const asset = resolveMediaAsset({
     alt: props.alt,
-    src: typeof props.src === 'string' ? props.src : null,
+    media,
+    src: source,
   })
 
   if (!asset) {
     return null
   }
 
-  const media = <MediaSurface asset={asset} variant="inline" />
+  const surface = <MediaSurface asset={asset} variant="inline" />
+  const caption = resolveMediaCaption({
+    alt: asset.alt,
+    caption: asset.caption,
+    title: props.title,
+  })
+  const credit = asset.credit?.trim() || null
 
   if (asset.kind === 'pdf' || asset.kind === 'unknown') {
     return (
-      <a className="markdown-media-link" href={asset.downloadURL} rel="noreferrer" target="_blank">
-        {media}
-      </a>
+      <span className="markdown-media">
+        <a className="markdown-media-link" href={asset.downloadURL} rel="noreferrer" target="_blank">
+          {surface}
+        </a>
+        <MediaDetails caption={caption} className="markdown-media__details" credit={credit} />
+      </span>
     )
   }
 
-  return media
+  return (
+    <span className="markdown-media">
+      {surface}
+      <MediaDetails caption={caption} className="markdown-media__details" credit={credit} />
+    </span>
+  )
 }
 
 function calloutDirectivePlugin() {
@@ -131,7 +187,7 @@ function citationPlugin(options: { citationIndex?: Map<string, number> } = {}) {
 }
 
 export function MarkdownRenderer(props: MarkdownRendererProps) {
-  const { citationIndex = new Map<string, number>(), headings, source } = props
+  const { citationIndex = new Map<string, number>(), headings, mediaBySource = {}, source } = props
   const resolvedHeadings = headings ?? extractMarkdownHeadings(source)
   let headingCursor = 0
 
@@ -182,7 +238,9 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         h4: renderHeading('h4'),
         h5: renderHeading('h5'),
         h6: renderHeading('h6'),
-        img: ({ alt, src }) => <MarkdownImage alt={alt} src={src} />,
+        img: ({ alt, src, title }) => (
+          <MarkdownImage alt={alt} mediaBySource={mediaBySource} src={src} title={title} />
+        ),
       }}
       remarkPlugins={[remarkGfm, remarkDirective, calloutDirectivePlugin, [citationPlugin, { citationIndex }]]}
     >

@@ -3,7 +3,13 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { buildPDFPreviewFallbackSVG } from '@/lib/pdf-preview'
-import { inferMediaKind, resolveLocalMediaPath, resolveMediaAsset } from '@/lib/media'
+import {
+  inferMediaKind,
+  resolveAttachmentDescription,
+  resolveLocalMediaPath,
+  resolveMediaAsset,
+  resolveMediaCaption,
+} from '@/lib/media'
 
 describe('media utilities', () => {
   it('classifies raster, vector, and pdf assets', () => {
@@ -73,5 +79,50 @@ describe('media utilities', () => {
     expect(svg).toContain('&quot;debugReason&quot;:&quot;Could not map media URL to local upload path&quot;')
     expect(svg).toContain('&quot;watermarkToken&quot;:&quot;reader-42&quot;')
     expect(svg).toContain('Page 2')
+  })
+
+  it('resolves image captions with a fallback chain', () => {
+    expect(
+      resolveMediaCaption({
+        alt: 'Alt fallback',
+        caption: 'Stored caption',
+        title: 'Markdown title',
+      }),
+    ).toBe('Stored caption')
+    expect(
+      resolveMediaCaption({
+        alt: 'Alt fallback',
+        caption: '   ',
+        title: 'Markdown title',
+      }),
+    ).toBe('Markdown title')
+    expect(
+      resolveMediaCaption({
+        alt: 'Alt fallback',
+        caption: null,
+        title: '   ',
+      }),
+    ).toBe('Alt fallback')
+  })
+
+  it('keeps attachment descriptions independent from alt text', () => {
+    expect(
+      resolveAttachmentDescription({
+        caption: 'Media caption',
+        description: 'Attachment description',
+      }),
+    ).toBe('Attachment description')
+    expect(
+      resolveAttachmentDescription({
+        caption: 'Media caption',
+        description: '   ',
+      }),
+    ).toBe('Media caption')
+    expect(
+      resolveAttachmentDescription({
+        caption: null,
+        description: null,
+      }),
+    ).toBeNull()
   })
 })
