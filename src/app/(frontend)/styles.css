@@ -169,8 +169,25 @@ html[data-zblog-preview-theme='light'] {
     @apply text-primary underline decoration-border underline-offset-4;
   }
 
+  .citation-link--missing {
+    @apply decoration-dashed text-muted-foreground;
+  }
+
   .markdown-media-link {
     @apply no-underline;
+  }
+
+  .markdown-figure {
+    @apply my-8 flex flex-col gap-3;
+  }
+
+  .markdown-figure__details,
+  .markdown-figure__caption {
+    @apply px-1 text-sm leading-6 text-muted-foreground;
+  }
+
+  .markdown-figure__details .media-details {
+    @apply gap-1.5;
   }
 
   .article-copy {
@@ -257,24 +274,32 @@ html[data-zblog-preview-theme='light'] {
     @apply border-b border-border px-1 py-0.5 text-[0.88em] text-foreground;
   }
 
-  .article-copy pre {
-    @apply overflow-x-auto border px-4 py-4 text-sm leading-7 text-foreground;
+  .markdown-codeblock {
+    @apply relative overflow-x-auto border px-4 pb-4 pt-10 text-sm leading-7 text-foreground;
   }
 
-  .article-copy table {
-    @apply block w-full overflow-x-auto border;
+  .markdown-codeblock__label {
+    @apply absolute right-3 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground;
   }
 
-  .article-copy table thead {
+  .markdown-table__scroll {
+    @apply w-full overflow-x-auto;
+  }
+
+  .markdown-table__scroll > table {
+    @apply w-full border;
+  }
+
+  .markdown-table__scroll > table thead {
     @apply bg-muted/60;
   }
 
-  .article-copy table th,
-  .article-copy table td {
+  .markdown-table__scroll > table th,
+  .markdown-table__scroll > table td {
     @apply border-b px-4 py-3 text-left text-sm;
   }
 
-  .article-copy table tr:last-child td {
+  .markdown-table__scroll > table tr:last-child td {
     @apply border-b-0;
   }
 
