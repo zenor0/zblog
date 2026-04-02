@@ -91,41 +91,31 @@ export function PostTableOfContents(props: PostTableOfContentsProps) {
   }
 
   return (
-    <section className="flex min-w-0 flex-col gap-3 rounded-xl border border-sidebar-border bg-sidebar/80 p-4 backdrop-blur-sm">
-      <div className="flex flex-col gap-2.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-1">
-            <p className="section-kicker">{progressLabel}</p>
-            <h2 className="text-base font-semibold text-sidebar-foreground">{label}</h2>
-          </div>
-          <span className="shrink-0 pt-0.5 text-xs font-medium text-sidebar-foreground/78">
-            {progress}%
-          </span>
+    <section
+      className="flex min-w-0 flex-col gap-4 border-t border-border pt-6 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0"
+      data-toc-rail=""
+    >
+      <div className="flex items-end justify-between gap-3 border-b border-border pb-3">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="section-kicker">{progressLabel}</p>
+          <h2 className="font-serif text-xl tracking-[-0.02em] text-foreground">{label}</h2>
         </div>
-
-        <div
-          aria-hidden="true"
-          className="h-1 overflow-hidden rounded-full bg-sidebar-accent"
-        >
-          <div
-            className="h-full rounded-full bg-sidebar-primary transition-[width] duration-200"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          {progress}%
+        </span>
       </div>
 
       <nav aria-label={label} className="max-h-[min(62vh,32rem)] overflow-y-auto pr-1">
-        <ol className="flex flex-col gap-1">
+        <ol className="flex flex-col gap-2">
           {headings.map((heading) => (
             <li key={heading.id}>
               <a
                 aria-current={activeID === heading.id ? 'location' : undefined}
                 className={cn(
-                  'block min-w-0 rounded-lg border border-transparent px-2.5 py-1.5 text-[13px] leading-5 text-sidebar-foreground/72 wrap-anywhere transition-colors hover:border-sidebar-border hover:bg-sidebar-accent/90 hover:text-sidebar-foreground',
-                  heading.depth === 3 && 'ml-2.5',
-                  heading.depth >= 4 && 'ml-4',
-                  activeID === heading.id &&
-                    'border-sidebar-border bg-sidebar-accent text-sidebar-foreground shadow-sm',
+                  'block min-w-0 border-l border-transparent pl-3 text-[13px] leading-5 text-foreground/62 wrap-anywhere transition-colors hover:border-border hover:text-foreground',
+                  heading.depth === 3 && 'ml-3',
+                  heading.depth >= 4 && 'ml-5',
+                  activeID === heading.id && 'border-foreground text-foreground',
                 )}
                 href={`#${heading.id}`}
               >
