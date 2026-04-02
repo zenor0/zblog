@@ -12,30 +12,147 @@ import {
   citationPattern,
   decodeComponentAttributeValue,
   decodePreparedValue,
+  extractNodeText,
   formatArticleReference,
 } from '@/lib/markdown/article-syntax'
 import { findMarkdownComponentByDirectiveName } from '@/lib/markdown/component-registry'
 import type { ArticleElementMeta, MarkdownRendererProps } from '@/lib/markdown/types'
 
-const calloutKinds = new Set(['note', 'tip', 'warning', 'info'])
+const knownCalloutKinds = new Set(['note', 'tip', 'important', 'warning', 'caution'])
+const calloutMarkerPattern = /^\s*\[!([^\]]+)\](?:[ \t]*\n?)?/i
 
-export function calloutDirectivePlugin() {
+function formatCalloutLabel(value: string) {
+  return value
+    .trim()
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
+function normalizeCalloutMetadata(rawLabel: string) {
+  const normalizedLabel = rawLabel.trim().toLowerCase().replace(/\s+/g, ' ')
+
+  if (!normalizedLabel) {
+    return null
+  }
+
+  return {
+    displayLabel: formatCalloutLabel(normalizedLabel),
+    kind: normalizedLabel,
+    variant: knownCalloutKinds.has(normalizedLabel) ? normalizedLabel : 'custom',
+  }
+}
+
+function nodeHasContent(node: any): boolean {
+  if (!node) {
+    return false
+  }
+
+  if (node.type === 'text') {
+    return typeof node.value === 'string' && node.value.length > 0
+  }
+
+  if (!Array.isArray(node.children)) {
+    return true
+  }
+
+  return node.children.some((child: any) => nodeHasContent(child))
+}
+
+function consumeLeadingText(nodes: any[], remaining: number): { nodes: any[]; remaining: number } {
+  const nextNodes: any[] = []
+  let remainingCharacters = remaining
+
+  for (const node of nodes) {
+    if (remainingCharacters <= 0) {
+      nextNodes.push(node)
+      continue
+    }
+
+    if (node?.type === 'text' && typeof node.value === 'string') {
+      if (node.value.length <= remainingCharacters) {
+        remainingCharacters -= node.value.length
+        continue
+      }
+
+      nextNodes.push({
+        ...node,
+        value: node.value.slice(remainingCharacters),
+      })
+      remainingCharacters = 0
+      continue
+    }
+
+    if (Array.isArray(node?.children)) {
+      const result = consumeLeadingText(node.children, remainingCharacters)
+
+      remainingCharacters = result.remaining
+
+      if (result.nodes.length > 0) {
+        nextNodes.push({
+          ...node,
+          children: result.nodes,
+        })
+      }
+
+      continue
+    }
+
+    nextNodes.push(node)
+  }
+
+  return {
+    nodes: nextNodes.filter((node) => nodeHasContent(node)),
+    remaining: remainingCharacters,
+  }
+}
+
+export function githubCalloutBlockquotePlugin() {
   return (tree: unknown) => {
-    visit(tree as any, (node: any) => {
-      if (
-        (node.type !== 'containerDirective' && node.type !== 'leafDirective') ||
-        !calloutKinds.has(node.name)
-      ) {
+    visit(tree as any, 'blockquote', (node: any) => {
+      const firstChild = Array.isArray(node?.children) ? node.children[0] : null
+
+      if (firstChild?.type !== 'paragraph') {
         return
+      }
+
+      const firstParagraphText = extractNodeText(firstChild)
+      const match = firstParagraphText.match(calloutMarkerPattern)
+
+      if (!match?.[0] || !match[1]) {
+        return
+      }
+
+      const metadata = normalizeCalloutMetadata(match[1])
+
+      if (!metadata) {
+        return
+      }
+
+      const updatedChildren = consumeLeadingText(firstChild.children ?? [], match[0].length)
+      const remainingParagraph = {
+        ...firstChild,
+        children: updatedChildren.nodes,
+      }
+      const blockquoteChildren = [...(node.children ?? [])]
+
+      if (nodeHasContent(remainingParagraph)) {
+        blockquoteChildren[0] = remainingParagraph
+      } else {
+        blockquoteChildren.shift()
       }
 
       const data = node.data || (node.data = {})
 
       data.hName = 'aside'
       data.hProperties = {
-        className: ['md-callout', `md-callout--${node.name}`],
-        'data-kind': node.name,
+        className: ['md-callout', `md-callout--${metadata.variant}`],
+        'data-callout-label': metadata.displayLabel,
+        'data-kind': metadata.kind,
       }
+
+      node.children = blockquoteChildren
     })
   }
 }

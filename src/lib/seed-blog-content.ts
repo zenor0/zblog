@@ -23,9 +23,8 @@ export function buildZhMarkdownShowcaseContent(figureURL: string) {
 
 这篇 seed 文章专门用来展示博客前端当前支持的 Markdown 能力，包括引用 [@smith2024]、文内交叉引用、表格 caption、callout、代码块和基础排版。
 
-:::note
-这不是写作建议，而是一份面向产品和测试的能力样本。
-:::
+> [!NOTE]
+> 这不是写作建议，而是一份面向产品和测试的能力样本。
 
 ## 文本与链接
 
@@ -45,9 +44,8 @@ export function buildZhMarkdownShowcaseContent(figureURL: string) {
 2. 再补引用。
 3. 最后检查文内交叉引用是否正确落点。
 
-:::warning
-这篇文章里的 TSX 代码块只是展示源码，不会像 MDX 一样直接执行组件。
-:::
+> [!WARNING]
+> 这篇文章里的 TSX 代码块只是展示源码，不会像 MDX 一样直接执行组件。
 
 ## 图表与交叉引用
 
@@ -91,9 +89,8 @@ export function buildEnMarkdownShowcaseContent(figureURL: string) {
 
 This seeded article is a single place to demonstrate the blog frontend's current Markdown capabilities: citations like [@smith2024], article cross-references, table captions, callouts, code fences, and rich text formatting.
 
-:::note
-Treat this as a product showcase and a regression fixture rather than editorial guidance.
-:::
+> [!NOTE]
+> Treat this as a product showcase and a regression fixture rather than editorial guidance.
 
 ## Text and links
 
@@ -113,9 +110,8 @@ The article body can mix **strong text**, _emphasis_, \`inline code\`, and ordin
 2. Insert references.
 3. Verify that every in-article reference resolves correctly.
 
-:::warning
-The TSX example below is rendered as source code only. It is not executed as MDX.
-:::
+> [!WARNING]
+> The TSX example below is rendered as source code only. It is not executed as MDX.
 
 ## Figures, tables, and cross-references
 

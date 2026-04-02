@@ -1,4 +1,11 @@
 import React from 'react'
+import {
+  AlertCircleIcon,
+  BadgeAlertIcon,
+  InfoIcon,
+  LightbulbIcon,
+  TriangleAlertIcon,
+} from 'lucide-react'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkDirective from 'remark-directive'
 import remarkGfm from 'remark-gfm'
@@ -8,21 +15,47 @@ import { extractMarkdownHeadings } from '@/lib/markdown-headings'
 import { extractMarkdownMediaSources, prepareMarkdownSource } from '@/lib/markdown/article-syntax'
 import {
   articleElementsPlugin,
-  calloutDirectivePlugin,
   citationPlugin,
+  githubCalloutBlockquotePlugin,
   markdownComponentDirectivePlugin,
 } from '@/lib/markdown/plugins'
 import { extractCodeBlockLanguage, MarkdownFigure, MarkdownImage } from '@/lib/markdown/renderers'
 import type { MarkdownRendererProps } from '@/lib/markdown/types'
 import { markdownComponentRenderers } from '@/lib/markdown/component-registry'
 
-function joinClassNames(...values: Array<null | string | undefined>) {
-  return values.filter(Boolean).join(' ') || undefined
+function joinClassNames(...values: Array<null | string | string[] | undefined>) {
+  return (
+    values
+      .flatMap((value) => {
+        if (!value) {
+          return []
+        }
+
+        return Array.isArray(value) ? value : [value]
+      })
+      .join(' ') || undefined
+  )
 }
 
 type ExtendedMarkdownComponents = Components & typeof markdownComponentRenderers
 
 export { extractMarkdownMediaSources }
+
+function resolveCalloutIcon(kind: unknown) {
+  switch (kind) {
+    case 'tip':
+      return LightbulbIcon
+    case 'important':
+      return BadgeAlertIcon
+    case 'warning':
+      return TriangleAlertIcon
+    case 'caution':
+      return AlertCircleIcon
+    case 'note':
+    default:
+      return InfoIcon
+  }
+}
 
 export function MarkdownRenderer(props: MarkdownRendererProps) {
   const {
@@ -37,8 +70,8 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
   let headingCursor = 0
 
   const renderHeading =
-    (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'): NonNullable<Components[typeof tag]> =>
-    ({ children, node: _node, ...rest }) => {
+    (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'): NonNullable<Components[typeof tag]> => {
+    const HeadingRenderer: NonNullable<Components[typeof tag]> = ({ children, node: _node, ...rest }) => {
       const heading = resolvedHeadings[headingCursor]
       const id = heading?.id
       const Tag = tag
@@ -53,6 +86,11 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         </Tag>
       )
     }
+
+    HeadingRenderer.displayName = `Markdown${tag.toUpperCase()}Heading`
+
+    return HeadingRenderer
+  }
 
   const components: ExtendedMarkdownComponents = {
     a: ({ children, href, node: _node, ...rest }: any) => {
@@ -71,11 +109,23 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         </a>
       )
     },
-    aside: ({ children, className, node: _node }: any) => (
-      <aside className={className}>
-        {children}
-      </aside>
-    ),
+    aside: ({ children, className, node: _node, ...rest }: any) => {
+      const calloutLabel =
+        typeof rest['data-callout-label'] === 'string' ? rest['data-callout-label'] : null
+      const Icon = resolveCalloutIcon(rest['data-kind'])
+
+      return (
+        <aside {...rest} className={joinClassNames(className)}>
+          {calloutLabel ? (
+            <div className="md-callout__title">
+              <Icon aria-hidden="true" className="md-callout__icon" />
+              <span>{calloutLabel}</span>
+            </div>
+          ) : null}
+          <div className="md-callout__content">{children}</div>
+        </aside>
+      )
+    },
     code: ({ children, className, node: _node, ...rest }: any) => (
       <code {...rest} className={className}>
         {children}
@@ -172,7 +222,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       remarkPlugins={[
         remarkGfm,
         remarkDirective,
-        calloutDirectivePlugin,
+        githubCalloutBlockquotePlugin,
         articleElementsPlugin,
         markdownComponentDirectivePlugin,
         [citationPlugin, { articleReferenceLabels, citationIndex }],

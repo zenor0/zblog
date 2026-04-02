@@ -22,7 +22,9 @@ describe('seed blog content', () => {
       expect(content).toContain('<NoticeCard tone=')
       expect(content).toContain('<FeatureGrid items=')
       expect(content).toContain('```tsx')
-      expect(content).toContain(':::note')
+      expect(content).toContain('> [!NOTE]')
+      expect(content).toContain('> [!WARNING]')
+      expect(content).not.toContain(':::note')
       expect(content).toContain('| Feature | Status |')
       expect(content).toContain('---')
     }

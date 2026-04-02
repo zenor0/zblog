@@ -157,7 +157,7 @@ export const Posts: CollectionConfig = {
             {
               admin: {
                 description:
-                  'Markdown is supported here, including blockquotes, fenced code, tables, callouts via :::note, and citations via [@citation-key].',
+                  'Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].',
                 language: 'markdown',
               },
               localized: true,

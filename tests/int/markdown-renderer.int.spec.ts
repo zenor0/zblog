@@ -24,6 +24,52 @@ function renderMarkdown(
 }
 
 describe('markdown renderer', () => {
+  it('renders GitHub note callouts and removes the marker from the body', () => {
+    const html = renderMarkdown(`
+> [!NOTE]
+> This content should render as a note callout.
+`)
+
+    expect(html).toContain('md-callout--note')
+    expect(html).toContain('data-callout-label="Note"')
+    expect(html).toContain('This content should render as a note callout.')
+    expect(html).not.toContain('[!NOTE]')
+  })
+
+  it('matches GitHub callout labels case-insensitively and preserves multiple paragraphs', () => {
+    const html = renderMarkdown(`
+> [!warning]
+> First paragraph.
+>
+> Second paragraph.
+`)
+
+    expect(html).toContain('md-callout--warning')
+    expect(html).toContain('data-callout-label="Warning"')
+    expect(html).toContain('First paragraph.')
+    expect(html).toContain('Second paragraph.')
+  })
+
+  it('renders unknown GitHub callout labels with fallback styling', () => {
+    const html = renderMarkdown(`
+> [!research notes]
+> Custom labels should still render as callouts.
+`)
+
+    expect(html).toContain('md-callout--custom')
+    expect(html).toContain('data-callout-label="Research Notes"')
+    expect(html).toContain('Custom labels should still render as callouts.')
+  })
+
+  it('keeps ordinary blockquotes as blockquotes', () => {
+    const html = renderMarkdown(`
+> This is just a quote.
+`)
+
+    expect(html).toContain('<blockquote>')
+    expect(html).not.toContain('md-callout')
+  })
+
   it('renders labeled figures and figure cross-references', () => {
     const source = `
 ![System overview](/media/overview.png "Overall architecture"){#fig:overview}
