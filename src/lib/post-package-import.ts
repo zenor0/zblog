@@ -6,10 +6,11 @@ import { unzip } from 'fflate'
 import matter from 'gray-matter'
 import type { Payload, PayloadRequest } from 'payload'
 
+import { getBibliographySource, type BibliographySource } from '@/lib/bibliography'
 import { defaultLocale, normalizeLocale, type AppLocale } from '@/lib/locales'
 import { slugify } from '@/lib/slugs'
 import { extractCitationKeys } from '@/lib/citations'
-import type { BibliographyFile, Media, Post, User } from '@/payload-types'
+import type { Media, Post, User } from '@/payload-types'
 
 const markdownExtensionPattern = /\.(md|markdown)$/i
 const bibliographyExtensionPattern = /\.bib$/i
@@ -111,6 +112,11 @@ type MDshipManifest = {
   bibliography?: null | string | string[]
   document?: string
   warnings?: string[]
+}
+
+type EmbeddedBibliography = BibliographySource & {
+  description?: string
+  title?: string
 }
 
 function unzipAsync(bytes: Uint8Array): Promise<Record<string, Uint8Array>> {
@@ -776,13 +782,6 @@ function buildLocalRequest(
 }
 
 async function findOneByField(args: {
-  collection: 'bibliography-files'
-  field: string
-  payload: Payload
-  user: User
-  value: string
-}): Promise<BibliographyFile | null>
-async function findOneByField(args: {
   collection: 'media'
   field: string
   payload: Payload
@@ -797,12 +796,12 @@ async function findOneByField(args: {
   value: string
 }): Promise<Post | null>
 async function findOneByField(args: {
-  collection: 'bibliography-files' | 'media' | 'posts'
+  collection: 'media' | 'posts'
   field: string
   payload: Payload
   user: User
   value: string
-}): Promise<BibliographyFile | Media | Post | null> {
+}): Promise<Media | Post | null> {
   const result = await args.payload.find({
     collection: args.collection,
     depth: 0,
@@ -817,115 +816,33 @@ async function findOneByField(args: {
     },
   })
 
-  return (result.docs[0] as BibliographyFile | Media | Post | undefined) ?? null
+  return (result.docs[0] as Media | Post | undefined) ?? null
 }
 
-async function upsertBibliography(args: {
-  bibliography: ParsedBibliographySource | null
-  existingPost: Post | null
-  ownerPostID?: PostDocumentID
-  payload: Payload
-  slug: string
-  user: User
-}): Promise<BibliographyFile | null> {
-  const { bibliography, existingPost, ownerPostID, payload, slug } = args
-  const request = buildLocalRequest(args.user)
-
-  if (!bibliography) {
-    const relationValue = existingPost?.bibliographyFile
-
-    if (relationValue && typeof relationValue === 'object') {
-      return relationValue as BibliographyFile
-    }
-
-    if (typeof relationValue === 'number') {
-      return (await payload.findByID({
-        collection: 'bibliography-files',
-        id: relationValue,
-        overrideAccess: false,
-        req: request,
-        user: args.user,
-      })) as BibliographyFile
-    }
-
+function getEmbeddedPostBibliography(post: Post | null): EmbeddedBibliography | null {
+  if (!post) {
     return null
   }
 
-  const importKey = `${slug}:bibliography:${bibliography.path}`
-  const nextFilename = `${slug}-${bibliography.filename}`
-  const existingByImportKey =
-    ((
-      await payload.find({
-        collection: 'bibliography-files',
-        depth: 0,
-        limit: 1,
-        overrideAccess: false,
-        req: request,
-        user: args.user,
-        where: {
-          importKey: {
-            equals: importKey,
-          },
-        },
-      })
-    )?.docs[0] as BibliographyFile | undefined) ?? null
-  const existingByFilename =
-    ((
-      await payload.find({
-        collection: 'bibliography-files',
-        depth: 0,
-        limit: 1,
-        overrideAccess: false,
-        req: request,
-        user: args.user,
-        where: {
-          filename: {
-            equals: nextFilename,
-          },
-        },
-      })
-    )?.docs[0] as BibliographyFile | undefined) ?? null
+  return getBibliographySource(
+    (post as Post & { bibliography?: Record<string, unknown> | null }).bibliography ?? null,
+  )
+}
 
-  const existingID = (existingByImportKey?.id ??
-    existingByFilename?.id ??
-    (typeof existingPost?.bibliographyFile === 'number'
-      ? existingPost.bibliographyFile
-      : existingPost?.bibliographyFile && typeof existingPost.bibliographyFile === 'object'
-        ? existingPost.bibliographyFile.id
-        : null)) as BibliographyFile['id'] | null
-
-  const data: Pick<
-    BibliographyFile,
-    'description' | 'filename' | 'importKey' | 'source' | 'title'
-  > & {
-    ownerPost?: PostDocumentID
-  } = {
-    description: bibliography.description,
-    filename: nextFilename,
-    importKey,
-    ...(ownerPostID !== undefined ? { ownerPost: ownerPostID } : {}),
-    source: bibliography.source,
-    title: bibliography.title,
+function buildEmbeddedBibliography(args: {
+  bibliography: ParsedBibliographySource | null
+  existingPost: Post | null
+}): EmbeddedBibliography | null {
+  if (!args.bibliography) {
+    return getEmbeddedPostBibliography(args.existingPost)
   }
 
-  if (existingID !== null) {
-    return (await payload.update({
-      collection: 'bibliography-files',
-      data,
-      id: existingID,
-      overrideAccess: false,
-      req: request,
-      user: args.user,
-    })) as unknown as BibliographyFile
+  return {
+    description: args.bibliography.description,
+    filename: args.bibliography.filename,
+    source: args.bibliography.source,
+    title: args.bibliography.title,
   }
-
-  return (await payload.create({
-    collection: 'bibliography-files',
-    data,
-    overrideAccess: false,
-    req: request,
-    user: args.user,
-  })) as BibliographyFile
 }
 
 function buildImportedAssetFilename(slug: string, assetPath: string): string {
@@ -1025,31 +942,15 @@ async function upsertMediaAssets(args: {
 }
 
 async function assignOwnedResourcesToPost(args: {
-  bibliographyDocument: BibliographyFile | null
   payload: Payload
   postID: PostDocumentID
   uploadedMediaByPath: Map<string, Media>
   user: User
 }): Promise<{
-  bibliographyDocument: BibliographyFile | null
   uploadedMediaByPath: Map<string, Media>
 }> {
   const request = buildLocalRequest(args.user)
   const ownedMediaByPath = new Map<string, Media>()
-  let ownedBibliography = args.bibliographyDocument
-
-  if (args.bibliographyDocument?.id) {
-    ownedBibliography = (await args.payload.update({
-      collection: 'bibliography-files',
-      data: {
-        ownerPost: args.postID,
-      },
-      id: args.bibliographyDocument.id,
-      overrideAccess: false,
-      req: request,
-      user: args.user,
-    })) as unknown as BibliographyFile
-  }
 
   for (const [assetPath, media] of args.uploadedMediaByPath.entries()) {
     const ownedMedia = (await args.payload.update({
@@ -1067,7 +968,6 @@ async function assignOwnedResourcesToPost(args: {
   }
 
   return {
-    bibliographyDocument: ownedBibliography,
     uploadedMediaByPath: ownedMediaByPath,
   }
 }
@@ -1170,7 +1070,9 @@ async function importPostEntries(args: {
       ? null
       : null)
 
-  if (!bibliography && !existingPost?.bibliographyFile) {
+  const existingBibliography = getEmbeddedPostBibliography(existingPost)
+
+  if (!bibliography && !existingBibliography?.source) {
     const citationDocument = parsedPackage.documents.find(
       (document) => extractCitationKeys(document.content).length > 0,
     )
@@ -1185,13 +1087,9 @@ async function importPostEntries(args: {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zblog-post-package-'))
 
   try {
-    let bibliographyDocument = await upsertBibliography({
+    const bibliographyDocument = buildEmbeddedBibliography({
       bibliography,
       existingPost,
-      ownerPostID: existingPost?.id,
-      payload: args.payload,
-      slug: parsedPackage.slug,
-      user: args.user,
     })
     let uploadedMediaByPath = await upsertMediaAssets({
       ownerPostID: existingPost?.id,
@@ -1230,10 +1128,13 @@ async function importPostEntries(args: {
       bibliographyDocument ||
       (sharedDocument.hasBibliographyField && sharedDocument.bibliographyPath === null)
     ) {
-      sharedData.bibliographyFile =
+      sharedData.bibliography =
         sharedDocument.hasBibliographyField && sharedDocument.bibliographyPath === null
           ? null
-          : (bibliographyDocument?.id ?? null)
+          : {
+              filename: bibliographyDocument?.filename ?? null,
+              source: bibliographyDocument?.source ?? null,
+            }
     }
 
     const effectiveStatus = sharedDocument.status
@@ -1300,8 +1201,7 @@ async function importPostEntries(args: {
       }
     }
 
-    ;({ bibliographyDocument, uploadedMediaByPath } = await assignOwnedResourcesToPost({
-      bibliographyDocument,
+    ;({ uploadedMediaByPath } = await assignOwnedResourcesToPost({
       payload: args.payload,
       postID: post.id,
       uploadedMediaByPath,
@@ -1326,7 +1226,7 @@ async function importPostEntries(args: {
     }
 
     return {
-      bibliographyID: bibliographyDocument?.id ?? null,
+      bibliographyID: null,
       importedLocales: localizedDocuments.map((document) => document.locale),
       importedMediaCount: uploadedMediaByPath.size,
       operation: existingPost ? 'updated' : 'created',

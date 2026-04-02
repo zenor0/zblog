@@ -6,7 +6,7 @@ import path from 'path'
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
-import type { BibliographyFile, Media, Post, User } from '@/payload-types'
+import type { Media, Post, User } from '@/payload-types'
 import {
   buildEnMarkdownShowcaseContent,
   buildZhMarkdownShowcaseContent,
@@ -116,14 +116,6 @@ async function deleteExistingSeedContent(payload: Awaited<ReturnType<typeof getP
       },
     }),
     payload.delete({
-      collection: 'bibliography-files',
-      where: {
-        title: {
-          in: ['Seed Citations'],
-        },
-      },
-    }),
-    payload.delete({
       collection: 'media',
       where: {
         alt: {
@@ -158,19 +150,12 @@ async function createSeedFiles(
     filePath: assetPaths.attachmentPath,
   })) as Media
 
-  const bibliography = (await payload.create({
-    collection: 'bibliography-files',
-    data: {
-      description: 'BibTeX references used by the seeded multilingual post.',
-      filename: 'seed-citations.bib',
-      source: bibliographyText,
-      title: 'Seed Citations',
-    },
-  })) as BibliographyFile
-
   return {
     attachment,
-    bibliography,
+    bibliography: {
+      filename: 'seed-citations.bib',
+      source: bibliographyText,
+    },
     hero,
   }
 }
@@ -192,7 +177,7 @@ function buildZhContent(heroURL: string) {
 
 - 正文仍然用 Markdown 编写，便于 diff。
 - 引用键直接写在内容里，例如 [@smith2024]。
-- BibTeX 文件单独上传，由系统负责校验。
+- BibTeX 文本跟随文章一起存储，由系统负责校验。
 - 附件放在侧边栏区域，而不是塞进正文里。
 
 ## 版本记录为什么重要
@@ -227,7 +212,7 @@ This seeded entry covers Markdown rendering, BibTeX references, attachments, ima
 
 - Keep the main body in Markdown for readable diffs.
 - Insert citation keys inline, such as [@smith2024].
-- Upload a BibTeX file separately and validate against it.
+- Store one BibTeX source directly on the post and validate against it.
 - Keep downloadable assets in a dedicated attachments section.
 `
 }
@@ -247,7 +232,7 @@ async function seedPosts(
           label: 'Seed attachment',
         },
       ],
-      bibliographyFile: files.bibliography.id,
+      bibliography: files.bibliography,
       content: buildZhContent(files.hero.url ?? ''),
       excerpt: 'Seeded article covering Markdown, citations, translations, and versions.',
       heroImage: files.hero.id,
@@ -309,7 +294,7 @@ async function seedPosts(
     collection: 'posts',
     data: {
       _status: 'published',
-      bibliographyFile: files.bibliography.id,
+      bibliography: files.bibliography,
       content: buildZhMarkdownShowcaseContent(files.hero.url ?? ''),
       excerpt: 'Seeded article covering the current Markdown rendering capabilities end to end.',
       heroImage: files.hero.id,

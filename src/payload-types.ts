@@ -69,7 +69,6 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    'bibliography-files': BibliographyFile;
     posts: Post;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -79,14 +78,12 @@ export interface Config {
   };
   collectionsJoins: {
     posts: {
-      ownedBibliographyFiles: 'bibliography-files';
       ownedMedia: 'media';
     };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'bibliography-files': BibliographyFilesSelect<false> | BibliographyFilesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -205,9 +202,18 @@ export interface Post {
    */
   content: string;
   /**
-   * Link a BibTeX source here. Citation keys used in the current locale content are validated against the stored bibliography text.
+   * Store one BibTeX source directly on this post. Structured editing is available for safe, common entries.
    */
-  bibliographyFile?: (number | null) | BibliographyFile;
+  bibliography?: {
+    /**
+     * Optional original filename for the BibTeX source stored on this post.
+     */
+    filename?: string | null;
+    /**
+     * Paste BibTeX source here. Citation keys used in the current locale content are validated against this text.
+     */
+    source?: string | null;
+  };
   attachments?:
     | {
         file: number | Media;
@@ -238,11 +244,6 @@ export interface Post {
      */
     noindex?: boolean | null;
   };
-  ownedBibliographyFiles?: {
-    docs?: (number | BibliographyFile)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
   ownedMedia?: {
     docs?: (number | Media)[];
     hasNextPage?: boolean;
@@ -260,35 +261,6 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bibliography-files".
- */
-export interface BibliographyFile {
-  id: number;
-  title: string;
-  description?: string | null;
-  /**
-   * Compatibility field for the original BibTeX filename. New imports keep this unique, but the actual bibliography is stored as text below.
-   */
-  filename?: string | null;
-  /**
-   * Paste or import BibTeX source here. Citation validation reads directly from this text field.
-   */
-  source?: string | null;
-  importKey?: string | null;
-  ownerPost?: (number | null) | Post;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -415,10 +387,6 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'bibliography-files';
-        value: number | BibliographyFile;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null);
@@ -516,35 +484,18 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bibliography-files_select".
- */
-export interface BibliographyFilesSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  filename?: T;
-  source?: T;
-  importKey?: T;
-  ownerPost?: T;
-  url?: T;
-  thumbnailURL?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   content?: T;
-  bibliographyFile?: T;
+  bibliography?:
+    | T
+    | {
+        filename?: T;
+        source?: T;
+      };
   attachments?:
     | T
     | {
@@ -565,7 +516,6 @@ export interface PostsSelect<T extends boolean = true> {
         metaImage?: T;
         noindex?: T;
       };
-  ownedBibliographyFiles?: T;
   ownedMedia?: T;
   slug?: T;
   heroImage?: T;

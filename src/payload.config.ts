@@ -5,7 +5,6 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { BibliographyFiles } from './collections/BibliographyFiles'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
@@ -22,7 +21,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, BibliographyFiles, Posts],
+  collections: [Users, Media, Posts],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   localization: {

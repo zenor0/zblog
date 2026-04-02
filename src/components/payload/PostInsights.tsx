@@ -2,6 +2,7 @@ import type { Media, Post } from '@/payload-types'
 import type { AppLocale } from '@/lib/locales'
 import type { UIFieldServerComponent, UIFieldServerProps } from 'payload'
 
+import { getBibliographySource, loadBibliographyEntries } from '@/lib/bibliography'
 import { defaultLocale, getLocaleLabel, normalizeLocale, supportedLocales } from '@/lib/locales'
 
 import './post-insights.scss'
@@ -20,11 +21,21 @@ type LocaleInsight = {
   snapshot: LocaleSnapshot | null
 }
 
-type RelatedSummary = Pick<Post, 'attachments' | 'bibliographyFile' | 'heroImage'>
+type RelatedSummary = Pick<Post, 'attachments' | 'heroImage'> & {
+  bibliography?: {
+    filename?: null | string
+    source?: null | string
+  } | null
+}
 
 type ResourceSummary = {
-  bibliographyFiles: number
   media: number
+}
+
+type BibliographySummary = {
+  entryCount: number
+  filename: null | string
+  parseStatus: 'empty' | 'invalid' | 'ready'
 }
 
 type HeroImageSummary = Pick<Media, 'alt' | 'caption' | 'credit' | 'previewSVGURL' | 'thumbnailURL' | 'url'>
@@ -145,14 +156,6 @@ function formatDate(value: null | string | undefined, activeLocale: AppLocale): 
   }).format(parsed)
 }
 
-function getBibliographyTitle(value: Post['bibliographyFile']): null | string {
-  if (value && typeof value === 'object' && 'title' in value && typeof value.title === 'string') {
-    return value.title
-  }
-
-  return null
-}
-
 function getHeroImage(value: Post['heroImage']): HeroImageSummary | null {
   if (!value || typeof value !== 'object') {
     return null
@@ -256,7 +259,7 @@ async function loadRelatedSummary(args: {
     }),
     select: {
       attachments: true,
-      bibliographyFile: true,
+      bibliography: true,
       heroImage: true,
     },
     user: args.req.user,
@@ -268,24 +271,7 @@ async function loadResourceSummary(args: {
   id: number | string
   req: UIFieldServerProps['req']
 }): Promise<ResourceSummary> {
-  const [bibliographyFiles, media] = await Promise.all([
-    args.req.payload.find({
-      collection: 'bibliography-files',
-      depth: 0,
-      limit: 1,
-      page: 1,
-      req: buildLocalRequest({
-        req: args.req,
-      }),
-      user: args.req.user,
-      where: {
-        ownerPost: {
-          equals: args.id,
-        },
-      },
-      ...getAccessOverride(args.req.user),
-    }),
-    args.req.payload.find({
+  const media = await args.req.payload.find({
       collection: 'media',
       depth: 0,
       limit: 1,
@@ -300,12 +286,32 @@ async function loadResourceSummary(args: {
         },
       },
       ...getAccessOverride(args.req.user),
-    }),
-  ])
+    })
 
   return {
-    bibliographyFiles: bibliographyFiles.totalDocs,
     media: media.totalDocs,
+  }
+}
+
+async function buildBibliographySummary(
+  bibliography: RelatedSummary['bibliography'],
+): Promise<BibliographySummary> {
+  const source = getBibliographySource(bibliography ?? null)
+
+  if (!source?.source) {
+    return {
+      entryCount: 0,
+      filename: source?.filename ?? null,
+      parseStatus: 'empty',
+    }
+  }
+
+  const entries = await loadBibliographyEntries(source)
+
+  return {
+    entryCount: entries.length,
+    filename: source.filename ?? null,
+    parseStatus: entries.length > 0 ? 'ready' : 'invalid',
   }
 }
 
@@ -353,10 +359,9 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
   ])
 
   const attachmentCount = Array.isArray(references?.attachments) ? references.attachments.length : 0
-  const bibliographyTitle = getBibliographyTitle(references?.bibliographyFile)
+  const bibliography = await buildBibliographySummary(references?.bibliography)
   const heroImage = getHeroImage(references?.heroImage)
   const heroPreviewURL = getPreviewURL(heroImage)
-  const totalOwnedResources = resources.bibliographyFiles + resources.media
 
   const completeCount = countByCoverage(locales, 'complete')
   const partialCount = countByCoverage(locales, 'partial')
@@ -461,7 +466,17 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
             <div className="post-insights__metric-list">
               <div className="post-insights__metric">
                 <span className="post-insights__metric-label">Bibliography</span>
-                <strong>{bibliographyTitle ?? 'None linked'}</strong>
+                <strong>
+                  {bibliography.parseStatus === 'empty'
+                    ? 'None stored'
+                    : bibliography.parseStatus === 'invalid'
+                      ? 'Invalid BibTeX'
+                      : `${bibliography.entryCount} entries`}
+                </strong>
+              </div>
+              <div className="post-insights__metric">
+                <span className="post-insights__metric-label">Stored filename</span>
+                <strong>{bibliography.filename ?? 'Not set'}</strong>
               </div>
               <div className="post-insights__metric">
                 <span className="post-insights__metric-label">Attachments</span>
@@ -480,16 +495,8 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
 
             <div className="post-insights__metric-list">
               <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Bibliography files</span>
-                <strong>{resources.bibliographyFiles}</strong>
-              </div>
-              <div className="post-insights__metric">
                 <span className="post-insights__metric-label">Media files</span>
                 <strong>{resources.media}</strong>
-              </div>
-              <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Total owned</span>
-                <strong>{totalOwnedResources}</strong>
               </div>
             </div>
           </section>

@@ -1,12 +1,12 @@
 import type { TypeWithVersion } from 'payload'
 
 import { isEditor } from '@/lib/access'
-import { loadBibliographyEntries, getReferencedEntries } from '@/lib/bibliography'
+import { getBibliographySource, loadBibliographyEntries, getReferencedEntries } from '@/lib/bibliography'
 import { buildCitationIndex } from '@/lib/citations'
 import { buildVersionDiff } from '@/lib/diff'
 import { defaultLocale, localeCodes, type AppLocale } from '@/lib/locales'
 import { getPayloadClient } from '@/lib/payload'
-import type { BibliographyFile, Post, User } from '@/payload-types'
+import type { Post, User } from '@/payload-types'
 
 export type ResolvedPost = {
   bibliographyEntries: Awaited<ReturnType<typeof loadBibliographyEntries>>
@@ -125,11 +125,11 @@ export async function getPostBySlug(args: {
     return null
   }
 
-  const bibliographyFile =
-    post.bibliographyFile && typeof post.bibliographyFile === 'object'
-      ? (post.bibliographyFile as BibliographyFile)
-      : null
-  const bibliographyEntries = await loadBibliographyEntries(bibliographyFile)
+  const bibliographyEntries = await loadBibliographyEntries(
+    getBibliographySource(
+      (post as Post & { bibliography?: Record<string, unknown> | null }).bibliography ?? null,
+    ),
+  )
   const { entries, missingKeys } = getReferencedEntries(post.content, bibliographyEntries)
 
   return {
@@ -203,11 +203,11 @@ export async function getPostByID(args: {
     return null
   }
 
-  const bibliographyFile =
-    post.bibliographyFile && typeof post.bibliographyFile === 'object'
-      ? (post.bibliographyFile as BibliographyFile)
-      : null
-  const bibliographyEntries = await loadBibliographyEntries(bibliographyFile)
+  const bibliographyEntries = await loadBibliographyEntries(
+    getBibliographySource(
+      (post as Post & { bibliography?: Record<string, unknown> | null }).bibliography ?? null,
+    ),
+  )
   const { entries, missingKeys } = getReferencedEntries(post.content, bibliographyEntries)
 
   return {

@@ -1,12 +1,8 @@
-import fs from 'fs/promises'
-import path from 'path'
-
 import { BibLatexParser, type BibDB } from 'biblatex-csl-converter'
 
 import { extractCitationKeys, normalizeCitationKey } from '@/lib/citations'
-import { bibliographyUploadDir } from '@/lib/uploads'
 
-type BibliographyFileLike = {
+export type BibliographySource = {
   filename?: string | null
   source?: string | null
 }
@@ -88,6 +84,82 @@ export type BibliographyDisplay = {
   title: string
   year: string
 }
+
+export type EditableBibliographyEntry = {
+  accessed: string
+  authors: BibliographyName[]
+  bookTitle: string
+  citationKey: string
+  date: string
+  doi: string
+  editors: BibliographyName[]
+  entryType: string
+  eventTitle: string
+  institution: string
+  journalTitle: string
+  location: string
+  note: string
+  number: string
+  organization: string
+  pages: string
+  publisher: string
+  school: string
+  seriesTitle: string
+  subtitle: string
+  title: string
+  translators: BibliographyName[]
+  url: string
+  venue: string
+  volume: string
+}
+
+export type EditableBibliographyParseResult = {
+  entries: EditableBibliographyEntry[]
+  isFullyEditable: boolean
+  issues: string[]
+}
+
+const supportedEditableEntryTypes = new Set([
+  'article',
+  'book',
+  'inbook',
+  'incollection',
+  'inproceedings',
+  'manual',
+  'misc',
+  'online',
+  'phdthesis',
+  'proceedings',
+  'report',
+  'techreport',
+  'thesis',
+])
+
+const supportedEditableFieldKeys = new Set([
+  'author',
+  'booktitle',
+  'date',
+  'doi',
+  'editor',
+  'eventtitle',
+  'institution',
+  'journaltitle',
+  'location',
+  'note',
+  'number',
+  'organization',
+  'pages',
+  'publisher',
+  'school',
+  'series',
+  'subtitle',
+  'title',
+  'translator',
+  'url',
+  'urldate',
+  'venue',
+  'volume',
+])
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -411,6 +483,176 @@ export function describeBibliographyEntry(entry: BibliographyEntry): Bibliograph
   }
 }
 
+function cloneBibliographyName(person: BibliographyName): BibliographyName {
+  return {
+    family: person.family,
+    given: person.given,
+    literal: person.literal,
+    prefix: person.prefix,
+    suffix: person.suffix,
+    usePrefix: person.usePrefix,
+  }
+}
+
+function getUnsupportedEditableFields(entry: BibliographyEntry): string[] {
+  return Object.keys(entry.fields).filter((key) => !supportedEditableFieldKeys.has(key))
+}
+
+function toEditableBibliographyEntry(entry: BibliographyEntry): EditableBibliographyEntry {
+  return {
+    accessed: entry.accessed?.literal ?? entry.fields.urldate ?? '',
+    authors: entry.authors.map((person) => cloneBibliographyName(person)),
+    bookTitle: entry.fields.booktitle ?? '',
+    citationKey: entry.citationKey,
+    date: entry.issued?.literal ?? entry.fields.date ?? '',
+    doi: entry.doi,
+    editors: entry.editors.map((person) => cloneBibliographyName(person)),
+    entryType: entry.entryType,
+    eventTitle: entry.eventTitle,
+    institution: entry.institution,
+    journalTitle: entry.journalTitle,
+    location: entry.location,
+    note: entry.fields.note ?? '',
+    number: entry.number,
+    organization: entry.organization,
+    pages: entry.pages,
+    publisher: entry.publisher,
+    school: entry.school,
+    seriesTitle: entry.seriesTitle,
+    subtitle: entry.subtitle,
+    title: entry.title,
+    translators: entry.translators.map((person) => cloneBibliographyName(person)),
+    url: entry.url,
+    venue: entry.venue,
+    volume: entry.volume,
+  }
+}
+
+function serializeEditableBibliographyName(person: BibliographyName): string {
+  if (person.literal) {
+    return `{${normalizeWhitespace(person.literal)}}`
+  }
+
+  const family = [person.usePrefix ? person.prefix : '', person.family].filter(Boolean).join(' ').trim()
+  const base = family
+    ? [family, person.given].filter(Boolean).join(', ')
+    : normalizeWhitespace([person.given, person.prefix].filter(Boolean).join(' '))
+
+  return person.suffix ? `${base}, ${person.suffix}` : base
+}
+
+function serializeEditableBibliographyNames(people: BibliographyName[]): string {
+  return people
+    .map((person) => serializeEditableBibliographyName(person))
+    .map((value) => normalizeWhitespace(value))
+    .filter(Boolean)
+    .join(' and ')
+}
+
+function serializeEditableCitationKey(citationKey: string, entryIndex: number): string {
+  return normalizeCitationKey(citationKey) || `reference-${entryIndex + 1}`
+}
+
+function serializeEditableEntryType(entryType: string): string {
+  return normalizeWhitespace(entryType).toLowerCase() || 'misc'
+}
+
+function pushSerializedBibliographyField(
+  lines: string[],
+  fieldName: string,
+  value: null | string | undefined,
+) {
+  const normalized = normalizeWhitespace(value ?? '')
+
+  if (!normalized) {
+    return
+  }
+
+  lines.push(`  ${fieldName} = {${normalized}},`)
+}
+
+export function parseEditableBibliography(bibtex: string): EditableBibliographyParseResult {
+  if (!bibtex.trim()) {
+    return {
+      entries: [],
+      isFullyEditable: true,
+      issues: [],
+    }
+  }
+
+  const entries = parseBibliography(bibtex)
+
+  if (entries.length === 0) {
+    return {
+      entries: [],
+      isFullyEditable: false,
+      issues: ['Unable to parse bibliography source into editable entries.'],
+    }
+  }
+
+  const issues: string[] = []
+
+  for (const entry of entries) {
+    if (!supportedEditableEntryTypes.has(entry.entryType)) {
+      issues.push(`${entry.citationKey}: unsupported entry type "${entry.entryType || 'unknown'}"`)
+    }
+
+    const unsupportedFields = getUnsupportedEditableFields(entry)
+
+    if (unsupportedFields.length > 0) {
+      issues.push(`${entry.citationKey}: unsupported fields ${unsupportedFields.join(', ')}`)
+    }
+  }
+
+  return {
+    entries: entries.map((entry) => toEditableBibliographyEntry(entry)),
+    isFullyEditable: issues.length === 0,
+    issues,
+  }
+}
+
+export function serializeEditableBibliography(entries: EditableBibliographyEntry[]): string {
+  return entries
+    .map((entry, entryIndex) => {
+      const lines = [
+        `@${serializeEditableEntryType(entry.entryType)}{${serializeEditableCitationKey(entry.citationKey, entryIndex)},`,
+      ]
+
+      pushSerializedBibliographyField(lines, 'author', serializeEditableBibliographyNames(entry.authors))
+      pushSerializedBibliographyField(lines, 'editor', serializeEditableBibliographyNames(entry.editors))
+      pushSerializedBibliographyField(
+        lines,
+        'translator',
+        serializeEditableBibliographyNames(entry.translators),
+      )
+      pushSerializedBibliographyField(lines, 'title', entry.title)
+      pushSerializedBibliographyField(lines, 'subtitle', entry.subtitle)
+      pushSerializedBibliographyField(lines, 'journaltitle', entry.journalTitle)
+      pushSerializedBibliographyField(lines, 'booktitle', entry.bookTitle)
+      pushSerializedBibliographyField(lines, 'eventtitle', entry.eventTitle)
+      pushSerializedBibliographyField(lines, 'publisher', entry.publisher)
+      pushSerializedBibliographyField(lines, 'organization', entry.organization)
+      pushSerializedBibliographyField(lines, 'institution', entry.institution)
+      pushSerializedBibliographyField(lines, 'school', entry.school)
+      pushSerializedBibliographyField(lines, 'venue', entry.venue)
+      pushSerializedBibliographyField(lines, 'location', entry.location)
+      pushSerializedBibliographyField(lines, 'series', entry.seriesTitle)
+      pushSerializedBibliographyField(lines, 'volume', entry.volume)
+      pushSerializedBibliographyField(lines, 'number', entry.number)
+      pushSerializedBibliographyField(lines, 'pages', entry.pages)
+      pushSerializedBibliographyField(lines, 'date', entry.date)
+      pushSerializedBibliographyField(lines, 'doi', entry.doi)
+      pushSerializedBibliographyField(lines, 'url', entry.url)
+      pushSerializedBibliographyField(lines, 'urldate', entry.accessed)
+      pushSerializedBibliographyField(lines, 'note', entry.note)
+
+      lines.push('}')
+
+      return lines.join('\n')
+    })
+    .join('\n\n')
+}
+
 export function parseBibliography(bibtex: string): BibliographyEntry[] {
   try {
     const parsedEntries = new BibLatexParser(bibtex, {
@@ -426,26 +668,36 @@ export function parseBibliography(bibtex: string): BibliographyEntry[] {
   }
 }
 
-export async function readBibliographySource(doc?: BibliographyFileLike | null): Promise<string | null> {
+export function getBibliographySource(
+  value?: null | Record<string, unknown>,
+): BibliographySource | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const filename = typeof value.filename === 'string' ? value.filename : null
+  const source = typeof value.source === 'string' ? value.source : null
+
+  if (!filename && !source) {
+    return null
+  }
+
+  return {
+    filename,
+    source,
+  }
+}
+
+export async function readBibliographySource(doc?: BibliographySource | null): Promise<string | null> {
   if (!doc?.source || typeof doc.source !== 'string') {
-    if (!doc?.filename) {
-      return null
-    }
-
-    const legacyFilePath = path.join(bibliographyUploadDir, doc.filename)
-
-    try {
-      return await fs.readFile(legacyFilePath, 'utf8')
-    } catch {
-      return null
-    }
+    return null
   }
 
   return doc.source
 }
 
 export async function loadBibliographyEntries(
-  doc?: BibliographyFileLike | null,
+  doc?: BibliographySource | null,
 ): Promise<BibliographyEntry[]> {
   const source = await readBibliographySource(doc)
 
