@@ -110,11 +110,11 @@ describe('post overview summary helpers', () => {
         bibliographyFile: {
           id: 1,
           title: 'Main bibliography',
-        },
+        } as any,
         heroImage: {
           alt: 'Hero image',
           url: '/media/hero.png',
-        },
+        } as any,
         tags: [{ value: 'payload' }, { value: 'cms' }],
       }),
     ).toMatchObject({

@@ -4,10 +4,13 @@ import type { AppLocale } from '@/lib/locales'
 import { getLocaleLabel } from '@/lib/locales'
 import { buildSeoDescription } from '@/lib/seo'
 
-export type LocaleSnapshot = Pick<
-  Post,
-  'content' | 'title' | 'translatedAt' | 'translatedFromLocale' | 'translationStatus'
->
+export type LocaleSnapshot = {
+  content?: null | string
+  title?: null | string
+  translatedAt?: null | string
+  translatedFromLocale?: null | string
+  translationStatus?: Post['translationStatus']
+}
 
 export type LocaleCoverage = 'complete' | 'missing' | 'partial'
 
@@ -23,6 +26,11 @@ export type HeroImageSummary = Pick<
   'alt' | 'caption' | 'credit' | 'previewSVGURL' | 'thumbnailURL' | 'url'
 >
 
+type CoverageSource = {
+  content?: null | string
+  title?: null | string
+}
+
 type SnapshotTone = 'danger' | 'muted' | 'neutral' | 'success' | 'warning'
 
 type SnapshotItem = {
@@ -35,9 +43,7 @@ export function hasText(value: null | string | undefined): boolean {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-export function getLocaleCoverage(
-  snapshot: null | Pick<LocaleSnapshot, 'content' | 'title'>,
-): LocaleCoverage {
+export function getLocaleCoverage(snapshot: CoverageSource | null): LocaleCoverage {
   const hasTitle = hasText(snapshot?.title)
   const hasContent = hasText(snapshot?.content)
 
@@ -74,9 +80,7 @@ export function getCoverageTone(coverage: LocaleCoverage): SnapshotTone {
   }
 }
 
-export function getCoverageBadgeLabel(
-  snapshot: null | Pick<LocaleSnapshot, 'content' | 'title'>,
-): string {
+export function getCoverageBadgeLabel(snapshot: CoverageSource | null): string {
   const presentFields = Number(hasText(snapshot?.title)) + Number(hasText(snapshot?.content))
   const coverage = getLocaleCoverage(snapshot)
 
@@ -251,7 +255,7 @@ export function buildPublishingSnapshot(args: {
     slug: {
       label: 'Slug',
       tone: hasText(args.slug) ? 'neutral' : 'warning',
-      value: hasText(args.slug) ? args.slug.trim() : 'Missing',
+      value: hasText(args.slug) ? args.slug?.trim() ?? 'Missing' : 'Missing',
     } satisfies SnapshotItem,
     status: {
       label: 'Status',

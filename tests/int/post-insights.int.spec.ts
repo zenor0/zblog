@@ -50,7 +50,7 @@ describe('PostInsights', () => {
     const find = vi.fn().mockResolvedValueOnce({ totalDocs: 1 }).mockResolvedValueOnce({ totalDocs: 3 })
 
     const markup = renderToStaticMarkup(
-      await PostInsights({
+      await (PostInsights as any)({
         id: 42,
         req: {
           locale: 'en',
@@ -77,7 +77,7 @@ describe('PostInsights', () => {
 
   it('shows a save-first empty state for unsaved documents', async () => {
     const markup = renderToStaticMarkup(
-      await PostInsights({
+      await (PostInsights as any)({
         id: undefined,
         req: {
           locale: 'en',

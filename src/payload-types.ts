@@ -204,6 +204,7 @@ export interface Post {
    * Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].
    */
   content: string;
+  heroImage?: (number | null) | Media;
   /**
    * Link a BibTeX source here. Citation keys used in the current locale content are validated against the stored bibliography text.
    */
@@ -249,7 +250,6 @@ export interface Post {
     totalDocs?: number;
   };
   slug: string;
-  heroImage?: (number | null) | Media;
   tags?:
     | {
         value: string;
@@ -544,6 +544,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   content?: T;
+  heroImage?: T;
   bibliographyFile?: T;
   attachments?:
     | T
@@ -568,7 +569,6 @@ export interface PostsSelect<T extends boolean = true> {
   ownedBibliographyFiles?: T;
   ownedMedia?: T;
   slug?: T;
-  heroImage?: T;
   tags?:
     | T
     | {
