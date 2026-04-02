@@ -126,7 +126,7 @@ test.describe('Admin Panel', () => {
 
   test('can navigate to list view', async () => {
     await page.goto('http://localhost:3000/admin/collections/users')
-    await expect(page).toHaveURL('http://localhost:3000/admin/collections/users')
+    await expect(page).toHaveURL(/http:\/\/localhost:3000\/admin\/collections\/users(\?depth=1&limit=10)?$/)
   })
 
   test('can navigate to edit view', async () => {
@@ -138,7 +138,7 @@ test.describe('Admin Panel', () => {
 
   test('can open the posts collection and create view', async () => {
     await page.goto('http://localhost:3000/admin/collections/posts')
-    await expect(page).toHaveURL('http://localhost:3000/admin/collections/posts')
+    await expect(page).toHaveURL(/http:\/\/localhost:3000\/admin\/collections\/posts(\?depth=1&limit=10)?$/)
 
     await page.goto('http://localhost:3000/admin/collections/posts/create')
     await expect(page.locator('input[name=\"slug\"]')).toBeVisible()
@@ -173,7 +173,7 @@ test.describe('Admin Panel', () => {
       )
 
       await expect(page).toHaveURL(`http://localhost:3000/zh-hans/posts/${draftPost.slug}`)
-      await expect(page.getByText('预览模式')).toBeVisible()
+      await expect(page.getByRole('alert').getByText('预览模式')).toBeVisible()
       await expect(page.locator('h1').first()).toHaveText('预览草稿示例文章')
       await expect(page.getByText('这一段只应该在 preview 中可见。')).toBeVisible()
       await expect(page.getByRole('link', { name: '退出预览' })).toBeVisible()
@@ -232,6 +232,8 @@ test.describe('Admin Panel', () => {
 
       await page.goto('http://localhost:3000/zh-hans/posts/imported-package-demo')
       await expect(page.locator('h1').first()).toHaveText('导入包示例文章（更新）')
+      await expect(page.locator('summary')).toContainText('参考文献')
+      await page.locator('summary').click()
       await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
       await expect(page.getByText('第二次导入追加了这一段')).toBeVisible()
 
@@ -277,6 +279,8 @@ test.describe('Admin Panel', () => {
 
       await page.goto('http://localhost:3000/zh-hans/posts/mdship-import-demo')
       await expect(page.locator('h1').first()).toHaveText('MDship 导入示例文章（更新）')
+      await expect(page.locator('summary')).toContainText('参考文献')
+      await page.locator('summary').click()
       await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
       await expect(page.getByText('这段文字来自第二次 mdship 工作区导入')).toBeVisible()
     } finally {
