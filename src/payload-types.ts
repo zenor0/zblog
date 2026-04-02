@@ -201,7 +201,7 @@ export interface Post {
   title: string;
   excerpt?: string | null;
   /**
-   * Markdown is supported here, including blockquotes, fenced code, tables, callouts via :::note, and citations via [@citation-key].
+   * Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].
    */
   content: string;
   /**
