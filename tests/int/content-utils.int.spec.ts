@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest'
 import {
   describeBibliographyEntry,
   parseBibliography,
+  parseEditableBibliography,
   getReferencedEntries,
   readBibliographySource,
+  serializeEditableBibliography,
 } from '@/lib/bibliography'
 import { buildCitationIndex, extractCitationKeys } from '@/lib/citations'
 import { buildTextDiff } from '@/lib/diff'
@@ -105,6 +107,122 @@ describe('content utilities', () => {
     await expect(readBibliographySource({ source: sampleBibliography })).resolves.toContain(
       '@article{smith2024',
     )
+  })
+
+  it('derives structured editable entries and serializes them back to BibTeX', () => {
+    const editable = parseEditableBibliography(sampleBibliography)
+
+    expect(editable.isFullyEditable).toBe(true)
+    expect(editable.issues).toEqual([])
+    expect(editable.entries).toHaveLength(3)
+    expect(editable.entries[0]).toMatchObject({
+      citationKey: 'smith2024',
+      date: '2024',
+      entryType: 'article',
+      title: 'A Useful Paper',
+    })
+    expect(editable.entries[0]?.authors).toEqual([
+      {
+        family: 'Smith',
+        given: 'Jane',
+        literal: '',
+        prefix: '',
+        suffix: '',
+        usePrefix: false,
+      },
+      {
+        family: 'Doe',
+        given: 'John',
+        literal: '',
+        prefix: '',
+        suffix: '',
+        usePrefix: false,
+      },
+    ])
+
+    const serialized = serializeEditableBibliography(editable.entries)
+
+    expect(serialized).toContain('@article{smith2024,')
+    expect(serialized).toContain('author = {Smith, Jane and Doe, John}')
+    expect(serialized).toContain('journaltitle = {Journal of Blogging}')
+    expect(serialized).toContain('@online{openai2025,')
+  })
+
+  it('marks unsupported bibliography shapes as raw-only', () => {
+    const unsupported = parseEditableBibliography(`
+@article{complex2025,
+  author = {Doe, Jamie},
+  title = {Complex Entry},
+  abstract = {Not part of the structured editor surface},
+  year = {2025}
+}
+`)
+
+    expect(unsupported.isFullyEditable).toBe(false)
+    expect(unsupported.issues[0]).toContain('complex2025')
+    expect(unsupported.entries[0]?.citationKey).toBe('complex2025')
+  })
+
+  it('serializes editable entries with normalized fallback citation keys', () => {
+    const serialized = serializeEditableBibliography([
+      {
+        accessed: '',
+        authors: [],
+        bookTitle: '',
+        citationKey: '  @MixedKey  ',
+        date: '',
+        doi: '',
+        editors: [],
+        entryType: 'misc',
+        eventTitle: '',
+        institution: '',
+        journalTitle: '',
+        location: '',
+        note: '',
+        number: '',
+        organization: '',
+        pages: '',
+        publisher: '',
+        school: '',
+        seriesTitle: '',
+        subtitle: '',
+        title: 'Normalized Key',
+        translators: [],
+        url: '',
+        venue: '',
+        volume: '',
+      },
+      {
+        accessed: '',
+        authors: [],
+        bookTitle: '',
+        citationKey: '',
+        date: '',
+        doi: '',
+        editors: [],
+        entryType: 'misc',
+        eventTitle: '',
+        institution: '',
+        journalTitle: '',
+        location: '',
+        note: '',
+        number: '',
+        organization: '',
+        pages: '',
+        publisher: '',
+        school: '',
+        seriesTitle: '',
+        subtitle: '',
+        title: 'Fallback Key',
+        translators: [],
+        url: '',
+        venue: '',
+        volume: '',
+      },
+    ])
+
+    expect(serialized).toContain('@misc{mixedkey,')
+    expect(serialized).toContain('@misc{reference-2,')
   })
 
   it('builds line-based text diffs', () => {

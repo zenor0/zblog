@@ -172,13 +172,32 @@ export const Posts: CollectionConfig = {
           fields: [
             {
               admin: {
+                components: {
+                  Field: '/components/payload/BibliographyField#BibliographyField',
+                },
                 description:
-                  'Link a BibTeX source here. Citation keys used in the current locale content are validated against the stored bibliography text.',
+                  'Store one BibTeX source directly on this post. Structured editing is available for safe, common entries.',
               },
-              filterOptions: sharedOrCurrentPostOwnedFilter,
-              name: 'bibliographyFile',
-              relationTo: 'bibliography-files',
-              type: 'relationship',
+              name: 'bibliography',
+              type: 'group',
+              fields: [
+                {
+                  admin: {
+                    description: 'Optional original filename for the BibTeX source stored on this post.',
+                  },
+                  name: 'filename',
+                  type: 'text',
+                },
+                {
+                  admin: {
+                    description:
+                      'Paste BibTeX source here. Citation keys used in the current locale content are validated against this text.',
+                    language: 'plaintext',
+                  },
+                  name: 'source',
+                  type: 'code',
+                },
+              ],
             },
             {
               name: 'attachments',
@@ -323,20 +342,6 @@ export const Posts: CollectionConfig = {
               },
             },
             {
-              name: 'ownedBibliographyFiles',
-              type: 'join',
-              collection: 'bibliography-files',
-              on: 'ownerPost',
-              defaultLimit: 10,
-              defaultSort: '-updatedAt',
-              maxDepth: 0,
-              admin: {
-                allowCreate: false,
-                defaultColumns: ['title', 'filename', 'updatedAt'],
-              },
-              label: 'Owned bibliography files',
-            },
-            {
               name: 'ownedMedia',
               type: 'join',
               collection: 'media',
@@ -417,7 +422,12 @@ export const Posts: CollectionConfig = {
         }
 
         const content = typeof data.content === 'string' ? data.content : originalDoc?.content
-        const bibliographyValue = data.bibliographyFile ?? originalDoc?.bibliographyFile
+        const bibliographyValue =
+          data.bibliography && typeof data.bibliography === 'object'
+            ? data.bibliography
+            : originalDoc?.bibliography && typeof originalDoc.bibliography === 'object'
+              ? originalDoc.bibliography
+              : null
 
         if (!content || typeof content !== 'string') {
           return data
@@ -431,21 +441,11 @@ export const Posts: CollectionConfig = {
 
         if (!bibliographyValue) {
           throw new Error(
-            `Locale "${currentLocale}" contains citation keys, but no bibliography file is linked to the post.`,
+            `Locale "${currentLocale}" contains citation keys, but no bibliography source is stored on the post.`,
           )
         }
 
-        const bibliographyFile =
-          typeof bibliographyValue === 'number'
-            ? await req.payload.findByID({
-                collection: 'bibliography-files',
-                id: bibliographyValue,
-                overrideAccess: false,
-                req,
-              })
-            : bibliographyValue
-
-        const bibliographyEntries = await loadBibliographyEntries(bibliographyFile)
+        const bibliographyEntries = await loadBibliographyEntries(bibliographyValue)
         const availableKeys = new Set(bibliographyEntries.map((entry) => entry.citationKey))
         const missingKeys = citationKeys.filter((key) => !availableKeys.has(key))
 
