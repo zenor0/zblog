@@ -164,6 +164,14 @@ html[data-zblog-preview-theme='light'] {
     @apply border border-border bg-background;
   }
 
+  [data-home-featured-post] .media-surface--card {
+    @apply aspect-[4/5];
+  }
+
+  [data-home-post-list] article:last-child {
+    @apply border-b-0;
+  }
+
   [data-editorial-shell='true'] [data-slot='button'] {
     @apply rounded-none border-border shadow-none transition-colors;
   }
@@ -203,6 +211,10 @@ html[data-zblog-preview-theme='light'] {
 
   [data-editorial-shell='true'] [data-slot='alert-title'] {
     @apply font-serif text-base tracking-[-0.02em];
+  }
+
+  [data-locale-switcher] [data-slot='sheet-content'] {
+    @apply border-l border-border bg-background shadow-none;
   }
 
   .md-callout {
