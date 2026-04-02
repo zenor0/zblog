@@ -1,5 +1,6 @@
 import { nonBibliographyPrefixList, type NonBibliographyPrefix } from '@/lib/citations'
 
+import { findMarkdownComponentByJsxTag } from '@/lib/markdown/component-registry'
 import type { ArticleElementMeta } from '@/lib/markdown/types'
 
 const markdownImagePattern = /!\[[^\]]*]\((?:<([^>]+)>|([^\s)]+))(?:\s+(?:"[^"]*"|'[^']*'))?\)/g
@@ -11,8 +12,9 @@ const articleReferenceMarkerPattern = new RegExp(`(${articleReferenceKindPattern
 
 export const articleLabelPattern = /^\s*\{#([^}\s]+)\}\s*$/
 export const citationPattern = /\[@([^\]]+)\]/g
+const componentEncodingPrefix = '__zblog_component__'
 
-const articleReferenceLabels: Record<NonBibliographyPrefix, string> = {
+const defaultArticleReferenceLabels: Record<NonBibliographyPrefix, string> = {
   alg: 'Algorithm',
   app: 'Appendix',
   cor: 'Corollary',
@@ -52,6 +54,82 @@ export function decodePreparedValue(value: string) {
   return value.replaceAll(articleSyntaxColonToken, ':')
 }
 
+function encodeComponentAttributeValue(value: string) {
+  return `${componentEncodingPrefix}${encodeURIComponent(value)}`
+}
+
+export function decodeComponentAttributeValue(value: string) {
+  if (!value.startsWith(componentEncodingPrefix)) {
+    return value
+  }
+
+  return decodeURIComponent(value.slice(componentEncodingPrefix.length))
+}
+
+function parseJSXLikeAttributes(value: string) {
+  const attributes = new Map<string, string>()
+  const attributePattern =
+    /([A-Za-z_][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|\{([^}]*)\}|([^\s]+))/g
+
+  for (const match of value.matchAll(attributePattern)) {
+    const name = match[1]
+    const rawValue = match[2] ?? match[3] ?? match[4] ?? match[5] ?? ''
+
+    attributes.set(name, rawValue)
+  }
+
+  return attributes
+}
+
+function buildDirectiveAttributes(attributes: Map<string, string>) {
+  if (attributes.size === 0) {
+    return ''
+  }
+
+  return `{${Array.from(attributes.entries())
+    .map(([name, value]) => `${name}="${encodeComponentAttributeValue(value)}"`)
+    .join(' ')}}`
+}
+
+function transformComponentTagLine(line: string) {
+  const trimmed = line.trim()
+  const selfClosingMatch = trimmed.match(/^<([A-Z][A-Za-z0-9]*)\s*([^>]*)\/>$/)
+
+  if (selfClosingMatch) {
+    const component = findMarkdownComponentByJsxTag(selfClosingMatch[1])
+
+    if (!component) {
+      return null
+    }
+
+    const attributes = buildDirectiveAttributes(parseJSXLikeAttributes(selfClosingMatch[2] ?? ''))
+
+    return `${line.slice(0, line.indexOf('<'))}::${component.directiveName}${attributes}`
+  }
+
+  const openingMatch = trimmed.match(/^<([A-Z][A-Za-z0-9]*)\s*([^>]*)>$/)
+
+  if (openingMatch) {
+    const component = findMarkdownComponentByJsxTag(openingMatch[1])
+
+    if (!component) {
+      return null
+    }
+
+    const attributes = buildDirectiveAttributes(parseJSXLikeAttributes(openingMatch[2] ?? ''))
+
+    return `${line.slice(0, line.indexOf('<'))}:::${component.directiveName}${attributes}`
+  }
+
+  const closingMatch = trimmed.match(/^<\/([A-Z][A-Za-z0-9]*)>$/)
+
+  if (closingMatch && findMarkdownComponentByJsxTag(closingMatch[1])) {
+    return `${line.slice(0, line.indexOf('<'))}:::`
+  }
+
+  return null
+}
+
 export function prepareMarkdownSource(source: string) {
   const lines = source.split(/\r?\n/)
   let activeFence: null | string = null
@@ -74,6 +152,12 @@ export function prepareMarkdownSource(source: string) {
 
       if (activeFence) {
         return line
+      }
+
+      const transformedComponentLine = transformComponentTagLine(line)
+
+      if (transformedComponentLine) {
+        return transformedComponentLine
       }
 
       const escapedCitations = line.replace(citationPattern, (_match, rawGroup: string) => {
@@ -120,8 +204,13 @@ export function parseArticleLabel(value: string): null | { kind: NonBibliography
   }
 }
 
-export function formatArticleReference(meta: Pick<ArticleElementMeta, 'kind' | 'number'>) {
-  return `${articleReferenceLabels[meta.kind]} ${meta.number}`
+export function formatArticleReference(
+  meta: Pick<ArticleElementMeta, 'kind' | 'number'>,
+  labels: Partial<Record<NonBibliographyPrefix, string>> = {},
+) {
+  const label = labels[meta.kind] ?? defaultArticleReferenceLabels[meta.kind]
+
+  return `${label} ${meta.number}`
 }
 
 export function createArticleAnchorId(label: string) {

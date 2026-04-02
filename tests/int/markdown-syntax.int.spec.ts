@@ -19,6 +19,28 @@ Literal [@fig:overview]
     expect(prepareMarkdownSource(source)).toContain(`Literal [@fig:overview]`)
   })
 
+  it('transforms whitelisted JSX-like blocks into markdown directives outside fenced code blocks', () => {
+    const source = `
+<NoticeCard tone="info" title="Rendered component">
+Visible body
+</NoticeCard>
+
+<FeatureGrid items='[{"title":"Citation","status":"native"}]' />
+
+\`\`\`tsx
+<NoticeCard tone="info" title="Code only" />
+\`\`\`
+`
+
+    const prepared = prepareMarkdownSource(source)
+
+    expect(prepared).toContain(':::notice-card{')
+    expect(prepared).toContain('::feature-grid{')
+    expect(prepared).toContain('Visible body')
+    expect(prepared).toContain('<NoticeCard tone="info" title="Code only" />')
+    expect(prepared).not.toContain('<NoticeCard tone="info" title="Rendered component">')
+  })
+
   it('parses supported article labels and rejects bibliography labels', () => {
     expect(parseArticleLabel('#fig:overview')).toEqual({
       kind: 'fig',

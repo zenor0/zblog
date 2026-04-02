@@ -25,6 +25,7 @@
     "attachments": "Attachments",
     "draftLabel": "Draft",
     "editorialStatus": "Editorial",
+    "figureLabel": "Figure",
     "latestSnapshot": "Latest snapshot",
     "localeNavigation": "Locales",
     "machineStatus": "Machine draft",
@@ -39,6 +40,7 @@
     "references": "References",
     "siteLabel": "ZBlog",
     "tags": "Tags",
+    "tableLabel": "Table",
     "unknownDate": "Unknown date",
     "unscheduled": "Unscheduled",
     "versionID": "Version ID"

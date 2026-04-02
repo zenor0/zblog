@@ -7,6 +7,15 @@ import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 import type { BibliographyFile, Media, Post, User } from '@/payload-types'
+import {
+  buildEnMarkdownShowcaseContent,
+  buildZhMarkdownShowcaseContent,
+  seedCitationDemoSlug,
+  seedFallbackDemoSlug,
+  seedMarkdownShowcaseEnTitle,
+  seedMarkdownShowcaseSlug,
+  seedMarkdownShowcaseZhTitle,
+} from '@/lib/seed-blog-content'
 
 const seedDir = path.resolve(process.cwd(), '.seed-assets')
 
@@ -102,7 +111,7 @@ async function deleteExistingSeedContent(payload: Awaited<ReturnType<typeof getP
       collection: 'posts',
       where: {
         slug: {
-          in: ['seed-citation-demo', 'seed-fallback-demo'],
+          in: [seedCitationDemoSlug, seedFallbackDemoSlug, seedMarkdownShowcaseSlug],
         },
       },
     }),
@@ -242,7 +251,7 @@ async function seedPosts(
       content: buildZhContent(files.hero.url ?? ''),
       excerpt: 'Seeded article covering Markdown, citations, translations, and versions.',
       heroImage: files.hero.id,
-      slug: 'seed-citation-demo',
+      slug: seedCitationDemoSlug,
       tags: [{ value: 'payload' }, { value: 'citations' }, { value: 'seed' }],
       title: '带引用与版本历史的示例文章',
     },
@@ -290,10 +299,40 @@ async function seedPosts(
 - 版本列表入口
 `,
       excerpt: 'Seeded post for testing locale fallback behavior.',
-      slug: 'seed-fallback-demo',
+      slug: seedFallbackDemoSlug,
       tags: [{ value: 'fallback' }, { value: 'locales' }],
       title: '语言回退示例文章',
     },
+  })
+
+  const showcasePost = (await payload.create({
+    collection: 'posts',
+    data: {
+      _status: 'published',
+      bibliographyFile: files.bibliography.id,
+      content: buildZhMarkdownShowcaseContent(files.hero.url ?? ''),
+      excerpt: 'Seeded article covering the current Markdown rendering capabilities end to end.',
+      heroImage: files.hero.id,
+      slug: seedMarkdownShowcaseSlug,
+      tags: [{ value: 'markdown' }, { value: 'showcase' }, { value: 'seed' }],
+      title: seedMarkdownShowcaseZhTitle,
+    },
+  })) as Post
+
+  await payload.update({
+    collection: 'posts',
+    data: {
+      _status: 'published',
+      content: buildEnMarkdownShowcaseContent(files.hero.url ?? ''),
+      excerpt: 'Seeded showcase article for the frontend Markdown feature set.',
+      title: seedMarkdownShowcaseEnTitle,
+      translatedAt: new Date().toISOString(),
+      translatedFromLocale: 'zh-Hans',
+      translationProvider: 'seed-script',
+      translationStatus: 'machine',
+    },
+    id: showcasePost.id,
+    locale: 'en',
   })
 }
 
@@ -307,7 +346,7 @@ async function logSummary(payload: Awaited<ReturnType<typeof getPayload>>) {
     sort: 'slug',
     where: {
       slug: {
-        in: ['seed-citation-demo', 'seed-fallback-demo'],
+        in: [seedCitationDemoSlug, seedFallbackDemoSlug, seedMarkdownShowcaseSlug],
       },
     },
   })

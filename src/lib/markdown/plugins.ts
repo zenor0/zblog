@@ -8,8 +8,14 @@ import {
   parseTableCaptionParagraph,
   registerArticleElement,
 } from '@/lib/markdown/article-elements'
-import { citationPattern, decodePreparedValue, formatArticleReference } from '@/lib/markdown/article-syntax'
-import type { ArticleElementMeta } from '@/lib/markdown/types'
+import {
+  citationPattern,
+  decodeComponentAttributeValue,
+  decodePreparedValue,
+  formatArticleReference,
+} from '@/lib/markdown/article-syntax'
+import { findMarkdownComponentByDirectiveName } from '@/lib/markdown/component-registry'
+import type { ArticleElementMeta, MarkdownRendererProps } from '@/lib/markdown/types'
 
 const calloutKinds = new Set(['note', 'tip', 'warning', 'info'])
 
@@ -95,8 +101,38 @@ export function articleElementsPlugin() {
   }
 }
 
-export function citationPlugin(options: { citationIndex?: Map<string, number> } = {}) {
+export function markdownComponentDirectivePlugin() {
+  return (tree: unknown) => {
+    visit(tree as any, (node: any) => {
+      if (
+        (node.type !== 'containerDirective' && node.type !== 'leafDirective') ||
+        !findMarkdownComponentByDirectiveName(node.name)
+      ) {
+        return
+      }
+
+      const attributes = Object.fromEntries(
+        Object.entries(node.attributes ?? {}).map(([key, value]) => [
+          key,
+          typeof value === 'string' ? decodeComponentAttributeValue(value) : value,
+        ]),
+      )
+      const data = node.data || (node.data = {})
+
+      data.hName = node.name
+      data.hProperties = {
+        ...(data.hProperties ?? {}),
+        ...attributes,
+      }
+    })
+  }
+}
+
+export function citationPlugin(
+  options: Pick<MarkdownRendererProps, 'articleReferenceLabels' | 'citationIndex'> = {},
+) {
   const citationIndex = options.citationIndex ?? new Map<string, number>()
+  const articleReferenceLabels = options.articleReferenceLabels ?? {}
 
   return (tree: any) => {
     const articleElementRegistry =
@@ -155,7 +191,7 @@ export function citationPlugin(options: { citationIndex?: Map<string, number> } 
                   children: [
                     {
                       type: 'text',
-                      value: formatArticleReference(articleElement),
+                      value: formatArticleReference(articleElement, articleReferenceLabels),
                     },
                   ],
                   data: {

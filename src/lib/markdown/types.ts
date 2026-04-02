@@ -7,6 +7,7 @@ import type { MarkdownHeading } from '@/lib/markdown-headings'
 import { resolveMediaAsset } from '@/lib/media'
 
 export type MarkdownRendererProps = {
+  articleReferenceLabels?: Partial<Record<NonBibliographyPrefix, string>>
   citationIndex?: Map<string, number>
   headings?: MarkdownHeading[]
   mediaBySource?: Record<string, MarkdownMediaLike>

@@ -42,7 +42,6 @@ export function buildArticleElementProperties(meta: ArticleElementMeta) {
     'data-article-anchor-id': meta.anchorId ?? undefined,
     'data-article-caption': meta.caption ?? undefined,
     'data-article-kind': meta.kind,
-    'data-article-label': formatArticleReference(meta),
     'data-article-number': String(meta.number),
   }
 }

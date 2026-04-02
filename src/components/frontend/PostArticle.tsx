@@ -300,6 +300,10 @@ export async function PostArticle(props: {
 
           <section className="article-copy" data-post-reading-root="">
             <MarkdownRenderer
+              articleReferenceLabels={{
+                fig: common('figureLabel'),
+                tbl: common('tableLabel'),
+              }}
               citationIndex={citationIndex}
               headings={allHeadings}
               mediaBySource={markdownMediaBySource}

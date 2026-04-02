@@ -25,6 +25,7 @@
     "attachments": "附件",
     "draftLabel": "草稿",
     "editorialStatus": "编辑整理",
+    "figureLabel": "图",
     "latestSnapshot": "最新快照",
     "localeNavigation": "语言",
     "machineStatus": "机器翻译",
@@ -39,6 +40,7 @@
     "references": "参考文献",
     "siteLabel": "ZBlog",
     "tags": "标签",
+    "tableLabel": "表",
     "unknownDate": "日期未知",
     "unscheduled": "未安排",
     "versionID": "版本 ID"

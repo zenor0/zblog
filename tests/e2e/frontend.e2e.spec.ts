@@ -16,11 +16,13 @@ test.describe('Frontend', () => {
 
     const heading = page.locator('h1').first()
     const seededPost = page.getByRole('link', { name: 'Seed Post with Citations and Version History' })
+    const showcasePost = page.getByRole('link', { name: 'Markdown Feature Showcase' })
 
     await expect(heading).toBeVisible()
     await expect(page.getByRole('link', { name: '简体中文' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'English' })).toBeVisible()
     await expect(seededPost).toBeVisible()
+    await expect(showcasePost).toBeVisible()
   })
 
   test('can render a seeded article with references and history link', async ({ page }) => {
@@ -43,5 +45,19 @@ test.describe('Frontend', () => {
     await expect(page.locator('h1').first()).toHaveText('版本历史')
     await expect(page.getByText(/版本 ID/).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Content' }).first()).toBeVisible()
+  })
+
+  test('can render the seeded markdown showcase article', async ({ page }) => {
+    await page.goto('http://localhost:3000/zh-hans/posts/seed-markdown-showcase')
+
+    await expect(page.locator('h1').first()).toHaveText('Markdown 能力展示文章')
+    await expect(page.locator('figure#ref-fig-seed-hero')).toBeVisible()
+    await expect(page.locator('figure#ref-tbl-feature-matrix')).toBeVisible()
+    await expect(page.locator('a[href="#ref-fig-seed-hero"]')).toContainText('图 1')
+    await expect(page.locator('a[href="#ref-tbl-feature-matrix"]')).toContainText('表 1')
+    await expect(page.locator('[data-markdown-component="notice-card"]')).toBeVisible()
+    await expect(page.locator('[data-markdown-component="feature-grid"]')).toBeVisible()
+    await expect(page.locator('pre[data-language="tsx"]')).toBeVisible()
+    await expect(page.locator('summary')).toContainText('参考文献')
   })
 })
