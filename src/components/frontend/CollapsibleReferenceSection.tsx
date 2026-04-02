@@ -72,18 +72,20 @@ export function CollapsibleReferenceSection(props: CollapsibleReferenceSectionPr
 
   return (
     <details
-      className="rounded-xl border border-border bg-muted/20"
+      className="border border-border bg-muted/12"
       id="references"
       onToggle={(event) => setOpen((event.currentTarget as HTMLDetailsElement).open)}
       open={open}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 sm:px-5 [&::-webkit-details-marker]:hidden">
         <span className="flex min-w-0 items-center gap-3">
-          <span className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground/80">
+          <span className="flex size-9 items-center justify-center border border-border bg-background text-foreground/80">
             <LibraryBigIcon className="size-4" />
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-sm font-semibold text-foreground sm:text-base">{label}</span>
+            <span className="font-serif text-lg tracking-[-0.02em] text-foreground sm:text-xl">
+              {label}
+            </span>
             <span className="text-xs text-muted-foreground sm:text-sm">{countLabel}</span>
           </span>
         </span>
@@ -92,7 +94,7 @@ export function CollapsibleReferenceSection(props: CollapsibleReferenceSectionPr
         />
       </summary>
 
-      <div className="border-t px-4 py-4 sm:px-5">{children}</div>
+      <div className="border-t border-border px-4 py-4 sm:px-5">{children}</div>
     </details>
   )
 }

@@ -1,8 +1,5 @@
 import Link from 'next/link'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import type { SiteSettings } from '@/lib/site-settings'
 
 function hasText(value: null | string | undefined): value is string {
@@ -30,74 +27,66 @@ export function SiteFooter(props: { settings: SiteSettings }) {
   }
 
   return (
-    <footer className="mt-12 border-t border-border/70">
-      <div className="page-frame py-8 sm:py-10">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-2">
-              <p className="section-kicker">{settings.siteName}</p>
-              {hasText(note) ? (
-                <p className="font-serif text-xl leading-8 tracking-[-0.02em] text-foreground/88 sm:text-2xl">
-                  {note}
-                </p>
-              ) : null}
-            </div>
-
-            {metaItems.length ? (
-              <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                {metaItems.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
+    <footer className="mt-16 border-t border-border" data-site-footer="">
+      <div className="page-frame py-10 sm:py-14">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+          <div className="flex flex-col gap-3">
+            <p className="section-kicker">{settings.siteName}</p>
+            {hasText(note) ? (
+              <p className="max-w-2xl font-serif text-2xl leading-9 tracking-[-0.025em] text-foreground/90 sm:text-3xl">
+                {note}
+              </p>
             ) : null}
           </div>
 
-          {records.length ? (
-            <div className="flex flex-wrap gap-2">
-              {records.map((item) => {
-                const content = (
-                  <Badge variant="outline">
-                    {item.label}: {item.value}
-                  </Badge>
-                )
-
-                return hasText(item.href) ? (
-                  <Link
-                    href={item.href}
-                    key={item.id ?? `${item.label}-${item.value}`}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <div key={item.id ?? `${item.label}-${item.value}`}>{content}</div>
-                )
-              })}
+          {metaItems.length ? (
+            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+              {metaItems.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
             </div>
           ) : null}
-
-          {links.length ? (
-            <>
-              <Separator />
-              <div className="flex flex-wrap gap-1">
-                {links.map((item) => (
-                  <Button
-                    asChild
-                    className="px-0"
-                    key={item.id ?? `${item.label}-${item.href}`}
-                    size="sm"
-                    variant="link"
-                  >
-                    <Link href={item.href} rel="noreferrer" target="_blank">
-                      {item.label}
-                    </Link>
-                  </Button>
-                ))}
-              </div>
-            </>
-          ) : null}
         </div>
+
+        {records.length ? (
+          <dl className="mt-8 grid gap-x-8 gap-y-3 border-t border-border pt-6 sm:grid-cols-2">
+            {records.map((item) => {
+              const value = hasText(item.href) ? (
+                <Link href={item.href} rel="noreferrer" target="_blank">
+                  {item.value}
+                </Link>
+              ) : (
+                item.value
+              )
+
+              return (
+                <div
+                  className="flex items-baseline justify-between gap-4 border-b border-border pb-2"
+                  key={item.id ?? `${item.label}-${item.value}`}
+                >
+                  <dt className="editorial-meta">{item.label}</dt>
+                  <dd className="text-sm text-foreground/82">{value}</dd>
+                </div>
+              )
+            })}
+          </dl>
+        ) : null}
+
+        {links.length ? (
+          <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-6">
+            {links.map((item) => (
+              <Link
+                className="editorial-link no-underline"
+                href={item.href}
+                key={item.id ?? `${item.label}-${item.href}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
       </div>
     </footer>
   )

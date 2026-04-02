@@ -1,11 +1,8 @@
 import Link from 'next/link'
 import {
   ArrowLeftIcon,
-  Clock3Icon,
   FileWarningIcon,
-  HistoryIcon,
   LanguagesIcon,
-  PaperclipIcon,
   SparklesIcon,
   TriangleAlertIcon,
 } from 'lucide-react'
@@ -17,9 +14,7 @@ import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { describeBibliographyEntry } from '@/lib/bibliography'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/lib/markdown'
 import { extractMarkdownHeadings } from '@/lib/markdown-headings'
@@ -167,15 +162,16 @@ export async function PostArticle(props: {
   return (
     <div className="page-frame frontend-shell">
       <div
-        className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between"
+        className="mb-8 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between"
         data-embedded-hidden="true"
       >
-        <Button asChild className="w-fit" size="sm" variant="ghost">
-          <Link href={backHref}>
-            <ArrowLeftIcon data-icon="inline-start" />
-            {backLabel}
-          </Link>
-        </Button>
+        <Link
+          className="editorial-meta inline-flex w-fit items-center gap-2 transition-colors hover:text-foreground"
+          href={backHref}
+        >
+          <ArrowLeftIcon className="size-4" />
+          {backLabel}
+        </Link>
 
         <LocaleSwitcher
           activeLocale={locale}
@@ -186,37 +182,30 @@ export async function PostArticle(props: {
 
       <article
         className={cn(
-          'grid gap-6',
-          tocHeadings.length > 0 && 'xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-8',
+          'grid gap-10',
+          tocHeadings.length > 0 && 'xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-10',
         )}
+        data-article-layout=""
       >
-        <div className="flex min-w-0 flex-col gap-6">
-          <header className="flex flex-col gap-5 border-b pb-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">
+        <div className="flex min-w-0 flex-col gap-8" data-article-reading-column="">
+          <header
+            className="flex flex-col gap-6 border-b border-border pb-10"
+            data-article-frontmatter=""
+          >
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              <span>
                 {formatLongDate({
                   fallback: common('unscheduled'),
                   locale: resolved.resolvedLocale,
                   value: post.publishedAt ?? post.updatedAt,
                 })}
-              </Badge>
-              <Badge variant="secondary">
-                <Clock3Icon />
-                {article('readingTime', {
-                  minutes: estimateReadingMinutes(post.content),
-                })}
-              </Badge>
-              <Badge variant="outline">
-                <LanguagesIcon />
-                {getLocaleLabel(resolved.resolvedLocale)}
-              </Badge>
+              </span>
+              <span>{article('readingTime', { minutes: estimateReadingMinutes(post.content) })}</span>
+              <span>{getLocaleLabel(resolved.resolvedLocale)}</span>
               {historyHref ? (
-                <Button asChild size="sm" variant="ghost">
-                  <Link href={historyHref}>
-                    <HistoryIcon data-icon="inline-start" />
-                    {article('versionHistory')}
-                  </Link>
-                </Button>
+                <Link className="editorial-link no-underline" href={historyHref}>
+                  {article('versionHistory')}
+                </Link>
               ) : null}
             </div>
 
@@ -224,11 +213,11 @@ export async function PostArticle(props: {
               <p className="section-kicker">
                 {usedDraftAccess ? article('previewTitle') : common('publishedLabel')}
               </p>
-              <h1 className="max-w-4xl font-serif text-4xl leading-none tracking-[-0.045em] sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-4xl font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl lg:text-7xl">
                 {displayTitle}
               </h1>
               {post.excerpt ? (
-                <p className="max-w-3xl text-base leading-8 text-foreground/68 sm:text-lg">
+                <p className="max-w-3xl text-base leading-8 text-foreground/72 sm:text-lg">
                   {post.excerpt}
                 </p>
               ) : null}
@@ -265,11 +254,9 @@ export async function PostArticle(props: {
                   <AlertTitle>{article('bibliographyMismatchTitle')}</AlertTitle>
                   <AlertDescription className="gap-3">
                     <p>{article('bibliographyMismatchIntro')}</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {missingCitationKeys.map((key) => (
-                        <Badge key={key} variant="outline">
-                          {key}
-                        </Badge>
+                        <span key={key}>{key}</span>
                       ))}
                     </div>
                   </AlertDescription>
@@ -279,7 +266,7 @@ export async function PostArticle(props: {
           ) : null}
 
           {heroImage?.url ? (
-            <figure className="flex flex-col gap-3 border-b pb-8">
+            <figure className="flex flex-col gap-3 border-b border-border pb-10">
               <MediaSurface
                 alt={heroImage.alt || displayTitle}
                 loading="eager"
@@ -298,7 +285,7 @@ export async function PostArticle(props: {
             </figure>
           ) : null}
 
-          <section className="article-copy" data-post-reading-root="">
+          <section className="article-copy" data-article-body="" data-post-reading-root="">
             <MarkdownRenderer
               articleReferenceLabels={{
                 fig: common('figureLabel'),
@@ -312,18 +299,18 @@ export async function PostArticle(props: {
           </section>
 
           {hasSupplementaryContent ? (
-            <div className="flex flex-col gap-8 border-t pt-8">
+            <div
+              className="flex flex-col gap-10 border-t border-border pt-10"
+              data-article-supplementary=""
+            >
               {post.tags?.length ? (
                 <section className="flex flex-col gap-3">
-                  <h2 className="flex items-center gap-2 text-base font-medium">
-                    <SparklesIcon />
-                    {common('tags')}
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="section-kicker">{common('tags')}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                     {post.tags.map((tag) => (
-                      <Badge key={tag.id ?? tag.value} variant="secondary">
+                      <span key={tag.id ?? tag.value}>
                         {tag.value}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 </section>
@@ -331,12 +318,14 @@ export async function PostArticle(props: {
 
               {attachments.length ? (
                 <section className="flex flex-col gap-3">
-                  <h2 className="flex items-center gap-2 text-base font-medium">
-                    <PaperclipIcon />
-                    {common('attachments')}
-                  </h2>
-                  <div className="flex flex-col">
-                    {attachments.map((attachment, index) => {
+                  <div className="flex flex-col gap-1">
+                    <p className="section-kicker">{common('attachments')}</p>
+                    <h2 className="font-serif text-2xl tracking-[-0.02em] text-foreground">
+                      {common('attachments')}
+                    </h2>
+                  </div>
+                  <div className="flex flex-col divide-y divide-border">
+                    {attachments.map((attachment) => {
                       const file = attachment.file as Exclude<typeof attachment.file, number>
                       const asset = resolveMediaAsset({
                         alt: attachment.label || file.alt || file.filename,
@@ -350,41 +339,35 @@ export async function PostArticle(props: {
                         asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
 
                       return (
-                        <div key={attachment.id ?? file.id}>
-                          {index > 0 ? <Separator /> : null}
-                          <a
-                            className="group flex flex-col gap-4 py-4 transition-colors hover:text-primary sm:flex-row"
-                            href={file.url ?? '#'}
-                            rel="noreferrer"
-                            target="_blank"
-                          >
-                            <div className="sm:w-28 sm:flex-none">
-                              <MediaSurface
-                                alt={attachment.label || file.alt || file.filename}
-                                asset={asset}
-                                variant="attachment"
-                              />
-                            </div>
-                            <span className="flex min-w-0 flex-1 flex-col gap-2">
-                              <span className="flex flex-wrap items-center gap-2">
-                                <Badge variant="outline">{typeLabel}</Badge>
-                                {file.filename ? (
-                                  <span className="truncate text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                                    {file.filename}
-                                  </span>
-                                ) : null}
-                              </span>
-                              <span className="font-medium leading-6 text-foreground transition-colors group-hover:text-primary">
-                                {attachment.label || file.filename || file.alt}
-                              </span>
-                              <MediaDetails
-                                caption={attachmentDescription}
-                                credit={file.credit}
-                                creditPrefix={common('mediaCredit')}
-                              />
+                        <a
+                          className="group grid gap-4 py-4 transition-colors hover:text-foreground sm:grid-cols-[7rem_minmax(0,1fr)]"
+                          href={file.url ?? '#'}
+                          key={attachment.id ?? file.id}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          <div className="sm:w-28 sm:flex-none">
+                            <MediaSurface
+                              alt={attachment.label || file.alt || file.filename}
+                              asset={asset}
+                              variant="attachment"
+                            />
+                          </div>
+                          <span className="flex min-w-0 flex-1 flex-col gap-2">
+                            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                              <span>{typeLabel}</span>
+                              {file.filename ? <span className="truncate">{file.filename}</span> : null}
                             </span>
-                          </a>
-                        </div>
+                            <span className="font-serif text-xl tracking-[-0.02em] text-foreground">
+                              {attachment.label || file.filename || file.alt}
+                            </span>
+                            <MediaDetails
+                              caption={attachmentDescription}
+                              credit={file.credit}
+                              creditPrefix={common('mediaCredit')}
+                            />
+                          </span>
+                        </a>
                       )
                     })}
                   </div>
@@ -393,6 +376,7 @@ export async function PostArticle(props: {
 
               {bibliographyEntries.length ? (
                 <section className="flex flex-col gap-3">
+                  <p className="section-kicker">{common('references')}</p>
                   <CollapsibleReferenceSection
                     countLabel={article('referencesCount', { count: bibliographyEntries.length })}
                     label={common('references')}
@@ -457,7 +441,7 @@ export async function PostArticle(props: {
                                       <span key={`${entry.citationKey}-${link.label}`}>
                                         {linkIndex > 0 ? <span className="px-1.5 text-border">·</span> : null}
                                         <a
-                                          className="text-primary wrap-anywhere underline decoration-border/80 underline-offset-3 transition-colors hover:text-primary/80"
+                                          className="editorial-link wrap-anywhere no-underline"
                                           href={link.href}
                                           rel="noreferrer"
                                           target="_blank"
@@ -489,7 +473,7 @@ export async function PostArticle(props: {
         </div>
 
         {tocHeadings.length ? (
-          <aside className="border-t pt-8 xl:sticky xl:top-6 xl:self-start xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+          <aside className="xl:sticky xl:top-8 xl:self-start">
             <PostTableOfContents
               headings={tocHeadings}
               label={article('tableOfContents')}

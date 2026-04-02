@@ -13,6 +13,11 @@ test.describe('Frontend', () => {
 
     await expect(page).toHaveURL(/http:\/\/localhost:3000\/(en|zh-hans)$/)
     await expect(page).toHaveTitle(/ZBlog/)
+    await expect(page.locator('[data-editorial-shell="true"]')).toBeVisible()
+    await expect(page.locator('[data-home-hero]')).toBeVisible()
+    await expect(page.locator('[data-home-featured-post]')).toBeVisible()
+    await expect(page.locator('[data-home-post-list]')).toBeVisible()
+    await expect(page.locator('[data-home-post-list] article').first()).toBeVisible()
 
     const heading = page.locator('h1').first()
     const seededPost = page.getByRole('link', { name: 'Seed Post with Citations and Version History' })
@@ -29,6 +34,11 @@ test.describe('Frontend', () => {
     await page.goto('http://localhost:3000/zh-hans/posts/seed-citation-demo')
 
     await expect(page.locator('h1').first()).toHaveText('带引用与版本历史的示例文章（修订）')
+    await expect(page.locator('[data-article-frontmatter]')).toBeVisible()
+    await expect(page.locator('[data-article-reading-column]')).toBeVisible()
+    await expect(page.locator('[data-article-supplementary]')).toBeVisible()
+    await expect(page.locator('[data-toc-rail]')).toBeVisible()
+    await expect(page.locator('[data-post-reading-root]')).toBeVisible()
     await expect(page.getByRole('link', { name: '版本历史' })).toBeVisible()
     await expect(page.getByRole('heading', { name: '目录' })).toBeVisible()
     await expect(page.locator('summary')).toContainText('参考文献')
