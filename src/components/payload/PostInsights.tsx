@@ -1,33 +1,45 @@
-import type { Media, Post } from '@/payload-types'
+import type { Post } from '@/payload-types'
 import type { AppLocale } from '@/lib/locales'
 import type { UIFieldServerComponent, UIFieldServerProps } from 'payload'
 
-import { defaultLocale, getLocaleLabel, normalizeLocale, supportedLocales } from '@/lib/locales'
+import { defaultLocale, normalizeLocale, supportedLocales } from '@/lib/locales'
+import {
+  buildContentAssetSummary,
+  buildPublishingSnapshot,
+  formatStatus,
+  getCoverageBadgeLabel,
+  getCoverageTone,
+  getHeroImage,
+  getLocaleCoverage,
+  getLocaleNote,
+  getPreviewURL,
+  getStatusTone,
+  summarizeLocaleCoverage,
+  type LocaleInsight,
+  type LocaleSnapshot,
+} from '@/components/payload/postOverviewSummary'
 
 import './post-insights.scss'
 
-type LocaleSnapshot = Pick<
+type RelatedSummary = Pick<
   Post,
-  'content' | 'title' | 'translatedAt' | 'translatedFromLocale' | 'translationStatus'
+  | '_status'
+  | 'attachments'
+  | 'bibliographyFile'
+  | 'content'
+  | 'excerpt'
+  | 'heroImage'
+  | 'seo'
+  | 'slug'
+  | 'tags'
+  | 'title'
+  | 'updatedAt'
 >
-
-type LocaleCoverage = 'complete' | 'missing' | 'partial'
-
-type LocaleInsight = {
-  code: AppLocale
-  coverage: LocaleCoverage
-  label: string
-  snapshot: LocaleSnapshot | null
-}
-
-type RelatedSummary = Pick<Post, 'attachments' | 'bibliographyFile' | 'heroImage'>
 
 type ResourceSummary = {
   bibliographyFiles: number
   media: number
 }
-
-type HeroImageSummary = Pick<Media, 'alt' | 'caption' | 'credit' | 'previewSVGURL' | 'thumbnailURL' | 'url'>
 
 function getAccessOverride(reqUser: unknown) {
   return reqUser ? ({ overrideAccess: false as const } as const) : {}
@@ -48,166 +60,6 @@ function buildLocalRequest(args: {
   }
 
   return localReq
-}
-
-function hasText(value: null | string | undefined): boolean {
-  return typeof value === 'string' && value.trim().length > 0
-}
-
-function getCoverage(snapshot: LocaleSnapshot | null): LocaleCoverage {
-  const hasTitle = hasText(snapshot?.title)
-  const hasContent = hasText(snapshot?.content)
-
-  if (hasTitle && hasContent) {
-    return 'complete'
-  }
-
-  if (hasTitle || hasContent) {
-    return 'partial'
-  }
-
-  return 'missing'
-}
-
-function getCoverageLabel(coverage: LocaleCoverage): string {
-  switch (coverage) {
-    case 'complete':
-      return 'Complete'
-    case 'partial':
-      return 'Partial'
-    default:
-      return 'Missing'
-  }
-}
-
-function getPresentFieldCount(snapshot: LocaleSnapshot | null): number {
-  return Number(hasText(snapshot?.title)) + Number(hasText(snapshot?.content))
-}
-
-function getCoverageTone(coverage: LocaleCoverage): string {
-  switch (coverage) {
-    case 'complete':
-      return 'success'
-    case 'partial':
-      return 'warning'
-    default:
-      return 'danger'
-  }
-}
-
-function getCoverageBadgeLabel(snapshot: LocaleSnapshot | null): string {
-  const coverage = getCoverage(snapshot)
-  const presentFieldCount = getPresentFieldCount(snapshot)
-
-  return `${getCoverageLabel(coverage)} ${presentFieldCount}/2`
-}
-
-function formatStatus(value: LocaleSnapshot['translationStatus']): string {
-  switch (value) {
-    case 'machine':
-      return 'Machine'
-    case 'original':
-      return 'Original'
-    case 'reviewed':
-      return 'Reviewed'
-    default:
-      return 'Not set'
-  }
-}
-
-function getStatusTone(value: LocaleSnapshot['translationStatus']): string {
-  switch (value) {
-    case 'reviewed':
-      return 'success'
-    case 'machine':
-      return 'warning'
-    case 'original':
-      return 'muted'
-    default:
-      return 'muted'
-  }
-}
-
-function formatDate(value: null | string | undefined, activeLocale: AppLocale): string {
-  if (!value) {
-    return 'Not set'
-  }
-
-  const parsed = new Date(value)
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value
-  }
-
-  return new Intl.DateTimeFormat(activeLocale === 'zh-Hans' ? 'zh-Hans' : 'en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(parsed)
-}
-
-function getBibliographyTitle(value: Post['bibliographyFile']): null | string {
-  if (value && typeof value === 'object' && 'title' in value && typeof value.title === 'string') {
-    return value.title
-  }
-
-  return null
-}
-
-function getHeroImage(value: Post['heroImage']): HeroImageSummary | null {
-  if (!value || typeof value !== 'object') {
-    return null
-  }
-
-  const alt = 'alt' in value && typeof value.alt === 'string' ? value.alt : ''
-  const caption = 'caption' in value && typeof value.caption === 'string' ? value.caption : null
-  const credit = 'credit' in value && typeof value.credit === 'string' ? value.credit : null
-  const previewSVGURL =
-    'previewSVGURL' in value && typeof value.previewSVGURL === 'string' ? value.previewSVGURL : null
-  const thumbnailURL =
-    'thumbnailURL' in value && typeof value.thumbnailURL === 'string' ? value.thumbnailURL : null
-  const url = 'url' in value && typeof value.url === 'string' ? value.url : null
-
-  return {
-    alt,
-    caption,
-    credit,
-    previewSVGURL,
-    thumbnailURL,
-    url,
-  }
-}
-
-function getPreviewURL(heroImage: HeroImageSummary | null): null | string {
-  return heroImage?.previewSVGURL ?? heroImage?.thumbnailURL ?? heroImage?.url ?? null
-}
-
-function getLocaleNote(snapshot: LocaleSnapshot | null, activeLocale: AppLocale): null | string {
-  const parts: string[] = []
-
-  if (snapshot?.translatedFromLocale) {
-    parts.push(`From ${getLocaleLabel(snapshot.translatedFromLocale)}`)
-  }
-
-  if (snapshot?.translatedAt) {
-    parts.push(formatDate(snapshot.translatedAt, activeLocale))
-  }
-
-  if (parts.length === 0) {
-    return null
-  }
-
-  return parts.join(' · ')
-}
-
-function countByCoverage(locales: LocaleInsight[], coverage: LocaleCoverage): number {
-  return locales.filter((locale) => locale.coverage === coverage).length
-}
-
-function countByStatus(
-  locales: LocaleInsight[],
-  status: LocaleSnapshot['translationStatus'],
-): number {
-  return locales.filter((locale) => locale.snapshot?.translationStatus === status).length
 }
 
 async function loadLocaleSnapshot(args: {
@@ -255,9 +107,17 @@ async function loadRelatedSummary(args: {
       req: args.req,
     }),
     select: {
+      _status: true,
       attachments: true,
       bibliographyFile: true,
+      content: true,
+      excerpt: true,
       heroImage: true,
+      seo: true,
+      slug: true,
+      tags: true,
+      title: true,
+      updatedAt: true,
     },
     user: args.req.user,
     ...getAccessOverride(args.req.user),
@@ -314,8 +174,8 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
     return (
       <section className="post-insights">
         <div className="post-insights__empty">
-          <h3>Post insights</h3>
-          <p>Save this post first to inspect locale coverage and related resources.</p>
+          <h3>Post overview</h3>
+          <p>Save this post first to inspect locale coverage, publishing status, and linked resources.</p>
         </div>
       </section>
     )
@@ -335,7 +195,7 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
 
         return {
           code: locale.code,
-          coverage: getCoverage(snapshot),
+          coverage: getLocaleCoverage(snapshot),
           label: locale.label,
           snapshot,
         } satisfies LocaleInsight
@@ -352,19 +212,53 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
     }),
   ])
 
-  const attachmentCount = Array.isArray(references?.attachments) ? references.attachments.length : 0
-  const bibliographyTitle = getBibliographyTitle(references?.bibliographyFile)
+  const activeLocaleInsight = locales.find((locale) => locale.code === activeLocale) ?? null
   const heroImage = getHeroImage(references?.heroImage)
   const heroPreviewURL = getPreviewURL(heroImage)
+  const localeSummary = summarizeLocaleCoverage(locales)
+  const publishingSnapshot = buildPublishingSnapshot({
+    activeLocale,
+    content: activeLocaleInsight?.snapshot?.content ?? references?.content ?? null,
+    excerpt: references?.excerpt ?? null,
+    heroImage: references?.heroImage ?? null,
+    seo: references?.seo ?? null,
+    slug: references?.slug ?? null,
+    status: references?._status ?? null,
+    title: activeLocaleInsight?.snapshot?.title ?? references?.title ?? null,
+    translationStatus: activeLocaleInsight?.snapshot?.translationStatus ?? null,
+    updatedAt: references?.updatedAt ?? null,
+  })
+  const contentAssets = buildContentAssetSummary({
+    attachments: references?.attachments ?? null,
+    bibliographyFile: references?.bibliographyFile ?? null,
+    heroImage: references?.heroImage ?? null,
+    tags: references?.tags ?? null,
+  })
   const totalOwnedResources = resources.bibliographyFiles + resources.media
-
-  const completeCount = countByCoverage(locales, 'complete')
-  const partialCount = countByCoverage(locales, 'partial')
-  const missingCount = countByCoverage(locales, 'missing')
-  const reviewedCount = countByStatus(locales, 'reviewed')
 
   return (
     <section className="post-insights">
+      <section className="post-insights__section">
+        <header className="post-insights__section-header">
+          <div>
+            <h3>Publishing snapshot</h3>
+            <p>Fast checks for the active locale before you edit or publish.</p>
+          </div>
+        </header>
+
+        <div className="post-insights__snapshot-grid">
+          {Object.entries(publishingSnapshot).map(([key, item]) => (
+            <article
+              className={`post-insights__snapshot-card post-insights__snapshot-card--${item.tone}`}
+              key={key}
+            >
+              <span className="post-insights__snapshot-label">{item.label}</span>
+              <strong>{item.value}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="post-insights__section">
         <header className="post-insights__section-header">
           <div>
@@ -372,10 +266,10 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
             <p>Saved draft snapshots for each locale, optimized for quick scanning.</p>
           </div>
           <div className="post-insights__summary-strip">
-            <span className="post-insights__summary-pill">{completeCount} complete</span>
-            <span className="post-insights__summary-pill">{partialCount} partial</span>
-            <span className="post-insights__summary-pill">{missingCount} missing</span>
-            <span className="post-insights__summary-pill">{reviewedCount} reviewed</span>
+            <span className="post-insights__summary-pill">{localeSummary.completeCount} complete</span>
+            <span className="post-insights__summary-pill">{localeSummary.partialCount} partial</span>
+            <span className="post-insights__summary-pill">{localeSummary.missingCount} missing</span>
+            <span className="post-insights__summary-pill">{localeSummary.reviewedCount} reviewed</span>
           </div>
         </header>
 
@@ -425,8 +319,8 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
         <section className="post-insights__section post-insights__section--media">
           <header className="post-insights__section-header">
             <div>
-              <h3>Hero image</h3>
-              <p>Preview of the image currently linked on this locale.</p>
+              <h3>Content assets</h3>
+              <p>Hero image and support material linked to the active locale draft.</p>
             </div>
           </header>
 
@@ -444,56 +338,49 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
           ) : (
             <div className="post-insights__hero-placeholder">
               <strong>No hero image linked</strong>
-              <span>Add a hero image in the sidebar to preview it here.</span>
+              <span>Add a hero image in the edit flow to preview it here.</span>
             </div>
           )}
+
+          <div className="post-insights__metric-list">
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Bibliography</span>
+              <strong>{contentAssets.bibliographyLabel}</strong>
+            </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Attachments</span>
+              <strong>{contentAssets.attachmentCount}</strong>
+            </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Tags</span>
+              <strong>{contentAssets.tagCount}</strong>
+            </div>
+          </div>
         </section>
 
-        <div className="post-insights__stack-grid">
-          <section className="post-insights__section">
-            <header className="post-insights__section-header">
-              <div>
-                <h3>References</h3>
-                <p>Linked assets for the active locale draft.</p>
-              </div>
-            </header>
-
-            <div className="post-insights__metric-list">
-              <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Bibliography</span>
-                <strong>{bibliographyTitle ?? 'None linked'}</strong>
-              </div>
-              <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Attachments</span>
-                <strong>{attachmentCount}</strong>
-              </div>
+        <section className="post-insights__section">
+          <header className="post-insights__section-header">
+            <div>
+              <h3>Owned resources</h3>
+              <p>Reverse-linked resources currently assigned to this post.</p>
             </div>
-          </section>
+          </header>
 
-          <section className="post-insights__section">
-            <header className="post-insights__section-header">
-              <div>
-                <h3>Owned resources</h3>
-                <p>Reverse-linked resources currently assigned to this post.</p>
-              </div>
-            </header>
-
-            <div className="post-insights__metric-list">
-              <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Bibliography files</span>
-                <strong>{resources.bibliographyFiles}</strong>
-              </div>
-              <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Media files</span>
-                <strong>{resources.media}</strong>
-              </div>
-              <div className="post-insights__metric">
-                <span className="post-insights__metric-label">Total owned</span>
-                <strong>{totalOwnedResources}</strong>
-              </div>
+          <div className="post-insights__metric-list">
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Bibliography files</span>
+              <strong>{resources.bibliographyFiles}</strong>
             </div>
-          </section>
-        </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Media files</span>
+              <strong>{resources.media}</strong>
+            </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Total owned</span>
+              <strong>{totalOwnedResources}</strong>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
   )
