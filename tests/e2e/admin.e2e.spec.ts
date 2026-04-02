@@ -67,6 +67,30 @@ async function seedUntitledDraftPreviewPost() {
   }
 }
 
+async function seedAdminLayoutPost() {
+  const payload = await getPayload({ config })
+
+  await payload.delete({
+    collection: 'posts',
+    where: {
+      slug: {
+        equals: 'admin-layout-demo',
+      },
+    },
+  })
+
+  return payload.create({
+    collection: 'posts',
+    data: {
+      content: '# Admin layout demo\n\nBody copy for admin layout assertions.',
+      excerpt: 'Post used to verify the admin information architecture.',
+      slug: 'admin-layout-demo',
+      title: 'Admin Layout Demo',
+    },
+    draft: true,
+  })
+}
+
 async function submitImport(page: Page) {
   const response = await Promise.all([
     page.waitForResponse(
@@ -196,6 +220,34 @@ test.describe('Admin Panel', () => {
       await expect(page.getByRole('link', { name: '退出预览' })).toBeVisible()
     } finally {
       await cleanupPostByID(draftPost.id)
+    }
+  })
+
+  test('post edit view groups fields into overview and edit flows', async () => {
+    const post = await seedAdminLayoutPost()
+
+    try {
+      await page.goto(`http://localhost:3000/admin/collections/posts/${post.id}`)
+
+      const documentPane = page.locator('main')
+      const editTab = documentPane.getByRole('button', { name: 'Edit' })
+      const overviewTab = documentPane.getByRole('button', { name: 'Overview' })
+
+      await expect(editTab).toBeVisible()
+      await expect(overviewTab).toBeVisible()
+
+      await overviewTab.click()
+      await expect(page.getByText('Publishing snapshot')).toBeVisible()
+
+      await editTab.click()
+      await expect(page.getByText('Core Content', { exact: true })).toBeVisible()
+      await expect(page.getByText('Assets & References', { exact: true })).toBeVisible()
+      await expect(page.getByText('Translation', { exact: true })).toBeVisible()
+      await expect(page.getByText('SEO', { exact: true })).toBeVisible()
+      await expect(page.getByText('Managed Resources', { exact: true })).toBeVisible()
+      await expect(page.getByRole('textbox', { name: 'Slug *' })).toBeVisible()
+    } finally {
+      await cleanupPostByID(post.id)
     }
   })
 

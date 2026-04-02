@@ -142,176 +142,244 @@ export const Posts: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
+          label: 'Edit',
           fields: [
             {
-              localized: true,
-              name: 'title',
-              required: true,
-              type: 'text',
-            },
-            {
-              localized: true,
-              name: 'excerpt',
-              type: 'textarea',
-            },
-            {
-              admin: {
-                description:
-                  'Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].',
-                language: 'markdown',
-              },
-              localized: true,
-              name: 'content',
-              required: true,
-              type: 'code',
-            },
-          ],
-          label: 'Content',
-        },
-        {
-          fields: [
-            {
-              admin: {
-                description:
-                  'Link a BibTeX source here. Citation keys used in the current locale content are validated against the stored bibliography text.',
-              },
-              filterOptions: sharedOrCurrentPostOwnedFilter,
-              name: 'bibliographyFile',
-              relationTo: 'bibliography-files',
-              type: 'relationship',
-            },
-            {
-              name: 'attachments',
-              type: 'array',
+              label: 'Core Content',
+              type: 'collapsible',
               fields: [
                 {
-                  filterOptions: sharedOrCurrentPostOwnedFilter,
-                  name: 'file',
-                  relationTo: 'media',
+                  localized: true,
+                  name: 'title',
                   required: true,
-                  type: 'relationship',
-                },
-                {
-                  name: 'label',
                   type: 'text',
                 },
                 {
-                  name: 'description',
+                  localized: true,
+                  name: 'excerpt',
                   type: 'textarea',
                 },
-              ],
-            },
-          ],
-          label: 'References',
-        },
-        {
-          fields: [
-            {
-              localized: true,
-              name: 'translationStatus',
-              type: 'select',
-              defaultValue: 'original',
-              options: [
                 {
-                  label: 'Original',
-                  value: 'original',
-                },
-                {
-                  label: 'Machine translated',
-                  value: 'machine',
-                },
-                {
-                  label: 'Human reviewed',
-                  value: 'reviewed',
+                  admin: {
+                    description:
+                      'Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].',
+                    language: 'markdown',
+                  },
+                  localized: true,
+                  name: 'content',
+                  required: true,
+                  type: 'code',
                 },
               ],
             },
             {
-              admin: {
-                readOnly: true,
-              },
-              localized: true,
-              name: 'translatedFromLocale',
-              type: 'text',
-            },
-            {
-              admin: {
-                date: {
-                  pickerAppearance: 'dayAndTime',
-                },
-                readOnly: true,
-              },
-              localized: true,
-              name: 'translatedAt',
-              type: 'date',
-            },
-            {
-              admin: {
-                readOnly: true,
-              },
-              localized: true,
-              name: 'translationProvider',
-              type: 'text',
-            },
-          ],
-          label: 'Translations',
-        },
-        {
-          fields: [
-            {
-              name: 'seo',
-              type: 'group',
+              label: 'Assets & References',
+              type: 'collapsible',
               fields: [
                 {
-                  name: 'metaTitle',
-                  type: 'text',
-                  admin: {
-                    description:
-                      'Optional SEO title override for the current locale. Leave blank to reuse the post title.',
-                  },
-                  localized: true,
-                  maxLength: 70,
-                  label: 'SEO title',
-                },
-                {
-                  name: 'metaDescription',
-                  type: 'textarea',
-                  admin: {
-                    description:
-                      'Optional SEO description override for the current locale. Leave blank to reuse the excerpt or a summary derived from the post body.',
-                  },
-                  localized: true,
-                  maxLength: 180,
-                  label: 'SEO description',
-                },
-                {
-                  admin: {
-                    description:
-                      'Optional social sharing image override. Leave blank to reuse the hero image, then the site default image.',
-                  },
                   filterOptions: sharedOrCurrentPostOwnedFilter,
-                  name: 'metaImage',
+                  name: 'heroImage',
                   relationTo: 'media',
                   type: 'relationship',
-                  label: 'Social image',
                 },
                 {
-                  name: 'noindex',
-                  type: 'checkbox',
                   admin: {
                     description:
-                      'Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published posts.',
+                      'Link a BibTeX source here. Citation keys used in the current locale content are validated against the stored bibliography text.',
                   },
-                  defaultValue: false,
+                  filterOptions: sharedOrCurrentPostOwnedFilter,
+                  name: 'bibliographyFile',
+                  relationTo: 'bibliography-files',
+                  type: 'relationship',
+                },
+                {
+                  name: 'attachments',
+                  type: 'array',
+                  fields: [
+                    {
+                      filterOptions: sharedOrCurrentPostOwnedFilter,
+                      name: 'file',
+                      relationTo: 'media',
+                      required: true,
+                      type: 'relationship',
+                    },
+                    {
+                      name: 'label',
+                      type: 'text',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              admin: {
+                initCollapsed: true,
+              },
+              label: 'Translation',
+              type: 'collapsible',
+              fields: [
+                {
                   localized: true,
-                  label: 'No index',
+                  name: 'translationStatus',
+                  type: 'select',
+                  defaultValue: 'original',
+                  options: [
+                    {
+                      label: 'Original',
+                      value: 'original',
+                    },
+                    {
+                      label: 'Machine translated',
+                      value: 'machine',
+                    },
+                    {
+                      label: 'Human reviewed',
+                      value: 'reviewed',
+                    },
+                  ],
+                },
+                {
+                  admin: {
+                    initCollapsed: true,
+                  },
+                  label: 'Translation metadata',
+                  type: 'collapsible',
+                  fields: [
+                    {
+                      admin: {
+                        readOnly: true,
+                      },
+                      localized: true,
+                      name: 'translatedFromLocale',
+                      type: 'text',
+                    },
+                    {
+                      admin: {
+                        date: {
+                          pickerAppearance: 'dayAndTime',
+                        },
+                        readOnly: true,
+                      },
+                      localized: true,
+                      name: 'translatedAt',
+                      type: 'date',
+                    },
+                    {
+                      admin: {
+                        readOnly: true,
+                      },
+                      localized: true,
+                      name: 'translationProvider',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              admin: {
+                initCollapsed: true,
+              },
+              label: 'SEO',
+              type: 'collapsible',
+              fields: [
+                {
+                  name: 'seo',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'metaTitle',
+                      type: 'text',
+                      admin: {
+                        description:
+                          'Optional SEO title override for the current locale. Leave blank to reuse the post title.',
+                      },
+                      localized: true,
+                      maxLength: 70,
+                      label: 'SEO title',
+                    },
+                    {
+                      name: 'metaDescription',
+                      type: 'textarea',
+                      admin: {
+                        description:
+                          'Optional SEO description override for the current locale. Leave blank to reuse the excerpt or a summary derived from the post body.',
+                      },
+                      localized: true,
+                      maxLength: 180,
+                      label: 'SEO description',
+                    },
+                    {
+                      admin: {
+                        description:
+                          'Optional social sharing image override. Leave blank to reuse the hero image, then the site default image.',
+                      },
+                      filterOptions: sharedOrCurrentPostOwnedFilter,
+                      name: 'metaImage',
+                      relationTo: 'media',
+                      type: 'relationship',
+                      label: 'Social image',
+                    },
+                    {
+                      name: 'noindex',
+                      type: 'checkbox',
+                      admin: {
+                        description:
+                          'Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published posts.',
+                      },
+                      defaultValue: false,
+                      localized: true,
+                      label: 'No index',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              admin: {
+                initCollapsed: true,
+              },
+              label: 'Managed Resources',
+              type: 'collapsible',
+              fields: [
+                {
+                  name: 'ownedBibliographyFiles',
+                  type: 'join',
+                  collection: 'bibliography-files',
+                  on: 'ownerPost',
+                  defaultLimit: 10,
+                  defaultSort: '-updatedAt',
+                  maxDepth: 0,
+                  admin: {
+                    allowCreate: false,
+                    defaultColumns: ['title', 'filename', 'updatedAt'],
+                  },
+                  label: 'Owned bibliography files',
+                },
+                {
+                  name: 'ownedMedia',
+                  type: 'join',
+                  collection: 'media',
+                  on: 'ownerPost',
+                  defaultLimit: 12,
+                  defaultSort: '-updatedAt',
+                  maxDepth: 0,
+                  admin: {
+                    allowCreate: false,
+                    defaultColumns: ['filename', 'alt', 'updatedAt'],
+                  },
+                  label: 'Owned media',
                 },
               ],
             },
           ],
-          label: 'SEO',
         },
         {
+          label: 'Overview',
           fields: [
             {
               name: 'postInsights',
@@ -322,36 +390,7 @@ export const Posts: CollectionConfig = {
                 },
               },
             },
-            {
-              name: 'ownedBibliographyFiles',
-              type: 'join',
-              collection: 'bibliography-files',
-              on: 'ownerPost',
-              defaultLimit: 10,
-              defaultSort: '-updatedAt',
-              maxDepth: 0,
-              admin: {
-                allowCreate: false,
-                defaultColumns: ['title', 'filename', 'updatedAt'],
-              },
-              label: 'Owned bibliography files',
-            },
-            {
-              name: 'ownedMedia',
-              type: 'join',
-              collection: 'media',
-              on: 'ownerPost',
-              defaultLimit: 12,
-              defaultSort: '-updatedAt',
-              maxDepth: 0,
-              admin: {
-                allowCreate: false,
-                defaultColumns: ['filename', 'alt', 'updatedAt'],
-              },
-              label: 'Owned media',
-            },
           ],
-          label: 'Insights',
         },
       ],
     },
@@ -364,15 +403,6 @@ export const Posts: CollectionConfig = {
       required: true,
       type: 'text',
       unique: true,
-    },
-    {
-      admin: {
-        position: 'sidebar',
-      },
-      filterOptions: sharedOrCurrentPostOwnedFilter,
-      name: 'heroImage',
-      relationTo: 'media',
-      type: 'relationship',
     },
     {
       admin: {
