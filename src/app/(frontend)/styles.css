@@ -217,6 +217,14 @@ html[data-zblog-preview-theme='light'] {
     @apply border-l border-border bg-background shadow-none;
   }
 
+  [data-site-footer] a {
+    @apply text-foreground underline decoration-border/90 underline-offset-[0.22em] transition-colors hover:text-foreground/72;
+  }
+
+  [data-site-footer] dd a {
+    @apply text-foreground/82 hover:text-foreground;
+  }
+
   .md-callout {
     @apply my-8 border border-border bg-muted/42 px-5 py-4 text-sm leading-7 text-foreground/84;
     border-left-width: 0.22rem;
