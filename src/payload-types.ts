@@ -201,6 +201,7 @@ export interface Post {
    * Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].
    */
   content: string;
+  heroImage?: (number | null) | Media;
   /**
    * Store one BibTeX source directly on this post. Structured editing is available for safe, common entries.
    */
@@ -250,7 +251,6 @@ export interface Post {
     totalDocs?: number;
   };
   slug: string;
-  heroImage?: (number | null) | Media;
   tags?:
     | {
         value: string;
@@ -490,6 +490,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   content?: T;
+  heroImage?: T;
   bibliography?:
     | T
     | {
@@ -518,7 +519,6 @@ export interface PostsSelect<T extends boolean = true> {
       };
   ownedMedia?: T;
   slug?: T;
-  heroImage?: T;
   tags?:
     | T
     | {
