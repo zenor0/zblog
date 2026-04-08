@@ -1,0 +1,51 @@
+.post-translation-manager {
+  display: grid;
+  gap: 1rem;
+}
+
+.post-translation-manager__rows {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-translation-manager__row {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-150);
+}
+
+.post-translation-manager__copy,
+.post-translation-manager__actions,
+.post-translation-manager__action-panel,
+.post-translation-manager__action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.post-translation-manager__copy {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.post-translation-manager__action-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.post-translation-manager__action-panel label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+@media (max-width: 900px) {
+  .post-translation-manager__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
