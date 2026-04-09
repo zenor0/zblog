@@ -15,8 +15,33 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@payloadcms/ui', () => ({
-  Button: ({ children, buttonStyle: _buttonStyle, size: _size, ...props }: any) => (
+  Button: ({ children, buttonStyle: _buttonStyle, margin: _margin, size: _size, ...props }: any) => (
     <button {...props}>{children}</button>
+  ),
+  SelectInput: ({ label, onChange, options, value }: any) => (
+    <label>
+      <span>{label}</span>
+      <select
+        aria-label={label}
+        onChange={(event) => {
+          const nextValue = event.target.value
+
+          onChange(
+            nextValue
+              ? options.find((option: { value: string }) => option.value === nextValue) ?? null
+              : null,
+          )
+        }}
+        value={value?.value ?? ''}
+      >
+        <option value="">Select a locale</option>
+        {options.map((option: { label: string; value: string }) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
   ),
   toast: {
     error: mocks.error,

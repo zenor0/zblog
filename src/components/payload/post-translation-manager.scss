@@ -3,6 +3,29 @@
   gap: 1rem;
 }
 
+.post-translation-manager__header,
+.post-translation-manager__empty,
+.post-translation-manager__row,
+.post-translation-manager__action-panel {
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-0);
+}
+
+.post-translation-manager__header h3,
+.post-translation-manager__heading strong {
+  margin: 0;
+}
+
+.post-translation-manager__header p,
+.post-translation-manager__note,
+.post-translation-manager__action-note,
+.post-translation-manager__heading span {
+  margin: 0.35rem 0 0;
+  color: var(--theme-elevation-700);
+}
+
 .post-translation-manager__rows {
   display: grid;
   gap: 0.75rem;
@@ -11,41 +34,69 @@
   padding: 0;
 }
 
-.post-translation-manager__row {
+.post-translation-manager__row-main {
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
   grid-template-columns: minmax(0, 1fr) auto;
-  padding: 1rem;
-  border: 1px solid var(--theme-elevation-150);
+  align-items: start;
 }
 
 .post-translation-manager__copy,
-.post-translation-manager__actions,
-.post-translation-manager__action-panel,
-.post-translation-manager__action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.post-translation-manager__copy {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
+.post-translation-manager__action,
 .post-translation-manager__action-panel {
   display: grid;
   gap: 0.75rem;
 }
 
-.post-translation-manager__action-panel label {
-  display: grid;
-  gap: 0.35rem;
+.post-translation-manager__heading {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.post-translation-manager__heading span {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.post-translation-manager__pills,
+.post-translation-manager__actions,
+.post-translation-manager__action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.post-translation-manager__actions {
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.post-translation-manager__action {
+  align-items: stretch;
+}
+
+.post-translation-manager__action-panel {
+  min-width: min(22rem, 100%);
+}
+
+.post-translation-manager__action-panel .field-type {
+  margin: 0;
+}
+
+.post-translation-manager__action-note {
+  margin: 0;
 }
 
 @media (max-width: 900px) {
-  .post-translation-manager__row {
+  .post-translation-manager__row-main {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .post-translation-manager__actions {
+    justify-content: flex-start;
   }
 }

@@ -6,16 +6,17 @@
 .bibliography-field__header,
 .bibliography-field__warning,
 .bibliography-field__empty,
-.bibliography-field__entry,
-.bibliography-field__meta {
-  display: grid;
-  gap: 0.75rem;
+.bibliography-field__upload-panel {
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-0);
 }
 
 .bibliography-field__header,
-.bibliography-field__entry-header,
 .bibliography-field__people-header,
-.bibliography-field__mode-switch {
+.bibliography-field__mode-switch,
+.bibliography-field__upload-panel {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -31,35 +32,62 @@
 }
 
 .bibliography-field__header h3,
-.bibliography-field__entry-header strong {
+.bibliography-field__entry-heading strong {
   margin: 0;
 }
 
 .bibliography-field__header p,
+.bibliography-field__upload-copy p,
 .bibliography-field__people-empty,
-.bibliography-field__empty span {
+.bibliography-field__empty span,
+.bibliography-field__entry-heading span,
+.bibliography-field__note {
   margin: 0.35rem 0 0;
   color: var(--theme-elevation-700);
 }
 
-.bibliography-field__entry-toggle,
-.bibliography-field__upload {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  color: var(--theme-text);
-  cursor: pointer;
-  font: inherit;
-  padding: 0;
-  text-align: left;
+.bibliography-field__meta,
+.bibliography-field__entries,
+.bibliography-field__entry-body,
+.bibliography-field__people {
+  display: grid;
+  gap: 1rem;
 }
 
 .bibliography-field__meta {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
+  align-items: start;
 }
 
-.bibliography-field__meta-field,
+.bibliography-field__meta > .field-type {
+  margin: 0;
+}
+
+.bibliography-field__upload-panel {
+  min-height: 100%;
+}
+
+.bibliography-field__upload-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.bibliography-field__upload-copy span {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-600);
+}
+
+.bibliography-field__upload-copy strong {
+  display: block;
+  color: var(--theme-text);
+}
+
+.bibliography-field__file-input {
+  display: none;
+}
+
 .bibliography-field__raw,
 .bibliography-field__grid label,
 .bibliography-field__person label {
@@ -78,9 +106,27 @@
   font-family: var(--font-mono);
 }
 
-.bibliography-field__entry-body,
-.bibliography-field__entries,
-.bibliography-field__people {
+.bibliography-field__entry.collapsible {
+  margin: 0;
+}
+
+.bibliography-field__entry .collapsible__header-wrap,
+.bibliography-field__entry-summary,
+.bibliography-field__entry-heading {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.bibliography-field__entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--theme-elevation-700);
+}
+
+.bibliography-field__entry .collapsible__content {
   display: grid;
   gap: 1rem;
 }
@@ -109,8 +155,11 @@
 
 @media (max-width: 900px) {
   .bibliography-field__header,
-  .bibliography-field__entry-header,
   .bibliography-field__people-header,
+  .bibliography-field__upload-panel {
+    display: grid;
+  }
+
   .bibliography-field__meta,
   .bibliography-field__grid,
   .bibliography-field__person {

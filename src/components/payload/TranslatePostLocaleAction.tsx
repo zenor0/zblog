@@ -1,12 +1,28 @@
 'use client'
 
-import { Button, toast, useConfig } from '@payloadcms/ui'
+import { Button, SelectInput, toast, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
 type SourceOption = {
   code: string
   label: string
+}
+
+function getSelectedLocaleValue(selectedOption: unknown): string {
+  if (!selectedOption || Array.isArray(selectedOption)) {
+    return ''
+  }
+
+  if (
+    typeof selectedOption === 'object' &&
+    'value' in selectedOption &&
+    typeof selectedOption.value === 'string'
+  ) {
+    return selectedOption.value
+  }
+
+  return ''
 }
 
 type TranslatePostLocaleActionProps = {
@@ -74,6 +90,7 @@ export function TranslatePostLocaleAction(props: TranslatePostLocaleActionProps)
     <div className="post-translation-manager__action">
       <Button
         buttonStyle="secondary"
+        margin={false}
         onClick={() => setIsOpen((current) => !current)}
         size="small"
         type="button"
@@ -82,23 +99,31 @@ export function TranslatePostLocaleAction(props: TranslatePostLocaleActionProps)
       </Button>
 
       {isOpen ? (
-        <div className="post-translation-manager__action-panel">
-          <label>
-            <span>Source locale</span>
-            <select onChange={(event) => setSourceLocale(event.target.value)} value={sourceLocale}>
-              <option value="">Select a locale</option>
-              {availableSources.map((option) => (
-                <option key={option.code} value={option.code}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+        <div className="post-translation-manager__action-panel" data-popup-prevent-close>
+          <p className="post-translation-manager__action-note">
+            Copy the current article structure and translated values from another locale version.
+          </p>
+
+          <SelectInput
+            isClearable={false}
+            label="Source locale"
+            name={`translate-${props.id}-${props.targetLocale}-source`}
+            onChange={(selectedOption: unknown) => setSourceLocale(getSelectedLocaleValue(selectedOption))}
+            options={availableSources.map((option) => ({
+              label: option.label,
+              value: option.code,
+            }))}
+            path={`translate-${props.id}-${props.targetLocale}-source`}
+            placeholder="Select a locale"
+            readOnly={isLoading}
+            value={sourceLocale}
+          />
 
           <div className="post-translation-manager__action-buttons">
             <Button
               buttonStyle="primary"
               disabled={!sourceLocale || isLoading}
+              margin={false}
               onClick={() => void handleTranslate()}
               size="small"
               type="button"
@@ -108,6 +133,7 @@ export function TranslatePostLocaleAction(props: TranslatePostLocaleActionProps)
 
             <Button
               buttonStyle="secondary"
+              margin={false}
               onClick={() => {
                 setIsOpen(false)
                 setSourceLocale('')

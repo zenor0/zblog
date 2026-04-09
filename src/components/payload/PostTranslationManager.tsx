@@ -1,5 +1,6 @@
 import type { UIFieldServerComponent, UIFieldServerProps } from 'payload'
 
+import { Button, Pill } from '@payloadcms/ui'
 import { defaultLocale, normalizeLocale, supportedLocales, type AppLocale } from '@/lib/locales'
 import { buildTranslationLocaleRow } from '@/components/payload/postTranslationSummary'
 import { TranslatePostLocaleAction } from '@/components/payload/TranslatePostLocaleAction'
@@ -25,6 +26,31 @@ function buildLocalRequest(args: {
   }
 
   return localReq
+}
+
+function getCompletionPillStyle(completedFields: number) {
+  if (completedFields >= 3) {
+    return 'success' as const
+  }
+
+  if (completedFields > 0) {
+    return 'warning' as const
+  }
+
+  return 'light' as const
+}
+
+function getTranslationStatusPillStyle(status: string | null | undefined) {
+  switch (status) {
+    case 'reviewed':
+      return 'success' as const
+    case 'machine':
+      return 'warning' as const
+    case 'original':
+      return 'dark' as const
+    default:
+      return 'light' as const
+  }
 }
 
 export const PostTranslationManager: UIFieldServerComponent = async ({ id, req }) => {
@@ -81,34 +107,80 @@ export const PostTranslationManager: UIFieldServerComponent = async ({ id, req }
       <header className="post-translation-manager__header">
         <div>
           <h3>Translation management</h3>
-          <p>Review every locale version and trigger translations without switching the admin locale.</p>
+          <p>
+            Review every locale version and trigger translations without switching the admin
+            locale.
+          </p>
         </div>
       </header>
 
       <ul className="post-translation-manager__rows">
         {rows.map((row) => (
           <li className="post-translation-manager__row" key={row.code}>
-            <div className="post-translation-manager__copy">
-              <strong>{row.label}</strong>
-              <span>{row.completionLabel}</span>
-              <span>{row.translationStatusLabel}</span>
-              {row.translationNote ? <span>{row.translationNote}</span> : null}
-            </div>
+            <div className="post-translation-manager__row-main">
+              <div className="post-translation-manager__copy">
+                <div className="post-translation-manager__heading">
+                  <strong>{row.label}</strong>
+                  <span>{row.code}</span>
+                </div>
 
-            <div className="post-translation-manager__actions">
-              {row.isDefault ? <span className="post-translation-manager__badge">Default</span> : null}
-              {row.isActive ? <span className="post-translation-manager__badge">Active</span> : null}
-              <a href={`${adminRoute}/collections/posts/${id}?locale=${row.code}`}>Edit locale</a>
-              <TranslatePostLocaleAction
-                collectionSlug="posts"
-                id={id}
-                sourceOptions={rows.map((item) => ({
-                  code: item.code,
-                  label: item.label,
-                }))}
-                targetLabel={row.label}
-                targetLocale={row.code}
-              />
+                <div className="post-translation-manager__pills">
+                  <Pill
+                    pillStyle={getCompletionPillStyle(row.completedFields)}
+                    size="small"
+                  >
+                    {row.completionLabel} translated
+                  </Pill>
+                  <Pill
+                    pillStyle={getTranslationStatusPillStyle(row.snapshot?.translationStatus)}
+                    size="small"
+                  >
+                    {row.translationStatusLabel}
+                  </Pill>
+                  {row.isDefault ? (
+                    <Pill pillStyle="light-gray" size="small">
+                      Default
+                    </Pill>
+                  ) : null}
+                  {row.isActive ? (
+                    <Pill pillStyle="light-gray" size="small">
+                      Active
+                    </Pill>
+                  ) : null}
+                </div>
+
+                {row.translationNote ? (
+                  <p className="post-translation-manager__note">{row.translationNote}</p>
+                ) : (
+                  <p className="post-translation-manager__note">
+                    {row.completedFields === 0
+                      ? 'No translated fields yet.'
+                      : 'Locale content is available and ready for review.'}
+                  </p>
+                )}
+              </div>
+
+              <div className="post-translation-manager__actions">
+                <Button
+                  buttonStyle="secondary"
+                  el="link"
+                  margin={false}
+                  size="small"
+                  to={`${adminRoute}/collections/posts/${id}?locale=${row.code}`}
+                >
+                  Edit locale
+                </Button>
+                <TranslatePostLocaleAction
+                  collectionSlug="posts"
+                  id={id}
+                  sourceOptions={rows.map((item) => ({
+                    code: item.code,
+                    label: item.label,
+                  }))}
+                  targetLabel={row.label}
+                  targetLocale={row.code}
+                />
+              </div>
             </div>
           </li>
         ))}

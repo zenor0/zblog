@@ -2,6 +2,32 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
+vi.mock('@payloadcms/ui', () => ({
+  Button: ({
+    children,
+    buttonStyle: _buttonStyle,
+    el,
+    margin: _margin,
+    size: _size,
+    to,
+    url,
+    ...props
+  }: {
+    children: React.ReactNode
+    buttonStyle?: string
+    el?: string
+    margin?: boolean
+    size?: string
+    to?: string
+    url?: string
+  }) =>
+    el === 'link'
+      ? React.createElement('a', { href: to || url, ...props }, children)
+      : React.createElement('button', props, children),
+  Pill: ({ children, pillStyle }: { children: React.ReactNode; pillStyle?: string }) =>
+    React.createElement('span', { 'data-pill-style': pillStyle || 'light' }, children),
+}))
+
 vi.mock('@/components/payload/TranslatePostLocaleAction', () => ({
   TranslatePostLocaleAction: ({ targetLocale }: { targetLocale: string }) => (
     React.createElement('button', { type: 'button' }, `Translate ${targetLocale}`)
@@ -28,7 +54,7 @@ describe('PostTranslationManager', () => {
     expect(markup).toContain('Translation management')
   })
 
-  it('renders every locale with completion and edit links', async () => {
+  it('renders every locale with completion pills and edit links', async () => {
     const findByID = vi
       .fn()
       .mockResolvedValueOnce({
@@ -72,6 +98,7 @@ describe('PostTranslationManager', () => {
     expect(markup).toContain('Translation management')
     expect(markup).toContain('English')
     expect(markup).toContain('2/3')
+    expect(markup).toContain('data-pill-style=')
     expect(markup).toContain('/admin/collections/posts/42?locale=en')
   })
 })
