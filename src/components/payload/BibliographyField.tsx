@@ -3,13 +3,10 @@
 import type { GroupFieldClientComponent } from 'payload'
 import type { BibliographyName, EditableBibliographyEntry } from '@/lib/bibliography'
 
-import { useField } from '@payloadcms/ui'
+import { Button, useField } from '@payloadcms/ui'
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 
-import {
-  parseEditableBibliography,
-  serializeEditableBibliography,
-} from '@/lib/bibliography'
+import { parseEditableBibliography, serializeEditableBibliography } from '@/lib/bibliography'
 
 import './bibliography-field.scss'
 
@@ -104,6 +101,10 @@ function normalizeEntry(entry: EditableBibliographyEntry): EditableBibliographyE
   }
 }
 
+function getEntryStateKey(entry: EditableBibliographyEntry, entryIndex: number): string {
+  return `${entry.citationKey || `entry-${entryIndex + 1}`}-${entryIndex}`
+}
+
 export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
   const sourcePath = `${path}.source`
   const filenamePath = `${path}.filename`
@@ -111,12 +112,30 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
   const filenameField = useField<string>({ path: filenamePath })
   const [mode, setMode] = useState<Mode>('structured')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const deferredSource = useDeferredValue(typeof sourceField.value === 'string' ? sourceField.value : '')
+  const deferredSource = useDeferredValue(
+    typeof sourceField.value === 'string' ? sourceField.value : '',
+  )
   const parsed = useMemo(() => parseEditableBibliography(deferredSource), [deferredSource])
-  const [entries, setEntries] = useState<EditableBibliographyEntry[]>(parsed.entries.map(cloneEntry))
+  const [entries, setEntries] = useState<EditableBibliographyEntry[]>(
+    parsed.entries.map(cloneEntry),
+  )
+  const [expandedEntries, setExpandedEntries] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     setEntries(parsed.entries.map(cloneEntry))
+    setExpandedEntries((current) => {
+      const next: Record<string, boolean> = {}
+
+      parsed.entries.forEach((entry, entryIndex) => {
+        const key = getEntryStateKey(entry, entryIndex)
+
+        if (current[key]) {
+          next[key] = true
+        }
+      })
+
+      return next
+    })
   }, [parsed.entries])
 
   useEffect(() => {
@@ -138,7 +157,9 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
     value: EditableBibliographyEntry[keyof EditableBibliographyEntry],
   ) {
     const nextEntries = entries.map((entry, index) =>
-      index === entryIndex ? ({ ...entry, [fieldName]: value } as EditableBibliographyEntry) : entry,
+      index === entryIndex
+        ? ({ ...entry, [fieldName]: value } as EditableBibliographyEntry)
+        : entry,
     )
 
     commitEntries(nextEntries)
@@ -157,7 +178,9 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
       }
 
       const nextPeople = entry[role].map((person, currentIndex) =>
-        currentIndex === personIndex ? ({ ...person, [fieldName]: value } as BibliographyName) : person,
+        currentIndex === personIndex
+          ? ({ ...person, [fieldName]: value } as BibliographyName)
+          : person,
       )
 
       return {
@@ -170,7 +193,14 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
   }
 
   function addEntry() {
-    commitEntries([...entries, createEmptyEntry(entries.length)])
+    const nextEntry = createEmptyEntry(entries.length)
+    const nextKey = getEntryStateKey(nextEntry, entries.length)
+
+    setExpandedEntries((current) => ({
+      ...current,
+      [nextKey]: true,
+    }))
+    commitEntries([...entries, nextEntry])
   }
 
   function removeEntry(entryIndex: number) {
@@ -203,6 +233,15 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
     commitEntries(nextEntries)
   }
 
+  function toggleEntry(entry: EditableBibliographyEntry, entryIndex: number) {
+    const key = getEntryStateKey(entry, entryIndex)
+
+    setExpandedEntries((current) => ({
+      ...current,
+      [key]: !current[key],
+    }))
+  }
+
   async function handleFileImport(file: File | null | undefined) {
     if (!file) {
       return
@@ -227,24 +266,30 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
           </p>
         </div>
 
-        <div className="bibliography-field__mode-switch" role="tablist" aria-label="Bibliography mode">
-          <button
+        <div
+          className="bibliography-field__mode-switch"
+          role="tablist"
+          aria-label="Bibliography mode"
+        >
+          <Button
             aria-selected={mode === 'structured'}
-            className={mode === 'structured' ? 'is-active' : undefined}
+            buttonStyle={mode === 'structured' ? 'primary' : 'secondary'}
             disabled={Boolean(deferredSource.trim()) && !parsed.isFullyEditable}
             onClick={() => setMode('structured')}
+            size="small"
             type="button"
           >
             Structured
-          </button>
-          <button
+          </Button>
+          <Button
             aria-selected={mode === 'raw'}
-            className={mode === 'raw' ? 'is-active' : undefined}
+            buttonStyle={mode === 'raw' ? 'primary' : 'secondary'}
             onClick={() => setMode('raw')}
+            size="small"
             type="button"
           >
             Raw BibTeX
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -278,13 +323,15 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
           type="file"
         />
 
-        <button
+        <Button
+          buttonStyle="secondary"
           className="bibliography-field__upload"
           onClick={() => fileInputRef.current?.click()}
+          size="small"
           type="button"
         >
           Upload .bib
-        </button>
+        </Button>
       </div>
 
       {mode === 'raw' ? (
@@ -306,234 +353,314 @@ export const BibliographyField: GroupFieldClientComponent = ({ path }) => {
             </div>
           ) : null}
 
-          {entries.map((entry, entryIndex) => (
-            <article className="bibliography-field__entry" key={`${entry.citationKey || 'entry'}-${entryIndex}`}>
-              <header className="bibliography-field__entry-header">
-                <div>
-                  <strong>{entry.citationKey || `Entry ${entryIndex + 1}`}</strong>
-                  <span>{entry.entryType}</span>
-                </div>
-                <button onClick={() => removeEntry(entryIndex)} type="button">
-                  Remove entry
-                </button>
-              </header>
+          {entries.map((entry, entryIndex) => {
+            const entryKey = getEntryStateKey(entry, entryIndex)
+            const isExpanded = expandedEntries[entryKey] === true
 
-              <div className="bibliography-field__grid">
-                <label>
-                  <span>Citation key</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'citationKey', event.target.value)}
-                    type="text"
-                    value={entry.citationKey}
-                  />
-                </label>
-
-                <label>
-                  <span>Entry type</span>
-                  <select
-                    onChange={(event) => updateEntry(entryIndex, 'entryType', event.target.value)}
-                    value={entry.entryType}
+            return (
+              <article className="bibliography-field__entry" key={entryKey}>
+                <header className="bibliography-field__entry-header">
+                  <button
+                    className="bibliography-field__entry-toggle"
+                    onClick={() => toggleEntry(entry, entryIndex)}
+                    type="button"
                   >
-                    {entryTypeOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    <strong>{entry.citationKey || `Entry ${entryIndex + 1}`}</strong>
+                    <span>{entry.entryType}</span>
+                    {entry.title ? <span>{entry.title}</span> : null}
+                  </button>
+                  <Button
+                    buttonStyle="secondary"
+                    onClick={() => removeEntry(entryIndex)}
+                    size="small"
+                    type="button"
+                  >
+                    Remove entry
+                  </Button>
+                </header>
 
-                <label className="bibliography-field__grid-span">
-                  <span>Title</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'title', event.target.value)}
-                    type="text"
-                    value={entry.title}
-                  />
-                </label>
-
-                <label className="bibliography-field__grid-span">
-                  <span>Subtitle</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'subtitle', event.target.value)}
-                    type="text"
-                    value={entry.subtitle}
-                  />
-                </label>
-
-                <label>
-                  <span>Date</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'date', event.target.value)}
-                    type="text"
-                    value={entry.date}
-                  />
-                </label>
-
-                <label>
-                  <span>Accessed</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'accessed', event.target.value)}
-                    type="text"
-                    value={entry.accessed}
-                  />
-                </label>
-
-                <label className="bibliography-field__grid-span">
-                  <span>Journal</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'journalTitle', event.target.value)}
-                    type="text"
-                    value={entry.journalTitle}
-                  />
-                </label>
-
-                <label className="bibliography-field__grid-span">
-                  <span>Book title</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'bookTitle', event.target.value)}
-                    type="text"
-                    value={entry.bookTitle}
-                  />
-                </label>
-
-                <label>
-                  <span>Publisher</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'publisher', event.target.value)}
-                    type="text"
-                    value={entry.publisher}
-                  />
-                </label>
-
-                <label>
-                  <span>Institution</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'institution', event.target.value)}
-                    type="text"
-                    value={entry.institution}
-                  />
-                </label>
-
-                <label>
-                  <span>Volume</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'volume', event.target.value)}
-                    type="text"
-                    value={entry.volume}
-                  />
-                </label>
-
-                <label>
-                  <span>Number</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'number', event.target.value)}
-                    type="text"
-                    value={entry.number}
-                  />
-                </label>
-
-                <label>
-                  <span>Pages</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'pages', event.target.value)}
-                    type="text"
-                    value={entry.pages}
-                  />
-                </label>
-
-                <label className="bibliography-field__grid-span">
-                  <span>DOI</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'doi', event.target.value)}
-                    type="text"
-                    value={entry.doi}
-                  />
-                </label>
-
-                <label className="bibliography-field__grid-span">
-                  <span>URL</span>
-                  <input
-                    onChange={(event) => updateEntry(entryIndex, 'url', event.target.value)}
-                    type="text"
-                    value={entry.url}
-                  />
-                </label>
-
-                <label className="bibliography-field__grid-span">
-                  <span>Note</span>
-                  <textarea
-                    onChange={(event) => updateEntry(entryIndex, 'note', event.target.value)}
-                    rows={3}
-                    value={entry.note}
-                  />
-                </label>
-              </div>
-
-              {([
-                ['authors', 'Authors'],
-                ['editors', 'Editors'],
-                ['translators', 'Translators'],
-              ] as const).map(([role, label]) => (
-                <section className="bibliography-field__people" key={`${entryIndex}-${role}`}>
-                  <header className="bibliography-field__people-header">
-                    <strong>{label}</strong>
-                    <button onClick={() => addName(entryIndex, role)} type="button">
-                      Add person
-                    </button>
-                  </header>
-
-                  {entry[role].length === 0 ? (
-                    <p className="bibliography-field__people-empty">No {label.toLowerCase()} added.</p>
-                  ) : null}
-
-                  {entry[role].map((person, personIndex) => (
-                    <div className="bibliography-field__person" key={`${role}-${personIndex}`}>
+                {isExpanded ? (
+                  <div className="bibliography-field__entry-body">
+                    <div className="bibliography-field__grid">
                       <label>
-                        <span>Given</span>
+                        <span>Citation key</span>
                         <input
                           onChange={(event) =>
-                            updateName(entryIndex, role, personIndex, 'given', event.target.value)
+                            updateEntry(entryIndex, 'citationKey', event.target.value)
                           }
                           type="text"
-                          value={person.given}
+                          value={entry.citationKey}
                         />
                       </label>
 
                       <label>
-                        <span>Family</span>
+                        <span>Entry type</span>
+                        <select
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'entryType', event.target.value)
+                          }
+                          value={entry.entryType}
+                        >
+                          {entryTypeOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>Title</span>
+                        <input
+                          onChange={(event) => updateEntry(entryIndex, 'title', event.target.value)}
+                          type="text"
+                          value={entry.title}
+                        />
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>Subtitle</span>
                         <input
                           onChange={(event) =>
-                            updateName(entryIndex, role, personIndex, 'family', event.target.value)
+                            updateEntry(entryIndex, 'subtitle', event.target.value)
                           }
                           type="text"
-                          value={person.family}
+                          value={entry.subtitle}
                         />
                       </label>
 
                       <label>
-                        <span>Literal</span>
+                        <span>Date</span>
                         <input
-                          onChange={(event) =>
-                            updateName(entryIndex, role, personIndex, 'literal', event.target.value)
-                          }
+                          onChange={(event) => updateEntry(entryIndex, 'date', event.target.value)}
                           type="text"
-                          value={person.literal}
+                          value={entry.date}
                         />
                       </label>
 
-                      <button onClick={() => removeName(entryIndex, role, personIndex)} type="button">
-                        Remove
-                      </button>
+                      <label>
+                        <span>Accessed</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'accessed', event.target.value)
+                          }
+                          type="text"
+                          value={entry.accessed}
+                        />
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>Journal</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'journalTitle', event.target.value)
+                          }
+                          type="text"
+                          value={entry.journalTitle}
+                        />
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>Book title</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'bookTitle', event.target.value)
+                          }
+                          type="text"
+                          value={entry.bookTitle}
+                        />
+                      </label>
+
+                      <label>
+                        <span>Publisher</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'publisher', event.target.value)
+                          }
+                          type="text"
+                          value={entry.publisher}
+                        />
+                      </label>
+
+                      <label>
+                        <span>Institution</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'institution', event.target.value)
+                          }
+                          type="text"
+                          value={entry.institution}
+                        />
+                      </label>
+
+                      <label>
+                        <span>Volume</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'volume', event.target.value)
+                          }
+                          type="text"
+                          value={entry.volume}
+                        />
+                      </label>
+
+                      <label>
+                        <span>Number</span>
+                        <input
+                          onChange={(event) =>
+                            updateEntry(entryIndex, 'number', event.target.value)
+                          }
+                          type="text"
+                          value={entry.number}
+                        />
+                      </label>
+
+                      <label>
+                        <span>Pages</span>
+                        <input
+                          onChange={(event) => updateEntry(entryIndex, 'pages', event.target.value)}
+                          type="text"
+                          value={entry.pages}
+                        />
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>DOI</span>
+                        <input
+                          onChange={(event) => updateEntry(entryIndex, 'doi', event.target.value)}
+                          type="text"
+                          value={entry.doi}
+                        />
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>URL</span>
+                        <input
+                          onChange={(event) => updateEntry(entryIndex, 'url', event.target.value)}
+                          type="text"
+                          value={entry.url}
+                        />
+                      </label>
+
+                      <label className="bibliography-field__grid-span">
+                        <span>Note</span>
+                        <textarea
+                          onChange={(event) => updateEntry(entryIndex, 'note', event.target.value)}
+                          rows={3}
+                          value={entry.note}
+                        />
+                      </label>
                     </div>
-                  ))}
-                </section>
-              ))}
-            </article>
-          ))}
 
-          <button className="bibliography-field__add-entry" onClick={addEntry} type="button">
+                    {(
+                      [
+                        ['authors', 'Authors'],
+                        ['editors', 'Editors'],
+                        ['translators', 'Translators'],
+                      ] as const
+                    ).map(([role, label]) => (
+                      <section className="bibliography-field__people" key={`${entryIndex}-${role}`}>
+                        <header className="bibliography-field__people-header">
+                          <strong>{label}</strong>
+                          <Button
+                            buttonStyle="secondary"
+                            onClick={() => addName(entryIndex, role)}
+                            size="small"
+                            type="button"
+                          >
+                            Add person
+                          </Button>
+                        </header>
+
+                        {entry[role].length === 0 ? (
+                          <p className="bibliography-field__people-empty">
+                            No {label.toLowerCase()} added.
+                          </p>
+                        ) : null}
+
+                        {entry[role].map((person, personIndex) => (
+                          <div
+                            className="bibliography-field__person"
+                            key={`${role}-${personIndex}`}
+                          >
+                            <label>
+                              <span>Given</span>
+                              <input
+                                onChange={(event) =>
+                                  updateName(
+                                    entryIndex,
+                                    role,
+                                    personIndex,
+                                    'given',
+                                    event.target.value,
+                                  )
+                                }
+                                type="text"
+                                value={person.given}
+                              />
+                            </label>
+
+                            <label>
+                              <span>Family</span>
+                              <input
+                                onChange={(event) =>
+                                  updateName(
+                                    entryIndex,
+                                    role,
+                                    personIndex,
+                                    'family',
+                                    event.target.value,
+                                  )
+                                }
+                                type="text"
+                                value={person.family}
+                              />
+                            </label>
+
+                            <label>
+                              <span>Literal</span>
+                              <input
+                                onChange={(event) =>
+                                  updateName(
+                                    entryIndex,
+                                    role,
+                                    personIndex,
+                                    'literal',
+                                    event.target.value,
+                                  )
+                                }
+                                type="text"
+                                value={person.literal}
+                              />
+                            </label>
+
+                            <Button
+                              buttonStyle="secondary"
+                              onClick={() => removeName(entryIndex, role, personIndex)}
+                              size="small"
+                              type="button"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </section>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+            )
+          })}
+
+          <Button
+            className="bibliography-field__add-entry"
+            buttonStyle="secondary"
+            onClick={addEntry}
+            size="small"
+            type="button"
+          >
             Add bibliography entry
-          </button>
+          </Button>
         </div>
       )}
     </section>

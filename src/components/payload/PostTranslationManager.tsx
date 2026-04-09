@@ -1,6 +1,6 @@
 import type { UIFieldServerComponent, UIFieldServerProps } from 'payload'
 
-import { defaultLocale, normalizeLocale, supportedLocales } from '@/lib/locales'
+import { defaultLocale, normalizeLocale, supportedLocales, type AppLocale } from '@/lib/locales'
 import { buildTranslationLocaleRow } from '@/components/payload/postTranslationSummary'
 import { TranslatePostLocaleAction } from '@/components/payload/TranslatePostLocaleAction'
 
@@ -11,7 +11,7 @@ function getAccessOverride(reqUser: unknown) {
 }
 
 function buildLocalRequest(args: {
-  locale?: string
+  locale?: AppLocale
   req: UIFieldServerProps['req']
 }): Partial<UIFieldServerProps['req']> {
   const localReq: Partial<UIFieldServerProps['req']> = {}

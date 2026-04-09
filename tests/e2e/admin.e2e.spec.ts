@@ -1,30 +1,37 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect, Page, BrowserContext } from '@playwright/test'
 import config from '../../src/payload.config.js'
 import { getPayload } from 'payload'
 import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
 import { createPostPackageFiles } from '../helpers/createPostPackage'
 import { login } from '../helpers/login'
+import { retryOnSqliteBusy } from '../helpers/retryOnSqliteBusy'
 import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
+
+const serverURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
 
 async function cleanupDraftPreviewPost() {
   const payload = await getPayload({ config })
 
-  await payload.delete({
-    collection: 'posts',
-    where: {
-      slug: {
-        equals: 'preview-draft-demo',
+  await retryOnSqliteBusy(async () => {
+    await payload.delete({
+      collection: 'posts',
+      where: {
+        slug: {
+          equals: 'preview-draft-demo',
+        },
       },
-    },
+    })
   })
 }
 
 async function cleanupPostByID(id: number) {
   const payload = await getPayload({ config })
 
-  await payload.delete({
-    collection: 'posts',
-    id,
+  await retryOnSqliteBusy(async () => {
+    await payload.delete({
+      collection: 'posts',
+      id,
+    })
   })
 }
 
@@ -70,13 +77,15 @@ async function seedUntitledDraftPreviewPost() {
 async function seedAdminLayoutPost() {
   const payload = await getPayload({ config })
 
-  await payload.delete({
-    collection: 'posts',
-    where: {
-      slug: {
-        equals: 'admin-layout-demo',
+  await retryOnSqliteBusy(async () => {
+    await payload.delete({
+      collection: 'posts',
+      where: {
+        slug: {
+          equals: 'admin-layout-demo',
+        },
       },
-    },
+    })
   })
 
   return payload.create({
@@ -125,7 +134,18 @@ async function activateImportMode(page: Page, mode: 'mdship' | 'zip') {
   })
 }
 
+async function waitForPostDocumentReady(page: Page) {
+  await expect(page.getByRole('button', { name: 'Overview' })).toBeVisible({
+    timeout: 30_000,
+  })
+  await expect(page.getByText('Publishing snapshot')).toBeVisible({
+    timeout: 30_000,
+  })
+  await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
+}
+
 test.describe('Admin Panel', () => {
+  let context: BrowserContext
   let page: Page
 
   test.beforeAll(async ({ browser }) => {
@@ -133,70 +153,71 @@ test.describe('Admin Panel', () => {
 
     await seedTestUser()
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
-    await login({ page, user: testUser })
+    await login({ page, serverURL, user: testUser })
   })
 
   test.afterAll(async () => {
+    await context?.close()
     await cleanupTestUser()
   })
 
   test('can navigate to dashboard', async () => {
-    await page.goto('http://localhost:3000/admin')
-    await expect(page).toHaveURL('http://localhost:3000/admin')
+    await page.goto(`${serverURL}/admin`)
+    await expect(page).toHaveURL(`${serverURL}/admin`)
   })
 
   test('can navigate to list view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/users')
-    await expect(page).toHaveURL(/http:\/\/localhost:3000\/admin\/collections\/users(\?depth=1&limit=10)?$/)
+    await page.goto(`${serverURL}/admin/collections/users`)
+    await expect(page).toHaveURL(
+      new RegExp(`^${serverURL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/admin/collections/users(?:\\?depth=1&limit=10)?$`),
+    )
   })
 
   test('can navigate to edit view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/users/create')
+    await page.goto(`${serverURL}/admin/collections/users/create`)
     await expect(page).toHaveURL(/\/admin\/collections\/users\/[a-zA-Z0-9-_]+/)
     const editViewArtifact = page.locator('input[name="email"]')
     await expect(editViewArtifact).toBeVisible()
   })
 
-  test('can open the posts collection and create view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/posts')
-    await expect(page).toHaveURL(/http:\/\/localhost:3000\/admin\/collections\/posts(\?depth=1&limit=10)?$/)
+  test('can open the posts collection and create view with overview first', async () => {
+    await page.goto(`${serverURL}/admin/collections/posts`)
+    await expect(page).toHaveURL(
+      new RegExp(`^${serverURL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/admin/collections/posts(?:\\?depth=1&limit=10)?$`),
+    )
 
-    await page.goto('http://localhost:3000/admin/collections/posts/create')
-    await expect(page.locator('input[name=\"slug\"]')).toBeVisible()
-    await expect(page.locator('input[name=\"title\"]')).toBeVisible()
+    await page.goto(`${serverURL}/admin/collections/posts/create`)
+    await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
     await expect(page.getByTestId('post-import-trigger')).toBeVisible()
+    await waitForPostDocumentReady(page)
+
+    await page.getByRole('button', { name: 'Core Content' }).click({ force: true })
+    await expect(page.getByRole('textbox', { name: 'Title *' })).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(page.getByRole('textbox', { name: 'Slug *' })).toBeVisible()
   })
 
   test('can open the import menu from the create flow', async () => {
-    await page.goto('http://localhost:3000/admin/collections/posts/create')
+    await page.goto(`${serverURL}/admin/collections/posts/create`)
     await expect(page.getByTestId('post-import-trigger')).toBeVisible()
     await openImportMenu(page)
     await expect(page.getByTestId('import-panel')).toBeVisible()
-  })
-
-  test('can open the translate menu from the document controls', async () => {
-    await page.goto('http://localhost:3000/admin/collections/posts/create')
-    await expect(page.getByTestId('translate-locale-trigger')).toBeVisible()
-    await page.getByTestId('translate-locale-trigger').click()
-    await expect(page.getByTestId('translate-locale-menu')).toBeVisible()
-    await expect(page.getByTestId('translate-locale-submit')).toBeVisible()
   })
 
   test('can preview a draft post through the frontend preview route', async () => {
     const draftPost = await seedDraftPreviewPost()
 
     try {
-      await page.goto(`http://localhost:3000/admin/collections/posts/${draftPost.id}`)
+      await page.goto(`${serverURL}/admin/collections/posts/${draftPost.id}`)
       await expect(page.locator('main').first()).toBeVisible()
 
-      await page.goto(
-        `http://localhost:3000/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`,
-      )
+      await page.goto(`${serverURL}/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`)
 
-      await expect(page).toHaveURL(`http://localhost:3000/zh-hans/posts/${draftPost.slug}`)
+      await expect(page).toHaveURL(`${serverURL}/zh-hans/posts/${draftPost.slug}`)
       await expect(page.getByRole('alert').getByText('预览模式')).toBeVisible()
       await expect(page.locator('h1').first()).toHaveText('预览草稿示例文章')
       await expect(page.getByText('这一段只应该在 preview 中可见。')).toBeVisible()
@@ -210,11 +231,9 @@ test.describe('Admin Panel', () => {
     const draftPost = await seedUntitledDraftPreviewPost()
 
     try {
-      await page.goto(
-        `http://localhost:3000/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`,
-      )
+      await page.goto(`${serverURL}/api/preview?collection=posts&id=${draftPost.id}&locale=zh-CN`)
 
-      await expect(page).toHaveURL(`http://localhost:3000/zh-hans/preview/posts/${draftPost.id}`)
+      await expect(page).toHaveURL(`${serverURL}/zh-hans/preview/posts/${draftPost.id}`)
       await expect(page.locator('h1').first()).toHaveText('未命名草稿')
       await expect(page.getByText('这是一篇没有标题和 slug 的草稿')).toBeVisible()
       await expect(page.getByRole('link', { name: '退出预览' })).toBeVisible()
@@ -223,29 +242,37 @@ test.describe('Admin Panel', () => {
     }
   })
 
-  test('post edit view groups fields into overview and edit flows', async () => {
+  test('post edit view uses overview-first top-level workflow tabs', async () => {
     const post = await seedAdminLayoutPost()
 
     try {
-      await page.goto(`http://localhost:3000/admin/collections/posts/${post.id}`)
+      await page.goto(`${serverURL}/admin/collections/posts/${post.id}`)
+      await waitForPostDocumentReady(page)
 
       const documentPane = page.locator('main')
-      const editTab = documentPane.getByRole('button', { name: 'Edit' })
       const overviewTab = documentPane.getByRole('button', { name: 'Overview' })
+      const coreTab = documentPane.getByRole('button', { name: 'Core Content' })
+      const assetsTab = documentPane.getByRole('button', { name: 'Assets & References' })
+      const translationTab = documentPane.getByRole('button', { name: 'Translation' })
+      const seoTab = documentPane.getByRole('button', { name: 'SEO' })
 
-      await expect(editTab).toBeVisible()
       await expect(overviewTab).toBeVisible()
+      await expect(coreTab).toBeVisible()
+      await expect(assetsTab).toBeVisible()
+      await expect(translationTab).toBeVisible()
+      await expect(seoTab).toBeVisible()
 
-      await overviewTab.click()
-      await expect(page.getByText('Publishing snapshot')).toBeVisible()
+      await coreTab.click({ force: true })
+      await expect(page.getByRole('textbox', { name: 'Title *' })).toBeVisible({
+        timeout: 30_000,
+      })
+      await expect(page.getByText('Owned media')).toBeVisible()
 
-      await editTab.click()
-      await expect(page.getByText('Core Content', { exact: true })).toBeVisible()
-      await expect(page.getByText('Assets & References', { exact: true })).toBeVisible()
-      await expect(page.getByText('Translation', { exact: true })).toBeVisible()
-      await expect(page.getByText('SEO', { exact: true })).toBeVisible()
-      await expect(page.getByText('Managed Resources', { exact: true })).toBeVisible()
-      await expect(page.getByRole('textbox', { name: 'Slug *' })).toBeVisible()
+      await translationTab.click({ force: true })
+      await expect(page.getByText('Translation management')).toBeVisible({
+        timeout: 30_000,
+      })
+      await expect(page.getByRole('button', { name: 'Translate from...' }).first()).toBeVisible()
     } finally {
       await cleanupPostByID(post.id)
     }
@@ -266,7 +293,7 @@ test.describe('Admin Panel', () => {
     })
 
     try {
-      await page.goto('http://localhost:3000/admin/collections/posts/create')
+      await page.goto(`${serverURL}/admin/collections/posts/create`)
       await openImportMenu(page)
 
       await activateImportMode(page, 'zip')
@@ -282,14 +309,14 @@ test.describe('Admin Panel', () => {
       await submitImport(page)
       await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
 
-      await page.goto('http://localhost:3000/zh-hans/posts/imported-package-demo')
+      await page.goto(`${serverURL}/zh-hans/posts/imported-package-demo`)
       await expect(page.locator('h1').first()).toHaveText('导入包示例文章（更新）')
       await expect(page.locator('summary')).toContainText('参考文献')
       await page.locator('summary').click()
       await expect(page.getByText('Composable Publishing Workflows')).toBeVisible()
       await expect(page.getByText('第二次导入追加了这一段')).toBeVisible()
 
-      await page.goto('http://localhost:3000/zh-hans/posts/imported-package-demo/history')
+      await page.goto(`${serverURL}/zh-hans/posts/imported-package-demo/history`)
       await expect(page.locator('h1').first()).toHaveText('版本历史')
       await expect(page.getByText(/版本 ID/).first()).toBeVisible()
     } finally {
@@ -308,7 +335,7 @@ test.describe('Admin Panel', () => {
     })
 
     try {
-      await page.goto('http://localhost:3000/admin/collections/posts/create')
+      await page.goto(`${serverURL}/admin/collections/posts/create`)
       await openImportMenu(page)
 
       await activateImportMode(page, 'mdship')
@@ -329,7 +356,7 @@ test.describe('Admin Panel', () => {
       await submitImport(page)
       await expect(page).toHaveURL(/\/admin\/collections\/posts\/[a-zA-Z0-9-_]+/)
 
-      await page.goto('http://localhost:3000/zh-hans/posts/mdship-import-demo')
+      await page.goto(`${serverURL}/zh-hans/posts/mdship-import-demo`)
       await expect(page.locator('h1').first()).toHaveText('MDship 导入示例文章（更新）')
       await expect(page.locator('summary')).toContainText('参考文献')
       await page.locator('summary').click()

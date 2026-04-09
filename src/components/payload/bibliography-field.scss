@@ -4,18 +4,15 @@
 }
 
 .bibliography-field__header,
-.bibliography-field__meta,
-.bibliography-field__entry,
 .bibliography-field__warning,
-.bibliography-field__empty {
-  border: 1px solid var(--theme-elevation-200);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  background: var(--theme-elevation-0);
+.bibliography-field__empty,
+.bibliography-field__entry,
+.bibliography-field__meta {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .bibliography-field__header,
-.bibliography-field__meta,
 .bibliography-field__entry-header,
 .bibliography-field__people-header,
 .bibliography-field__mode-switch {
@@ -45,34 +42,21 @@
   color: var(--theme-elevation-700);
 }
 
-.bibliography-field__mode-switch button,
-.bibliography-field__upload,
-.bibliography-field__add-entry,
-.bibliography-field__entry button,
-.bibliography-field__people button {
+.bibliography-field__entry-toggle,
+.bibliography-field__upload {
   appearance: none;
-  border: 1px solid var(--theme-elevation-300);
-  border-radius: 999px;
-  background: var(--theme-elevation-50);
+  background: transparent;
+  border: 0;
   color: var(--theme-text);
   cursor: pointer;
   font: inherit;
-  padding: 0.45rem 0.8rem;
-}
-
-.bibliography-field__mode-switch button.is-active {
-  background: var(--theme-elevation-900);
-  color: var(--theme-elevation-0);
-}
-
-.bibliography-field__mode-switch button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  padding: 0;
+  text-align: left;
 }
 
 .bibliography-field__meta {
-  grid-template-columns: minmax(0, 1fr) auto;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .bibliography-field__meta-field,
@@ -87,12 +71,6 @@
 .bibliography-field textarea,
 .bibliography-field select {
   width: 100%;
-  border: 1px solid var(--theme-elevation-250);
-  border-radius: 0.5rem;
-  background: var(--theme-input-bg);
-  color: var(--theme-text);
-  font: inherit;
-  padding: 0.65rem 0.8rem;
 }
 
 .bibliography-field__raw textarea {
@@ -100,6 +78,7 @@
   font-family: var(--font-mono);
 }
 
+.bibliography-field__entry-body,
 .bibliography-field__entries,
 .bibliography-field__people {
   display: grid;
@@ -110,7 +89,6 @@
   display: grid;
   gap: 0.75rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 1rem;
 }
 
 .bibliography-field__grid-span {
@@ -133,10 +111,7 @@
   .bibliography-field__header,
   .bibliography-field__entry-header,
   .bibliography-field__people-header,
-  .bibliography-field__meta {
-    display: grid;
-  }
-
+  .bibliography-field__meta,
   .bibliography-field__grid,
   .bibliography-field__person {
     grid-template-columns: minmax(0, 1fr);
