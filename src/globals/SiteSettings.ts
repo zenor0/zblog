@@ -93,7 +93,10 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
           condition: (_, siblingData) => siblingData?.type === 'internal',
           description: 'Enter a locale-agnostic path such as /posts or /about.',
         },
-        validate: (value, { siblingData }) =>
+        validate: (
+          value: unknown,
+          { siblingData }: { siblingData?: { type?: string } },
+        ) =>
           validateFooterLinkValue(value, {
             field: 'internalPath',
             required: args.required,
@@ -107,7 +110,10 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
         admin: {
           condition: (_, siblingData) => siblingData?.type === 'external',
         },
-        validate: (value, { siblingData }) =>
+        validate: (
+          value: unknown,
+          { siblingData }: { siblingData?: { type?: string } },
+        ) =>
           validateFooterLinkValue(value, {
             field: 'externalUrl',
             required: args.required,
