@@ -1,0 +1,45 @@
+import { describe, expect, it } from 'vitest'
+
+import { SiteSettings } from '@/globals/SiteSettings'
+
+describe('Site settings footer config', () => {
+  it('defines the rebuilt footer groups and reusable link shape', () => {
+    const footerField = SiteSettings.fields.find((field: any) => field.name === 'footer') as any
+
+    expect(footerField.type).toBe('group')
+    expect(footerField.fields.map((field: any) => field.name)).toEqual([
+      'brand',
+      'navigationSections',
+      'socialLinks',
+      'contactItems',
+      'legalLinks',
+      'compliance',
+      'bottomBar',
+    ])
+
+    const brandField = footerField.fields.find((field: any) => field.name === 'brand') as any
+    expect(brandField.fields.map((field: any) => field.name)).toEqual([
+      'logo',
+      'name',
+      'description',
+      'supportingText',
+      'link',
+    ])
+
+    const brandLinkField = brandField.fields.find((field: any) => field.name === 'link') as any
+    expect(brandLinkField.fields.map((field: any) => field.name)).toEqual([
+      'type',
+      'internalPath',
+      'externalUrl',
+      'openInNewTab',
+    ])
+
+    const socialLinksField = footerField.fields.find((field: any) => field.name === 'socialLinks') as any
+    expect(socialLinksField.fields.map((field: any) => field.name)).toEqual([
+      'platform',
+      'label',
+      'url',
+      'openInNewTab',
+    ])
+  })
+})

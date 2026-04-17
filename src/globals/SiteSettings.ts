@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload'
+import type { Field, GlobalConfig } from 'payload'
 
 const localizedHeroDefaults = {
   en: {
@@ -24,11 +24,340 @@ function getLocalizedHeroDefault(
   return localizedHeroDefaults[normalizedLocale][field]
 }
 
+const footerSocialPlatformOptions = [
+  'github',
+  'x',
+  'linkedin',
+  'youtube',
+  'instagram',
+  'discord',
+  'rss',
+  'email',
+  'other',
+] as const
+
+function validateFooterLinkValue(
+  value: unknown,
+  args: {
+    field: 'externalUrl' | 'internalPath'
+    required?: boolean
+    siblingData?: {
+      type?: string
+    }
+  },
+) {
+  const expectsValue =
+    args.required === true &&
+    ((args.field === 'internalPath' && args.siblingData?.type === 'internal') ||
+      (args.field === 'externalUrl' && args.siblingData?.type === 'external'))
+
+  if (!expectsValue) {
+    return true
+  }
+
+  return typeof value === 'string' && value.trim().length > 0
+    ? true
+    : args.field === 'internalPath'
+      ? 'Internal path is required.'
+      : 'External URL is required.'
+}
+
+function footerLinkField(args: { label: string; name?: string; required?: boolean }): Field {
+  return {
+    name: args.name ?? 'link',
+    type: 'group',
+    label: args.label,
+    fields: [
+      {
+        name: 'type',
+        type: 'radio',
+        defaultValue: 'internal',
+        label: 'Link type',
+        options: [
+          {
+            label: 'Internal path',
+            value: 'internal',
+          },
+          {
+            label: 'External URL',
+            value: 'external',
+          },
+        ],
+        required: true,
+      },
+      {
+        name: 'internalPath',
+        type: 'text',
+        label: 'Internal path',
+        admin: {
+          condition: (_, siblingData) => siblingData?.type === 'internal',
+          description: 'Enter a locale-agnostic path such as /posts or /about.',
+        },
+        validate: (value, { siblingData }) =>
+          validateFooterLinkValue(value, {
+            field: 'internalPath',
+            required: args.required,
+            siblingData,
+          }),
+      },
+      {
+        name: 'externalUrl',
+        type: 'text',
+        label: 'External URL',
+        admin: {
+          condition: (_, siblingData) => siblingData?.type === 'external',
+        },
+        validate: (value, { siblingData }) =>
+          validateFooterLinkValue(value, {
+            field: 'externalUrl',
+            required: args.required,
+            siblingData,
+          }),
+      },
+      {
+        name: 'openInNewTab',
+        type: 'checkbox',
+        defaultValue: false,
+        label: 'Open in new tab',
+      },
+    ],
+  }
+}
+
+const footerFields: Field[] = [
+  {
+    name: 'brand',
+    type: 'group',
+    label: 'Brand',
+    fields: [
+      {
+        name: 'logo',
+        type: 'relationship',
+        relationTo: 'media',
+        label: 'Logo',
+      },
+      {
+        name: 'name',
+        type: 'text',
+        label: 'Brand name',
+        localized: true,
+      },
+      {
+        name: 'description',
+        type: 'textarea',
+        label: 'Brand description',
+        localized: true,
+      },
+      {
+        name: 'supportingText',
+        type: 'textarea',
+        label: 'Supporting text',
+        localized: true,
+      },
+      footerLinkField({
+        label: 'Brand link',
+      }),
+    ],
+  },
+  {
+    name: 'navigationSections',
+    type: 'array',
+    label: 'Navigation sections',
+    labels: {
+      plural: 'Navigation sections',
+      singular: 'Navigation section',
+    },
+    fields: [
+      {
+        name: 'title',
+        type: 'text',
+        label: 'Title',
+        localized: true,
+        required: true,
+      },
+      {
+        name: 'links',
+        type: 'array',
+        label: 'Links',
+        labels: {
+          plural: 'Links',
+          singular: 'Link',
+        },
+        fields: [
+          {
+            name: 'label',
+            type: 'text',
+            label: 'Label',
+            localized: true,
+            required: true,
+          },
+          {
+            name: 'description',
+            type: 'text',
+            label: 'Description',
+            localized: true,
+          },
+          footerLinkField({
+            label: 'Destination',
+            required: true,
+          }),
+        ],
+      },
+    ],
+  },
+  {
+    name: 'socialLinks',
+    type: 'array',
+    label: 'Social links',
+    labels: {
+      plural: 'Social links',
+      singular: 'Social link',
+    },
+    fields: [
+      {
+        name: 'platform',
+        type: 'select',
+        label: 'Platform',
+        options: footerSocialPlatformOptions.map((value) => ({
+          label: value,
+          value,
+        })),
+        required: true,
+      },
+      {
+        name: 'label',
+        type: 'text',
+        label: 'Label',
+        localized: true,
+      },
+      {
+        name: 'url',
+        type: 'text',
+        label: 'URL',
+        required: true,
+      },
+      {
+        name: 'openInNewTab',
+        type: 'checkbox',
+        defaultValue: true,
+        label: 'Open in new tab',
+      },
+    ],
+  },
+  {
+    name: 'contactItems',
+    type: 'array',
+    label: 'Contact items',
+    labels: {
+      plural: 'Contact items',
+      singular: 'Contact item',
+    },
+    fields: [
+      {
+        name: 'label',
+        type: 'text',
+        label: 'Label',
+        localized: true,
+        required: true,
+      },
+      {
+        name: 'value',
+        type: 'text',
+        label: 'Value',
+        localized: true,
+        required: true,
+      },
+      footerLinkField({
+        label: 'Optional link',
+      }),
+    ],
+  },
+  {
+    name: 'legalLinks',
+    type: 'array',
+    label: 'Legal links',
+    labels: {
+      plural: 'Legal links',
+      singular: 'Legal link',
+    },
+    fields: [
+      {
+        name: 'label',
+        type: 'text',
+        label: 'Label',
+        localized: true,
+        required: true,
+      },
+      footerLinkField({
+        label: 'Destination',
+        required: true,
+      }),
+    ],
+  },
+  {
+    name: 'compliance',
+    type: 'group',
+    label: 'Compliance',
+    fields: [
+      {
+        name: 'copyright',
+        type: 'text',
+        label: 'Copyright',
+        localized: true,
+      },
+      {
+        name: 'filings',
+        type: 'array',
+        label: 'Compliance filings',
+        labels: {
+          plural: 'Compliance filings',
+          singular: 'Compliance filing',
+        },
+        fields: [
+          {
+            name: 'label',
+            type: 'text',
+            label: 'Label',
+            localized: true,
+            required: true,
+          },
+          {
+            name: 'value',
+            type: 'text',
+            label: 'Value',
+            localized: true,
+            required: true,
+          },
+          {
+            name: 'href',
+            type: 'text',
+            label: 'Link',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'bottomBar',
+    type: 'group',
+    label: 'Bottom bar',
+    fields: [
+      {
+        name: 'note',
+        type: 'textarea',
+        label: 'Note',
+        localized: true,
+      },
+    ],
+  },
+]
+
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site settings',
   admin: {
-    description: 'Configure the homepage hero copy and the footer records, copyright, and links shown on the frontend.',
+    description:
+      'Configure the homepage hero copy and the structured footer content shown on the frontend.',
     group: 'Frontend',
   },
   fields: [
@@ -113,80 +442,7 @@ export const SiteSettings: GlobalConfig = {
       name: 'footer',
       type: 'group',
       label: 'Footer',
-      fields: [
-        {
-          name: 'note',
-          type: 'textarea',
-          label: 'Note',
-          localized: true,
-        },
-        {
-          name: 'owner',
-          type: 'text',
-          label: 'Owner name',
-        },
-        {
-          name: 'copyright',
-          type: 'text',
-          admin: {
-            placeholder: '© 2026 ZBlog',
-          },
-          label: 'Copyright',
-        },
-        {
-          name: 'records',
-          type: 'array',
-          label: 'Records',
-          labels: {
-            plural: 'Records',
-            singular: 'Record',
-          },
-          fields: [
-            {
-              name: 'label',
-              type: 'text',
-              label: 'Label',
-              localized: true,
-              required: true,
-            },
-            {
-              name: 'value',
-              type: 'text',
-              label: 'Value',
-              required: true,
-            },
-            {
-              name: 'href',
-              type: 'text',
-              label: 'Link',
-            },
-          ],
-        },
-        {
-          name: 'links',
-          type: 'array',
-          label: 'Footer links',
-          labels: {
-            plural: 'Footer links',
-            singular: 'Footer link',
-          },
-          fields: [
-            {
-              name: 'label',
-              type: 'text',
-              label: 'Label',
-              localized: true,
-              required: true,
-            },
-            {
-              name: 'href',
-              type: 'text',
-              label: 'Link',
-              required: true,
-            },
-          ],
-        },
-      ],
+      fields: footerFields,
     },
   ],
 }

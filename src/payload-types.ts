@@ -602,7 +602,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Configure the homepage hero copy and the footer records, copyright, and links shown on the frontend.
+ * Configure the homepage hero copy and the structured footer content shown on the frontend.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
@@ -627,25 +627,98 @@ export interface SiteSetting {
     homeDescription?: string | null;
     defaultSocialImage?: (number | null) | Media;
   };
-  footer?: {
-    note?: string | null;
-    owner?: string | null;
-    copyright?: string | null;
-    records?:
+  footer: {
+    brand: {
+      logo?: (number | null) | Media;
+      name?: string | null;
+      description?: string | null;
+      supportingText?: string | null;
+      link: {
+        type: 'internal' | 'external';
+        /**
+         * Enter a locale-agnostic path such as /posts or /about.
+         */
+        internalPath?: string | null;
+        externalUrl?: string | null;
+        openInNewTab?: boolean | null;
+      };
+    };
+    navigationSections?:
+      | {
+          title: string;
+          links?:
+            | {
+                label: string;
+                description?: string | null;
+                link: {
+                  type: 'internal' | 'external';
+                  /**
+                   * Enter a locale-agnostic path such as /posts or /about.
+                   */
+                  internalPath?: string | null;
+                  externalUrl?: string | null;
+                  openInNewTab?: boolean | null;
+                };
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    socialLinks?:
+      | {
+          platform: 'github' | 'x' | 'linkedin' | 'youtube' | 'instagram' | 'discord' | 'rss' | 'email' | 'other';
+          label?: string | null;
+          url: string;
+          openInNewTab?: boolean | null;
+          id?: string | null;
+        }[]
+      | null;
+    contactItems?:
       | {
           label: string;
           value: string;
-          href?: string | null;
+          link: {
+            type: 'internal' | 'external';
+            /**
+             * Enter a locale-agnostic path such as /posts or /about.
+             */
+            internalPath?: string | null;
+            externalUrl?: string | null;
+            openInNewTab?: boolean | null;
+          };
           id?: string | null;
         }[]
       | null;
-    links?:
+    legalLinks?:
       | {
           label: string;
-          href: string;
+          link: {
+            type: 'internal' | 'external';
+            /**
+             * Enter a locale-agnostic path such as /posts or /about.
+             */
+            internalPath?: string | null;
+            externalUrl?: string | null;
+            openInNewTab?: boolean | null;
+          };
           id?: string | null;
         }[]
       | null;
+    compliance?: {
+      copyright?: string | null;
+      filings?:
+        | {
+            label: string;
+            value: string;
+            href?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    bottomBar?: {
+      note?: string | null;
+    };
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -674,23 +747,98 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   footer?:
     | T
     | {
-        note?: T;
-        owner?: T;
-        copyright?: T;
-        records?:
+        brand?:
+          | T
+          | {
+              logo?: T;
+              name?: T;
+              description?: T;
+              supportingText?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    internalPath?: T;
+                    externalUrl?: T;
+                    openInNewTab?: T;
+                  };
+            };
+        navigationSections?:
+          | T
+          | {
+              title?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    description?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          internalPath?: T;
+                          externalUrl?: T;
+                          openInNewTab?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+            };
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              label?: T;
+              url?: T;
+              openInNewTab?: T;
+              id?: T;
+            };
+        contactItems?:
           | T
           | {
               label?: T;
               value?: T;
-              href?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    internalPath?: T;
+                    externalUrl?: T;
+                    openInNewTab?: T;
+                  };
               id?: T;
             };
-        links?:
+        legalLinks?:
           | T
           | {
               label?: T;
-              href?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    internalPath?: T;
+                    externalUrl?: T;
+                    openInNewTab?: T;
+                  };
               id?: T;
+            };
+        compliance?:
+          | T
+          | {
+              copyright?: T;
+              filings?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    href?: T;
+                    id?: T;
+                  };
+            };
+        bottomBar?:
+          | T
+          | {
+              note?: T;
             };
       };
   updatedAt?: T;
