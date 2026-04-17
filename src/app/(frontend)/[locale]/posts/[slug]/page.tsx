@@ -98,7 +98,7 @@ export default async function PostPage(props: {
   const shouldRenderStructuredData = !resolved.usedFallback && !resolved.post.seo?.noindex
   const structuredData = shouldRenderStructuredData
     ? buildArticleStructuredData({
-        authorName: siteSettings.footer?.owner || siteSettings.siteName,
+        authorName: siteSettings.footer?.brand?.name || siteSettings.siteName,
         description: buildSeoDescription({
           content: resolved.post.content,
           fallback: siteSettings.siteDescription,

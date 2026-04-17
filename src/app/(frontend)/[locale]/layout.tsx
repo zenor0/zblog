@@ -23,7 +23,7 @@ export default async function LocaleLayout(props: {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       {children}
-      <SiteFooter settings={siteSettings} />
+      <SiteFooter locale={locale} settings={siteSettings} />
     </NextIntlClientProvider>
   )
 }

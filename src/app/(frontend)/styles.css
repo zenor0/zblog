@@ -225,6 +225,22 @@ html[data-zblog-preview-theme='light'] {
     @apply text-foreground/82 hover:text-foreground;
   }
 
+  [data-site-footer] [data-footer-heading] {
+    @apply mb-1;
+  }
+
+  [data-site-footer] [data-footer-grid] {
+    @apply items-start;
+  }
+
+  [data-site-footer] [data-footer-link-description] {
+    @apply text-sm leading-6 text-muted-foreground;
+  }
+
+  [data-site-footer] [data-footer-bottom] {
+    @apply text-sm text-muted-foreground;
+  }
+
   .md-callout {
     @apply my-8 border border-border bg-muted/42 px-5 py-4 text-sm leading-7 text-foreground/84;
     border-left-width: 0.22rem;
