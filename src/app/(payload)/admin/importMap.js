@@ -5,6 +5,7 @@ import { PostPackageImportAction as PostPackageImportAction_991c33c68c79e784af33
 import { PostLivePreviewView as PostLivePreviewView_9222b67ecbb0ab1ba52dfe865b4c4243 } from '../../../components/payload/PostLivePreviewView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "/components/payload/PostInsights#PostInsights": PostInsights_e770027bab5f28ea955c6ccf216cedb4,
   "/components/payload/BibliographyField#BibliographyField": BibliographyField_717477dca85f9102a6193d977c97f573,
