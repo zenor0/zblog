@@ -41,6 +41,10 @@
     "siteLabel": "ZBlog",
     "tags": "Tags",
     "tableLabel": "Table",
+    "themeAuto": "System",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "themeNavigation": "Theme",
     "unknownDate": "Unknown date",
     "unscheduled": "Unscheduled",
     "versionID": "Version ID"

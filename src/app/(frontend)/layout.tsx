@@ -3,7 +3,14 @@ import { cookies, headers } from 'next/headers'
 import { Newsreader, Source_Sans_3 } from 'next/font/google'
 import React from 'react'
 
-import { defaultLocale, localeCookieName, localeRequestHeaderName, normalizeLocale } from '@/lib/locales'
+import { ThemeRuntime } from '@/components/frontend/ThemeSwitcher'
+import { frontendThemeInitScript } from '@/components/frontend/theme'
+import {
+  defaultLocale,
+  localeCookieName,
+  localeRequestHeaderName,
+  normalizeLocale,
+} from '@/lib/locales'
 import { getSiteURL } from '@/lib/seo'
 
 import './styles.css'
@@ -34,8 +41,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     defaultLocale
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: frontendThemeInitScript }} />
+      </head>
       <body>
+        <ThemeRuntime />
         <div className={`${sans.variable} ${serif.variable}`} data-editorial-shell="true">
           <main>{children}</main>
         </div>

@@ -13,6 +13,7 @@ import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
+import { ThemeSwitcher } from '@/components/frontend/ThemeSwitcher'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { describeBibliographyEntry } from '@/lib/bibliography'
@@ -104,7 +105,9 @@ export async function PostArticle(props: {
     markdownMediaSources.length > 0
       ? Object.fromEntries(
           (
-            await (await getPayloadClient()).find({
+            await (
+              await getPayloadClient()
+            ).find({
               collection: 'media',
               depth: 0,
               limit: markdownMediaSources.length,
@@ -132,7 +135,9 @@ export async function PostArticle(props: {
         )
       : {}
   const tocHeadings = allHeadings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
-  const hasSupplementaryContent = Boolean(post.tags?.length || attachments.length || bibliographyEntries.length)
+  const hasSupplementaryContent = Boolean(
+    post.tags?.length || attachments.length || bibliographyEntries.length,
+  )
   const displayTitle =
     typeof post.title === 'string' && post.title.trim().length > 0
       ? post.title
@@ -173,11 +178,21 @@ export async function PostArticle(props: {
           {backLabel}
         </Link>
 
-        <LocaleSwitcher
-          activeLocale={locale}
-          items={localeLinks}
-          label={common('localeNavigation')}
-        />
+        <div className="flex items-center justify-end gap-2">
+          <ThemeSwitcher
+            label={common('themeNavigation')}
+            labels={{
+              auto: common('themeAuto'),
+              dark: common('themeDark'),
+              light: common('themeLight'),
+            }}
+          />
+          <LocaleSwitcher
+            activeLocale={locale}
+            items={localeLinks}
+            label={common('localeNavigation')}
+          />
+        </div>
       </div>
 
       <article
@@ -200,7 +215,9 @@ export async function PostArticle(props: {
                   value: post.publishedAt ?? post.updatedAt,
                 })}
               </span>
-              <span>{article('readingTime', { minutes: estimateReadingMinutes(post.content) })}</span>
+              <span>
+                {article('readingTime', { minutes: estimateReadingMinutes(post.content) })}
+              </span>
               <span>{getLocaleLabel(resolved.resolvedLocale)}</span>
               {historyHref ? (
                 <Link className="editorial-link no-underline" href={historyHref}>
@@ -308,9 +325,7 @@ export async function PostArticle(props: {
                   <p className="section-kicker">{common('tags')}</p>
                   <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                     {post.tags.map((tag) => (
-                      <span key={tag.id ?? tag.value}>
-                        {tag.value}
-                      </span>
+                      <span key={tag.id ?? tag.value}>{tag.value}</span>
                     ))}
                   </div>
                 </section>
@@ -356,7 +371,9 @@ export async function PostArticle(props: {
                           <span className="flex min-w-0 flex-1 flex-col gap-2">
                             <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                               <span>{typeLabel}</span>
-                              {file.filename ? <span className="truncate">{file.filename}</span> : null}
+                              {file.filename ? (
+                                <span className="truncate">{file.filename}</span>
+                              ) : null}
                             </span>
                             <span className="font-serif text-xl tracking-[-0.02em] text-foreground">
                               {attachment.label || file.filename || file.alt}
@@ -382,7 +399,7 @@ export async function PostArticle(props: {
                     label={common('references')}
                   >
                     <ol className="flex flex-col">
-                      {bibliographyEntries.map((entry, index) => (
+                      {bibliographyEntries.map((entry, index) =>
                         (() => {
                           const display = describeBibliographyEntry(entry)
                           const displayYear = display.year || common('referenceNoDate')
@@ -418,12 +435,17 @@ export async function PostArticle(props: {
                                   )}
                                 </p>
 
-                                {display.container || display.secondary.length || display.accessed ? (
+                                {display.container ||
+                                display.secondary.length ||
+                                display.accessed ? (
                                   <div className="flex min-w-0 flex-col gap-0.5 text-[13px] leading-5 text-muted-foreground">
                                     {[display.container, ...display.secondary]
                                       .filter((segment): segment is string => Boolean(segment))
                                       .map((segment, segmentIndex) => (
-                                        <p className="wrap-anywhere" key={`${entry.citationKey}-${segmentIndex}`}>
+                                        <p
+                                          className="wrap-anywhere"
+                                          key={`${entry.citationKey}-${segmentIndex}`}
+                                        >
                                           {segment}
                                         </p>
                                       ))}
@@ -439,14 +461,18 @@ export async function PostArticle(props: {
                                   <p className="min-w-0 text-[13px] leading-5 text-muted-foreground">
                                     {display.links.map((link, linkIndex) => (
                                       <span key={`${entry.citationKey}-${link.label}`}>
-                                        {linkIndex > 0 ? <span className="px-1.5 text-border">·</span> : null}
+                                        {linkIndex > 0 ? (
+                                          <span className="px-1.5 text-border">·</span>
+                                        ) : null}
                                         <a
                                           className="editorial-link wrap-anywhere no-underline"
                                           href={link.href}
                                           rel="noreferrer"
                                           target="_blank"
                                         >
-                                          <span className="text-muted-foreground">{link.label}:</span>{' '}
+                                          <span className="text-muted-foreground">
+                                            {link.label}:
+                                          </span>{' '}
                                           {link.value}
                                         </a>
                                       </span>
@@ -462,8 +488,8 @@ export async function PostArticle(props: {
                               </div>
                             </li>
                           )
-                        })()
-                      ))}
+                        })(),
+                      )}
                     </ol>
                   </CollapsibleReferenceSection>
                 </section>

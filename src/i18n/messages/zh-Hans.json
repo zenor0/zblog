@@ -41,6 +41,10 @@
     "siteLabel": "ZBlog",
     "tags": "标签",
     "tableLabel": "表",
+    "themeAuto": "跟随系统",
+    "themeDark": "深色",
+    "themeLight": "浅色",
+    "themeNavigation": "主题",
     "unknownDate": "日期未知",
     "unscheduled": "未安排",
     "versionID": "版本 ID"

@@ -4,11 +4,17 @@ import { getTranslations } from 'next-intl/server'
 
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { ThemeSwitcher } from '@/components/frontend/ThemeSwitcher'
 import { formatShortDate } from '@/i18n/format'
 import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/lib/locales'
 import { getPublishedPosts } from '@/lib/posts'
-import { buildHomeStructuredData, buildPageMetadata, buildSeoDescription, serializeStructuredData } from '@/lib/seo'
+import {
+  buildHomeStructuredData,
+  buildPageMetadata,
+  buildSeoDescription,
+  serializeStructuredData,
+} from '@/lib/seo'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export async function generateMetadata(props: {
@@ -20,7 +26,8 @@ export async function generateMetadata(props: {
   const siteSettings = await getSiteSettings(locale)
   const title = siteSettings.seo?.homeTitle || siteSettings.homeHero?.title || home('heroTitle')
   const description = buildSeoDescription({
-    fallback: siteSettings.siteDescription || siteSettings.homeHero?.description || home('heroDescription'),
+    fallback:
+      siteSettings.siteDescription || siteSettings.homeHero?.description || home('heroDescription'),
     value: siteSettings.seo?.homeDescription,
   })
   const defaultSocialImage =
@@ -31,7 +38,8 @@ export async function generateMetadata(props: {
   return buildPageMetadata({
     canonicalLocale: locale,
     description,
-    fallbackDescription: siteSettings.siteDescription || siteSettings.homeHero?.description || home('heroDescription'),
+    fallbackDescription:
+      siteSettings.siteDescription || siteSettings.homeHero?.description || home('heroDescription'),
     fallbackImage: defaultSocialImage,
     siteName: siteSettings.siteName,
     title,
@@ -88,11 +96,21 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
           </div>
 
           <div className="flex flex-col gap-5 lg:items-end">
-            <LocaleSwitcher
-              activeLocale={locale}
-              items={buildLocaleLinks('')}
-              label={common('localeNavigation')}
-            />
+            <div className="flex items-center justify-end gap-2">
+              <ThemeSwitcher
+                label={common('themeNavigation')}
+                labels={{
+                  auto: common('themeAuto'),
+                  dark: common('themeDark'),
+                  light: common('themeLight'),
+                }}
+              />
+              <LocaleSwitcher
+                activeLocale={locale}
+                items={buildLocaleLinks('')}
+                label={common('localeNavigation')}
+              />
+            </div>
 
             <div className="flex flex-col gap-1 text-right">
               <p className="editorial-meta">{siteSettings.siteName}</p>
@@ -184,12 +202,16 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                     {home('postsHeading')}
                   </h2>
                 </div>
-                <p className="editorial-meta">{home('publishedEntries', { count: posts.length })}</p>
+                <p className="editorial-meta">
+                  {home('publishedEntries', { count: posts.length })}
+                </p>
               </div>
 
               {remainingPosts.map((post) => {
                 const heroImage =
-                  post.heroImage && typeof post.heroImage === 'object' && typeof post.heroImage.url === 'string'
+                  post.heroImage &&
+                  typeof post.heroImage === 'object' &&
+                  typeof post.heroImage.url === 'string'
                     ? post.heroImage
                     : null
 
@@ -242,8 +264,16 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                     </div>
 
                     {heroImage ? (
-                      <Link className="block md:order-last" href={buildLocalePath(locale, `/posts/${post.slug}`)}>
-                        <MediaSurface alt={heroImage.alt || post.title} loading="lazy" media={heroImage} variant="card" />
+                      <Link
+                        className="block md:order-last"
+                        href={buildLocalePath(locale, `/posts/${post.slug}`)}
+                      >
+                        <MediaSurface
+                          alt={heroImage.alt || post.title}
+                          loading="lazy"
+                          media={heroImage}
+                          variant="card"
+                        />
                       </Link>
                     ) : null}
                   </article>
