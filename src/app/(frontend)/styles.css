@@ -651,3 +651,49 @@ html[data-zblog-preview-theme='light'] {
 [data-zblog-embedded-preview='true'] [data-embedded-hidden='true'] {
   display: none;
 }
+
+@layer components {
+  .dev-reference-shell {
+    @apply flex flex-col gap-12;
+  }
+
+  .dev-reference-hero {
+    @apply flex flex-col gap-6 border-b border-border pb-10;
+  }
+
+  .dev-reference-card {
+    @apply rounded-none border-border bg-background shadow-none;
+  }
+
+  .dev-reference-section {
+    @apply grid gap-5;
+  }
+
+  .dev-reference-section__intro {
+    @apply grid gap-3 border-b border-border pb-5;
+  }
+
+  .dev-reference-section__intro h2 {
+    @apply font-serif text-4xl tracking-[-0.04em];
+  }
+
+  .dev-reference-section__intro p:not(.section-kicker) {
+    @apply max-w-2xl text-sm leading-7 text-muted-foreground;
+  }
+
+  .dev-progress-panel {
+    @apply grid gap-4 lg:sticky lg:top-8;
+  }
+
+  .dev-progress-link {
+    @apply grid grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-3 px-1 py-2 text-sm text-muted-foreground no-underline transition-colors hover:text-foreground;
+  }
+
+  .dev-progress-link[data-state='current'] {
+    @apply bg-muted/55 text-foreground;
+  }
+
+  .dev-progress-link[data-state='done'] {
+    @apply text-foreground/78;
+  }
+}
