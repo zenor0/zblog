@@ -1,123 +1,180 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { ArrowLeft, BookMarked, Check, Circle, MapPinned } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { PostArticle } from '@/components/frontend/PostArticle'
+import { defaultLocale, getLocaleLabel } from '@/lib/locales'
+import type { ResolvedPost } from '@/lib/posts'
+
+import { ArticleProgressLab } from './ArticleProgressLab'
 
 export const metadata: Metadata = {
   title: 'Article Progress Lab',
   robots: { index: false, follow: false },
 }
 
-const sections = [
-  { id: 'opening', label: '开篇', progress: 12, state: 'done' },
-  { id: 'context', label: '背景', progress: 28, state: 'done' },
-  { id: 'argument', label: '主论点', progress: 54, state: 'current' },
-  { id: 'references', label: '引用', progress: 76, state: 'upcoming' },
-  { id: 'ending', label: '结语', progress: 100, state: 'upcoming' },
-] as const
+const articleProgressDemoContent = `
+## 一、问题：阅读位置不是一个点
 
-const paragraphBlocks = [
-  '这是一页用于隔离开发文章阅读辅助控件的实验场。它不依赖真实文章数据，可以先验证目录、进度条、章节状态、滚动提示和窄屏布局。',
-  '真实文章页最重要的是阅读连续性，因此任何浮动控件都应该保持克制：展示当前位置、帮助跳转，但不制造额外视觉负担。',
-  '后续可以把本页拆成多个更小的实验：移动端底部进度条、桌面端侧边目录、代码块内小地图、引用段落定位，以及阅读完成后的推荐入口。',
-]
+很多进度条只回答“读到百分之多少”，却没有回答“屏幕里正在出现哪一段内容”。对于短文来说，这个差异不明显；但在一篇包含多级标题、引用、表格和长段落的文章里，读者真正需要的是一个可回忆的上下文区域。
+
+这页实验把阅读位置理解成一个范围：屏幕上方露出的内容构成范围的起点，屏幕底部仍可见的内容构成范围的终点。指示器不只点亮单个章节，而是在目录线上标出当前可视阅读区域。
+
+当读者快速滚动时，这个范围会像一段高亮的游标沿着目录移动。它比单个圆点更能表达“我正在跨过两个小节”或者“这一屏仍然停留在同一个论证段”。
+
+### 从屏幕上沿推断阅读起点
+
+屏幕上沿是读者当前上下文的入口。页面滚动后，上沿附近的标题、段落或媒体通常决定了读者对“我现在在哪”的第一反应。实验中会为顶部预留一小段安全距离，避免浏览器顶部、页面标题或 sticky 元素造成误判。
+
+如果上沿落在两个标题之间，算法会回退到最近的上一个标题；如果上沿已经越过文章开头，则从第一节开始计入；如果上沿接近文章末尾，则保持在最后一个可读章节。
+
+### 从屏幕下沿补充阅读终点
+
+底部边界让进度表达从“当前标题”变成“当前阅读区域”。当一个屏幕同时露出上一节尾部和下一节开头时，目录应该显示一段区间，而不是只选择其中一个标题。
+
+这对长文尤其重要：读者经常在两个层级之间过渡，例如二级标题下的最后一个三级小节和下一组二级标题的导语同时出现在屏幕里。范围高亮可以提示这次过渡正在发生。
+
+#### 可视范围需要一点缓冲
+
+严格使用 viewport 的 0 到 100% 会让高亮过于敏感。实验页将顶部向下收一点、底部向上收一点，把阅读窗口定义为更接近眼睛实际停留的区域。这个数值后续可以根据真实文章模板继续调试。
+
+缓冲并不是为了隐藏内容，而是为了让指示器稳定。它减少了标题刚进入视口一两像素就触发状态切换的抖动，也让目录的反馈更像阅读辅助而不是滚动调试器。
+
+## 二、结构：目录像一张文章小地图
+
+这个指示器的主体不是普通进度条，而是文章目录。每个标题都提供路径的折点方向，但阅读高亮本身是连续游标，不会被锁死在某个标题节点上。读者扫一眼就能知道文章的层级、当前位置以及还剩多少结构没有读。
+
+目录保留多级标题，但不会把视觉做成复杂树状菜单。层级通过缩进、字号和 H2/H3/H4 标识表达；主线保持连续，避免读者在细枝末节里迷路。
+
+### 层级密度要服务阅读节奏
+
+多级目录最大的风险是噪声。实验里一级结构用较重文本，二级结构轻一点，三级结构更靠内。这样既能看见文章骨架，也不会让每个小标题都争夺注意力。
+
+如果真实文章标题更多，组件可以继续演化出折叠策略：默认显示 H2 与当前 H2 下的 H3/H4，或者在移动端只显示当前区域附近的节点。
+
+- H2 表示文章阶段，承担主要导航。
+- H3 表示论证段落，承担当前位置说明。
+- H4 表示局部注释，只在当前上下文里强化方向。
+
+### Accent 区域表示当前可见内容
+
+目录线上的 accent 色段来自当前屏幕上方和下方对应的文章位置，并被映射到一条连续曲折路径上。它可以停在两个标题之间，也可以跨过多个标题，不再只能吸附到固定节点。
+
+这种表达比“已读”和“未读”更柔和。已读并不一定需要强提示，当前可见区域才是最需要强调的内容。读者滚动时，accent 色段像一条移动的窗口。
+
+## 三、测试文章必须足够长
+
+短文章无法暴露这个组件的问题。真正的长文会包含重复出现的段落节奏、不同层级的标题、间隔很远的章节和偶尔插入的重点块。只有文章足够长，sticky 目录、线段高亮和滚动计算才有验证价值。
+
+本页故意放入比普通实验页更长的正文。它不追求内容本身完整，而是模拟真实文章中读者会经历的滚动距离：从导语进入主论点，再经过方法、案例、边界和结语。
+
+当你滚动这篇文章时，右侧目录会根据页面中实际可见的上下边界更新，而不是使用固定的假进度。
+
+### 长文常见的结构摩擦
+
+一篇很长的文章通常不是线性地平铺信息，而是在多个层级之间来回切换：先提出问题，再给出背景，然后分解方法，最后用案例验证。目录如果只能显示一个激活项，就无法描述这种连续过渡。
+
+另一个摩擦来自滚动速度。读者可能快速扫过不感兴趣的部分，也可能在某个段落停留很久。指示器应该对快滚保持稳定，对慢读保持准确。
+
+> 目标不是让目录变得醒目，而是让读者在需要方向感时能立刻找到它。
+
+## 四、测量模型：把文章位置映射到目录路径
+
+每个标题定义了正文里的一个锚点，同时也定义了目录路径上的一个折点。屏幕阅读窗口的上下边界会先转换为文章中的绝对位置，再插值映射到目录路径上的连续坐标。
+
+这个模型足够轻量，也更接近无级进度条的行为。读者不需要知道某个段落的像素位置，但 UI 可以在两个标题之间呈现细腻的中间状态。
+
+### 尺寸变化后重新计算
+
+字体加载、窗口缩放、内容折行和响应式布局都会改变标题位置。因此组件不只监听 scroll，也监听 resize，并使用 ResizeObserver 观察文章和目录尺寸变化。
+
+这样做可以避免一个常见问题：页面首次渲染时测量正确，但字体加载后正文高度改变，目录高亮开始偏移。实验页会在这些变化后重新计算当前可视范围。
+
+## 五、交互原则：低打扰但可点击
+
+目录项仍然是锚点链接。用户可以直接点击跳转到对应标题；同时，高亮区域只负责解释当前屏幕，不试图阻止或接管原生滚动行为。
+
+低打扰意味着组件不应该在滚动时播放复杂动画，也不应该把所有已读内容都染成强色。状态越少，读者越容易把它当成辅助工具而不是另一个要阅读的界面。
+
+### 移动端暂时转为顶部摘要
+
+窄屏没有足够空间常驻完整目录。实验页先让目录排在文章上方，保留同一套测量逻辑；后续可以进一步拆成底部抽屉、顶部细线或当前章节胶囊。
+
+无论视觉形态如何变化，核心数据都应该保持一致：当前可见起点、当前可见终点、连续路径坐标以及文章整体百分比。
+
+## 六、边界：复杂内容不应该破坏方向感
+
+真实文章里会插入图片、代码、引用、提示块和很长的列表。它们可能占据一整屏，导致屏幕中没有任何新标题。此时组件应该保持最近的标题区间，而不是清空高亮。
+
+如果一个媒体块横跨两个章节之间的边界，底部边界仍然会把下一节纳入当前区域。这样读者能预判接下来进入哪一段，而不是等标题完全滚到屏幕中央才得到反馈。
+
+- 没有标题进入视口时，使用边界位置在相邻标题之间的插值结果。
+- 文章开头和结尾需要 clamp，不能出现负进度或超过 100%。
+- 目录自身高度变化时，accent 曲线同步重算。
+
+### 自动滚动目录窗口
+
+当目录内容超过设定高度时，目录本身会成为一个独立滚动区域。页面滚动过程中，组件会自动把当前阅读窗口附近的标题带回视野，从而弱化很久以前的阅读进度。
+
+这个行为让实验更接近真实长文：目录不必永久显示所有历史节点，而是始终把当前段落附近的上下文留在可见范围里。
+
+#### 高度控制为什么必要
+
+不同文章有不同标题密度。标题少时可以给目录更高空间，标题多时则需要限制高度，避免侧栏比正文视窗更抢眼。高度控制只是实验选项，真实组件可以根据断点和文章长度自动选择默认值。
+
+## 七、下一步：从实验页抽成真实组件
+
+确认这个方向后，可以把测量逻辑抽到前台文章组件中，由真实 Markdown 或 Payload 富文本生成标题数组。实验页继续保留，用来验证极端标题数量、移动端布局和主题颜色。
+
+最终目标不是复制这页所有视觉细节，而是保留最有价值的交互：用多级目录表达文章结构，用一条连续线表达阅读路径，用 accent 色段表达当前屏幕正在覆盖的内容。
+
+当组件进入真实文章页后，还可以把当前区间暴露给阅读统计、分享锚点或“继续阅读”功能。这样目录不只是装饰，而成为文章体验的基础设施。
+`.trim()
+
+const demoResolvedPost: ResolvedPost = {
+  bibliographyEntries: [],
+  citationIndex: new Map(),
+  missingCitationKeys: [],
+  post: {
+    id: -1,
+    title: '用真实文章页验证阅读进度目录',
+    excerpt:
+      '这个开发页复用生产博客文章布局，只替换右侧目录组件，用来观察新阅读进度指示器在真实页面中的表现。',
+    content: articleProgressDemoContent,
+    slug: 'article-progress-lab',
+    tags: null,
+    attachments: null,
+    heroImage: null,
+    translationStatus: 'original',
+    publishedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-05-01T00:00:00.000Z',
+    createdAt: '2026-05-01T00:00:00.000Z',
+    _status: 'published',
+  },
+  requestedLocale: defaultLocale,
+  resolvedLocale: defaultLocale,
+  sourcePost: null,
+  usedDraftAccess: false,
+  usedFallback: false,
+}
 
 export default function ArticleProgressLabPage() {
   return (
-    <div className="page-frame frontend-shell dev-reference-shell">
-      <header className="dev-reference-hero">
-        <Link className="editorial-link inline-flex items-center gap-2 text-sm" href="/dev">
-          <ArrowLeft aria-hidden="true" /> 开发参考
-        </Link>
-        <p className="section-kicker">Component Lab / Article Progress</p>
-        <div className="flex max-w-4xl flex-col gap-5">
-          <h1 className="font-serif text-6xl leading-none tracking-[-0.055em] sm:text-7xl">
-            单独验证文章进度和目录，不污染真实文章流程。
-          </h1>
-          <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
-            这里用于沉淀阅读辅助组件的交互假设。确认方向后，再把稳定逻辑抽到前台组件并接入文章详情页。
-          </p>
-        </div>
-      </header>
-
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
-        <article className="article-copy min-w-0 border border-border bg-background px-5 py-8 sm:px-8 lg:px-10">
-          <p className="section-kicker">Preview Article</p>
-          <h2 id="opening">在长文里保持方向感</h2>
-          {paragraphBlocks.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-
-          <h3 id="context">背景：为什么需要实验页</h3>
-          <p>
-            当文章页同时包含正文、目录、媒体、引用和历史版本时，直接在真实页面里试错会让反馈变慢。实验页把变量缩小到单个组件，让设计和实现可以快速迭代。
-          </p>
-
-          <h3 id="argument">当前假设：低干扰、可定位、可替换</h3>
-          <p>
-            当前阶段的目标不是一次性定稿，而是先定义清楚可替换的边界：数据输入、显示状态、桌面与移动端布局，以及与文章正文之间的视觉层级。
-          </p>
-
-          <h3 id="references">引用和复杂内容</h3>
-          <p>
-            目录组件需要兼容二级、三级标题，并在引用、表格、代码块和媒体穿插出现时仍然准确表达阅读位置。
-          </p>
-
-          <h3 id="ending">完成态</h3>
-          <p>
-            阅读完成后可以弱提示相关文章、返回顶部或收藏入口，但默认不打断阅读结束时的停顿。
-          </p>
-        </article>
-
-        <aside className="dev-progress-panel">
-          <Card className="dev-reference-card">
-            <CardHeader>
-              <MapPinned aria-hidden="true" />
-              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">阅读位置</CardTitle>
-              <CardDescription>模拟 54% 进度，当前停留在“主论点”。</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-5">
-              <div aria-label="文章阅读进度" className="h-2 border border-border bg-muted/50" role="progressbar" aria-valuemax={100} aria-valuemin={0} aria-valuenow={54}>
-                <div className="h-full bg-foreground" style={{ width: '54%' }} />
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="font-serif text-4xl tracking-[-0.04em]">54%</span>
-                <Badge variant="secondary">主论点</Badge>
-              </div>
-              <Separator />
-              <nav aria-label="文章目录实验" className="flex flex-col gap-1">
-                {sections.map((section) => (
-                  <a
-                    className="dev-progress-link"
-                    data-state={section.state}
-                    href={`#${section.id}`}
-                    key={section.id}
-                  >
-                    {section.state === 'done' ? <Check aria-hidden="true" /> : <Circle aria-hidden="true" />}
-                    <span>{section.label}</span>
-                    <span>{section.progress}%</span>
-                  </a>
-                ))}
-              </nav>
-            </CardContent>
-          </Card>
-
-          <Card className="dev-reference-card">
-            <CardHeader>
-              <BookMarked aria-hidden="true" />
-              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">待验证问题</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3 text-sm leading-6 text-muted-foreground">
-              <p>桌面目录是否 sticky，还是只在文章顶部显示？</p>
-              <p>移动端使用顶部细进度条，还是底部章节抽屉？</p>
-              <p>标题层级很多时，是否需要折叠三级标题？</p>
-            </CardContent>
-          </Card>
-        </aside>
-      </section>
-    </div>
+    <PostArticle
+      backHref="/dev"
+      backLabel="开发参考"
+      historyHref={null}
+      locale={defaultLocale}
+      localeLinks={[
+        {
+          href: '/dev/article-progress',
+          label: getLocaleLabel(defaultLocale),
+          locale: defaultLocale,
+        },
+      ]}
+      previewExitPath="/dev/article-progress"
+      renderTableOfContents={({ headings, label, progressLabel }) => (
+        <ArticleProgressLab headings={headings} label={label} progressLabel={progressLabel} />
+      )}
+      resolved={demoResolvedPost}
+    />
   )
 }

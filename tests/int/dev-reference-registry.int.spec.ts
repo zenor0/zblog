@@ -20,6 +20,8 @@ describe('dev reference registry', () => {
     const experiments = devReferenceSections.find((section) => section.id === 'experiments')
 
     expect(experiments?.items.map((item) => item.slug)).toContain('article-progress')
+    expect(experiments?.items.map((item) => item.slug)).toContain('article-layout')
     expect(getDevReferenceItem('article-progress')?.href).toBe('/dev/article-progress')
+    expect(getDevReferenceItem('article-layout')?.href).toBe('/dev/article-layout')
   })
 })

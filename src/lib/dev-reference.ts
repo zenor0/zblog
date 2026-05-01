@@ -45,6 +45,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         status: 'experiment',
         tags: ['article', 'toc', 'progress', 'reading'],
       },
+      {
+        slug: 'article-layout',
+        title: 'Article Layout Lab',
+        description: '复用真实文章页，对比正文、标题、图片、代码块、表格和提示块的排版节奏。',
+        href: '/dev/article-layout',
+        status: 'experiment',
+        tags: ['article', 'typography', 'layout', 'rich-text'],
+      },
     ],
   },
 ]

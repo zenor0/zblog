@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeftIcon,
@@ -18,7 +19,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { describeBibliographyEntry } from '@/lib/bibliography'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/lib/markdown'
-import { extractMarkdownHeadings } from '@/lib/markdown-headings'
+import type { MarkdownMediaLike } from '@/lib/markdown/types'
+import { extractMarkdownHeadings, type MarkdownHeading } from '@/lib/markdown-headings'
 import { resolveAttachmentDescription, resolveMediaAsset, resolveMediaCaption } from '@/lib/media'
 import { getPayloadClient } from '@/lib/payload'
 import type { ResolvedPost } from '@/lib/posts'
@@ -80,10 +82,26 @@ export async function PostArticle(props: {
   historyHref?: null | string
   locale: AppLocale
   localeLinks: LocaleLink[]
+  markdownMediaBySource?: Record<string, MarkdownMediaLike>
   previewExitPath: string
+  renderTableOfContents?: (args: {
+    headings: MarkdownHeading[]
+    label: string
+    progressLabel: string
+  }) => ReactNode
   resolved: ResolvedPost
 }) {
-  const { backHref, backLabel, historyHref, locale, localeLinks, previewExitPath, resolved } = props
+  const {
+    backHref,
+    backLabel,
+    historyHref,
+    locale,
+    localeLinks,
+    markdownMediaBySource: markdownMediaBySourceOverrides = {},
+    previewExitPath,
+    renderTableOfContents,
+    resolved,
+  } = props
   const {
     bibliographyEntries,
     citationIndex,
@@ -101,8 +119,11 @@ export async function PostArticle(props: {
   )
   const allHeadings = extractMarkdownHeadings(post.content)
   const markdownMediaSources = extractMarkdownMediaSources(post.content)
-  const markdownMediaBySource =
-    markdownMediaSources.length > 0
+  const markdownMediaSourcesToFetch = markdownMediaSources.filter(
+    (source) => !markdownMediaBySourceOverrides[source],
+  )
+  const fetchedMarkdownMediaBySource =
+    markdownMediaSourcesToFetch.length > 0
       ? Object.fromEntries(
           (
             await (
@@ -110,7 +131,7 @@ export async function PostArticle(props: {
             ).find({
               collection: 'media',
               depth: 0,
-              limit: markdownMediaSources.length,
+              limit: markdownMediaSourcesToFetch.length,
               overrideAccess: false,
               select: {
                 alt: true,
@@ -125,7 +146,7 @@ export async function PostArticle(props: {
               },
               where: {
                 url: {
-                  in: markdownMediaSources,
+                  in: markdownMediaSourcesToFetch,
                 },
               },
             })
@@ -134,6 +155,10 @@ export async function PostArticle(props: {
             .map((media) => [media.url as string, media]),
         )
       : {}
+  const markdownMediaBySource = {
+    ...fetchedMarkdownMediaBySource,
+    ...markdownMediaBySourceOverrides,
+  }
   const tocHeadings = allHeadings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
   const hasSupplementaryContent = Boolean(
     post.tags?.length || attachments.length || bibliographyEntries.length,
@@ -500,11 +525,19 @@ export async function PostArticle(props: {
 
         {tocHeadings.length ? (
           <aside className="xl:sticky xl:top-8 xl:self-start">
-            <PostTableOfContents
-              headings={tocHeadings}
-              label={article('tableOfContents')}
-              progressLabel={article('readingProgress')}
-            />
+            {renderTableOfContents ? (
+              renderTableOfContents({
+                headings: tocHeadings,
+                label: article('tableOfContents'),
+                progressLabel: article('readingProgress'),
+              })
+            ) : (
+              <PostTableOfContents
+                headings={tocHeadings}
+                label={article('tableOfContents')}
+                progressLabel={article('readingProgress')}
+              />
+            )}
           </aside>
         ) : null}
       </article>
