@@ -1,5 +1,12 @@
 import type { Field, GlobalConfig } from 'payload'
 
+import {
+  articleLayoutPresetOptions,
+  defaultArticleLayoutPresetID,
+  validateArticleLayoutLength,
+  validateArticleLayoutLineHeight,
+} from '@/lib/article-layout'
+
 const localizedHeroDefaults = {
   en: {
     description: 'A simple blog for articles, notes, and project updates.',
@@ -358,6 +365,104 @@ const footerFields: Field[] = [
   },
 ]
 
+const articleLayoutFields: Field[] = [
+  {
+    name: 'preset',
+    type: 'select',
+    admin: {
+      description:
+        'Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.',
+    },
+    defaultValue: defaultArticleLayoutPresetID,
+    label: 'Preset',
+    options: articleLayoutPresetOptions,
+    required: true,
+  },
+  {
+    name: 'advanced',
+    type: 'group',
+    admin: {
+      description:
+        'Optional safe CSS token overrides. Leave blank to use the selected preset values.',
+    },
+    fields: [
+      {
+        name: 'contentWidth',
+        type: 'text',
+        admin: {
+          description: 'Controls both the reading column and prose max width, such as 76ch.',
+        },
+        label: 'Content width',
+        validate: validateArticleLayoutLength,
+      },
+      {
+        name: 'bodyFontSize',
+        type: 'text',
+        admin: {
+          description: 'Body text size, such as 0.98rem or 17px.',
+        },
+        label: 'Body font size',
+        validate: validateArticleLayoutLength,
+      },
+      {
+        name: 'bodyLineHeight',
+        type: 'text',
+        admin: {
+          description: 'Unitless body line-height ratio, such as 1.65.',
+        },
+        label: 'Body line height',
+        validate: validateArticleLayoutLineHeight,
+      },
+      {
+        name: 'paragraphGap',
+        type: 'text',
+        admin: {
+          description: 'Vertical gap between consecutive paragraphs, such as 0.75rem.',
+        },
+        label: 'Paragraph gap',
+        validate: validateArticleLayoutLength,
+      },
+      {
+        name: 'flowGap',
+        type: 'text',
+        admin: {
+          description: 'Default vertical flow gap between ordinary article elements.',
+        },
+        label: 'Flow gap',
+        validate: validateArticleLayoutLength,
+      },
+      {
+        name: 'blockGap',
+        type: 'text',
+        admin: {
+          description: 'Outer vertical gap for figures, tables, code blocks, and callouts.',
+        },
+        label: 'Rich block gap',
+        validate: validateArticleLayoutLength,
+      },
+      {
+        name: 'captionGap',
+        type: 'text',
+        admin: {
+          description: 'Internal gap between media/table surfaces and their captions.',
+        },
+        label: 'Caption gap',
+        validate: validateArticleLayoutLength,
+      },
+      {
+        name: 'gridGap',
+        type: 'text',
+        admin: {
+          description: 'Desktop gap between the reading column and the table of contents rail.',
+        },
+        label: 'Reading grid gap',
+        validate: validateArticleLayoutLength,
+      },
+    ],
+    label: 'Advanced overrides',
+  },
+]
+
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site settings',
@@ -449,6 +554,16 @@ export const SiteSettings: GlobalConfig = {
       type: 'group',
       label: 'Footer',
       fields: footerFields,
+    },
+    {
+      name: 'articleLayout',
+      type: 'group',
+      admin: {
+        description:
+          'Configure the default article reading layout preset and a small set of safe spacing overrides.',
+      },
+      label: 'Article layout',
+      fields: articleLayoutFields,
     },
   ],
 }

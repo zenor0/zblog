@@ -54,7 +54,9 @@ const tocPath = {
   bottomPadding: 10,
   depthX: 12,
   startX: 10,
-  width: 52,
+  titleDepthX: 13.2,
+  titleStartX: 36,
+  width: 76,
 }
 
 const headingLevelOptions: { label: string; value: HeadingLevel }[] = [
@@ -65,7 +67,7 @@ const headingLevelOptions: { label: string; value: HeadingLevel }[] = [
 
 const pathStyleOptions: { label: string; value: PathStyle }[] = [
   { label: '直角', value: 'stepped' },
-  { label: '圆角', value: 'rounded' },
+  { label: '软折', value: 'rounded' },
   { label: '曲线', value: 'flow' },
   { label: '斜切', value: 'diagonal' },
 ]
@@ -139,16 +141,26 @@ function syncTitleOverflow(itemElement: HTMLLIElement) {
   itemElement.style.removeProperty('--title-scroll-distance')
 }
 
-function getTocX(level: HeadingLevel, indentScale: number) {
-  return tocPath.startX + (level - 2) * tocPath.depthX * indentScale
+function getTocX(level: HeadingLevel, indentScale: number, trackOverlapScale: number) {
+  const depth = level - 2
+  const gutterX = tocPath.startX + depth * tocPath.depthX * indentScale
+
+  if (depth <= 0) {
+    return gutterX
+  }
+
+  const titleEdgeX = tocPath.titleStartX + depth * tocPath.titleDepthX * indentScale - 4
+  const overlapWeight = trackOverlapScale * (depth / 2)
+
+  return gutterX + (titleEdgeX - gutterX) * overlapWeight
 }
 
-function getRoundedCornerRadius(startPoint: TocPoint, endPoint: TocPoint) {
-  return Math.min(
-    7,
-    Math.abs(endPoint.x - startPoint.x) / 2,
-    Math.abs(endPoint.y - startPoint.y) / 4,
-  )
+function getRoundedCornerRadius(startPoint: TocPoint, endPoint: TocPoint, bendScale: number) {
+  const horizontalDistance = Math.abs(endPoint.x - startPoint.x)
+  const verticalDistance = Math.abs(endPoint.y - startPoint.y)
+  const maximumRadius = Math.min(18, horizontalDistance / 2, verticalDistance / 2.4)
+
+  return maximumRadius * clamp(bendScale, 0, 1)
 }
 
 function getCubicPoint(
@@ -174,10 +186,11 @@ function getCubicPoint(
   }
 }
 
-function getFlowSegmentLength(startPoint: TocPoint, endPoint: TocPoint) {
+function getFlowSegmentLength(startPoint: TocPoint, endPoint: TocPoint, bendScale: number) {
   const verticalDistance = endPoint.y - startPoint.y
-  const controlPointA = { ...startPoint, y: startPoint.y + verticalDistance * 0.42 }
-  const controlPointB = { ...endPoint, y: endPoint.y - verticalDistance * 0.42 }
+  const controlWeight = 0.2 + clamp(bendScale, 0, 1) * 0.34
+  const controlPointA = { ...startPoint, y: startPoint.y + verticalDistance * controlWeight }
+  const controlPointB = { ...endPoint, y: endPoint.y - verticalDistance * controlWeight }
   let length = 0
   let previousPoint = startPoint
 
@@ -191,7 +204,12 @@ function getFlowSegmentLength(startPoint: TocPoint, endPoint: TocPoint) {
   return length
 }
 
-function getSegmentLength(startPoint: TocPoint, endPoint: TocPoint, pathStyle: PathStyle) {
+function getSegmentLength(
+  startPoint: TocPoint,
+  endPoint: TocPoint,
+  pathStyle: PathStyle,
+  bendScale: number,
+) {
   const horizontalDistance = Math.abs(endPoint.x - startPoint.x)
   const verticalDistance = Math.abs(endPoint.y - startPoint.y)
 
@@ -200,14 +218,14 @@ function getSegmentLength(startPoint: TocPoint, endPoint: TocPoint, pathStyle: P
   }
 
   if (pathStyle === 'flow') {
-    return getFlowSegmentLength(startPoint, endPoint)
+    return getFlowSegmentLength(startPoint, endPoint, bendScale)
   }
 
   if (pathStyle === 'rounded') {
-    const radius = getRoundedCornerRadius(startPoint, endPoint)
+    const radius = getRoundedCornerRadius(startPoint, endPoint, bendScale)
 
     if (radius === 0) {
-      return verticalDistance
+      return horizontalDistance + verticalDistance
     }
 
     return (
@@ -220,28 +238,38 @@ function getSegmentLength(startPoint: TocPoint, endPoint: TocPoint, pathStyle: P
   return horizontalDistance + verticalDistance
 }
 
-function buildSegmentPath(startPoint: TocPoint, endPoint: TocPoint, pathStyle: PathStyle) {
+function buildSegmentPath(
+  startPoint: TocPoint,
+  endPoint: TocPoint,
+  pathStyle: PathStyle,
+  bendScale: number,
+) {
   if (pathStyle === 'diagonal') {
     return `L ${endPoint.x} ${endPoint.y}`
   }
 
   if (pathStyle === 'flow') {
     const verticalDistance = endPoint.y - startPoint.y
+    const controlWeight = 0.2 + clamp(bendScale, 0, 1) * 0.34
 
-    return `C ${startPoint.x} ${startPoint.y + verticalDistance * 0.42} ${endPoint.x} ${
-      endPoint.y - verticalDistance * 0.42
+    return `C ${startPoint.x} ${startPoint.y + verticalDistance * controlWeight} ${endPoint.x} ${
+      endPoint.y - verticalDistance * controlWeight
     } ${endPoint.x} ${endPoint.y}`
   }
 
   const midpointY = (startPoint.y + endPoint.y) / 2
 
   if (pathStyle === 'rounded') {
-    const radius = getRoundedCornerRadius(startPoint, endPoint)
+    const radius = getRoundedCornerRadius(startPoint, endPoint, bendScale)
     const xDirection = Math.sign(endPoint.x - startPoint.x)
     const yDirection = Math.sign(endPoint.y - startPoint.y) || 1
 
-    if (radius === 0 || xDirection === 0) {
+    if (xDirection === 0) {
       return `L ${endPoint.x} ${endPoint.y}`
+    }
+
+    if (radius === 0) {
+      return `L ${startPoint.x} ${midpointY} L ${endPoint.x} ${midpointY} L ${endPoint.x} ${endPoint.y}`
     }
 
     return [
@@ -256,7 +284,7 @@ function buildSegmentPath(startPoint: TocPoint, endPoint: TocPoint, pathStyle: P
   return `L ${startPoint.x} ${midpointY} L ${endPoint.x} ${midpointY} L ${endPoint.x} ${endPoint.y}`
 }
 
-function buildPathModel(points: TocPoint[], pathStyle: PathStyle): PathModel {
+function buildPathModel(points: TocPoint[], pathStyle: PathStyle, bendScale: number): PathModel {
   const firstPoint = points[0]
 
   if (!firstPoint) {
@@ -272,10 +300,10 @@ function buildPathModel(points: TocPoint[], pathStyle: PathStyle): PathModel {
       return path
     }
 
-    totalLength += getSegmentLength(previousPoint, point, pathStyle)
+    totalLength += getSegmentLength(previousPoint, point, pathStyle, bendScale)
     cumulativeLengths.push(totalLength)
 
-    return `${path} ${buildSegmentPath(previousPoint, point, pathStyle)}`
+    return `${path} ${buildSegmentPath(previousPoint, point, pathStyle, bendScale)}`
   }, `M ${firstPoint.x} ${firstPoint.y}`)
 
   return {
@@ -363,7 +391,9 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
   const progressSvgRef = useRef<SVGSVGElement | null>(null)
   const trackPathRef = useRef<SVGPathElement | null>(null)
   const activePathRef = useRef<SVGPathElement | null>(null)
+  const mobileProgressRef = useRef<HTMLDivElement | null>(null)
   const visibleEndPercentRef = useRef<HTMLSpanElement | null>(null)
+  const mobileVisibleEndPercentRef = useRef<HTMLSpanElement | null>(null)
   const progressRef = useRef<ReadingProgress>(initialProgress)
   const paintedRangeRef = useRef({ activeEndIndex: -1, activeStartIndex: -1, pathD: '' })
   const shouldSyncTitleOverflowRef = useRef(true)
@@ -373,8 +403,10 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
   const [pathStyle, setPathStyle] = useState<PathStyle>('rounded')
   const [lineWeight, setLineWeight] = useState<LineWeight>('regular')
   const [railHeight, setRailHeight] = useState<RailHeight>('regular')
+  const [bendScale, setBendScale] = useState(0.48)
   const [indentScale, setIndentScale] = useState(1)
   const [spacingScale, setSpacingScale] = useState(0.72)
+  const [trackOverlapScale, setTrackOverlapScale] = useState(0.46)
   const [scrollLeadScale, setScrollLeadScale] = useState(0.46)
   const [visibleHeadingLevels, setVisibleHeadingLevels] = useState<Record<HeadingLevel, boolean>>({
     2: true,
@@ -434,6 +466,23 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
 
       if (visibleEndPercentRef.current) {
         visibleEndPercentRef.current.textContent = formatPercent(nextProgress.visibleEndPercent)
+      }
+
+      if (mobileVisibleEndPercentRef.current) {
+        mobileVisibleEndPercentRef.current.textContent = formatPercent(
+          nextProgress.visibleEndPercent,
+        )
+      }
+
+      if (mobileProgressRef.current) {
+        const startPercent = `${nextProgress.visibleStartPercent}%`
+        const widthPercent = `${Math.max(
+          nextProgress.visibleEndPercent - nextProgress.visibleStartPercent,
+          1,
+        )}%`
+
+        mobileProgressRef.current.style.setProperty('--mobile-progress-start', startPercent)
+        mobileProgressRef.current.style.setProperty('--mobile-progress-size', widthPercent)
       }
 
       const paintedRange = paintedRangeRef.current
@@ -545,7 +594,7 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
 
         points.push({
           documentY: headingTops[index] ?? articleTop,
-          x: getTocX(heading.depth as HeadingLevel, indentScale),
+          x: getTocX(heading.depth as HeadingLevel, indentScale, trackOverlapScale),
           y: itemRect.top + itemRect.height / 2 - listRect.top,
         })
 
@@ -565,7 +614,7 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
       const finalPoint = headingPoints.at(-1)
 
       if (finalPoint) {
-        const pathModel = buildPathModel(headingPoints, pathStyle)
+        const pathModel = buildPathModel(headingPoints, pathStyle, bendScale)
         const mappedTop = mapDocumentYToPathOffset(
           viewportTop,
           headingPoints,
@@ -667,13 +716,22 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
       pathD,
       pathHeight,
       pathLength,
-      pathWidth: tocPath.width + Math.max(indentScale - 1, 0) * tocPath.depthX * 2,
+      pathWidth:
+        tocPath.width + Math.max(indentScale - 1, 0) * tocPath.depthX * 2 + trackOverlapScale * 16,
       visibleEndPercent,
       visibleStartPercent,
     })
 
     return shouldContinueMeasuring
-  }, [displayedHeadings, indentScale, paintProgress, pathStyle, scrollLeadScale])
+  }, [
+    bendScale,
+    displayedHeadings,
+    indentScale,
+    paintProgress,
+    pathStyle,
+    scrollLeadScale,
+    trackOverlapScale,
+  ])
 
   useLayoutEffect(() => {
     let animationFrame = 0
@@ -742,6 +800,7 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
   }, [displayedHeadings, progress.activeEndIndex, progress.activeStartIndex])
 
   const readingRangeLabel = `${formatPercent(progress.visibleStartPercent)}–${formatPercent(progress.visibleEndPercent)}`
+  const mobileHeading = displayedHeadings[progress.activeStartIndex] ?? displayedHeadings[0]
 
   if (displayedHeadings.length === 0) {
     return null
@@ -818,6 +877,27 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
         </div>
 
         <div className="dev-progress-floating-controls__row">
+          <label className="dev-progress-floating-controls__label" htmlFor="dev-progress-bend">
+            弯曲
+          </label>
+          <div className="dev-progress-floating-controls__range">
+            <input
+              aria-label="目录线弯曲程度"
+              id="dev-progress-bend"
+              max="1"
+              min="0"
+              onChange={(event) => {
+                setBendScale(Number(event.currentTarget.value))
+              }}
+              step="0.01"
+              type="range"
+              value={bendScale}
+            />
+            <span>{bendScale.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div className="dev-progress-floating-controls__row">
           <span className="dev-progress-floating-controls__label">高度</span>
           <div
             className="dev-progress-floating-controls__buttons"
@@ -859,6 +939,27 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
               value={indentScale}
             />
             <span>{indentScale.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div className="dev-progress-floating-controls__row">
+          <label className="dev-progress-floating-controls__label" htmlFor="dev-progress-overlap">
+            穿插
+          </label>
+          <div className="dev-progress-floating-controls__range">
+            <input
+              aria-label="目录线进入标题区域程度"
+              id="dev-progress-overlap"
+              max="1"
+              min="0"
+              onChange={(event) => {
+                setTrackOverlapScale(Number(event.currentTarget.value))
+              }}
+              step="0.01"
+              type="range"
+              value={trackOverlapScale}
+            />
+            <span>{trackOverlapScale.toFixed(2)}</span>
           </div>
         </div>
 
@@ -946,6 +1047,21 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
             <span>{readingRangeLabel}</span>
             <span>{activeLabel}</span>
           </div>
+        ) : null}
+      </div>
+
+      <div className="dev-progress-mobile" data-weight={lineWeight}>
+        <div aria-hidden="true" className="dev-progress-mobile__track" ref={mobileProgressRef}>
+          <span />
+        </div>
+        {mobileHeading ? (
+          <a className="dev-progress-mobile__link" href={`#${mobileHeading.id}`}>
+            <span className="dev-progress-mobile__level">H{mobileHeading.depth}</span>
+            <span className="dev-progress-mobile__title">{mobileHeading.text}</span>
+            <span className="dev-progress-mobile__percent" ref={mobileVisibleEndPercentRef}>
+              {formatPercent(progress.visibleEndPercent)}
+            </span>
+          </a>
         ) : null}
       </div>
 
