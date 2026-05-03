@@ -14,6 +14,7 @@ describe('dev reference registry', () => {
     expect(items[0]?.slug).toBe('design-system')
     expect(designSystem?.href).toBe('/dev/design-system')
     expect(designSystem?.status).toBe('foundation')
+    expect(getDevReferenceItem('article-blocks')?.href).toBe('/dev/design-system/article-blocks')
   })
 
   it('groups experimental pages separately from foundation references', () => {

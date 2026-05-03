@@ -1,6 +1,10 @@
 import type { Field, GlobalConfig } from 'payload'
 
 import {
+  articleLayoutCJKFontOptions,
+  articleLayoutCodeFontOptions,
+  articleLayoutHeadingFontOptions,
+  articleLayoutLatinFontOptions,
   articleLayoutPresetOptions,
   defaultArticleLayoutPresetID,
   validateArticleLayoutLength,
@@ -100,10 +104,7 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
           condition: (_, siblingData) => siblingData?.type === 'internal',
           description: 'Enter a locale-agnostic path such as /posts or /about.',
         },
-        validate: (
-          value: unknown,
-          { siblingData }: { siblingData?: { type?: string } },
-        ) =>
+        validate: (value: unknown, { siblingData }: { siblingData?: { type?: string } }) =>
           validateFooterLinkValue(value, {
             field: 'internalPath',
             required: args.required,
@@ -117,10 +118,7 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
         admin: {
           condition: (_, siblingData) => siblingData?.type === 'external',
         },
-        validate: (
-          value: unknown,
-          { siblingData }: { siblingData?: { type?: string } },
-        ) =>
+        validate: (value: unknown, { siblingData }: { siblingData?: { type?: string } }) =>
           validateFooterLinkValue(value, {
             field: 'externalUrl',
             required: args.required,
@@ -367,99 +365,189 @@ const footerFields: Field[] = [
 
 const articleLayoutFields: Field[] = [
   {
-    name: 'preset',
-    type: 'select',
+    type: 'row',
     admin: {
-      description:
-        'Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.',
-    },
-    defaultValue: defaultArticleLayoutPresetID,
-    label: 'Preset',
-    options: articleLayoutPresetOptions,
-    required: true,
-  },
-  {
-    name: 'advanced',
-    type: 'group',
-    admin: {
-      description:
-        'Optional safe CSS token overrides. Leave blank to use the selected preset values.',
+      className: 'article-layout-settings-grid',
     },
     fields: [
       {
-        name: 'contentWidth',
-        type: 'text',
+        type: 'collapsible',
         admin: {
-          description: 'Controls both the reading column and prose max width, such as 76ch.',
+          className: 'article-layout-settings__controls',
+          initCollapsed: false,
         },
-        label: 'Content width',
-        validate: validateArticleLayoutLength,
+        fields: [
+          {
+            name: 'preset',
+            type: 'select',
+            admin: {
+              description:
+                'Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.',
+            },
+            defaultValue: defaultArticleLayoutPresetID,
+            label: 'Preset',
+            options: articleLayoutPresetOptions,
+            required: true,
+          },
+          {
+            name: 'typography',
+            type: 'group',
+            admin: {
+              description:
+                'Optional font stack overrides. Leave blank to inherit the selected layout preset.',
+              width: '100%',
+            },
+            fields: [
+              {
+                name: 'latinFont',
+                type: 'select',
+                admin: {
+                  description: 'Western text font stack.',
+                  width: '50%',
+                },
+                label: 'Latin font',
+                options: [...articleLayoutLatinFontOptions],
+              },
+              {
+                name: 'cjkFont',
+                type: 'select',
+                admin: {
+                  description: 'Chinese/Japanese/Korean fallback stack.',
+                  width: '50%',
+                },
+                label: 'CJK font',
+                options: [...articleLayoutCJKFontOptions],
+              },
+              {
+                name: 'headingFont',
+                type: 'select',
+                admin: {
+                  description: 'Heading font stack.',
+                  width: '50%',
+                },
+                label: 'Heading font',
+                options: [...articleLayoutHeadingFontOptions],
+              },
+              {
+                name: 'codeFont',
+                type: 'select',
+                admin: {
+                  description: 'Inline and block code font stack.',
+                  width: '50%',
+                },
+                label: 'Code font',
+                options: [...articleLayoutCodeFontOptions],
+              },
+            ],
+            label: 'Typography',
+          },
+          {
+            name: 'advanced',
+            type: 'group',
+            admin: {
+              description:
+                'Optional safe CSS token overrides. Leave blank to use the selected preset values.',
+              width: '100%',
+            },
+            fields: [
+              {
+                name: 'contentWidth',
+                type: 'text',
+                admin: {
+                  description:
+                    'Controls both the reading column and prose max width, such as 76ch.',
+                  width: '50%',
+                },
+                label: 'Content width',
+                validate: validateArticleLayoutLength,
+              },
+              {
+                name: 'bodyFontSize',
+                type: 'text',
+                admin: {
+                  description: 'Body text size, such as 0.98rem or 17px.',
+                  width: '50%',
+                },
+                label: 'Body font size',
+                validate: validateArticleLayoutLength,
+              },
+              {
+                name: 'bodyLineHeight',
+                type: 'text',
+                admin: {
+                  description: 'Unitless body line-height ratio, such as 1.65.',
+                  width: '50%',
+                },
+                label: 'Body line height',
+                validate: validateArticleLayoutLineHeight,
+              },
+              {
+                name: 'paragraphGap',
+                type: 'text',
+                admin: {
+                  description: 'Vertical gap between consecutive paragraphs, such as 0.75rem.',
+                  width: '50%',
+                },
+                label: 'Paragraph gap',
+                validate: validateArticleLayoutLength,
+              },
+              {
+                name: 'flowGap',
+                type: 'text',
+                admin: {
+                  description: 'Default vertical flow gap between ordinary article elements.',
+                  width: '50%',
+                },
+                label: 'Flow gap',
+                validate: validateArticleLayoutLength,
+              },
+              {
+                name: 'blockGap',
+                type: 'text',
+                admin: {
+                  description: 'Outer vertical gap for figures, tables, code blocks, and callouts.',
+                  width: '50%',
+                },
+                label: 'Rich block gap',
+                validate: validateArticleLayoutLength,
+              },
+              {
+                name: 'captionGap',
+                type: 'text',
+                admin: {
+                  description: 'Internal gap between media/table surfaces and their captions.',
+                  width: '50%',
+                },
+                label: 'Caption gap',
+                validate: validateArticleLayoutLength,
+              },
+              {
+                name: 'gridGap',
+                type: 'text',
+                admin: {
+                  description:
+                    'Desktop gap between the reading column and the table of contents rail.',
+                  width: '50%',
+                },
+                label: 'Reading grid gap',
+                validate: validateArticleLayoutLength,
+              },
+            ],
+            label: 'Advanced overrides',
+          },
+        ],
+        label: 'Layout controls',
       },
       {
-        name: 'bodyFontSize',
-        type: 'text',
+        name: 'preview',
+        type: 'ui',
         admin: {
-          description: 'Body text size, such as 0.98rem or 17px.',
+          components: {
+            Field: '/components/payload/ArticleLayoutPreview#ArticleLayoutPreview',
+          },
         },
-        label: 'Body font size',
-        validate: validateArticleLayoutLength,
-      },
-      {
-        name: 'bodyLineHeight',
-        type: 'text',
-        admin: {
-          description: 'Unitless body line-height ratio, such as 1.65.',
-        },
-        label: 'Body line height',
-        validate: validateArticleLayoutLineHeight,
-      },
-      {
-        name: 'paragraphGap',
-        type: 'text',
-        admin: {
-          description: 'Vertical gap between consecutive paragraphs, such as 0.75rem.',
-        },
-        label: 'Paragraph gap',
-        validate: validateArticleLayoutLength,
-      },
-      {
-        name: 'flowGap',
-        type: 'text',
-        admin: {
-          description: 'Default vertical flow gap between ordinary article elements.',
-        },
-        label: 'Flow gap',
-        validate: validateArticleLayoutLength,
-      },
-      {
-        name: 'blockGap',
-        type: 'text',
-        admin: {
-          description: 'Outer vertical gap for figures, tables, code blocks, and callouts.',
-        },
-        label: 'Rich block gap',
-        validate: validateArticleLayoutLength,
-      },
-      {
-        name: 'captionGap',
-        type: 'text',
-        admin: {
-          description: 'Internal gap between media/table surfaces and their captions.',
-        },
-        label: 'Caption gap',
-        validate: validateArticleLayoutLength,
-      },
-      {
-        name: 'gridGap',
-        type: 'text',
-        admin: {
-          description: 'Desktop gap between the reading column and the table of contents rail.',
-        },
-        label: 'Reading grid gap',
-        validate: validateArticleLayoutLength,
       },
     ],
-    label: 'Advanced overrides',
   },
 ]
 
@@ -473,97 +561,132 @@ export const SiteSettings: GlobalConfig = {
   },
   fields: [
     {
-      name: 'siteName',
-      type: 'text',
-      defaultValue: 'ZBlog',
-      label: 'Site name',
-      required: true,
-    },
-    {
-      name: 'siteDescription',
-      type: 'textarea',
-      defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'siteDescription'),
-      label: 'Site description',
-      localized: true,
-    },
-    {
-      name: 'homeHero',
-      type: 'group',
-      label: 'Homepage hero',
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'eyebrow',
-          type: 'text',
-          defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'eyebrow'),
-          label: 'Eyebrow',
-          localized: true,
+          id: 'general',
+          label: 'General',
+          fields: [
+            {
+              name: 'siteName',
+              type: 'text',
+              defaultValue: 'ZBlog',
+              label: 'Site name',
+              required: true,
+            },
+            {
+              name: 'siteDescription',
+              type: 'textarea',
+              defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'siteDescription'),
+              label: 'Site description',
+              localized: true,
+            },
+          ],
         },
         {
-          name: 'title',
-          type: 'text',
-          defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'title'),
-          label: 'Title',
-          localized: true,
+          id: 'homepage',
+          label: 'Homepage',
+          fields: [
+            {
+              name: 'homeHero',
+              type: 'group',
+              label: 'Homepage hero',
+              fields: [
+                {
+                  name: 'eyebrow',
+                  type: 'text',
+                  defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'eyebrow'),
+                  label: 'Eyebrow',
+                  localized: true,
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'title'),
+                  label: 'Title',
+                  localized: true,
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'description'),
+                  label: 'Description',
+                  localized: true,
+                },
+              ],
+            },
+          ],
         },
         {
-          name: 'description',
-          type: 'textarea',
-          defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'description'),
-          label: 'Description',
-          localized: true,
+          id: 'seo',
+          label: 'SEO',
+          fields: [
+            {
+              name: 'seo',
+              type: 'group',
+              label: 'SEO & sharing',
+              fields: [
+                {
+                  name: 'homeTitle',
+                  type: 'text',
+                  admin: {
+                    description:
+                      'Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.',
+                  },
+                  localized: true,
+                  maxLength: 70,
+                  label: 'Homepage SEO title',
+                },
+                {
+                  name: 'homeDescription',
+                  type: 'textarea',
+                  admin: {
+                    description:
+                      'Optional SEO description override for the localized homepage. Leave blank to reuse the site description.',
+                  },
+                  localized: true,
+                  maxLength: 180,
+                  label: 'Homepage SEO description',
+                },
+                {
+                  name: 'defaultSocialImage',
+                  type: 'relationship',
+                  relationTo: 'media',
+                  label: 'Default social image',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'article-layout',
+          label: 'Article layout',
+          fields: [
+            {
+              name: 'articleLayout',
+              type: 'group',
+              admin: {
+                description:
+                  'Configure the default article reading layout preset and a small set of safe spacing overrides.',
+              },
+              label: 'Article layout',
+              fields: articleLayoutFields,
+            },
+          ],
+        },
+        {
+          id: 'footer',
+          label: 'Footer',
+          fields: [
+            {
+              name: 'footer',
+              type: 'group',
+              label: 'Footer',
+              fields: footerFields,
+            },
+          ],
         },
       ],
-    },
-    {
-      name: 'seo',
-      type: 'group',
-      label: 'SEO & sharing',
-      fields: [
-        {
-          name: 'homeTitle',
-          type: 'text',
-          admin: {
-            description:
-              'Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.',
-          },
-          localized: true,
-          maxLength: 70,
-          label: 'Homepage SEO title',
-        },
-        {
-          name: 'homeDescription',
-          type: 'textarea',
-          admin: {
-            description:
-              'Optional SEO description override for the localized homepage. Leave blank to reuse the site description.',
-          },
-          localized: true,
-          maxLength: 180,
-          label: 'Homepage SEO description',
-        },
-        {
-          name: 'defaultSocialImage',
-          type: 'relationship',
-          relationTo: 'media',
-          label: 'Default social image',
-        },
-      ],
-    },
-    {
-      name: 'footer',
-      type: 'group',
-      label: 'Footer',
-      fields: footerFields,
-    },
-    {
-      name: 'articleLayout',
-      type: 'group',
-      admin: {
-        description:
-          'Configure the default article reading layout preset and a small set of safe spacing overrides.',
-      },
-      label: 'Article layout',
-      fields: articleLayoutFields,
     },
   ],
 }

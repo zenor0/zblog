@@ -7,7 +7,9 @@ export type ArticleLayoutPresetID =
 export const articleLayoutPresetTokenNames = [
   '--article-layout-block-gap',
   '--article-layout-caption-gap',
+  '--article-layout-cjk-font-family',
   '--article-layout-code-font-size',
+  '--article-layout-code-font-family',
   '--article-layout-code-line-height',
   '--article-layout-code-padding',
   '--article-layout-copy-font-size',
@@ -27,6 +29,8 @@ export const articleLayoutPresetTokenNames = [
   '--article-layout-h4-line-height',
   '--article-layout-h4-margin-bottom',
   '--article-layout-h4-margin-top',
+  '--article-layout-heading-font-family',
+  '--article-layout-latin-font-family',
   '--article-layout-list-block-gap',
   '--article-layout-paragraph-gap',
   '--article-layout-reading-column-max',
@@ -54,10 +58,21 @@ export type ArticleLayoutAdvancedSettings = {
   paragraphGap?: null | string
 }
 
-export type ArticleLayoutSettingsInput = {
-  advanced?: ArticleLayoutAdvancedSettings | null
-  preset?: null | string
-} | null | undefined
+export type ArticleLayoutTypographySettings = {
+  cjkFont?: null | string
+  codeFont?: null | string
+  headingFont?: null | string
+  latinFont?: null | string
+}
+
+export type ArticleLayoutSettingsInput =
+  | {
+      advanced?: ArticleLayoutAdvancedSettings | null
+      preset?: null | string
+      typography?: ArticleLayoutTypographySettings | null
+    }
+  | null
+  | undefined
 
 export type ResolvedArticleLayoutConfig = {
   presetID: ArticleLayoutPresetID
@@ -65,6 +80,97 @@ export type ResolvedArticleLayoutConfig = {
 }
 
 export const defaultArticleLayoutPresetID: ArticleLayoutPresetID = 'dense-technical'
+
+const articleLayoutLatinFontStacks = {
+  'literary-serif': 'Georgia, "Times New Roman", ui-serif, serif',
+  'system-sans': 'var(--font-sans), ui-sans-serif, system-ui, sans-serif',
+  'system-serif': 'var(--font-serif), ui-serif, Georgia, serif',
+} as const
+
+const articleLayoutCJKFontStacks = {
+  'heiti-sans': '"Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", sans-serif',
+  'kaiti-serif': '"Kaiti SC", KaiTi, STKaiti, serif',
+  'songti-serif': '"Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif',
+  'system-cjk-sans': '"PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif',
+} as const
+
+const articleLayoutHeadingFontStacks = {
+  'compact-sans':
+    'var(--font-sans), "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", sans-serif',
+  'display-serif': 'var(--font-serif), Georgia, "Source Han Serif SC", "Songti SC", serif',
+  inherit: 'var(--article-layout-latin-font-family), var(--article-layout-cjk-font-family), serif',
+} as const
+
+const articleLayoutCodeFontStacks = {
+  'system-mono': 'var(--font-mono), "SFMono-Regular", Consolas, "Liberation Mono", monospace',
+  'technical-mono':
+    '"JetBrains Mono", "Fira Code", var(--font-mono), "SFMono-Regular", Consolas, monospace',
+} as const
+
+type ArticleLayoutLatinFontID = keyof typeof articleLayoutLatinFontStacks
+type ArticleLayoutCJKFontID = keyof typeof articleLayoutCJKFontStacks
+type ArticleLayoutHeadingFontID = keyof typeof articleLayoutHeadingFontStacks
+type ArticleLayoutCodeFontID = keyof typeof articleLayoutCodeFontStacks
+
+export const articleLayoutLatinFontOptions = [
+  {
+    label: 'System sans',
+    value: 'system-sans',
+  },
+  {
+    label: 'System serif',
+    value: 'system-serif',
+  },
+  {
+    label: 'Literary serif',
+    value: 'literary-serif',
+  },
+] as const
+
+export const articleLayoutCJKFontOptions = [
+  {
+    label: 'System CJK sans',
+    value: 'system-cjk-sans',
+  },
+  {
+    label: 'Heiti sans',
+    value: 'heiti-sans',
+  },
+  {
+    label: 'Songti serif',
+    value: 'songti-serif',
+  },
+  {
+    label: 'Kaiti serif',
+    value: 'kaiti-serif',
+  },
+] as const
+
+export const articleLayoutHeadingFontOptions = [
+  {
+    label: 'Inherit body stack',
+    value: 'inherit',
+  },
+  {
+    label: 'Display serif',
+    value: 'display-serif',
+  },
+  {
+    label: 'Compact sans',
+    value: 'compact-sans',
+  },
+] as const
+
+export const articleLayoutCodeFontOptions = [
+  {
+    label: 'System mono',
+    value: 'system-mono',
+  },
+  {
+    label: 'Technical mono',
+    value: 'technical-mono',
+  },
+] as const
 
 export const articleLayoutPresets: ArticleLayoutPreset[] = [
   {
@@ -74,7 +180,9 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
     tokens: {
       '--article-layout-block-gap': '1.65rem',
       '--article-layout-caption-gap': '0.38rem',
+      '--article-layout-cjk-font-family': articleLayoutCJKFontStacks['heiti-sans'],
       '--article-layout-code-font-size': '0.85rem',
+      '--article-layout-code-font-family': articleLayoutCodeFontStacks['system-mono'],
       '--article-layout-code-line-height': '1.6',
       '--article-layout-code-padding': '2.25rem 0.95rem 0.95rem',
       '--article-layout-copy-font-size': '0.98rem',
@@ -94,6 +202,8 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
       '--article-layout-h4-line-height': '1.38',
       '--article-layout-h4-margin-bottom': '0.35rem',
       '--article-layout-h4-margin-top': '1.5rem',
+      '--article-layout-heading-font-family': articleLayoutHeadingFontStacks['compact-sans'],
+      '--article-layout-latin-font-family': articleLayoutLatinFontStacks['system-sans'],
       '--article-layout-list-block-gap': '1rem',
       '--article-layout-paragraph-gap': '0.75rem',
       '--article-layout-reading-column-max': '76ch',
@@ -107,7 +217,9 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
     tokens: {
       '--article-layout-block-gap': '2rem',
       '--article-layout-caption-gap': '0.45rem',
+      '--article-layout-cjk-font-family': articleLayoutCJKFontStacks['songti-serif'],
       '--article-layout-code-font-size': '0.875rem',
+      '--article-layout-code-font-family': articleLayoutCodeFontStacks['system-mono'],
       '--article-layout-code-line-height': '1.7',
       '--article-layout-code-padding': '2.5rem 1rem 1rem',
       '--article-layout-copy-font-size': '1rem',
@@ -127,6 +239,8 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
       '--article-layout-h4-line-height': '1.45',
       '--article-layout-h4-margin-bottom': '0.5em',
       '--article-layout-h4-margin-top': '1.5em',
+      '--article-layout-heading-font-family': articleLayoutHeadingFontStacks['inherit'],
+      '--article-layout-latin-font-family': articleLayoutLatinFontStacks['system-serif'],
       '--article-layout-list-block-gap': '1.25rem',
       '--article-layout-paragraph-gap': '1rem',
       '--article-layout-reading-column-max': '65ch',
@@ -140,7 +254,9 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
     tokens: {
       '--article-layout-block-gap': '2.5rem',
       '--article-layout-caption-gap': '0.5rem',
+      '--article-layout-cjk-font-family': articleLayoutCJKFontStacks['songti-serif'],
       '--article-layout-code-font-size': '0.9rem',
+      '--article-layout-code-font-family': articleLayoutCodeFontStacks['technical-mono'],
       '--article-layout-code-line-height': '1.7',
       '--article-layout-code-padding': '3rem 1.15rem 1.15rem',
       '--article-layout-copy-font-size': '1.0625rem',
@@ -160,6 +276,8 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
       '--article-layout-h4-line-height': '1.45',
       '--article-layout-h4-margin-bottom': '0.55rem',
       '--article-layout-h4-margin-top': '2.1rem',
+      '--article-layout-heading-font-family': articleLayoutHeadingFontStacks['display-serif'],
+      '--article-layout-latin-font-family': articleLayoutLatinFontStacks['literary-serif'],
       '--article-layout-list-block-gap': '1.25rem',
       '--article-layout-paragraph-gap': '0.85rem',
       '--article-layout-reading-column-max': '42rem',
@@ -240,6 +358,17 @@ function applyLineHeightOverride(
   }
 }
 
+function applyFontOverride<TFontID extends string>(
+  style: Partial<Record<ArticleLayoutPresetTokenName, string>>,
+  tokenName: ArticleLayoutPresetTokenName,
+  stacks: Record<TFontID, string>,
+  value: unknown,
+) {
+  if (typeof value === 'string' && value in stacks) {
+    style[tokenName] = stacks[value as TFontID]
+  }
+}
+
 export function resolveArticleLayoutConfig(
   settings: ArticleLayoutSettingsInput,
 ): ResolvedArticleLayoutConfig {
@@ -264,6 +393,33 @@ export function resolveArticleLayoutConfig(
   applyLengthOverride(style, '--article-layout-block-gap', advanced?.blockGap)
   applyLengthOverride(style, '--article-layout-caption-gap', advanced?.captionGap)
   applyLengthOverride(style, '--article-layout-grid-gap', advanced?.gridGap)
+
+  const typography = settings?.typography ?? null
+
+  applyFontOverride<ArticleLayoutLatinFontID>(
+    style,
+    '--article-layout-latin-font-family',
+    articleLayoutLatinFontStacks,
+    typography?.latinFont,
+  )
+  applyFontOverride<ArticleLayoutCJKFontID>(
+    style,
+    '--article-layout-cjk-font-family',
+    articleLayoutCJKFontStacks,
+    typography?.cjkFont,
+  )
+  applyFontOverride<ArticleLayoutHeadingFontID>(
+    style,
+    '--article-layout-heading-font-family',
+    articleLayoutHeadingFontStacks,
+    typography?.headingFont,
+  )
+  applyFontOverride<ArticleLayoutCodeFontID>(
+    style,
+    '--article-layout-code-font-family',
+    articleLayoutCodeFontStacks,
+    typography?.codeFont,
+  )
 
   return {
     presetID: preset.id,

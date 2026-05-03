@@ -4,7 +4,9 @@ import { SiteSettings } from '@/globals/SiteSettings'
 
 describe('Site settings footer config', () => {
   it('defines the rebuilt footer groups and reusable link shape', () => {
-    const footerField = SiteSettings.fields.find((field: any) => field.name === 'footer') as any
+    const tabsField = SiteSettings.fields.find((field: any) => field.type === 'tabs') as any
+    const footerTab = tabsField.tabs.find((tab: any) => tab.id === 'footer') as any
+    const footerField = footerTab.fields.find((field: any) => field.name === 'footer') as any
 
     expect(footerField.type).toBe('group')
     expect(footerField.fields.map((field: any) => field.name)).toEqual([

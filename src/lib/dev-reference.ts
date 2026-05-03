@@ -30,6 +30,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         status: 'foundation',
         tags: ['tokens', 'typography', 'components', 'motion'],
       },
+      {
+        slug: 'article-blocks',
+        title: 'Article Blocks',
+        description: '静态枚举文章富文本块、插入块和白名单组件的所有预期状态。',
+        href: '/dev/design-system/article-blocks',
+        status: 'foundation',
+        tags: ['article', 'rich-text', 'blocks', 'states'],
+      },
     ],
   },
   {

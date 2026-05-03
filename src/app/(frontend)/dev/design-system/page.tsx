@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, BookOpen, CircleDot, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Blocks, BookOpen, CircleDot, Sparkles } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { articleBlockPreviewCategories } from '@/lib/article-block-previews'
 
 export const metadata: Metadata = {
   title: 'Design System Reference',
@@ -49,7 +50,8 @@ export default function DesignSystemReferencePage() {
               安静、清晰、可持续扩展的博客前台语言。
             </h1>
             <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
-              本页作为新页面和新组件的视觉起点：先使用语义 token 与现有组件，再通过局部实验页验证复杂交互，最后沉淀为可复用模式。
+              本页作为新页面和新组件的视觉起点：先使用语义 token
+              与现有组件，再通过局部实验页验证复杂交互，最后沉淀为可复用模式。
             </p>
           </div>
           <Card className="dev-reference-card">
@@ -70,7 +72,9 @@ export default function DesignSystemReferencePage() {
         <div className="dev-reference-section__intro">
           <p className="section-kicker">Tokens</p>
           <h2>色彩语义</h2>
-          <p>所有页面优先使用语义色，避免组件内直接绑定具体颜色，使明暗主题和未来品牌调整更安全。</p>
+          <p>
+            所有页面优先使用语义色，避免组件内直接绑定具体颜色，使明暗主题和未来品牌调整更安全。
+          </p>
         </div>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
           {colorTokens.map(([label, className, description]) => (
@@ -91,12 +95,17 @@ export default function DesignSystemReferencePage() {
         <div className="dev-reference-section__intro">
           <p className="section-kicker">Typography</p>
           <h2>排版层级</h2>
-          <p>标题使用展示型衬线字体形成编辑感；正文保持宽松行高，为长文阅读和中英文混排留出呼吸感。</p>
+          <p>
+            标题使用展示型衬线字体形成编辑感；正文保持宽松行高，为长文阅读和中英文混排留出呼吸感。
+          </p>
         </div>
         <Card className="dev-reference-card">
           <CardContent className="flex flex-col gap-7 pt-6">
             {typeScale.map(([label, className, usage]) => (
-              <div className="grid gap-3 md:grid-cols-[9rem_minmax(0,1fr)] md:items-baseline" key={label}>
+              <div
+                className="grid gap-3 md:grid-cols-[9rem_minmax(0,1fr)] md:items-baseline"
+                key={label}
+              >
                 <div className="flex flex-col gap-1">
                   <Badge variant="outline">{label}</Badge>
                   <p className="text-xs leading-5 text-muted-foreground">{usage}</p>
@@ -159,21 +168,74 @@ export default function DesignSystemReferencePage() {
 
       <section className="dev-reference-section">
         <div className="dev-reference-section__intro">
+          <p className="section-kicker">Article Blocks</p>
+          <h2>文章富文本块</h2>
+          <p>
+            静态枚举文章中可能出现的富文本块和状态。每个分类都有自己的子路由，适合单独调整视觉预期。
+          </p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <Card className="dev-reference-card">
+            <CardHeader>
+              <CardTitle className="font-serif text-3xl tracking-[-0.035em]">
+                Article Block Preview Matrix
+              </CardTitle>
+              <CardDescription>
+                覆盖文本、callout、媒体、表格和文章内白名单组件的静态状态。
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-5">
+              <div className="flex flex-wrap gap-2">
+                {articleBlockPreviewCategories.map((category) => (
+                  <Badge key={category.slug} variant="outline">
+                    {category.title}
+                  </Badge>
+                ))}
+              </div>
+              <Button asChild variant="outline">
+                <Link href="/dev/design-system/article-blocks">
+                  打开文章块预览 <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="dev-reference-card">
+            <CardHeader>
+              <Blocks aria-hidden="true" />
+              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">静态优先</CardTitle>
+              <CardDescription>不依赖真实 MarkdownRenderer。</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm leading-6 text-muted-foreground">
+              这些页面用于隔离视觉状态；真实文章整体节奏继续在 /dev/article-layout 中对照。
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="dev-reference-section">
+        <div className="dev-reference-section__intro">
           <p className="section-kicker">Layout & Motion</p>
           <h2>布局与动效</h2>
-          <p>页面采用窄内容宽度、清晰分区和低干扰动效。复杂组件先在实验页里拆解，不直接进入文章页。</p>
+          <p>
+            页面采用窄内容宽度、清晰分区和低干扰动效。复杂组件先在实验页里拆解，不直接进入文章页。
+          </p>
         </div>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <Card className="dev-reference-card">
             <CardHeader>
-              <CardTitle className="font-serif text-3xl tracking-[-0.035em]">页面节奏样例</CardTitle>
+              <CardTitle className="font-serif text-3xl tracking-[-0.035em]">
+                页面节奏样例
+              </CardTitle>
               <CardDescription>Hero → 内容预览 → 元信息 → 继续阅读。</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-5">
               <div className="grid gap-4 border border-border bg-muted/28 p-5 md:grid-cols-[minmax(0,1fr)_12rem]">
                 <div className="flex flex-col gap-3">
                   <p className="section-kicker">Essay / 12 min</p>
-                  <h3 className="font-serif text-4xl leading-tight tracking-[-0.04em]">在长文里保存方向感</h3>
+                  <h3 className="font-serif text-4xl leading-tight tracking-[-0.04em]">
+                    在长文里保存方向感
+                  </h3>
                   <p className="max-w-xl text-sm leading-7 text-muted-foreground">
                     目录和进度提示应该辅助阅读，而不是抢走文章本身的注意力。
                   </p>
@@ -187,7 +249,10 @@ export default function DesignSystemReferencePage() {
               <Separator />
               <div className="grid gap-3 md:grid-cols-3">
                 {motionPrinciples.map((principle) => (
-                  <div className="flex gap-3 text-sm leading-6 text-muted-foreground" key={principle}>
+                  <div
+                    className="flex gap-3 text-sm leading-6 text-muted-foreground"
+                    key={principle}
+                  >
                     <CircleDot aria-hidden="true" className="mt-1 shrink-0" />
                     <p>{principle}</p>
                   </div>

@@ -627,6 +627,73 @@ export interface SiteSetting {
     homeDescription?: string | null;
     defaultSocialImage?: (number | null) | Media;
   };
+  /**
+   * Configure the default article reading layout preset and a small set of safe spacing overrides.
+   */
+  articleLayout: {
+    /**
+     * Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.
+     */
+    preset: 'dense-technical' | 'prose-baseline' | 'editorial-balanced' | 'current';
+    /**
+     * Optional font stack overrides. Leave blank to inherit the selected layout preset.
+     */
+    typography?: {
+      /**
+       * Western text font stack.
+       */
+      latinFont?: ('system-sans' | 'system-serif' | 'literary-serif') | null;
+      /**
+       * Chinese/Japanese/Korean fallback stack.
+       */
+      cjkFont?: ('system-cjk-sans' | 'heiti-sans' | 'songti-serif' | 'kaiti-serif') | null;
+      /**
+       * Heading font stack.
+       */
+      headingFont?: ('inherit' | 'display-serif' | 'compact-sans') | null;
+      /**
+       * Inline and block code font stack.
+       */
+      codeFont?: ('system-mono' | 'technical-mono') | null;
+    };
+    /**
+     * Optional safe CSS token overrides. Leave blank to use the selected preset values.
+     */
+    advanced?: {
+      /**
+       * Controls both the reading column and prose max width, such as 76ch.
+       */
+      contentWidth?: string | null;
+      /**
+       * Body text size, such as 0.98rem or 17px.
+       */
+      bodyFontSize?: string | null;
+      /**
+       * Unitless body line-height ratio, such as 1.65.
+       */
+      bodyLineHeight?: string | null;
+      /**
+       * Vertical gap between consecutive paragraphs, such as 0.75rem.
+       */
+      paragraphGap?: string | null;
+      /**
+       * Default vertical flow gap between ordinary article elements.
+       */
+      flowGap?: string | null;
+      /**
+       * Outer vertical gap for figures, tables, code blocks, and callouts.
+       */
+      blockGap?: string | null;
+      /**
+       * Internal gap between media/table surfaces and their captions.
+       */
+      captionGap?: string | null;
+      /**
+       * Desktop gap between the reading column and the table of contents rail.
+       */
+      gridGap?: string | null;
+    };
+  };
   footer: {
     brand: {
       logo?: (number | null) | Media;
@@ -720,52 +787,6 @@ export interface SiteSetting {
       note?: string | null;
     };
   };
-  /**
-   * Configure the default article reading layout preset and a small set of safe spacing overrides.
-   */
-  articleLayout: {
-    /**
-     * Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.
-     */
-    preset: 'dense-technical' | 'prose-baseline' | 'editorial-balanced' | 'current';
-    /**
-     * Optional safe CSS token overrides. Leave blank to use the selected preset values.
-     */
-    advanced?: {
-      /**
-       * Controls both the reading column and prose max width, such as 76ch.
-       */
-      contentWidth?: string | null;
-      /**
-       * Body text size, such as 0.98rem or 17px.
-       */
-      bodyFontSize?: string | null;
-      /**
-       * Unitless body line-height ratio, such as 1.65.
-       */
-      bodyLineHeight?: string | null;
-      /**
-       * Vertical gap between consecutive paragraphs, such as 0.75rem.
-       */
-      paragraphGap?: string | null;
-      /**
-       * Default vertical flow gap between ordinary article elements.
-       */
-      flowGap?: string | null;
-      /**
-       * Outer vertical gap for figures, tables, code blocks, and callouts.
-       */
-      blockGap?: string | null;
-      /**
-       * Internal gap between media/table surfaces and their captions.
-       */
-      captionGap?: string | null;
-      /**
-       * Desktop gap between the reading column and the table of contents rail.
-       */
-      gridGap?: string | null;
-    };
-  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -789,6 +810,31 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         homeTitle?: T;
         homeDescription?: T;
         defaultSocialImage?: T;
+      };
+  articleLayout?:
+    | T
+    | {
+        preset?: T;
+        typography?:
+          | T
+          | {
+              latinFont?: T;
+              cjkFont?: T;
+              headingFont?: T;
+              codeFont?: T;
+            };
+        advanced?:
+          | T
+          | {
+              contentWidth?: T;
+              bodyFontSize?: T;
+              bodyLineHeight?: T;
+              paragraphGap?: T;
+              flowGap?: T;
+              blockGap?: T;
+              captionGap?: T;
+              gridGap?: T;
+            };
       };
   footer?:
     | T
@@ -885,23 +931,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
           | T
           | {
               note?: T;
-            };
-      };
-  articleLayout?:
-    | T
-    | {
-        preset?: T;
-        advanced?:
-          | T
-          | {
-              contentWidth?: T;
-              bodyFontSize?: T;
-              bodyLineHeight?: T;
-              paragraphGap?: T;
-              flowGap?: T;
-              blockGap?: T;
-              captionGap?: T;
-              gridGap?: T;
             };
       };
   updatedAt?: T;

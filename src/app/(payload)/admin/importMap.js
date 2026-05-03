@@ -3,6 +3,7 @@ import { BibliographyField as BibliographyField_717477dca85f9102a6193d977c97f573
 import { PostTranslationManager as PostTranslationManager_2a8938c2187d10048ec37c73ed12f688 } from '../../../components/payload/PostTranslationManager'
 import { PostPackageImportAction as PostPackageImportAction_991c33c68c79e784af33515d69993235 } from '../../../components/payload/PostPackageImportAction'
 import { PostLivePreviewView as PostLivePreviewView_9222b67ecbb0ab1ba52dfe865b4c4243 } from '../../../components/payload/PostLivePreviewView'
+import { ArticleLayoutPreview as ArticleLayoutPreview_35a30d63e7f0d7b617d81e1657cd795c } from '../../../components/payload/ArticleLayoutPreview'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -12,5 +13,6 @@ export const importMap = {
   "/components/payload/PostTranslationManager#PostTranslationManager": PostTranslationManager_2a8938c2187d10048ec37c73ed12f688,
   "/components/payload/PostPackageImportAction#PostPackageImportAction": PostPackageImportAction_991c33c68c79e784af33515d69993235,
   "/components/payload/PostLivePreviewView#PostLivePreviewView": PostLivePreviewView_9222b67ecbb0ab1ba52dfe865b4c4243,
+  "/components/payload/ArticleLayoutPreview#ArticleLayoutPreview": ArticleLayoutPreview_35a30d63e7f0d7b617d81e1657cd795c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
