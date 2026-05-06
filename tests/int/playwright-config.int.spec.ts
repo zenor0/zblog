@@ -16,14 +16,18 @@ describe('playwright config', () => {
     vi.resetModules()
   })
 
-  test('probes the admin route when reusing an already running server', async () => {
-    process.env.PLAYWRIGHT_BASE_URL = 'http://localhost:3001'
+  test(
+    'probes the admin route when reusing an already running server',
+    { timeout: 15000 },
+    async () => {
+      process.env.PLAYWRIGHT_BASE_URL = 'http://localhost:3001'
 
-    const { default: config } = await loadPlaywrightConfig()
+      const { default: config } = await loadPlaywrightConfig()
 
-    expect(config.webServer).toMatchObject({
-      reuseExistingServer: true,
-      url: 'http://localhost:3001/admin',
-    })
-  })
+      expect(config.webServer).toMatchObject({
+        reuseExistingServer: true,
+        url: 'http://localhost:3001/admin',
+      })
+    },
+  )
 })

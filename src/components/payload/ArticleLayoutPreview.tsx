@@ -76,28 +76,34 @@ function readArticleLayoutSettings(
   fields: ArticleLayoutFormState | undefined,
 ): ArticleLayoutSettingsInput {
   const groupValue = fields?.articleLayout?.value
-
-  if (isRecord(groupValue)) {
-    return {
-      advanced: isRecord(groupValue.advanced)
-        ? readAdvancedSettingsFromRecord(groupValue.advanced)
-        : undefined,
-      preset: getStringValue(groupValue.preset),
-      typography: isRecord(groupValue.typography)
-        ? readTypographySettingsFromRecord(groupValue.typography)
-        : undefined,
-    }
-  }
+  const groupSettings = isRecord(groupValue)
+    ? {
+        advanced: isRecord(groupValue.advanced)
+          ? readAdvancedSettingsFromRecord(groupValue.advanced)
+          : {},
+        preset: getStringValue(groupValue.preset),
+        typography: isRecord(groupValue.typography)
+          ? readTypographySettingsFromRecord(groupValue.typography)
+          : {},
+      }
+    : {
+        advanced: {},
+        preset: undefined,
+        typography: {},
+      }
 
   return {
     advanced: advancedOverrideKeys.reduce<ArticleLayoutAdvancedSettings>((settings, key) => {
-      settings[key] = getFieldStringValue(fields, `articleLayout.advanced.${key}`)
+      settings[key] =
+        getFieldStringValue(fields, `articleLayout.advanced.${key}`) ?? groupSettings.advanced[key]
 
       return settings
     }, {}),
-    preset: getFieldStringValue(fields, 'articleLayout.preset'),
+    preset: getFieldStringValue(fields, 'articleLayout.preset') ?? groupSettings.preset,
     typography: typographyOverrideKeys.reduce<ArticleLayoutTypographySettings>((settings, key) => {
-      settings[key] = getFieldStringValue(fields, `articleLayout.typography.${key}`)
+      settings[key] =
+        getFieldStringValue(fields, `articleLayout.typography.${key}`) ??
+        groupSettings.typography[key]
 
       return settings
     }, {}),
