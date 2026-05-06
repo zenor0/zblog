@@ -1139,3 +1139,27 @@ For deeper exploration of specific topics, refer to the context files located in
 - GitHub: https://github.com/payloadcms/payload
 - Examples: https://github.com/payloadcms/payload/tree/main/examples
 - Templates: https://github.com/payloadcms/payload/tree/main/templates
+
+# Agent Instructions
+
+## Worktree Policy
+
+- By default, make code and documentation changes from a dedicated git worktree under `.worktrees/`, not from the repository's primary checkout.
+- Before editing files, create or reuse a task-specific branch and worktree:
+
+  ```bash
+  git worktree add .worktrees/<task-name> -b <branch-name>
+  ```
+
+- After the task worktree exists, run task-specific exploration, edits, formatting, and verification inside `.worktrees/<task-name>`.
+- Keep branch names short and task-oriented, for example `docs/agent-worktree-policy` or `fix/parser-timeout`.
+- Do not use the primary checkout branch for normal implementation work unless the user explicitly asks for it or the change is clearly limited to inspecting files without editing them.
+- If a change must be made in the primary checkout, state the reason before editing.
+- Do not remove or overwrite other users' worktrees or branches. If a target worktree already exists, inspect it first and either reuse it only when it matches the task or create a new task-specific worktree.
+- The repository intentionally ignores `.worktrees/`; do not remove that ignore rule unless the user asks.
+
+## Repository Hygiene
+
+- Treat existing uncommitted changes as user work unless told otherwise.
+- Avoid reverting, rebasing, resetting, or deleting work that was not created for the current task.
+- Keep edits scoped to the requested task and verify the result from inside the task worktree before reporting completion.
