@@ -1,27 +1,19 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import {
-  ArrowLeftIcon,
-  FileWarningIcon,
-  LanguagesIcon,
-  SparklesIcon,
-  TriangleAlertIcon,
-} from 'lucide-react'
+import { ArrowLeftIcon } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-import { CollapsibleReferenceSection } from '@/components/frontend/CollapsibleReferenceSection'
 import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { PostArticleNotices } from '@/components/frontend/PostArticleNotices'
+import { PostArticleSupplementary } from '@/components/frontend/PostArticleSupplementary'
 import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
 import { ThemeSwitcher } from '@/components/frontend/ThemeSwitcher'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { describeBibliographyEntry } from '@/lib/bibliography'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/lib/markdown'
 import type { MarkdownMediaLike } from '@/lib/markdown/types'
 import { extractMarkdownHeadings, type MarkdownHeading } from '@/lib/markdown-headings'
-import { resolveAttachmentDescription, resolveMediaAsset, resolveMediaCaption } from '@/lib/media'
+import { resolveMediaCaption } from '@/lib/media'
 import { getPayloadClient } from '@/lib/payload'
 import type { ResolvedPost } from '@/lib/posts'
 import { getLocaleLabel, type AppLocale } from '@/lib/locales'
@@ -35,44 +27,41 @@ type LocaleLink = {
   locale: AppLocale
 }
 
-function PreviewNotice(props: {
-  body: string
-  exitLabel: string
-  exitHref: string
-  title: string
-}) {
-  const { body, exitHref, exitLabel, title } = props
+async function loadMarkdownMediaBySource(
+  sources: string[],
+): Promise<Record<string, MarkdownMediaLike>> {
+  if (sources.length === 0) {
+    return {}
+  }
 
-  return (
-    <Alert className="border-border bg-transparent" data-embedded-hidden="true">
-      <SparklesIcon />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription className="gap-3">
-        <p>{body}</p>
-        <Button asChild size="sm" variant="outline">
-          <Link href={exitHref}>{exitLabel}</Link>
-        </Button>
-      </AlertDescription>
-    </Alert>
-  )
-}
+  const payload = await getPayloadClient()
+  const media = await payload.find({
+    collection: 'media',
+    depth: 0,
+    limit: sources.length,
+    overrideAccess: false,
+    select: {
+      alt: true,
+      caption: true,
+      credit: true,
+      filename: true,
+      height: true,
+      mimeType: true,
+      previewSVGURL: true,
+      url: true,
+      width: true,
+    },
+    where: {
+      url: {
+        in: sources,
+      },
+    },
+  })
 
-function TranslationNotice(props: { message: string; title: string; tone: 'info' | 'warning' }) {
-  const { message, title, tone } = props
-  const Icon = tone === 'warning' ? TriangleAlertIcon : LanguagesIcon
-
-  return (
-    <Alert
-      className={
-        tone === 'warning' ? 'border-destructive/40 bg-transparent' : 'border-border bg-transparent'
-      }
-    >
-      <Icon />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>
-        <p>{message}</p>
-      </AlertDescription>
-    </Alert>
+  return Object.fromEntries(
+    media.docs
+      .filter((item) => typeof item.url === 'string' && item.url.length > 0)
+      .map((item) => [item.url as string, item]),
   )
 }
 
@@ -114,55 +103,17 @@ export async function PostArticle(props: {
   const article = await getTranslations({ locale, namespace: 'Article' })
   const common = await getTranslations({ locale, namespace: 'Common' })
   const heroImage = post.heroImage && typeof post.heroImage === 'object' ? post.heroImage : null
-  const attachments = (post.attachments ?? []).filter(
-    (item) => item.file && typeof item.file === 'object' && item.file.url,
-  )
   const allHeadings = extractMarkdownHeadings(post.content)
   const markdownMediaSources = extractMarkdownMediaSources(post.content)
   const markdownMediaSourcesToFetch = markdownMediaSources.filter(
     (source) => !markdownMediaBySourceOverrides[source],
   )
-  const fetchedMarkdownMediaBySource =
-    markdownMediaSourcesToFetch.length > 0
-      ? Object.fromEntries(
-          (
-            await (
-              await getPayloadClient()
-            ).find({
-              collection: 'media',
-              depth: 0,
-              limit: markdownMediaSourcesToFetch.length,
-              overrideAccess: false,
-              select: {
-                alt: true,
-                caption: true,
-                credit: true,
-                filename: true,
-                height: true,
-                mimeType: true,
-                previewSVGURL: true,
-                url: true,
-                width: true,
-              },
-              where: {
-                url: {
-                  in: markdownMediaSourcesToFetch,
-                },
-              },
-            })
-          ).docs
-            .filter((media) => typeof media.url === 'string' && media.url.length > 0)
-            .map((media) => [media.url as string, media]),
-        )
-      : {}
+  const fetchedMarkdownMediaBySource = await loadMarkdownMediaBySource(markdownMediaSourcesToFetch)
   const markdownMediaBySource = {
     ...fetchedMarkdownMediaBySource,
     ...markdownMediaBySourceOverrides,
   }
   const tocHeadings = allHeadings.filter((heading) => heading.depth >= 2 && heading.depth <= 4)
-  const hasSupplementaryContent = Boolean(
-    post.tags?.length || attachments.length || bibliographyEntries.length,
-  )
   const displayTitle =
     typeof post.title === 'string' && post.title.trim().length > 0
       ? post.title
@@ -183,12 +134,6 @@ export async function PostArticle(props: {
           sourceLocale: getLocaleLabel(sourcePost.translatedFromLocale ?? resolved.resolvedLocale),
         })
       : null
-  const showNotices =
-    usedDraftAccess ||
-    Boolean(fallbackMessage) ||
-    Boolean(machineTranslationMessage) ||
-    missingCitationKeys.length > 0
-
   return (
     <div className="page-frame frontend-shell">
       <div
@@ -266,46 +211,43 @@ export async function PostArticle(props: {
             </div>
           </header>
 
-          {showNotices ? (
-            <div className="grid gap-3">
-              {usedDraftAccess ? (
-                <PreviewNotice
-                  body={article('previewBody')}
-                  exitHref={exitPreviewHref}
-                  exitLabel={article('exitPreview')}
-                  title={article('previewTitle')}
-                />
-              ) : null}
-              {fallbackMessage ? (
-                <TranslationNotice
-                  message={fallbackMessage}
-                  title={article('fallbackTitle')}
-                  tone="warning"
-                />
-              ) : null}
-              {machineTranslationMessage ? (
-                <TranslationNotice
-                  message={machineTranslationMessage}
-                  title={article('machineTranslationTitle')}
-                  tone="info"
-                />
-              ) : null}
-              {missingCitationKeys.length > 0 ? (
-                <Alert className="border-destructive/40 bg-transparent">
-                  <FileWarningIcon />
-                  <AlertTitle>{article('bibliographyMismatchTitle')}</AlertTitle>
-                  <AlertDescription className="gap-3">
-                    <p>{article('bibliographyMismatchIntro')}</p>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {missingCitationKeys.map((key) => (
-                        <span key={key}>{key}</span>
-                      ))}
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-            </div>
-          ) : null}
+          <PostArticleNotices
+            bibliographyMismatch={
+              missingCitationKeys.length > 0
+                ? {
+                    intro: article('bibliographyMismatchIntro'),
+                    keys: missingCitationKeys,
+                    title: article('bibliographyMismatchTitle'),
+                  }
+                : null
+            }
+            fallback={
+              fallbackMessage
+                ? {
+                    message: fallbackMessage,
+                    title: article('fallbackTitle'),
+                  }
+                : null
+            }
+            machineTranslation={
+              machineTranslationMessage
+                ? {
+                    message: machineTranslationMessage,
+                    title: article('machineTranslationTitle'),
+                  }
+                : null
+            }
+            preview={
+              usedDraftAccess
+                ? {
+                    body: article('previewBody'),
+                    exitHref: exitPreviewHref,
+                    exitLabel: article('exitPreview'),
+                    title: article('previewTitle'),
+                  }
+                : null
+            }
+          />
 
           {heroImage?.url ? (
             <figure className="flex flex-col gap-3 border-b border-border pb-10">
@@ -340,187 +282,25 @@ export async function PostArticle(props: {
             />
           </section>
 
-          {hasSupplementaryContent ? (
-            <div
-              className="flex flex-col gap-10 border-t border-border pt-10"
-              data-article-supplementary=""
-            >
-              {post.tags?.length ? (
-                <section className="flex flex-col gap-3">
-                  <p className="section-kicker">{common('tags')}</p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    {post.tags.map((tag) => (
-                      <span key={tag.id ?? tag.value}>{tag.value}</span>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {attachments.length ? (
-                <section className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <p className="section-kicker">{common('attachments')}</p>
-                    <h2 className="font-serif text-2xl tracking-[-0.02em] text-foreground">
-                      {common('attachments')}
-                    </h2>
-                  </div>
-                  <div className="flex flex-col divide-y divide-border">
-                    {attachments.map((attachment) => {
-                      const file = attachment.file as Exclude<typeof attachment.file, number>
-                      const asset = resolveMediaAsset({
-                        alt: attachment.label || file.alt || file.filename,
-                        media: file,
-                      })
-                      const attachmentDescription = resolveAttachmentDescription({
-                        caption: file.caption,
-                        description: attachment.description,
-                      })
-                      const typeLabel =
-                        asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
-
-                      return (
-                        <a
-                          className="group grid gap-4 py-4 transition-colors hover:text-foreground sm:grid-cols-[7rem_minmax(0,1fr)]"
-                          href={file.url ?? '#'}
-                          key={attachment.id ?? file.id}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          <div className="sm:w-28 sm:flex-none">
-                            <MediaSurface
-                              alt={attachment.label || file.alt || file.filename}
-                              asset={asset}
-                              variant="attachment"
-                            />
-                          </div>
-                          <span className="flex min-w-0 flex-1 flex-col gap-2">
-                            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                              <span>{typeLabel}</span>
-                              {file.filename ? (
-                                <span className="truncate">{file.filename}</span>
-                              ) : null}
-                            </span>
-                            <span className="font-serif text-xl tracking-[-0.02em] text-foreground">
-                              {attachment.label || file.filename || file.alt}
-                            </span>
-                            <MediaDetails
-                              caption={attachmentDescription}
-                              credit={file.credit}
-                              creditPrefix={common('mediaCredit')}
-                            />
-                          </span>
-                        </a>
-                      )
-                    })}
-                  </div>
-                </section>
-              ) : null}
-
-              {bibliographyEntries.length ? (
-                <section className="flex flex-col gap-3">
-                  <p className="section-kicker">{common('references')}</p>
-                  <CollapsibleReferenceSection
-                    countLabel={article('referencesCount', { count: bibliographyEntries.length })}
-                    label={common('references')}
-                  >
-                    <ol className="flex flex-col">
-                      {bibliographyEntries.map((entry, index) =>
-                        (() => {
-                          const display = describeBibliographyEntry(entry)
-                          const displayYear = display.year || common('referenceNoDate')
-                          const roleLabel =
-                            display.creatorRole === 'editor'
-                              ? common('referenceRoleEditor')
-                              : display.creatorRole === 'translator'
-                                ? common('referenceRoleTranslator')
-                                : null
-                          const typeLabel =
-                            entry.entryType.trim().length > 0
-                              ? entry.entryType.replace(/-/g, ' ')
-                              : common('referenceItem')
-
-                          return (
-                            <li
-                              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 border-b py-2.5 last:border-b-0"
-                              id={`reference-${index + 1}`}
-                              key={entry.citationKey}
-                            >
-                              <span className="pt-0.5 text-xs font-medium text-muted-foreground">
-                                [{index + 1}]
-                              </span>
-                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                                <p className="min-w-0 text-sm leading-6 text-foreground/82 wrap-anywhere">
-                                  {display.creators ? <>{display.creators}</> : null}
-                                  {roleLabel && display.creators ? <> ({roleLabel})</> : null}
-                                  <> {`(${displayYear}).`}</>
-                                  {display.title ? (
-                                    <> {display.title}.</>
-                                  ) : (
-                                    <> {common('referenceUntitled')}.</>
-                                  )}
-                                </p>
-
-                                {display.container ||
-                                display.secondary.length ||
-                                display.accessed ? (
-                                  <div className="flex min-w-0 flex-col gap-0.5 text-[13px] leading-5 text-muted-foreground">
-                                    {[display.container, ...display.secondary]
-                                      .filter((segment): segment is string => Boolean(segment))
-                                      .map((segment, segmentIndex) => (
-                                        <p
-                                          className="wrap-anywhere"
-                                          key={`${entry.citationKey}-${segmentIndex}`}
-                                        >
-                                          {segment}
-                                        </p>
-                                      ))}
-                                    {display.accessed ? (
-                                      <p className="wrap-anywhere">
-                                        {common('referenceAccessed', { date: display.accessed })}
-                                      </p>
-                                    ) : null}
-                                  </div>
-                                ) : null}
-
-                                {display.links.length ? (
-                                  <p className="min-w-0 text-[13px] leading-5 text-muted-foreground">
-                                    {display.links.map((link, linkIndex) => (
-                                      <span key={`${entry.citationKey}-${link.label}`}>
-                                        {linkIndex > 0 ? (
-                                          <span className="px-1.5 text-border">·</span>
-                                        ) : null}
-                                        <a
-                                          className="editorial-link wrap-anywhere no-underline"
-                                          href={link.href}
-                                          rel="noreferrer"
-                                          target="_blank"
-                                        >
-                                          <span className="text-muted-foreground">
-                                            {link.label}:
-                                          </span>{' '}
-                                          {link.value}
-                                        </a>
-                                      </span>
-                                    ))}
-                                  </p>
-                                ) : null}
-
-                                <span className="min-w-0 text-[11px] leading-4 tracking-[0.12em] text-muted-foreground/85 wrap-anywhere">
-                                  {entry.citationKey} · {typeLabel}
-                                  {roleLabel ? ` · ${roleLabel}` : ''} ·{' '}
-                                  {getLocaleLabel(resolved.resolvedLocale)}
-                                </span>
-                              </div>
-                            </li>
-                          )
-                        })(),
-                      )}
-                    </ol>
-                  </CollapsibleReferenceSection>
-                </section>
-              ) : null}
-            </div>
-          ) : null}
+          <PostArticleSupplementary
+            attachments={post.attachments}
+            bibliographyEntries={bibliographyEntries}
+            labels={{
+              attachments: common('attachments'),
+              mediaCredit: common('mediaCredit'),
+              referenceItem: common('referenceItem'),
+              referenceNoDate: common('referenceNoDate'),
+              referenceRoleEditor: common('referenceRoleEditor'),
+              referenceRoleTranslator: common('referenceRoleTranslator'),
+              references: common('references'),
+              referenceUntitled: common('referenceUntitled'),
+              tags: common('tags'),
+            }}
+            referenceAccessedLabel={(date) => common('referenceAccessed', { date })}
+            referencesCountLabel={article('referencesCount', { count: bibliographyEntries.length })}
+            resolvedLocale={resolved.resolvedLocale}
+            tags={post.tags}
+          />
         </div>
 
         {tocHeadings.length ? (
