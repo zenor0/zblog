@@ -69,9 +69,7 @@ export default async function ArticleBlockPreviewCategoryPage(props: {
         </div>
         <p className="section-kicker">Article Blocks / {category.slug}</p>
         <div className="flex max-w-4xl flex-col gap-5">
-          <h1 className="font-serif text-6xl leading-none tracking-[-0.055em] sm:text-7xl">
-            {category.title}
-          </h1>
+          <h1 className="font-serif text-3xl leading-tight sm:text-4xl">{category.title}</h1>
           <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
             {category.description}
           </p>

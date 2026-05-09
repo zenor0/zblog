@@ -232,7 +232,7 @@ export async function PostArticle(props: {
             className="flex flex-col gap-6 border-b border-border pb-10"
             data-article-frontmatter=""
           >
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="editorial-meta flex flex-wrap items-center gap-x-4 gap-y-2">
               <span>
                 {formatLongDate({
                   fallback: common('unscheduled'),
@@ -255,7 +255,7 @@ export async function PostArticle(props: {
               <p className="section-kicker">
                 {usedDraftAccess ? article('previewTitle') : common('publishedLabel')}
               </p>
-              <h1 className="max-w-4xl font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+              <h1 className="max-w-4xl font-serif text-3xl leading-tight sm:text-4xl lg:text-5xl">
                 {displayTitle}
               </h1>
               {post.excerpt ? (
@@ -296,7 +296,7 @@ export async function PostArticle(props: {
                   <AlertTitle>{article('bibliographyMismatchTitle')}</AlertTitle>
                   <AlertDescription className="gap-3">
                     <p>{article('bibliographyMismatchIntro')}</p>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <div className="editorial-tag-list">
                       {missingCitationKeys.map((key) => (
                         <span key={key}>{key}</span>
                       ))}
@@ -348,7 +348,7 @@ export async function PostArticle(props: {
               {post.tags?.length ? (
                 <section className="flex flex-col gap-3">
                   <p className="section-kicker">{common('tags')}</p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <div className="editorial-tag-list">
                     {post.tags.map((tag) => (
                       <span key={tag.id ?? tag.value}>{tag.value}</span>
                     ))}
@@ -360,9 +360,7 @@ export async function PostArticle(props: {
                 <section className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <p className="section-kicker">{common('attachments')}</p>
-                    <h2 className="font-serif text-2xl tracking-[-0.02em] text-foreground">
-                      {common('attachments')}
-                    </h2>
+                    <h2 className="font-serif text-xl text-foreground">{common('attachments')}</h2>
                   </div>
                   <div className="flex flex-col divide-y divide-border">
                     {attachments.map((attachment) => {
@@ -394,13 +392,13 @@ export async function PostArticle(props: {
                             />
                           </div>
                           <span className="flex min-w-0 flex-1 flex-col gap-2">
-                            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                            <span className="editorial-tag-list gap-y-1">
                               <span>{typeLabel}</span>
                               {file.filename ? (
                                 <span className="truncate">{file.filename}</span>
                               ) : null}
                             </span>
-                            <span className="font-serif text-xl tracking-[-0.02em] text-foreground">
+                            <span className="font-serif text-lg text-foreground">
                               {attachment.label || file.filename || file.alt}
                             </span>
                             <MediaDetails
@@ -445,7 +443,7 @@ export async function PostArticle(props: {
                               id={`reference-${index + 1}`}
                               key={entry.citationKey}
                             >
-                              <span className="pt-0.5 text-xs font-medium text-muted-foreground">
+                              <span className="pt-0.5 text-[11px] font-medium text-muted-foreground">
                                 [{index + 1}]
                               </span>
                               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -505,7 +503,7 @@ export async function PostArticle(props: {
                                   </p>
                                 ) : null}
 
-                                <span className="min-w-0 text-[11px] leading-4 tracking-[0.12em] text-muted-foreground/85 wrap-anywhere">
+                                <span className="min-w-0 text-[11px] leading-4 text-muted-foreground/85 wrap-anywhere">
                                   {entry.citationKey} · {typeLabel}
                                   {roleLabel ? ` · ${roleLabel}` : ''} ·{' '}
                                   {getLocaleLabel(resolved.resolvedLocale)}

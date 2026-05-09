@@ -98,11 +98,9 @@ export function PostTableOfContents(props: PostTableOfContentsProps) {
       <div className="flex items-end justify-between gap-3 border-b border-border pb-3">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="section-kicker">{progressLabel}</p>
-          <h2 className="font-serif text-xl tracking-[-0.02em] text-foreground">{label}</h2>
+          <h2 className="font-serif text-xl text-foreground">{label}</h2>
         </div>
-        <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          {progress}%
-        </span>
+        <span className="editorial-meta shrink-0">{progress}%</span>
       </div>
 
       <nav aria-label={label} className="max-h-[min(62vh,32rem)] overflow-y-auto pr-1">

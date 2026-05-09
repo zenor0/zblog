@@ -68,9 +68,7 @@ export default async function PostHistoryPage(props: {
             {history('title')}
           </Badge>
           <div className="flex flex-col gap-3">
-            <h1 className="font-serif text-4xl tracking-[-0.04em] sm:text-5xl">
-              {history('title')}
-            </h1>
+            <h1 className="font-serif text-2xl sm:text-3xl">{history('title')}</h1>
             <p className="text-base leading-8 text-foreground/68">
               {history('versionHistorySummary', {
                 count: versionDiffs.length,
@@ -95,7 +93,7 @@ export default async function PostHistoryPage(props: {
                 <section className="border-b py-6" key={entry.version.id}>
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="flex flex-col gap-2">
-                      <h2 className="font-serif text-2xl tracking-[-0.03em] sm:text-3xl">
+                      <h2 className="font-serif text-xl sm:text-2xl">
                         {formatLongDate({
                           fallback: common('unscheduled'),
                           locale: post.resolvedLocale,

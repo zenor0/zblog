@@ -1078,12 +1078,9 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
         <div className="dev-progress-rail__header">
           <div className="flex min-w-0 flex-col gap-1">
             <p className="section-kicker">{progressLabel}</p>
-            <h2 className="font-serif text-xl tracking-[-0.02em] text-foreground">{label}</h2>
+            <h2 className="font-serif text-xl text-foreground">{label}</h2>
           </div>
-          <span
-            className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
-            ref={visibleEndPercentRef}
-          >
+          <span className="editorial-meta shrink-0" ref={visibleEndPercentRef}>
             {formatPercent(progress.visibleEndPercent)}
           </span>
         </div>

@@ -31,9 +31,7 @@ export function NoticeCard(props: {
       data-tone={tone}
     >
       <CardHeader className="gap-3 border-b border-black/5 pb-5">
-        <Badge className="uppercase tracking-[0.16em]" variant="outline">
-          {tone}
-        </Badge>
+        <Badge variant="outline">{tone}</Badge>
         {props.title ? <CardTitle className="text-lg">{props.title}</CardTitle> : null}
       </CardHeader>
       <CardContent className="pt-5">{props.children}</CardContent>
