@@ -49,6 +49,10 @@ describe('article layout lab', () => {
       />,
     )
 
+    expect(articleLayoutDemoContent).not.toContain('## 一、')
+    expect(articleLayoutDemoContent).not.toContain('## 二、')
+    expect(articleLayoutDemoContent).not.toContain('## 三、')
+    expect(articleLayoutDemoContent).not.toContain('## 四、')
     expect(articleLayoutMarkdownMediaBySource[articleLayoutInlineImageSource]?.caption).toContain(
       '图片块',
     )

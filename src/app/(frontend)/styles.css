@@ -545,6 +545,62 @@ html[data-zblog-preview-theme='light'] {
     text-wrap: balance;
   }
 
+  .article-copy [data-article-heading] {
+    position: relative;
+  }
+
+  @media (min-width: 768px) {
+    .article-copy [data-article-heading]::before,
+    .article-copy [data-article-heading]::after {
+      pointer-events: none;
+      position: absolute;
+      opacity: 0;
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+    }
+
+    .article-copy [data-article-heading]::before {
+      content: attr(data-article-heading-number);
+      top: 0.08em;
+      right: calc(100% + 1.2rem);
+      width: 4rem;
+      color: var(--muted-foreground);
+      font-family: var(--zblog-code-font-family);
+      font-size: max(0.68rem, 0.42em);
+      font-weight: 500;
+      letter-spacing: 0;
+      line-height: inherit;
+      text-align: right;
+      transform: translateX(0.25rem);
+      white-space: nowrap;
+    }
+
+    .article-copy [data-article-heading]::after {
+      content: '';
+      top: 0.18em;
+      bottom: 0.18em;
+      right: calc(100% + 0.72rem);
+      width: 1px;
+      min-height: 1em;
+      background: var(--border);
+      transform: scaleY(0.72);
+      transform-origin: center;
+    }
+
+    .article-copy [data-article-heading]:hover::before,
+    .article-copy [data-article-heading]:focus-within::before {
+      opacity: 0.72;
+      transform: translateX(0);
+    }
+
+    .article-copy [data-article-heading]:hover::after,
+    .article-copy [data-article-heading]:focus-within::after {
+      opacity: 0.82;
+      transform: scaleY(1);
+    }
+  }
+
   .article-copy h2 {
     @apply mt-14 text-2xl sm:text-3xl;
   }

@@ -58,7 +58,7 @@ test.describe('Frontend', () => {
   })
 
   test('can render the seeded markdown showcase article', async ({ page }) => {
-    await page.goto('http://localhost:3000/zh-hans/posts/seed-markdown-showcase')
+    await page.goto('/zh-hans/posts/seed-markdown-showcase')
 
     await expect(page.locator('h1').first()).toHaveText('Markdown 能力展示文章')
     await expect(page.locator('figure#ref-fig-seed-hero')).toBeVisible()
@@ -67,6 +67,9 @@ test.describe('Frontend', () => {
     await expect(page.locator('a[href="#ref-tbl-feature-matrix"]')).toContainText('表 1')
     await expect(page.locator('[data-markdown-component="notice-card"]')).toBeVisible()
     await expect(page.locator('[data-markdown-component="feature-grid"]')).toBeVisible()
+    await expect(
+      page.locator('[data-post-reading-root] h2[data-article-heading-number="1"]').first(),
+    ).toBeVisible()
     await expect(page.locator('pre[data-language="tsx"]')).toBeVisible()
     await expect(page.locator('summary')).toContainText('参考文献')
   })

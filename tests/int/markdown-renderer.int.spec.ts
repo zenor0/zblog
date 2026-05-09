@@ -138,6 +138,33 @@ See [@tbl:benchmark].
     expect(html).toContain('@fig:missing')
   })
 
+  it('renders article heading numbers as metadata without changing heading text', () => {
+    const html = renderMarkdown(`
+# Body title
+
+## First section
+
+### Nested section
+
+#### Deep section
+
+##### Unnumbered section
+`)
+
+    expect(html).toMatch(
+      /<h2(?=[^>]*id="first-section")(?=[^>]*data-article-heading="true")(?=[^>]*data-article-heading-level="2")(?=[^>]*data-article-heading-number="1")[^>]*>First section<\/h2>/,
+    )
+    expect(html).toMatch(
+      /<h3(?=[^>]*id="nested-section")(?=[^>]*data-article-heading="true")(?=[^>]*data-article-heading-level="3")(?=[^>]*data-article-heading-number="1\.1")[^>]*>Nested section<\/h3>/,
+    )
+    expect(html).toMatch(
+      /<h4(?=[^>]*id="deep-section")(?=[^>]*data-article-heading="true")(?=[^>]*data-article-heading-level="4")(?=[^>]*data-article-heading-number="1\.1\.1")[^>]*>Deep section<\/h4>/,
+    )
+    expect(html).toContain('<h1 id="body-title">Body title</h1>')
+    expect(html).toContain('<h5 id="unnumbered-section">Unnumbered section</h5>')
+    expect(html).not.toContain('>1 First section<')
+  })
+
   it('preserves fenced tsx code blocks with a visible language label', () => {
     const source = `
 \`\`\`tsx
