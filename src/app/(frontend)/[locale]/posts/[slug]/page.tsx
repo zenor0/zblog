@@ -8,6 +8,8 @@ import { PostArticle } from '@/components/frontend/PostArticle'
 import { buildLocalePath } from '@/lib/locales'
 import { getPostBySlug, getRenderablePostLocales } from '@/lib/posts'
 import { getPreviewUser } from '@/lib/preview-user'
+import { getPayloadClient } from '@/lib/payload'
+import { getPostViewMetric } from '@/lib/post-views'
 import {
   buildArticleStructuredData,
   buildPageMetadata,
@@ -95,6 +97,12 @@ export default async function PostPage(props: {
   }
 
   const siteSettings = await getSiteSettings(resolved.resolvedLocale)
+  const payload = await getPayloadClient()
+  const postViewMetric = await getPostViewMetric({
+    locale: resolved.resolvedLocale,
+    payload,
+    postId: resolved.post.id,
+  })
   const shouldRenderStructuredData = !resolved.usedFallback && !resolved.post.seo?.noindex
   const structuredData = shouldRenderStructuredData
     ? buildArticleStructuredData({
@@ -140,6 +148,8 @@ export default async function PostPage(props: {
         localeLinks={buildLocaleLinks(`/posts/${slug}`)}
         previewExitPath={buildLocalePath(locale, `/posts/${slug}`)}
         resolved={resolved}
+        shouldTrackView={!resolved.usedDraftAccess}
+        viewCount={postViewMetric.viewCount}
       />
     </>
   )

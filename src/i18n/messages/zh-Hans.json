@@ -19,6 +19,7 @@
     "tableOfContents": "目录",
     "untitledDraft": "未命名草稿",
     "untitledPost": "未命名文章",
+    "viewCount": "{count, number} 次阅读",
     "versionHistory": "版本历史"
   },
   "Common": {

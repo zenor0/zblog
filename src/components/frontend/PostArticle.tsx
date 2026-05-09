@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
+import { ArticleViewTracker } from '@/components/frontend/ArticleViewTracker'
 import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
@@ -79,6 +80,8 @@ export async function PostArticle(props: {
     progressLabel: string
   }) => ReactNode
   resolved: ResolvedPost
+  shouldTrackView?: boolean
+  viewCount?: number
 }) {
   const {
     backHref,
@@ -90,6 +93,8 @@ export async function PostArticle(props: {
     previewExitPath,
     renderTableOfContents,
     resolved,
+    shouldTrackView = false,
+    viewCount = 0,
   } = props
   const {
     bibliographyEntries,
@@ -136,6 +141,9 @@ export async function PostArticle(props: {
       : null
   return (
     <div className="page-frame frontend-shell">
+      {shouldTrackView ? (
+        <ArticleViewTracker locale={resolved.resolvedLocale} postId={post.id} />
+      ) : null}
       <div
         className="mb-8 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between"
         data-embedded-hidden="true"
@@ -188,6 +196,7 @@ export async function PostArticle(props: {
               <span>
                 {article('readingTime', { minutes: estimateReadingMinutes(post.content) })}
               </span>
+              <span>{article('viewCount', { count: viewCount })}</span>
               <span>{getLocaleLabel(resolved.resolvedLocale)}</span>
               {historyHref ? (
                 <Link className="editorial-link no-underline" href={historyHref}>
