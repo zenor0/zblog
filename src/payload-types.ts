@@ -767,6 +767,10 @@ export interface SiteSetting {
     };
   };
   footer: {
+    /**
+     * Controls the frontend footer layout. Preview every option under /dev/footer-layouts.
+     */
+    layoutStyle: 'compact' | 'directory' | 'ledger';
     brand: {
       logo?: (number | null) | Media;
       name?: string | null;
@@ -911,6 +915,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   footer?:
     | T
     | {
+        layoutStyle?: T;
         brand?:
           | T
           | {

@@ -2,6 +2,15 @@ import type { AppLocale } from '@/lib/locales'
 import type { SiteSettings } from '@/lib/site-settings'
 
 import { buildLocalePath } from '@/lib/locales'
+import {
+  defaultSiteFooterLayoutStyle,
+  resolveSiteFooterLayoutStyle,
+  siteFooterLayoutStyleOptions,
+  type SiteFooterLayoutStyle,
+} from '@/lib/site-footer-layout'
+
+export { defaultSiteFooterLayoutStyle, resolveSiteFooterLayoutStyle, siteFooterLayoutStyleOptions }
+export type { SiteFooterLayoutStyle }
 
 type FooterData = NonNullable<SiteSettings['footer']>
 type FooterBrand = FooterData['brand']
@@ -46,6 +55,7 @@ export type NormalizedSiteFooter = {
     rel?: string
     target?: string
   }[]
+  layoutStyle: SiteFooterLayoutStyle
   navigationSections: {
     links: {
       description: null | string
@@ -241,6 +251,7 @@ export function normalizeSiteFooter(args: {
     },
     contactItems,
     legalLinks,
+    layoutStyle: resolveSiteFooterLayoutStyle((footer as { layoutStyle?: unknown }).layoutStyle),
     navigationSections,
     socialLinks,
   }

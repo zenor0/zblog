@@ -10,6 +10,7 @@ describe('Site settings footer config', () => {
 
     expect(footerField.type).toBe('group')
     expect(footerField.fields.map((field: any) => field.name)).toEqual([
+      'layoutStyle',
       'brand',
       'navigationSections',
       'socialLinks',
@@ -17,6 +18,16 @@ describe('Site settings footer config', () => {
       'legalLinks',
       'compliance',
       'bottomBar',
+    ])
+
+    const layoutStyleField = footerField.fields.find(
+      (field: any) => field.name === 'layoutStyle',
+    ) as any
+    expect(layoutStyleField.defaultValue).toBe('compact')
+    expect(layoutStyleField.options.map((option: any) => option.value)).toEqual([
+      'compact',
+      'directory',
+      'ledger',
     ])
 
     const brandField = footerField.fields.find((field: any) => field.name === 'brand') as any
@@ -36,7 +47,9 @@ describe('Site settings footer config', () => {
       'openInNewTab',
     ])
 
-    const socialLinksField = footerField.fields.find((field: any) => field.name === 'socialLinks') as any
+    const socialLinksField = footerField.fields.find(
+      (field: any) => field.name === 'socialLinks',
+    ) as any
     expect(socialLinksField.fields.map((field: any) => field.name)).toEqual([
       'platform',
       'label',

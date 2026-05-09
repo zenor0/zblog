@@ -62,6 +62,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         tags: ['article', 'typography', 'layout', 'rich-text'],
       },
       {
+        slug: 'footer-layouts',
+        title: 'Footer Layouts',
+        description: '对比更接近博客实践的 footer 信息排版：链接、版权、备案号和低频元信息。',
+        href: '/dev/footer-layouts',
+        status: 'experiment',
+        tags: ['footer', 'compliance', 'links', 'layout'],
+      },
+      {
         slug: 'typefaces',
         title: 'Typeface Candidates',
         description: '横向比较中文标题、中文正文、西文混排、强调字重和代码块字体的候选方案。',

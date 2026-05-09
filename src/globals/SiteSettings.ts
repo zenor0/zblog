@@ -10,6 +10,10 @@ import {
   validateArticleLayoutLength,
   validateArticleLayoutLineHeight,
 } from '@/lib/article-layout'
+import {
+  defaultSiteFooterLayoutStyle,
+  siteFooterLayoutStyleOptions,
+} from '@/lib/site-footer-layout'
 
 const localizedHeroDefaults = {
   en: {
@@ -136,6 +140,21 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
 }
 
 const footerFields: Field[] = [
+  {
+    name: 'layoutStyle',
+    type: 'select',
+    admin: {
+      description:
+        'Controls the frontend footer layout. Preview every option under /dev/footer-layouts.',
+    },
+    defaultValue: defaultSiteFooterLayoutStyle,
+    label: 'Layout style',
+    options: siteFooterLayoutStyleOptions.map((option) => ({
+      label: option.label,
+      value: option.value,
+    })),
+    required: true,
+  },
   {
     name: 'brand',
     type: 'group',
