@@ -72,7 +72,7 @@ function BibliographyMismatchNotice(
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription className="gap-3">
         <p>{intro}</p>
-        <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="editorial-tag-list">
           {keys.map((key) => (
             <span key={key}>{key}</span>
           ))}

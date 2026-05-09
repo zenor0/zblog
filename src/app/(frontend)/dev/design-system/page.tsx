@@ -23,9 +23,9 @@ const colorTokens = [
 ] as const
 
 const typeScale = [
-  ['Display', 'font-serif text-6xl leading-none tracking-[-0.055em]', '首页 Hero 与专题页主标题'],
-  ['Headline', 'font-serif text-4xl leading-tight tracking-[-0.04em]', '文章标题、分区标题'],
-  ['Subhead', 'font-serif text-2xl leading-snug tracking-[-0.03em]', '卡片标题、段落组标题'],
+  ['Display', 'font-serif text-4xl leading-tight', '首页 Hero 与专题页主标题'],
+  ['Headline', 'font-serif text-3xl leading-tight', '文章标题、分区标题'],
+  ['Subhead', 'font-serif text-xl leading-snug', '卡片标题、段落组标题'],
   ['Body', 'text-base leading-8 text-foreground/82', '长文正文、说明文字'],
   ['Meta', 'section-kicker', '日期、分类、状态、导航辅助信息'],
 ] as const
@@ -46,7 +46,7 @@ export default function DesignSystemReferencePage() {
         <p className="section-kicker">Design System / Frontend</p>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
           <div className="flex max-w-4xl flex-col gap-5">
-            <h1 className="font-serif text-6xl leading-none tracking-[-0.055em] sm:text-7xl lg:text-[5.5rem]">
+            <h1 className="font-serif text-4xl leading-tight sm:text-5xl">
               安静、清晰、可持续扩展的博客前台语言。
             </h1>
             <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
@@ -56,7 +56,7 @@ export default function DesignSystemReferencePage() {
           </div>
           <Card className="dev-reference-card">
             <CardHeader>
-              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">原则</CardTitle>
+              <CardTitle className="font-serif text-xl">原则</CardTitle>
               <CardDescription>以阅读为中心，而不是以装饰为中心。</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm leading-6 text-muted-foreground">
@@ -82,7 +82,7 @@ export default function DesignSystemReferencePage() {
               <CardContent className="flex flex-col gap-4 pt-6">
                 <div className={`h-24 border border-border ${className}`} />
                 <div className="grid gap-1">
-                  <h3 className="font-serif text-xl tracking-[-0.03em]">{label}</h3>
+                  <h3 className="font-serif text-xl">{label}</h3>
                   <p className="text-sm leading-6 text-muted-foreground">{description}</p>
                 </div>
               </CardContent>
@@ -177,9 +177,7 @@ export default function DesignSystemReferencePage() {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <Card className="dev-reference-card">
             <CardHeader>
-              <CardTitle className="font-serif text-3xl tracking-[-0.035em]">
-                Article Block Preview Matrix
-              </CardTitle>
+              <CardTitle className="font-serif text-2xl">Article Block Preview Matrix</CardTitle>
               <CardDescription>
                 覆盖文本、callout、媒体、表格和文章内白名单组件的静态状态。
               </CardDescription>
@@ -203,7 +201,7 @@ export default function DesignSystemReferencePage() {
           <Card className="dev-reference-card">
             <CardHeader>
               <Blocks aria-hidden="true" />
-              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">静态优先</CardTitle>
+              <CardTitle className="font-serif text-xl">静态优先</CardTitle>
               <CardDescription>不依赖真实 MarkdownRenderer。</CardDescription>
             </CardHeader>
             <CardContent className="text-sm leading-6 text-muted-foreground">
@@ -224,18 +222,14 @@ export default function DesignSystemReferencePage() {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <Card className="dev-reference-card">
             <CardHeader>
-              <CardTitle className="font-serif text-3xl tracking-[-0.035em]">
-                页面节奏样例
-              </CardTitle>
+              <CardTitle className="font-serif text-2xl">页面节奏样例</CardTitle>
               <CardDescription>Hero → 内容预览 → 元信息 → 继续阅读。</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-5">
               <div className="grid gap-4 border border-border bg-muted/28 p-5 md:grid-cols-[minmax(0,1fr)_12rem]">
                 <div className="flex flex-col gap-3">
                   <p className="section-kicker">Essay / 12 min</p>
-                  <h3 className="font-serif text-4xl leading-tight tracking-[-0.04em]">
-                    在长文里保存方向感
-                  </h3>
+                  <h3 className="font-serif text-3xl leading-tight">在长文里保存方向感</h3>
                   <p className="max-w-xl text-sm leading-7 text-muted-foreground">
                     目录和进度提示应该辅助阅读，而不是抢走文章本身的注意力。
                   </p>
@@ -264,7 +258,7 @@ export default function DesignSystemReferencePage() {
           <Card className="dev-reference-card">
             <CardHeader>
               <BookOpen aria-hidden="true" />
-              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">开发约定</CardTitle>
+              <CardTitle className="font-serif text-xl">开发约定</CardTitle>
               <CardDescription>新增前台能力时的顺序。</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm leading-6 text-muted-foreground">

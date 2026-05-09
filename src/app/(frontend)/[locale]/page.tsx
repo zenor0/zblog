@@ -87,7 +87,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
         >
           <div className="flex max-w-4xl flex-col gap-4">
             <p className="section-kicker">{heroEyebrow}</p>
-            <h1 className="max-w-4xl font-serif text-6xl leading-none tracking-[-0.055em] sm:text-7xl lg:text-[5.5rem]">
+            <h1 className="max-w-4xl font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl">
               {heroTitle}
             </h1>
             <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
@@ -134,7 +134,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                 key={featuredPost.id}
               >
                 <div className="flex min-w-0 flex-col gap-5">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                  <div className="editorial-meta flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span>
                       {formatShortDate({
                         fallback: common('unknownDate'),
@@ -151,7 +151,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <h2 className="font-serif text-4xl leading-tight tracking-[-0.04em] sm:text-5xl">
+                    <h2 className="font-serif text-3xl leading-tight sm:text-4xl">
                       <Link
                         className="editorial-link no-underline"
                         href={buildLocalePath(locale, `/posts/${featuredPost.slug}`)}
@@ -165,7 +165,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                   </div>
 
                   {featuredPost.tags?.length ? (
-                    <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <div className="editorial-tag-list">
                       {featuredPost.tags.map((tag, index) => (
                         <span key={tag.id ?? tag.value}>
                           {index > 0 ? <span className="pr-3 text-border">/</span> : null}
@@ -198,9 +198,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
               <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col gap-1">
                   <p className="section-kicker">{siteSettings.siteName}</p>
-                  <h2 className="font-serif text-3xl tracking-[-0.03em] sm:text-4xl">
-                    {home('postsHeading')}
-                  </h2>
+                  <h2 className="font-serif text-2xl sm:text-3xl">{home('postsHeading')}</h2>
                 </div>
                 <p className="editorial-meta">
                   {home('publishedEntries', { count: posts.length })}
@@ -221,7 +219,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                     key={post.id}
                   >
                     <div className="flex min-w-0 flex-col gap-3">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      <div className="editorial-meta flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span>
                           {formatShortDate({
                             fallback: common('unknownDate'),
@@ -238,7 +236,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <h2 className="font-serif text-2xl leading-tight tracking-[-0.03em] sm:text-[2rem]">
+                        <h2 className="font-serif text-xl leading-tight sm:text-2xl">
                           <Link
                             className="editorial-link no-underline"
                             href={buildLocalePath(locale, `/posts/${post.slug}`)}
@@ -252,7 +250,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                       </div>
 
                       {post.tags?.length ? (
-                        <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                        <div className="editorial-tag-list">
                           {post.tags.map((tag, index) => (
                             <span key={tag.id ?? tag.value}>
                               {index > 0 ? <span className="pr-3 text-border">/</span> : null}

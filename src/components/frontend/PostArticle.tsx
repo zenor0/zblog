@@ -177,7 +177,7 @@ export async function PostArticle(props: {
             className="flex flex-col gap-6 border-b border-border pb-10"
             data-article-frontmatter=""
           >
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="editorial-meta flex flex-wrap items-center gap-x-4 gap-y-2">
               <span>
                 {formatLongDate({
                   fallback: common('unscheduled'),
@@ -200,7 +200,7 @@ export async function PostArticle(props: {
               <p className="section-kicker">
                 {usedDraftAccess ? article('previewTitle') : common('publishedLabel')}
               </p>
-              <h1 className="max-w-4xl font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+              <h1 className="max-w-4xl font-serif text-3xl leading-tight sm:text-4xl lg:text-5xl">
                 {displayTitle}
               </h1>
               {post.excerpt ? (

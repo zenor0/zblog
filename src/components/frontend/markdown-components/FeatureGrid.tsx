@@ -20,7 +20,8 @@ function normalizeFeatureGridItem(value: unknown): FeatureGridItem | null {
   }
 
   return {
-    description: typeof candidate.description === 'string' ? candidate.description.trim() : undefined,
+    description:
+      typeof candidate.description === 'string' ? candidate.description.trim() : undefined,
     status: typeof candidate.status === 'string' ? candidate.status.trim() : undefined,
     title,
   }
@@ -42,7 +43,9 @@ function parseFeatureGridItems(value: unknown): FeatureGridItem[] {
     return []
   }
 
-  return source.map(normalizeFeatureGridItem).filter((item): item is FeatureGridItem => item !== null)
+  return source
+    .map(normalizeFeatureGridItem)
+    .filter((item): item is FeatureGridItem => item !== null)
 }
 
 export function FeatureGrid(props: { items?: unknown }) {
@@ -55,13 +58,12 @@ export function FeatureGrid(props: { items?: unknown }) {
   return (
     <div className="my-6 grid gap-4 sm:grid-cols-2" data-markdown-component="feature-grid">
       {items.map((item) => (
-        <Card className="gap-0 border-border/80 shadow-none" key={`${item.title}-${item.status ?? 'item'}`}>
+        <Card
+          className="gap-0 border-border/80 shadow-none"
+          key={`${item.title}-${item.status ?? 'item'}`}
+        >
           <CardHeader className="gap-3 pb-4">
-            {item.status ? (
-              <Badge className="uppercase tracking-[0.16em]" variant="secondary">
-                {item.status}
-              </Badge>
-            ) : null}
+            {item.status ? <Badge variant="secondary">{item.status}</Badge> : null}
             <CardTitle className="text-base">{item.title}</CardTitle>
           </CardHeader>
           {item.description ? (

@@ -78,7 +78,7 @@ function ArticleBlockFrame(props: ArticleBlockSampleProps & { children: ReactNod
       <CardHeader>
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="grid gap-2">
-            <CardTitle className="font-serif text-2xl tracking-[-0.03em]">{item.title}</CardTitle>
+            <CardTitle className="font-serif text-xl">{item.title}</CardTitle>
             <CardDescription className="leading-6">{item.description}</CardDescription>
           </div>
           <Badge variant="outline">{item.id}</Badge>

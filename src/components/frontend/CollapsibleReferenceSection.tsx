@@ -83,14 +83,15 @@ export function CollapsibleReferenceSection(props: CollapsibleReferenceSectionPr
             <LibraryBigIcon className="size-4" />
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="font-serif text-lg tracking-[-0.02em] text-foreground sm:text-xl">
-              {label}
-            </span>
+            <span className="font-serif text-lg text-foreground sm:text-xl">{label}</span>
             <span className="text-xs text-muted-foreground sm:text-sm">{countLabel}</span>
           </span>
         </span>
         <ChevronDownIcon
-          className={cn('size-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')}
+          className={cn(
+            'size-4 shrink-0 text-muted-foreground transition-transform',
+            open && 'rotate-180',
+          )}
         />
       </summary>
 

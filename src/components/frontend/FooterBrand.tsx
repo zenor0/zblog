@@ -5,7 +5,10 @@ import type { NormalizedSiteFooter } from '@/components/frontend/site-footer'
 function renderBrandContent(brand: NormalizedSiteFooter['brand']) {
   return (
     <div className="flex flex-col gap-3">
-      {brand.logo && typeof brand.logo === 'object' && 'url' in brand.logo && typeof brand.logo.url === 'string' ? (
+      {brand.logo &&
+      typeof brand.logo === 'object' &&
+      'url' in brand.logo &&
+      typeof brand.logo.url === 'string' ? (
         <img
           alt={brand.logo.alt || brand.name}
           className="h-10 w-auto object-contain"
@@ -18,7 +21,7 @@ function renderBrandContent(brand: NormalizedSiteFooter['brand']) {
       <p className="section-kicker">{brand.name}</p>
 
       {brand.description ? (
-        <p className="max-w-xl font-serif text-2xl leading-9 tracking-[-0.025em] text-foreground/90 sm:text-3xl">
+        <p className="max-w-xl font-serif text-xl leading-8 text-foreground/90 sm:text-2xl">
           {brand.description}
         </p>
       ) : null}
@@ -38,7 +41,12 @@ export function FooterBrand(props: { brand: NormalizedSiteFooter['brand'] }) {
   }
 
   return (
-    <Link className="block no-underline" href={props.brand.href} rel={props.brand.rel} target={props.brand.target}>
+    <Link
+      className="block no-underline"
+      href={props.brand.href}
+      rel={props.brand.rel}
+      target={props.brand.target}
+    >
       {content}
     </Link>
   )

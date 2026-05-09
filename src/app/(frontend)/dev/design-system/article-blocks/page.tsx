@@ -27,9 +27,7 @@ export default function ArticleBlockPreviewIndexPage() {
         <p className="section-kicker">Design System / Article Blocks</p>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
           <div className="flex max-w-4xl flex-col gap-5">
-            <h1 className="font-serif text-6xl leading-none tracking-[-0.055em] sm:text-7xl">
-              文章块静态样例矩阵。
-            </h1>
+            <h1 className="font-serif text-3xl leading-tight sm:text-4xl">文章块静态样例矩阵。</h1>
             <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
               这里不走真实 Markdown 渲染流程，而是用静态 JSX
               枚举文章中可能出现的富文本块和状态，方便独立调整视觉预期。
@@ -38,9 +36,7 @@ export default function ArticleBlockPreviewIndexPage() {
           <Card className="dev-reference-card">
             <CardHeader>
               <Blocks aria-hidden="true" />
-              <CardTitle className="font-serif text-2xl tracking-[-0.03em]">
-                Preview Contract
-              </CardTitle>
+              <CardTitle className="font-serif text-xl">Preview Contract</CardTitle>
               <CardDescription>先覆盖状态，再接入真实文章。</CardDescription>
             </CardHeader>
             <CardContent className="text-sm leading-6 text-muted-foreground">
@@ -59,9 +55,7 @@ export default function ArticleBlockPreviewIndexPage() {
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
                   <div className="grid gap-2">
-                    <CardTitle className="font-serif text-2xl tracking-[-0.03em]">
-                      {category.title}
-                    </CardTitle>
+                    <CardTitle className="font-serif text-xl">{category.title}</CardTitle>
                     <CardDescription className="leading-6">{category.description}</CardDescription>
                   </div>
                   <Badge variant="secondary">{items.length}</Badge>
