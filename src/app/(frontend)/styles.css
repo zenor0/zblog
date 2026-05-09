@@ -693,6 +693,157 @@ html[data-zblog-preview-theme='light'] {
     margin-bottom: 0;
   }
 
+  .dev-typeface-scheme {
+    --typeface-body-font: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    --typeface-body-line-height: 1.78;
+    --typeface-body-size: 1rem;
+    --typeface-body-weight: 400;
+    --typeface-code-font: 'SFMono-Regular', ui-monospace, monospace;
+    --typeface-code-size: 0.875rem;
+    --typeface-code-weight: 400;
+    --typeface-display-font: var(--font-serif), ui-serif, Georgia, serif;
+    --typeface-display-line-height: 1.08;
+    --typeface-display-size: 4rem;
+    --typeface-display-size-small: 2.75rem;
+    --typeface-display-weight: 600;
+    --typeface-heading-font: var(--font-serif), ui-serif, Georgia, serif;
+    --typeface-heading-line-height: 1.25;
+    --typeface-heading-size: 1.85rem;
+    --typeface-heading-weight: 600;
+    --typeface-meta-font: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    --typeface-meta-weight: 600;
+    --typeface-strong-weight: 700;
+  }
+
+  .dev-typeface-scheme__name {
+    font-family: var(--typeface-heading-font);
+    font-size: var(--typeface-heading-size);
+    font-weight: var(--typeface-heading-weight);
+    letter-spacing: 0;
+    line-height: var(--typeface-heading-line-height);
+    text-wrap: balance;
+  }
+
+  .dev-typeface-scheme__weights {
+    @apply flex flex-wrap gap-2 text-xs leading-5 text-muted-foreground;
+    font-family: var(--typeface-meta-font);
+    font-weight: var(--typeface-meta-weight);
+  }
+
+  .dev-typeface-scheme__weights span {
+    @apply border border-border px-2 py-1;
+  }
+
+  .dev-typeface-scheme__spec-grid {
+    @apply grid gap-3 border-y border-border py-4 md:grid-cols-3;
+  }
+
+  .dev-typeface-scheme__spec-grid > div {
+    @apply flex min-w-0 flex-col gap-2 text-sm leading-6;
+  }
+
+  .dev-typeface-scheme__spec-grid svg {
+    @apply text-muted-foreground;
+    height: 1rem;
+    width: 1rem;
+  }
+
+  .dev-typeface-scheme__spec-grid p,
+  .dev-typeface-scheme__label {
+    @apply text-xs uppercase text-muted-foreground;
+    font-family: var(--typeface-meta-font);
+    font-weight: var(--typeface-meta-weight);
+    letter-spacing: 0;
+  }
+
+  .dev-typeface-scheme__spec-grid span {
+    @apply min-w-0 truncate text-xs text-foreground/72;
+    font-family: var(--typeface-code-font);
+  }
+
+  .dev-typeface-scheme__preview {
+    @apply grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.72fr)];
+  }
+
+  .dev-typeface-scheme__article-sample,
+  .dev-typeface-scheme__code-sample {
+    @apply min-w-0 border border-border bg-muted/18 p-5 sm:p-6;
+  }
+
+  .dev-typeface-scheme__article-sample {
+    @apply flex flex-col gap-5;
+  }
+
+  .dev-typeface-scheme__display {
+    font-family: var(--typeface-display-font);
+    font-size: var(--typeface-display-size-small);
+    font-weight: var(--typeface-display-weight);
+    letter-spacing: 0;
+    line-height: var(--typeface-display-line-height);
+    text-wrap: balance;
+  }
+
+  .dev-typeface-scheme__heading {
+    font-family: var(--typeface-heading-font);
+    font-size: var(--typeface-heading-size);
+    font-weight: var(--typeface-heading-weight);
+    letter-spacing: 0;
+    line-height: var(--typeface-heading-line-height);
+    text-wrap: balance;
+  }
+
+  .dev-typeface-scheme__body {
+    @apply flex flex-col gap-4 text-foreground/84;
+    font-family: var(--typeface-body-font);
+    font-size: var(--typeface-body-size);
+    font-weight: var(--typeface-body-weight);
+    line-height: var(--typeface-body-line-height);
+  }
+
+  .dev-typeface-scheme__body strong {
+    color: var(--foreground);
+    font-weight: var(--typeface-strong-weight);
+  }
+
+  .dev-typeface-scheme__body code {
+    @apply border border-border/80 bg-background px-1.5 py-0.5 text-[0.85em] text-foreground;
+    font-family: var(--typeface-code-font);
+    font-weight: var(--typeface-code-weight);
+  }
+
+  .dev-typeface-scheme__code-sample {
+    @apply flex flex-col gap-4;
+  }
+
+  .dev-typeface-scheme__code-sample pre {
+    @apply overflow-x-auto border border-border bg-background p-4 text-foreground;
+    font-family: var(--typeface-code-font);
+    font-size: var(--typeface-code-size);
+    font-weight: var(--typeface-code-weight);
+    line-height: 1.7;
+  }
+
+  .dev-typeface-scheme__code-sample code {
+    font-family: inherit;
+  }
+
+  .dev-typeface-scheme__rationale {
+    @apply flex gap-3 border-t border-border pt-4 text-sm leading-7 text-muted-foreground;
+    font-family: var(--typeface-body-font);
+  }
+
+  .dev-typeface-scheme__rationale svg {
+    @apply mt-1 shrink-0 text-foreground;
+    height: 1rem;
+    width: 1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .dev-typeface-scheme__display {
+      font-size: var(--typeface-display-size);
+    }
+  }
+
   .dev-progress-rail {
     @apply hidden min-w-0 flex-col gap-4 border-t border-border pt-6 xl:flex xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0;
     --toc-panel-height: min(58vh, 30rem);

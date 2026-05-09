@@ -61,6 +61,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         status: 'experiment',
         tags: ['article', 'typography', 'layout', 'rich-text'],
       },
+      {
+        slug: 'typefaces',
+        title: 'Typeface Candidates',
+        description: '横向比较中文标题、中文正文、西文混排、强调字重和代码块字体的候选方案。',
+        href: '/dev/typefaces',
+        status: 'experiment',
+        tags: ['typography', 'cjk', 'latin', 'code'],
+      },
     ],
   },
 ]
