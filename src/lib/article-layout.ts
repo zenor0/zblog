@@ -102,7 +102,9 @@ const articleLayoutHeadingFontStacks = {
 } as const
 
 const articleLayoutCodeFontStacks = {
-  'system-mono': 'var(--font-mono), "SFMono-Regular", Consolas, "Liberation Mono", monospace',
+  'article-mono':
+    'var(--font-code), "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace',
+  'system-mono': '"SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace',
   'technical-mono':
     '"JetBrains Mono", "Fira Code", var(--font-mono), "SFMono-Regular", Consolas, monospace',
 } as const
@@ -163,6 +165,10 @@ export const articleLayoutHeadingFontOptions = [
 
 export const articleLayoutCodeFontOptions = [
   {
+    label: 'Article mono',
+    value: 'article-mono',
+  },
+  {
     label: 'System mono',
     value: 'system-mono',
   },
@@ -182,7 +188,7 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
       '--article-layout-caption-gap': '0.38rem',
       '--article-layout-cjk-font-family': articleLayoutCJKFontStacks['heiti-sans'],
       '--article-layout-code-font-size': '0.85rem',
-      '--article-layout-code-font-family': articleLayoutCodeFontStacks['system-mono'],
+      '--article-layout-code-font-family': articleLayoutCodeFontStacks['article-mono'],
       '--article-layout-code-line-height': '1.6',
       '--article-layout-code-padding': '2.25rem 0.95rem 0.95rem',
       '--article-layout-copy-font-size': '0.98rem',
@@ -219,7 +225,7 @@ export const articleLayoutPresets: ArticleLayoutPreset[] = [
       '--article-layout-caption-gap': '0.45rem',
       '--article-layout-cjk-font-family': articleLayoutCJKFontStacks['songti-serif'],
       '--article-layout-code-font-size': '0.875rem',
-      '--article-layout-code-font-family': articleLayoutCodeFontStacks['system-mono'],
+      '--article-layout-code-font-family': articleLayoutCodeFontStacks['article-mono'],
       '--article-layout-code-line-height': '1.7',
       '--article-layout-code-padding': '2.5rem 1rem 1rem',
       '--article-layout-copy-font-size': '1rem',

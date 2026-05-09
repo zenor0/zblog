@@ -726,7 +726,7 @@ export interface SiteSetting {
       /**
        * Inline and block code font stack.
        */
-      codeFont?: ('system-mono' | 'technical-mono') | null;
+      codeFont?: ('article-mono' | 'system-mono' | 'technical-mono') | null;
     };
     /**
      * Optional safe CSS token overrides. Leave blank to use the selected preset values.

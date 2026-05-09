@@ -81,6 +81,17 @@ describe('frontend visual restraint', () => {
     expect(styles).toContain('--zblog-type-badge-size: 0.625rem;')
   })
 
+  it('defines restrained code font and syntax tokens for article code blocks', () => {
+    const styles = readProjectFile('src/app/(frontend)/styles.css')
+
+    expect(styles).toMatch(/--zblog-code-font-family:\s*var\(--font-code\)/)
+    expect(styles).toContain('--zblog-syntax-keyword:')
+    expect(styles).toContain('--zblog-syntax-string:')
+    expect(styles).toContain('.markdown-codeblock .hljs-keyword')
+    expect(styles).toContain('.markdown-codeblock .hljs-string')
+    expect(styles).not.toMatch(/\.markdown-codeblock\s*\{[^}]*shadow-/s)
+  })
+
   it('keeps badges below body scale in shared and editorial UI', () => {
     const badgeComponent = readProjectFile('src/components/ui/badge.tsx')
     const styles = readProjectFile('src/app/(frontend)/styles.css')
