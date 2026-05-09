@@ -289,6 +289,8 @@ export function citationPlugin(
                   data: {
                     hProperties: {
                       className: ['citation-link'],
+                      'data-link-preview-key': reference.key,
+                      'data-link-preview-kind': 'bibliography',
                     },
                   },
                   type: 'link',
@@ -304,16 +306,23 @@ export function citationPlugin(
               const articleElement = articleElementRegistry.get(reference.key)
 
               if (articleElement?.anchorId) {
+                const label = formatArticleReference(articleElement, articleReferenceLabels)
+
                 nodes.push({
                   children: [
                     {
                       type: 'text',
-                      value: formatArticleReference(articleElement, articleReferenceLabels),
+                      value: label,
                     },
                   ],
                   data: {
                     hProperties: {
                       className: ['citation-link'],
+                      'data-link-preview-description': articleElement.caption ?? undefined,
+                      'data-link-preview-kind': 'articleElement',
+                      'data-link-preview-meta': `${articleElement.kind.toUpperCase()} reference`,
+                      'data-link-preview-subtitle': 'Article reference',
+                      'data-link-preview-title': label,
                     },
                   },
                   type: 'link',

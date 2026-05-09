@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
+import { ArticleAnchorNavigation } from '@/components/frontend/ArticleAnchorNavigation'
 import { ArticleViewTracker } from '@/components/frontend/ArticleViewTracker'
 import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
@@ -11,6 +12,7 @@ import { PostArticleNotices } from '@/components/frontend/PostArticleNotices'
 import { PostArticleSupplementary } from '@/components/frontend/PostArticleSupplementary'
 import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
 import { ThemeSwitcher } from '@/components/frontend/ThemeSwitcher'
+import { buildBibliographyLinkPreviews } from '@/lib/article-link-previews'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/lib/markdown'
 import type { MarkdownMediaLike } from '@/lib/markdown/types'
 import { extractMarkdownHeadings, type MarkdownHeading } from '@/lib/markdown-headings'
@@ -139,8 +141,14 @@ export async function PostArticle(props: {
           sourceLocale: getLocaleLabel(sourcePost.translatedFromLocale ?? resolved.resolvedLocale),
         })
       : null
+  const bibliographyLinkPreviews = buildBibliographyLinkPreviews(bibliographyEntries, {
+    referenceItem: common('referenceItem'),
+    referenceUntitled: common('referenceUntitled'),
+    references: common('references'),
+  })
   return (
     <div className="page-frame frontend-shell">
+      <ArticleAnchorNavigation returnLabel={article('returnToReadingPosition')} />
       {shouldTrackView ? (
         <ArticleViewTracker locale={resolved.resolvedLocale} postId={post.id} />
       ) : null}
@@ -284,6 +292,7 @@ export async function PostArticle(props: {
                 fig: common('figureLabel'),
                 tbl: common('tableLabel'),
               }}
+              bibliographyPreviewsByKey={bibliographyLinkPreviews.byKey}
               citationIndex={citationIndex}
               headings={allHeadings}
               mediaBySource={markdownMediaBySource}

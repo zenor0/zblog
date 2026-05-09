@@ -189,6 +189,20 @@ html[data-zblog-theme='light'] {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .article-copy a,
+  .citation-link,
+  [data-toc-rail] a,
+  .article-anchor-return,
+  [data-slot='hover-card-content'] {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 html[data-zblog-preview-theme='dark'] {
   --zblog-syntax-plain: #d4d4d4;
   --zblog-syntax-comment: #6a9955;
@@ -269,6 +283,7 @@ html[data-zblog-preview-theme='light'] {
   html {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
   }
 
@@ -504,7 +519,7 @@ html[data-zblog-preview-theme='light'] {
   }
 
   .citation-link {
-    @apply text-foreground underline decoration-border underline-offset-[0.22em];
+    @apply text-foreground underline decoration-border underline-offset-[0.22em] transition-colors hover:text-foreground/72;
   }
 
   .citation-link--missing {
@@ -513,6 +528,27 @@ html[data-zblog-preview-theme='light'] {
 
   .markdown-media-link {
     @apply no-underline;
+  }
+
+  .article-link-preview {
+    @apply w-[min(22rem,calc(100vw-2rem))] rounded-none border-border bg-background p-4 shadow-none;
+  }
+
+  .article-link-preview__title {
+    @apply mt-2 font-serif text-base leading-6 text-foreground wrap-anywhere;
+  }
+
+  .article-link-preview__subtitle {
+    @apply mt-1 text-[13px] leading-5 text-muted-foreground wrap-anywhere;
+  }
+
+  .article-link-preview__description {
+    @apply mt-3 line-clamp-4 text-[13px] leading-5 text-foreground/76 wrap-anywhere;
+  }
+
+  .article-anchor-return {
+    @apply fixed bottom-5 right-5 shadow-none;
+    z-index: 40;
   }
 
   .markdown-figure {

@@ -1,6 +1,8 @@
 import { CollapsibleReferenceSection } from '@/components/frontend/CollapsibleReferenceSection'
+import { ArticleLinkPreviewLink } from '@/components/frontend/ArticleLinkPreviewLink'
 import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
+import { createFallbackLinkPreview } from '@/lib/article-link-previews'
 import { describeBibliographyEntry, type BibliographyEntry } from '@/lib/bibliography'
 import type { AppLocale } from '@/lib/locales'
 import { getLocaleLabel } from '@/lib/locales'
@@ -79,10 +81,14 @@ function ArticleAttachments(props: {
           const typeLabel = asset?.kind === 'pdf' ? 'PDF' : asset?.extensionLabel || 'FILE'
 
           return (
-            <a
+            <ArticleLinkPreviewLink
               className="group grid gap-4 py-4 transition-colors hover:text-foreground sm:grid-cols-[7rem_minmax(0,1fr)]"
               href={file.url}
               key={attachment.id ?? file.id}
+              preview={createFallbackLinkPreview(
+                file.url,
+                attachment.label || file.filename || file.alt,
+              )}
               rel="noreferrer"
               target="_blank"
             >
@@ -107,7 +113,7 @@ function ArticleAttachments(props: {
                   creditPrefix={labels.mediaCredit}
                 />
               </span>
-            </a>
+            </ArticleLinkPreviewLink>
           )
         })}
       </div>
@@ -188,15 +194,19 @@ function ArticleReferences(props: {
                       {display.links.map((link, linkIndex) => (
                         <span key={`${entry.citationKey}-${link.label}`}>
                           {linkIndex > 0 ? <span className="px-1.5 text-border">·</span> : null}
-                          <a
+                          <ArticleLinkPreviewLink
                             className="editorial-link wrap-anywhere no-underline"
                             href={link.href}
+                            preview={createFallbackLinkPreview(
+                              link.href,
+                              `${link.label}: ${link.value}`,
+                            )}
                             rel="noreferrer"
                             target="_blank"
                           >
                             <span className="text-muted-foreground">{link.label}:</span>{' '}
                             {link.value}
-                          </a>
+                          </ArticleLinkPreviewLink>
                         </span>
                       ))}
                     </p>

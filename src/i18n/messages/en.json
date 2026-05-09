@@ -16,6 +16,7 @@
     "readingTime": "{minutes, number} min read",
     "readingProgress": "Reading progress",
     "referencesCount": "{count, number} references",
+    "returnToReadingPosition": "Return to reading position",
     "tableOfContents": "On this page",
     "untitledDraft": "Untitled draft",
     "untitledPost": "Untitled post",

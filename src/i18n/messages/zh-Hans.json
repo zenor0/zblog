@@ -16,6 +16,7 @@
     "readingTime": "{minutes, number} 分钟阅读",
     "readingProgress": "阅读进度",
     "referencesCount": "{count, number} 条参考文献",
+    "returnToReadingPosition": "回到原阅读位置",
     "tableOfContents": "目录",
     "untitledDraft": "未命名草稿",
     "untitledPost": "未命名文章",
