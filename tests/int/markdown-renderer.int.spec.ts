@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 
 import { buildCitationIndex } from '@/lib/citations'
 import { MarkdownRenderer } from '@/lib/markdown'
+import { buildBibliographyLinkPreviews } from '@/lib/article-link-previews'
+import { parseBibliography } from '@/lib/bibliography'
 
 function renderMarkdown(
   source: string,
@@ -12,11 +14,13 @@ function renderMarkdown(
       fig?: string
       tbl?: string
     }
+    bibliographyPreviewsByKey?: Record<string, any>
   } = {},
 ) {
   return renderToStaticMarkup(
     React.createElement(MarkdownRenderer, {
       articleReferenceLabels: options.articleReferenceLabels,
+      bibliographyPreviewsByKey: options.bibliographyPreviewsByKey,
       citationIndex: buildCitationIndex(source),
       source,
     }),
@@ -136,6 +140,42 @@ See [@tbl:benchmark].
 
     expect(html).toContain('citation-link--missing')
     expect(html).toContain('@fig:missing')
+  })
+
+  it('adds preview metadata to citation, article reference, heading, and external links', () => {
+    const source = `
+## Overview
+
+![System overview](/media/overview.png "Overall architecture"){#fig:overview}
+
+See [@smith2024], [@fig:overview], [Overview](#overview), and [Payload](https://payloadcms.com/docs).
+`
+    const bibliographyPreviews = buildBibliographyLinkPreviews(
+      parseBibliography(`
+@article{smith2024,
+  author = {Smith, Ada},
+  title = {Designing Blogs that Respect References},
+  journaltitle = {Journal of Technical Publishing},
+  year = {2024}
+}
+`),
+      {
+        referenceItem: 'reference',
+        referenceUntitled: 'Untitled work',
+      },
+    )
+    const html = renderMarkdown(source, {
+      bibliographyPreviewsByKey: bibliographyPreviews.byKey,
+    })
+
+    expect(html).toContain('data-link-preview-kind="bibliography"')
+    expect(html).toContain('data-link-preview-title="Designing Blogs that Respect References"')
+    expect(html).toContain('data-link-preview-kind="articleElement"')
+    expect(html).toContain('data-link-preview-title="Figure 1"')
+    expect(html).toContain('data-link-preview-kind="heading"')
+    expect(html).toContain('data-link-preview-title="Overview"')
+    expect(html).toContain('data-link-preview-kind="external"')
+    expect(html).toContain('data-link-preview-subtitle="payloadcms.com"')
   })
 
   it('renders article heading numbers as metadata without changing heading text', () => {

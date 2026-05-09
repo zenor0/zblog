@@ -10,6 +10,13 @@ import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkDirective from 'remark-directive'
 import remarkGfm from 'remark-gfm'
 
+import { ArticleLinkPreviewLink } from '@/components/frontend/ArticleLinkPreviewLink'
+import {
+  buildHeadingLinkPreviews,
+  createFallbackLinkPreview,
+  readLinkPreviewFromDataAttributes,
+  type ArticleLinkPreview,
+} from '@/lib/article-link-previews'
 import { extractMarkdownHeadings } from '@/lib/markdown-headings'
 
 import { extractMarkdownMediaSources, prepareMarkdownSource } from '@/lib/markdown/article-syntax'
@@ -45,6 +52,22 @@ type ExtendedMarkdownComponents = Components & typeof markdownComponentRenderers
 
 export { extractMarkdownMediaSources }
 
+function extractReactNodeText(node: React.ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node)
+  }
+
+  if (Array.isArray(node)) {
+    return node.map((child) => extractReactNodeText(child)).join('')
+  }
+
+  if (React.isValidElement(node)) {
+    return extractReactNodeText((node.props as { children?: React.ReactNode }).children)
+  }
+
+  return ''
+}
+
 function resolveCalloutIcon(kind: unknown) {
   switch (kind) {
     case 'tip':
@@ -64,14 +87,47 @@ function resolveCalloutIcon(kind: unknown) {
 export function MarkdownRenderer(props: MarkdownRendererProps) {
   const {
     articleReferenceLabels = {},
+    bibliographyPreviewsByKey = {},
     citationIndex = new Map<string, number>(),
     headings,
+    linkPreviewsByHref = {},
     mediaBySource = {},
     source,
   } = props
   const preparedSource = prepareMarkdownSource(source)
   const resolvedHeadings = headings ?? extractMarkdownHeadings(source)
+  const resolvedLinkPreviewsByHref: Record<string, ArticleLinkPreview> = {
+    ...buildHeadingLinkPreviews(resolvedHeadings),
+    ...linkPreviewsByHref,
+  }
   let headingCursor = 0
+
+  const resolveLinkPreview = (args: {
+    children: React.ReactNode
+    href?: Blob | null | string
+    props: Record<string, unknown>
+  }) => {
+    const href = typeof args.href === 'string' ? args.href : null
+
+    if (!href) {
+      return null
+    }
+
+    const previewKey =
+      typeof args.props['data-link-preview-key'] === 'string'
+        ? args.props['data-link-preview-key'].trim().toLowerCase()
+        : null
+
+    if (previewKey && bibliographyPreviewsByKey[previewKey]) {
+      return bibliographyPreviewsByKey[previewKey]
+    }
+
+    return (
+      readLinkPreviewFromDataAttributes(args.props, href) ??
+      resolvedLinkPreviewsByHref[href] ??
+      createFallbackLinkPreview(href, extractReactNodeText(args.children))
+    )
+  }
 
   const renderHeading = (
     tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
@@ -112,17 +168,19 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
     a: ({ children, href, node: _node, ...rest }: any) => {
       const isHashLink = typeof href === 'string' && href.startsWith('#')
       const isExternalLink = typeof href === 'string' && /^https?:\/\//i.test(href)
+      const preview = resolveLinkPreview({ children, href, props: rest })
 
       return (
-        <a
+        <ArticleLinkPreviewLink
           {...rest}
           className={joinClassNames(rest.className, isHashLink ? 'citation-link' : undefined)}
           href={href}
+          preview={preview}
           rel={isExternalLink ? 'noreferrer' : undefined}
           target={isExternalLink ? '_blank' : undefined}
         >
           {children}
-        </a>
+        </ArticleLinkPreviewLink>
       )
     },
     aside: ({ children, className, node: _node, ...rest }: any) => {

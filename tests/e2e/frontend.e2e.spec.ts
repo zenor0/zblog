@@ -9,9 +9,9 @@ test.describe('Frontend', () => {
   })
 
   test('can go on homepage', async ({ page }) => {
-    await page.goto('http://localhost:3000')
+    await page.goto('/')
 
-    await expect(page).toHaveURL(/http:\/\/localhost:3000\/(en|zh-hans)$/)
+    await expect(page).toHaveURL(/\/(en|zh-hans)$/)
     await expect(page).toHaveTitle(/ZBlog/)
     await expect(page.locator('[data-editorial-shell="true"]')).toBeVisible()
     await expect(page.locator('[data-home-hero]')).toBeVisible()
@@ -20,18 +20,22 @@ test.describe('Frontend', () => {
     await expect(page.locator('[data-home-post-list] article').first()).toBeVisible()
 
     const heading = page.locator('h1').first()
-    const seededPost = page.getByRole('link', { name: 'Seed Post with Citations and Version History' })
+    const seededPost = page.getByRole('link', {
+      name: 'Seed Post with Citations and Version History',
+    })
     const showcasePost = page.getByRole('link', { name: 'Markdown Feature Showcase' })
 
     await expect(heading).toBeVisible()
-    await expect(page.getByRole('link', { name: '简体中文' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'English' })).toBeVisible()
     await expect(seededPost).toBeVisible()
     await expect(showcasePost).toBeVisible()
+
+    await page.getByRole('button', { name: /语言|Locales/ }).click()
+    await expect(page.getByRole('menuitem', { name: '简体中文' })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'English' })).toBeVisible()
   })
 
   test('can render a seeded article with references and history link', async ({ page }) => {
-    await page.goto('http://localhost:3000/zh-hans/posts/seed-citation-demo')
+    await page.goto('/zh-hans/posts/seed-citation-demo')
 
     await expect(page.locator('h1').first()).toHaveText('带引用与版本历史的示例文章（修订）')
     await expect(page.locator('[data-article-frontmatter]')).toBeVisible()
@@ -50,7 +54,7 @@ test.describe('Frontend', () => {
   })
 
   test('can view seeded version history', async ({ page }) => {
-    await page.goto('http://localhost:3000/zh-hans/posts/seed-citation-demo/history')
+    await page.goto('/zh-hans/posts/seed-citation-demo/history')
 
     await expect(page.locator('h1').first()).toHaveText('版本历史')
     await expect(page.getByText(/版本 ID/).first()).toBeVisible()
@@ -72,5 +76,38 @@ test.describe('Frontend', () => {
     ).toBeVisible()
     await expect(page.locator('pre[data-language="tsx"]')).toBeVisible()
     await expect(page.locator('summary')).toContainText('参考文献')
+  })
+
+  test('shows article link previews and a return control for in-page jumps', async ({ page }) => {
+    await page.goto('/zh-hans/posts/seed-markdown-showcase')
+
+    const bibliographyLink = page.locator('[data-post-reading-root] a[href="#reference-1"]').first()
+
+    await bibliographyLink.hover()
+    await expect(page.locator('[data-link-preview-card-kind="bibliography"]')).toContainText(
+      'Designing Blogs that Respect References',
+    )
+
+    const figureLink = page.locator('[data-post-reading-root] a[href="#ref-fig-seed-hero"]').first()
+
+    await figureLink.hover()
+    await expect(page.locator('[data-link-preview-card-kind="articleElement"]')).toContainText(
+      '图 1',
+    )
+
+    const externalLink = page.getByRole('link', { name: 'Payload CMS 文档' })
+
+    await externalLink.hover()
+    await expect(page.locator('[data-link-preview-card-kind="external"]')).toContainText(
+      'payloadcms.com',
+    )
+
+    await figureLink.click()
+
+    const returnButton = page.getByRole('button', { name: '回到原阅读位置' })
+
+    await expect(returnButton).toBeVisible()
+    await returnButton.click()
+    await expect(returnButton).toBeHidden()
   })
 })
