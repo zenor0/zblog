@@ -85,10 +85,13 @@ describe('frontend visual restraint', () => {
     const styles = readProjectFile('src/app/(frontend)/styles.css')
 
     expect(styles).toMatch(/--zblog-code-font-family:\s*var\(--font-code\)/)
+    expect(styles).toContain('--zblog-codeblock-background: #111318;')
+    expect(styles).toContain('background: var(--zblog-codeblock-background);')
     expect(styles).toContain('--zblog-syntax-keyword:')
     expect(styles).toContain('--zblog-syntax-string:')
     expect(styles).toContain('.markdown-codeblock .hljs-keyword')
     expect(styles).toContain('.markdown-codeblock .hljs-string')
+    expect(styles).toContain('.markdown-codeblock .hljs-selector-class')
     expect(styles).not.toMatch(/\.markdown-codeblock\s*\{[^}]*shadow-/s)
   })
 

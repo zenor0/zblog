@@ -18,6 +18,7 @@ import type {
   ArticleBlockPreviewItem,
 } from '@/lib/article-block-previews'
 import type { ResolvedMediaAsset } from '@/lib/media'
+import { highlightCodeSnippet } from '@/lib/markdown/code-highlighting'
 
 type ArticleBlockSampleProps = {
   item: ArticleBlockPreviewItem
@@ -54,6 +55,12 @@ const pdfAsset: ResolvedMediaAsset = {
   src: '/media/article-research-notes.pdf',
   width: null,
 }
+
+const articleBlockPreviewCode = `export function ArticleBlock() {
+  return <section data-article-block="preview" />
+}`
+
+const highlightedArticleBlockPreviewCode = highlightCodeSnippet(articleBlockPreviewCode, 'tsx')
 
 const unknownAsset: ResolvedMediaAsset = {
   alt: 'Supplementary dataset',
@@ -235,9 +242,12 @@ function TextSample(props: ArticleBlockSampleProps) {
         <ArticleBlockFrame item={props.item}>
           <pre className="markdown-codeblock" data-language="tsx">
             <span className="markdown-codeblock__label">tsx</span>
-            <code>{`export function ArticleBlock() {
-  return <section data-article-block="preview" />
-}`}</code>
+            <code
+              className="markdown-codeblock__code markdown-codeblock__code--highlighted"
+              data-highlight-language={highlightedArticleBlockPreviewCode.language ?? undefined}
+              data-highlighted={highlightedArticleBlockPreviewCode.highlighted ? 'true' : undefined}
+              dangerouslySetInnerHTML={{ __html: highlightedArticleBlockPreviewCode.html }}
+            />
           </pre>
         </ArticleBlockFrame>
       )

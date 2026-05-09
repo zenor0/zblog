@@ -31,6 +31,25 @@ describe('code highlighting', () => {
     expect(result.html).not.toContain('<Badge />')
   })
 
+  it('highlights different language families with syntax tokens', () => {
+    const highlighted = [
+      highlightCodeSnippet('export const value = <Badge tone="info" />', 'tsx'),
+      highlightCodeSnippet('{"title":"Code","enabled":true}', 'json'),
+      highlightCodeSnippet('pnpm run test:int && echo "done"', 'bash'),
+      highlightCodeSnippet('.article { color: var(--foreground); }', 'css'),
+    ]
+
+    expect(highlighted.every((result) => result.highlighted)).toBe(true)
+    expect(highlighted.map((result) => result.language)).toEqual([
+      'typescript',
+      'json',
+      'bash',
+      'css',
+    ])
+    expect(new Set(highlighted.map((result) => result.html))).toHaveLength(highlighted.length)
+    expect(highlighted.every((result) => result.html.includes('hljs-'))).toBe(true)
+  })
+
   it('falls back to escaped plain code for unsupported languages', () => {
     const result = highlightCodeSnippet('<tag dangerous="true">', 'made-up-language')
 
