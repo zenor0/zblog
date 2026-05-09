@@ -51,12 +51,12 @@
   --zblog-type-meta-line: 1rem;
   --zblog-type-badge-size: 0.625rem;
   --zblog-type-badge-line: 1rem;
-  --zblog-tracking-meta: 0.08em;
-  --zblog-tracking-badge: 0.04em;
-  --zblog-tracking-label: 0.06em;
+  --zblog-tracking-meta: 0;
+  --zblog-tracking-badge: 0;
+  --zblog-tracking-label: 0;
   --zblog-code-font-family:
-    var(--font-code), 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', ui-monospace,
-    monospace;
+    var(--font-code, 'JetBrains Mono'), 'JetBrains Mono', 'SFMono-Regular', Consolas,
+    'Liberation Mono', ui-monospace, monospace;
   --zblog-codeblock-background: #111318;
   --zblog-codeblock-border: #2a2f3a;
   --zblog-codeblock-foreground: #d4d4d4;
@@ -977,370 +977,6 @@ html[data-zblog-preview-theme='light'] {
     margin-bottom: 0;
   }
 
-  .dev-typeface-lab {
-    @apply grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start;
-  }
-
-  .dev-typeface-lab__preview {
-    @apply min-w-0 border border-border bg-background;
-  }
-
-  .dev-typeface-preview {
-    @apply mx-auto flex max-w-4xl flex-col gap-8 px-5 py-6 sm:px-8 sm:py-8;
-  }
-
-  .dev-typeface-preview__header {
-    @apply flex flex-col gap-4 border-b border-border pb-8;
-  }
-
-  .dev-typeface-preview__header h2 {
-    font-family: var(--typeface-display-font);
-    font-size: min(var(--typeface-display-size), 3rem);
-    font-weight: var(--typeface-display-weight);
-    letter-spacing: 0;
-    line-height: 1.06;
-    text-wrap: balance;
-  }
-
-  .dev-typeface-preview__meta,
-  .dev-typeface-preview__label {
-    @apply uppercase text-muted-foreground;
-    font-family: var(--typeface-body-font);
-    font-size: var(--zblog-type-badge-size);
-    font-weight: 500;
-    letter-spacing: var(--zblog-tracking-label);
-    line-height: var(--zblog-type-badge-line);
-  }
-
-  .dev-typeface-preview__dek {
-    @apply max-w-2xl text-foreground/68;
-    font-family: var(--typeface-body-font);
-    font-size: var(--typeface-body-size);
-    font-weight: var(--typeface-body-weight);
-    line-height: var(--typeface-body-line-height);
-  }
-
-  .dev-typeface-preview__stack {
-    @apply flex flex-col gap-8;
-  }
-
-  .dev-typeface-preview__article {
-    @apply flex max-w-[72ch] flex-col gap-5;
-    font-family: var(--typeface-body-font);
-    font-size: var(--typeface-body-size);
-    font-weight: var(--typeface-body-weight);
-    line-height: var(--typeface-body-line-height);
-  }
-
-  .dev-typeface-preview__article h3 {
-    font-family: var(--typeface-heading-font);
-    font-size: var(--typeface-heading-size);
-    font-weight: var(--typeface-heading-weight);
-    letter-spacing: 0;
-    line-height: 1.22;
-    text-wrap: balance;
-  }
-
-  .dev-typeface-preview__article p {
-    @apply text-foreground/82;
-  }
-
-  .dev-typeface-preview__article strong {
-    @apply text-foreground;
-    font-weight: var(--typeface-strong-weight);
-  }
-
-  .dev-typeface-preview__article code {
-    @apply border border-border/80 bg-muted/40 px-1.5 py-0.5 text-[0.85em] text-foreground;
-    font-family: var(--typeface-code-font);
-  }
-
-  .dev-typeface-preview__article blockquote {
-    @apply border-l border-border pl-5 text-foreground/70 italic;
-  }
-
-  .dev-typeface-preview__code {
-    @apply flex flex-col gap-3 border-t border-border pt-6;
-  }
-
-  .dev-typeface-preview__code-header {
-    @apply flex items-end justify-between gap-3;
-  }
-
-  .dev-typeface-preview__code-header span {
-    @apply font-medium uppercase text-muted-foreground;
-    font-family: var(--typeface-code-font);
-    font-size: var(--zblog-type-badge-size);
-    letter-spacing: var(--zblog-tracking-label);
-    line-height: var(--zblog-type-badge-line);
-  }
-
-  .dev-typeface-codeblock {
-    font-family: var(--typeface-code-font);
-    font-size: var(--typeface-code-size);
-  }
-
-  .dev-typeface-lab__controls {
-    @apply flex min-w-0 flex-col gap-5 border border-border bg-muted/18 p-4 xl:sticky xl:top-8;
-  }
-
-  .dev-typeface-lab__controls-header {
-    @apply flex items-start gap-3 border-b border-border pb-4;
-  }
-
-  .dev-typeface-lab__controls-header svg {
-    @apply mt-1 shrink-0 text-muted-foreground;
-    height: 1rem;
-    width: 1rem;
-  }
-
-  .dev-typeface-lab__controls-header h2 {
-    @apply font-serif text-xl leading-7 text-foreground;
-  }
-
-  .dev-typeface-control-group {
-    @apply flex flex-col gap-3 border-b border-border pb-5;
-  }
-
-  .dev-typeface-control-group:last-child {
-    @apply border-b-0 pb-0;
-  }
-
-  .dev-typeface-control-group__title {
-    @apply font-medium uppercase text-muted-foreground;
-    font-size: var(--zblog-type-badge-size);
-    letter-spacing: var(--zblog-tracking-label);
-    line-height: var(--zblog-type-badge-line);
-  }
-
-  .dev-typeface-preset-list {
-    @apply grid gap-2;
-  }
-
-  .dev-typeface-preset-list [data-slot='button'] {
-    @apply h-auto justify-start px-3 py-2 text-left;
-    font-size: var(--zblog-type-caption-size);
-    line-height: var(--zblog-type-caption-line);
-  }
-
-  .dev-typeface-control {
-    @apply flex flex-col gap-2;
-    font-size: var(--zblog-type-caption-size);
-    line-height: var(--zblog-type-caption-line);
-  }
-
-  .dev-typeface-control__header {
-    @apply flex items-center justify-between gap-3 text-muted-foreground;
-  }
-
-  .dev-typeface-control__header > span:first-child {
-    @apply font-medium text-foreground/84;
-  }
-
-  .dev-typeface-control__header > span:last-child,
-  .dev-typeface-control__header output {
-    @apply font-medium text-muted-foreground;
-    font-size: var(--zblog-type-badge-size);
-  }
-
-  .dev-typeface-control select {
-    @apply h-9 w-full border border-border bg-background px-2 text-foreground outline-none transition-colors focus:border-foreground;
-  }
-
-  .dev-typeface-control input[type='range'] {
-    @apply h-5 w-full cursor-pointer appearance-none bg-transparent;
-  }
-
-  .dev-typeface-control input[type='range']::-webkit-slider-runnable-track {
-    @apply h-px bg-border;
-  }
-
-  .dev-typeface-control input[type='range']::-webkit-slider-thumb {
-    @apply size-3 appearance-none border border-border bg-foreground;
-    margin-top: -0.35rem;
-  }
-
-  .dev-typeface-control input[type='range']::-moz-range-track {
-    @apply h-px bg-border;
-  }
-
-  .dev-typeface-control input[type='range']::-moz-range-thumb {
-    @apply size-3 rounded-none border border-border bg-foreground;
-  }
-
-  .dev-typeface-control__note {
-    @apply text-muted-foreground;
-    font-size: var(--zblog-type-meta-size);
-    line-height: var(--zblog-type-caption-line);
-  }
-
-  .dev-typeface-check-list {
-    @apply flex list-none flex-col gap-2 pl-0 text-muted-foreground;
-    font-size: var(--zblog-type-caption-size);
-    line-height: var(--zblog-type-caption-line);
-  }
-
-  .dev-typeface-check-list li {
-    @apply border-l border-border pl-3;
-  }
-
-  @media (min-width: 48rem) {
-    .dev-typeface-preview__header h2 {
-      font-size: var(--typeface-display-size);
-    }
-  }
-
-  .dev-typeface-scheme {
-    --typeface-body-font: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-    --typeface-body-line-height: 1.78;
-    --typeface-body-size: 1rem;
-    --typeface-body-weight: 400;
-    --typeface-code-font: 'SFMono-Regular', ui-monospace, monospace;
-    --typeface-code-size: 0.875rem;
-    --typeface-code-weight: 400;
-    --typeface-display-font: var(--font-serif), ui-serif, Georgia, serif;
-    --typeface-display-line-height: 1.08;
-    --typeface-display-size: 4rem;
-    --typeface-display-size-small: 2.75rem;
-    --typeface-display-weight: 600;
-    --typeface-heading-font: var(--font-serif), ui-serif, Georgia, serif;
-    --typeface-heading-line-height: 1.25;
-    --typeface-heading-size: 1.85rem;
-    --typeface-heading-weight: 600;
-    --typeface-meta-font: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-    --typeface-meta-weight: 600;
-    --typeface-strong-weight: 700;
-  }
-
-  .dev-typeface-scheme__name {
-    font-family: var(--typeface-heading-font);
-    font-size: var(--typeface-heading-size);
-    font-weight: var(--typeface-heading-weight);
-    letter-spacing: 0;
-    line-height: var(--typeface-heading-line-height);
-    text-wrap: balance;
-  }
-
-  .dev-typeface-scheme__weights {
-    @apply flex flex-wrap gap-2 text-xs leading-5 text-muted-foreground;
-    font-family: var(--typeface-meta-font);
-    font-weight: var(--typeface-meta-weight);
-  }
-
-  .dev-typeface-scheme__weights span {
-    @apply border border-border px-2 py-1;
-  }
-
-  .dev-typeface-scheme__spec-grid {
-    @apply grid gap-3 border-y border-border py-4 md:grid-cols-3;
-  }
-
-  .dev-typeface-scheme__spec-grid > div {
-    @apply flex min-w-0 flex-col gap-2 text-sm leading-6;
-  }
-
-  .dev-typeface-scheme__spec-grid svg {
-    @apply text-muted-foreground;
-    height: 1rem;
-    width: 1rem;
-  }
-
-  .dev-typeface-scheme__spec-grid p,
-  .dev-typeface-scheme__label {
-    @apply text-xs uppercase text-muted-foreground;
-    font-family: var(--typeface-meta-font);
-    font-weight: var(--typeface-meta-weight);
-    letter-spacing: 0;
-  }
-
-  .dev-typeface-scheme__spec-grid span {
-    @apply min-w-0 truncate text-xs text-foreground/72;
-    font-family: var(--typeface-code-font);
-  }
-
-  .dev-typeface-scheme__preview {
-    @apply grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.72fr)];
-  }
-
-  .dev-typeface-scheme__article-sample,
-  .dev-typeface-scheme__code-sample {
-    @apply min-w-0 border border-border bg-muted/18 p-5 sm:p-6;
-  }
-
-  .dev-typeface-scheme__article-sample {
-    @apply flex flex-col gap-5;
-  }
-
-  .dev-typeface-scheme__display {
-    font-family: var(--typeface-display-font);
-    font-size: var(--typeface-display-size-small);
-    font-weight: var(--typeface-display-weight);
-    letter-spacing: 0;
-    line-height: var(--typeface-display-line-height);
-    text-wrap: balance;
-  }
-
-  .dev-typeface-scheme__heading {
-    font-family: var(--typeface-heading-font);
-    font-size: var(--typeface-heading-size);
-    font-weight: var(--typeface-heading-weight);
-    letter-spacing: 0;
-    line-height: var(--typeface-heading-line-height);
-    text-wrap: balance;
-  }
-
-  .dev-typeface-scheme__body {
-    @apply flex flex-col gap-4 text-foreground/84;
-    font-family: var(--typeface-body-font);
-    font-size: var(--typeface-body-size);
-    font-weight: var(--typeface-body-weight);
-    line-height: var(--typeface-body-line-height);
-  }
-
-  .dev-typeface-scheme__body strong {
-    color: var(--foreground);
-    font-weight: var(--typeface-strong-weight);
-  }
-
-  .dev-typeface-scheme__body code {
-    @apply border border-border/80 bg-background px-1.5 py-0.5 text-[0.85em] text-foreground;
-    font-family: var(--typeface-code-font);
-    font-weight: var(--typeface-code-weight);
-  }
-
-  .dev-typeface-scheme__code-sample {
-    @apply flex flex-col gap-4;
-  }
-
-  .dev-typeface-scheme__code-sample pre {
-    @apply overflow-x-auto border border-border bg-background p-4 text-foreground;
-    font-family: var(--typeface-code-font);
-    font-size: var(--typeface-code-size);
-    font-weight: var(--typeface-code-weight);
-    line-height: 1.7;
-  }
-
-  .dev-typeface-scheme__code-sample code {
-    font-family: inherit;
-  }
-
-  .dev-typeface-scheme__rationale {
-    @apply flex gap-3 border-t border-border pt-4 text-sm leading-7 text-muted-foreground;
-    font-family: var(--typeface-body-font);
-  }
-
-  .dev-typeface-scheme__rationale svg {
-    @apply mt-1 shrink-0 text-foreground;
-    height: 1rem;
-    width: 1rem;
-  }
-
-  @media (min-width: 40rem) {
-    .dev-typeface-scheme__display {
-      font-size: var(--typeface-display-size);
-    }
-  }
-
   .dev-progress-rail {
     @apply hidden min-w-0 flex-col gap-4 border-t border-border pt-6 xl:flex xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0;
     --toc-panel-height: min(58vh, 30rem);
@@ -1740,6 +1376,10 @@ html[data-zblog-preview-theme='light'] {
     margin-top: var(--article-layout-paragraph-gap);
   }
 
+  [data-article-layout-preset]:not([data-article-layout-preset='current']) .article-copy strong {
+    font-weight: var(--article-block-strong-font-weight);
+  }
+
   [data-article-layout-preset]:not([data-article-layout-preset='current']) .article-copy h2 {
     margin-top: var(--article-layout-h2-margin-top);
     margin-bottom: var(--article-layout-h2-margin-bottom);
@@ -1788,8 +1428,10 @@ html[data-zblog-preview-theme='light'] {
   [data-article-layout-preset]:not([data-article-layout-preset='current'])
     .article-copy
     blockquote {
+    border-color: var(--article-block-quote-border-color);
     margin-top: var(--article-layout-block-gap);
     margin-bottom: var(--article-layout-block-gap);
+    padding-left: var(--article-block-quote-padding-left);
   }
 
   [data-article-layout-preset]:not([data-article-layout-preset='current']) .md-callout,
@@ -1830,9 +1472,11 @@ html[data-zblog-preview-theme='light'] {
   }
 
   [data-article-layout-preset]:not([data-article-layout-preset='current']) .markdown-codeblock {
+    background: var(--article-block-code-background);
+    border-color: var(--article-block-code-border-color);
     font-family:
-      var(--article-layout-code-font-family), var(--font-mono), 'SFMono-Regular', Consolas,
-      monospace;
+      var(--article-layout-code-font-family), var(--font-code, 'JetBrains Mono'),
+      'SFMono-Regular', Consolas, monospace;
     padding: var(--article-layout-code-padding);
     font-size: var(--article-layout-code-font-size);
     line-height: var(--article-layout-code-line-height);
@@ -1842,9 +1486,27 @@ html[data-zblog-preview-theme='light'] {
     .article-copy
     :not(pre)
     > code {
+    background: var(--article-block-inline-code-background);
+    border-color: var(--article-block-inline-code-border-color);
     font-family:
-      var(--article-layout-code-font-family), var(--font-mono), 'SFMono-Regular', Consolas,
-      monospace;
+      var(--article-layout-code-font-family), var(--font-code, 'JetBrains Mono'),
+      'SFMono-Regular', Consolas, monospace;
+  }
+
+  [data-article-layout-preset]:not([data-article-layout-preset='current']) .media-surface {
+    background: var(--article-block-media-surface-background);
+  }
+
+  [data-article-layout-preset]:not([data-article-layout-preset='current']) .markdown-table__scroll,
+  [data-article-layout-preset]:not([data-article-layout-preset='current'])
+    .markdown-table__scroll
+    > table
+    th,
+  [data-article-layout-preset]:not([data-article-layout-preset='current'])
+    .markdown-table__scroll
+    > table
+    td {
+    border-color: var(--article-block-table-border-color);
   }
 
   [data-article-layout-preset]:not([data-article-layout-preset='current'])

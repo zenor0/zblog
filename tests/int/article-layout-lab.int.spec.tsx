@@ -17,11 +17,10 @@ import { MarkdownRenderer } from '@/lib/markdown'
 
 describe('article layout lab', () => {
   it('defines the expected layout comparison presets', () => {
-    expect(defaultArticleLayoutPresetID).toBe('dense-technical')
+    expect(defaultArticleLayoutPresetID).toBe('compact-editorial')
     expect(articleLayoutPresets.map((preset) => preset.id)).toEqual([
-      'dense-technical',
-      'prose-baseline',
-      'editorial-balanced',
+      'compact-editorial',
+      'balanced-editorial',
       'current',
     ])
   })
@@ -29,7 +28,7 @@ describe('article layout lab', () => {
   it('defines a complete token set for each non-current preset', () => {
     const configurablePresets = articleLayoutPresets.filter((preset) => preset.id !== 'current')
 
-    expect(configurablePresets).toHaveLength(3)
+    expect(configurablePresets).toHaveLength(2)
 
     for (const preset of configurablePresets) {
       expect(Object.keys(preset.tokens).sort()).toEqual([...articleLayoutPresetTokenNames].sort())

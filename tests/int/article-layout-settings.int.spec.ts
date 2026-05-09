@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import { SiteSettings } from '@/globals/SiteSettings'
 import {
-  articleLayoutPresets,
-  defaultArticleLayoutPresetID,
-  resolveArticleLayoutConfig,
-} from '@/lib/article-layout'
+  articleDesignPresets,
+  defaultArticleDesignPresetID,
+  resolveArticleDesignConfig,
+} from '@/lib/article-design'
 
 function collectFields(fields: any[]): any[] {
   return fields.flatMap((field) => [
@@ -15,7 +15,7 @@ function collectFields(fields: any[]): any[] {
 }
 
 describe('article layout settings', () => {
-  it('exposes compact article layout controls and live preview in site settings', () => {
+  it('exposes compact article design controls and live preview in site settings', () => {
     const tabsField = SiteSettings.fields.find((field: any) => field.type === 'tabs') as any
     const articleLayoutTab = tabsField.tabs.find((tab: any) => tab.id === 'article-layout') as any
     const articleLayoutField = articleLayoutTab.fields.find(
@@ -35,14 +35,14 @@ describe('article layout settings', () => {
     expect(articleLayoutField.type).toBe('group')
     expect(layoutRow.type).toBe('row')
     expect(layoutRow.admin.className).toBe('article-layout-settings-grid')
-    expect(controlsField.label).toBe('Layout controls')
+    expect(controlsField.label).toBe('Article design controls')
     expect(controlsField.admin.width).toBeUndefined()
 
     const presetField = allLayoutFields.find((field: any) => field.name === 'preset') as any
 
-    expect(presetField.defaultValue).toBe(defaultArticleLayoutPresetID)
+    expect(presetField.defaultValue).toBe(defaultArticleDesignPresetID)
     expect(presetField.options.map((option: any) => option.value)).toEqual(
-      articleLayoutPresets.map((preset) => preset.id),
+      articleDesignPresets.map((preset) => preset.id),
     )
 
     const typographyField = allLayoutFields.find((field: any) => field.name === 'typography') as any
@@ -81,8 +81,8 @@ describe('article layout settings', () => {
   })
 
   it('resolves preset tokens and safe advanced overrides into CSS variables', () => {
-    const resolved = resolveArticleLayoutConfig({
-      preset: 'prose-baseline',
+    const resolved = resolveArticleDesignConfig({
+      preset: 'balanced-editorial',
       advanced: {
         blockGap: '1.8rem',
         bodyLineHeight: '1.68',
@@ -92,36 +92,36 @@ describe('article layout settings', () => {
       },
     })
 
-    expect(resolved.presetID).toBe('prose-baseline')
+    expect(resolved.presetID).toBe('balanced-editorial')
     expect(resolved.style['--article-layout-reading-column-max']).toBe('70ch')
     expect(resolved.style['--article-layout-copy-max-width']).toBe('70ch')
     expect(resolved.style['--article-layout-block-gap']).toBe('1.8rem')
     expect(resolved.style['--article-layout-caption-gap']).toBe('6px')
     expect(resolved.style['--article-layout-copy-line-height']).toBe('1.68')
-    expect(resolved.style['--article-layout-paragraph-gap']).toBe('1rem')
+    expect(resolved.style['--article-layout-paragraph-gap']).toBe('0.95rem')
   })
 
   it('resolves controlled typography settings into article font tokens', () => {
-    const resolved = resolveArticleLayoutConfig({
-      preset: 'dense-technical',
+    const resolved = resolveArticleDesignConfig({
+      preset: 'compact-editorial',
       typography: {
-        cjkFont: 'songti-serif',
-        codeFont: 'technical-mono',
-        headingFont: 'display-serif',
-        latinFont: 'literary-serif',
+        cjkFont: 'noto-sans-sc',
+        codeFont: 'jetbrains-mono',
+        headingFont: 'editorial-serif',
+        latinFont: 'source-sans-3',
       },
     })
 
-    expect(resolved.style['--article-layout-latin-font-family']).toContain('Georgia')
-    expect(resolved.style['--article-layout-cjk-font-family']).toContain('Songti SC')
-    expect(resolved.style['--article-layout-heading-font-family']).toContain('var(--font-serif)')
+    expect(resolved.style['--article-layout-latin-font-family']).toContain('Source Sans 3')
+    expect(resolved.style['--article-layout-cjk-font-family']).toContain('Noto Sans SC')
+    expect(resolved.style['--article-layout-heading-font-family']).toContain('Newsreader')
     expect(resolved.style['--article-layout-code-font-family']).toContain('JetBrains Mono')
   })
 
   it('falls back to the default preset for missing or unknown values', () => {
-    expect(resolveArticleLayoutConfig(null).presetID).toBe(defaultArticleLayoutPresetID)
-    expect(resolveArticleLayoutConfig({ preset: 'unknown' }).presetID).toBe(
-      defaultArticleLayoutPresetID,
+    expect(resolveArticleDesignConfig(null).presetID).toBe(defaultArticleDesignPresetID)
+    expect(resolveArticleDesignConfig({ preset: 'unknown' }).presetID).toBe(
+      defaultArticleDesignPresetID,
     )
   })
 })

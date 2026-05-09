@@ -11,6 +11,13 @@ import {
   type ArticleLayoutPresetID,
 } from './articleLayoutPresets'
 
+function getLayoutLabRoot() {
+  return (
+    document.querySelector<HTMLElement>('[data-article-layout-lab-root]') ??
+    document.documentElement
+  )
+}
+
 export function ArticleLayoutLabControls() {
   const [activePresetID, setActivePresetID] = useState<ArticleLayoutPresetID>(
     defaultArticleLayoutPresetID,
@@ -19,7 +26,10 @@ export function ArticleLayoutLabControls() {
     articleLayoutPresets.find((preset) => preset.id === activePresetID) ?? articleLayoutPresets[0]
 
   useEffect(() => {
-    document.documentElement.dataset.articleLayoutPreset = activePresetID
+    const layoutLabRoot = getLayoutLabRoot()
+
+    layoutLabRoot.dataset.articleDesignPreset = activePresetID
+    layoutLabRoot.dataset.articleLayoutPreset = activePresetID
     const activeTokens =
       articleLayoutPresets.find((preset) => preset.id === activePresetID)?.tokens ?? {}
 
@@ -27,17 +37,18 @@ export function ArticleLayoutLabControls() {
       const tokenValue = activeTokens[tokenName]
 
       if (tokenValue) {
-        document.documentElement.style.setProperty(tokenName, tokenValue)
+        layoutLabRoot.style.setProperty(tokenName, tokenValue)
       } else {
-        document.documentElement.style.removeProperty(tokenName)
+        layoutLabRoot.style.removeProperty(tokenName)
       }
     }
 
     return () => {
-      delete document.documentElement.dataset.articleLayoutPreset
+      delete layoutLabRoot.dataset.articleDesignPreset
+      delete layoutLabRoot.dataset.articleLayoutPreset
 
       for (const tokenName of articleLayoutPresetTokenNames) {
-        document.documentElement.style.removeProperty(tokenName)
+        layoutLabRoot.style.removeProperty(tokenName)
       }
     }
   }, [activePresetID])

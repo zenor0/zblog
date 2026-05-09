@@ -149,6 +149,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       return (
         <Tag
           {...rest}
+          data-article-block="heading"
           data-article-heading={displayNumber ? 'true' : undefined}
           data-article-heading-level={displayNumber ? String(heading.depth) : undefined}
           data-article-heading-number={displayNumber}
@@ -174,6 +175,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         <ArticleLinkPreviewLink
           {...rest}
           className={joinClassNames(rest.className, isHashLink ? 'citation-link' : undefined)}
+          data-article-block={preview?.kind === 'bibliography' ? 'citation-link' : undefined}
           href={href}
           preview={preview}
           rel={isExternalLink ? 'noreferrer' : undefined}
@@ -189,7 +191,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       const Icon = resolveCalloutIcon(rest['data-kind'])
 
       return (
-        <aside {...rest} className={joinClassNames(className)}>
+        <aside {...rest} className={joinClassNames(className)} data-article-block="callout">
           {calloutLabel ? (
             <div className="md-callout__title">
               <Icon aria-hidden="true" className="md-callout__icon" />
@@ -205,7 +207,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
 
       if (!language) {
         return (
-          <code {...rest} className={className}>
+          <code {...rest} className={className} data-article-block="inline-code">
             {children}
           </code>
         )
@@ -222,6 +224,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
             'markdown-codeblock__code',
             highlighted.highlighted ? 'markdown-codeblock__code--highlighted' : undefined,
           )}
+          data-article-block="inline-code"
           data-highlight-language={highlighted.language ?? undefined}
           data-highlighted={highlighted.highlighted ? 'true' : undefined}
           dangerouslySetInnerHTML={{ __html: highlighted.html }}
@@ -234,8 +237,19 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
     h4: renderHeading('h4'),
     h5: renderHeading('h5'),
     h6: renderHeading('h6'),
+    hr: ({ node: _node, ...rest }: any) => <hr {...rest} data-article-block="divider" />,
+    blockquote: ({ children, node: _node, ...rest }: any) => (
+      <blockquote {...rest} data-article-block="blockquote">
+        {children}
+      </blockquote>
+    ),
     img: ({ alt, src, title }: any) => (
       <MarkdownImage alt={alt} mediaBySource={mediaBySource} src={src} title={title} />
+    ),
+    ol: ({ children, node: _node, ...rest }: any) => (
+      <ol {...rest} data-article-block="list">
+        {children}
+      </ol>
     ),
     p: ({ children, node, ...rest }: any) => {
       const {
@@ -267,13 +281,26 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         )
       }
 
-      return <p {...paragraphProps}>{children}</p>
+      return (
+        <p {...paragraphProps} data-article-block="paragraph">
+          {children}
+        </p>
+      )
     },
+    ul: ({ children, node: _node, ...rest }: any) => (
+      <ul {...rest} data-article-block="list">
+        {children}
+      </ul>
+    ),
     pre: ({ children, node: _node }: any) => {
       const language = extractCodeBlockLanguage(children)
 
       return (
-        <pre className="markdown-codeblock" data-language={language ?? undefined}>
+        <pre
+          className="markdown-codeblock"
+          data-article-block="code-block"
+          data-language={language ?? undefined}
+        >
           {language ? <span className="markdown-codeblock__label">{language}</span> : null}
           {children}
         </pre>
@@ -289,7 +316,9 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       } = rest
       const table = (
         <div className="markdown-table__scroll">
-          <table {...tableProps}>{children}</table>
+          <table {...tableProps} data-article-block="table">
+            {children}
+          </table>
         </div>
       )
 
@@ -307,6 +336,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       return (
         <figure
           className="markdown-figure markdown-figure--table"
+          data-article-block="table"
           id={typeof articleAnchorId === 'string' ? articleAnchorId : undefined}
         >
           {table}

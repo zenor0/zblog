@@ -1,15 +1,15 @@
 import type { Field, GlobalConfig } from 'payload'
 
 import {
-  articleLayoutCJKFontOptions,
-  articleLayoutCodeFontOptions,
-  articleLayoutHeadingFontOptions,
-  articleLayoutLatinFontOptions,
-  articleLayoutPresetOptions,
-  defaultArticleLayoutPresetID,
-  validateArticleLayoutLength,
-  validateArticleLayoutLineHeight,
-} from '@/lib/article-layout'
+  articleDesignCJKFontOptions,
+  articleDesignCodeFontOptions,
+  articleDesignHeadingFontOptions,
+  articleDesignLatinFontOptions,
+  articleDesignPresetOptions,
+  defaultArticleDesignPresetID,
+  validateArticleDesignLength,
+  validateArticleDesignLineHeight,
+} from '@/lib/article-design'
 import {
   defaultSiteFooterLayoutStyle,
   siteFooterLayoutStyleOptions,
@@ -401,11 +401,11 @@ const articleLayoutFields: Field[] = [
             type: 'select',
             admin: {
               description:
-                'Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.',
+                'Choose the default article design preset for public article pages.',
             },
-            defaultValue: defaultArticleLayoutPresetID,
+            defaultValue: defaultArticleDesignPresetID,
             label: 'Preset',
-            options: articleLayoutPresetOptions,
+            options: articleDesignPresetOptions,
             required: true,
           },
           {
@@ -413,7 +413,7 @@ const articleLayoutFields: Field[] = [
             type: 'group',
             admin: {
               description:
-                'Optional font stack overrides. Leave blank to inherit the selected layout preset.',
+                'Optional font stack overrides. Leave blank to inherit the selected design preset.',
               width: '100%',
             },
             fields: [
@@ -421,31 +421,31 @@ const articleLayoutFields: Field[] = [
                 name: 'latinFont',
                 type: 'select',
                 admin: {
-                  description: 'Western text font stack.',
+                  description: 'Western body text font stack.',
                   width: '50%',
                 },
                 label: 'Latin font',
-                options: [...articleLayoutLatinFontOptions],
+                options: [...articleDesignLatinFontOptions],
               },
               {
                 name: 'cjkFont',
                 type: 'select',
                 admin: {
-                  description: 'Chinese/Japanese/Korean fallback stack.',
+                  description: 'Chinese body text fallback stack.',
                   width: '50%',
                 },
                 label: 'CJK font',
-                options: [...articleLayoutCJKFontOptions],
+                options: [...articleDesignCJKFontOptions],
               },
               {
                 name: 'headingFont',
                 type: 'select',
                 admin: {
-                  description: 'Heading font stack.',
+                  description: 'Heading font stack. The default keeps headings in a serif voice.',
                   width: '50%',
                 },
                 label: 'Heading font',
-                options: [...articleLayoutHeadingFontOptions],
+                options: [...articleDesignHeadingFontOptions],
               },
               {
                 name: 'codeFont',
@@ -455,7 +455,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Code font',
-                options: [...articleLayoutCodeFontOptions],
+                options: [...articleDesignCodeFontOptions],
               },
             ],
             label: 'Typography',
@@ -478,7 +478,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Content width',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
               {
                 name: 'bodyFontSize',
@@ -488,7 +488,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Body font size',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
               {
                 name: 'bodyLineHeight',
@@ -498,7 +498,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Body line height',
-                validate: validateArticleLayoutLineHeight,
+                validate: validateArticleDesignLineHeight,
               },
               {
                 name: 'paragraphGap',
@@ -508,7 +508,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Paragraph gap',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
               {
                 name: 'flowGap',
@@ -518,7 +518,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Flow gap',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
               {
                 name: 'blockGap',
@@ -528,7 +528,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Rich block gap',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
               {
                 name: 'captionGap',
@@ -538,7 +538,7 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Caption gap',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
               {
                 name: 'gridGap',
@@ -549,13 +549,13 @@ const articleLayoutFields: Field[] = [
                   width: '50%',
                 },
                 label: 'Reading grid gap',
-                validate: validateArticleLayoutLength,
+                validate: validateArticleDesignLength,
               },
             ],
             label: 'Advanced overrides',
           },
         ],
-        label: 'Layout controls',
+        label: 'Article design controls',
       },
       {
         name: 'preview',
@@ -679,16 +679,16 @@ export const SiteSettings: GlobalConfig = {
         },
         {
           id: 'article-layout',
-          label: 'Article layout',
+          label: 'Article design',
           fields: [
             {
               name: 'articleLayout',
               type: 'group',
               admin: {
                 description:
-                  'Configure the default article reading layout preset and a small set of safe spacing overrides.',
+                  'Configure the code-owned article design preset and a small set of safe spacing overrides.',
               },
-              label: 'Article layout',
+              label: 'Article design',
               fields: articleLayoutFields,
             },
           ],

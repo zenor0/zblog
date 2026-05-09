@@ -20,10 +20,12 @@ describe('ArticleLayoutPreview', () => {
             contentWidth: '70ch',
             paragraphGap: '0.7rem',
           },
-          preset: 'prose-baseline',
+          preset: 'compact-editorial',
           typography: {
-            cjkFont: 'songti-serif',
-            latinFont: 'literary-serif',
+            cjkFont: 'noto-sans-sc',
+            codeFont: 'jetbrains-mono',
+            headingFont: 'editorial-serif',
+            latinFont: 'source-sans-3',
           },
         },
       },
@@ -36,37 +38,39 @@ describe('ArticleLayoutPreview', () => {
       />,
     )
 
-    const preview = screen.getByTestId('article-layout-preview')
+    const preview = screen.getByTestId('article-design-preview')
 
-    expect(preview.getAttribute('data-article-layout-preset')).toBe('prose-baseline')
+    expect(preview.getAttribute('data-article-design-preset')).toBe('compact-editorial')
     expect(preview.getAttribute('style')).toContain('--article-layout-reading-column-max: 70ch')
     expect(preview.getAttribute('style')).toContain('--article-layout-caption-gap: 5px')
-    expect(preview.getAttribute('style')).toContain('--article-layout-latin-font-family: Georgia')
-    expect(preview.getAttribute('style')).toContain('Songti SC')
-    expect(screen.getByText('Live article layout preview')).toBeTruthy()
-    expect(screen.getByText('Prose')).toBeTruthy()
-    expect(screen.getByText(/阅读节奏/)).toBeTruthy()
+    expect(preview.getAttribute('style')).toContain('Source Sans 3')
+    expect(preview.getAttribute('style')).toContain('Noto Sans SC')
+    expect(preview.getAttribute('style')).toContain('JetBrains Mono')
+    expect(screen.getByText('Article design preview')).toBeTruthy()
+    expect(screen.getByText('Compact editorial')).toBeTruthy()
+    expect(screen.getByText(/字体系统应该让重点自然浮出来/)).toBeTruthy()
+    expect(screen.getByTestId('article-design-preview-codeblock')).toBeTruthy()
   })
 
   it('prefers live path values over stale article layout group values', () => {
     mockedFormFields = {
       articleLayout: {
         value: {
-          preset: 'dense-technical',
+          preset: 'balanced-editorial',
           typography: {
-            cjkFont: 'heiti-sans',
-            latinFont: 'system-sans',
+            cjkFont: 'noto-serif-sc',
+            latinFont: 'newsreader',
           },
         },
       },
       'articleLayout.preset': {
-        value: 'prose-baseline',
+        value: 'compact-editorial',
       },
       'articleLayout.typography.cjkFont': {
-        value: 'songti-serif',
+        value: 'noto-sans-sc',
       },
       'articleLayout.typography.latinFont': {
-        value: 'literary-serif',
+        value: 'source-sans-3',
       },
     }
 
@@ -77,11 +81,12 @@ describe('ArticleLayoutPreview', () => {
       />,
     )
 
-    const preview = screen.getByTestId('article-layout-preview')
+    const preview = screen.getByTestId('article-design-preview')
+    const style = preview.getAttribute('style') ?? ''
 
-    expect(preview.getAttribute('data-article-layout-preset')).toBe('prose-baseline')
-    expect(preview.getAttribute('style')).toContain('--article-layout-latin-font-family: Georgia')
-    expect(preview.getAttribute('style')).toContain('Songti SC')
-    expect(preview.getAttribute('style')).not.toContain('PingFang SC')
+    expect(preview.getAttribute('data-article-design-preset')).toBe('compact-editorial')
+    expect(style).toMatch(/--article-layout-latin-font-family:[^;]*Source Sans 3/)
+    expect(style).toMatch(/--article-layout-cjk-font-family:[^;]*Noto Sans SC/)
+    expect(style).not.toMatch(/--article-layout-cjk-font-family:[^;]*Noto Serif SC/)
   })
 })

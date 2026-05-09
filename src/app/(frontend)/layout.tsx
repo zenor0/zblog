@@ -1,6 +1,12 @@
 import type { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
-import { IBM_Plex_Mono, Newsreader, Source_Sans_3 } from 'next/font/google'
+import {
+  JetBrains_Mono,
+  Newsreader,
+  Noto_Sans_SC,
+  Noto_Serif_SC,
+  Source_Sans_3,
+} from 'next/font/google'
 import React from 'react'
 
 import { ThemeRuntime } from '@/components/frontend/ThemeSwitcher'
@@ -27,10 +33,24 @@ const serif = Newsreader({
   weight: ['400', '500', '600', '700'],
 })
 
-const code = IBM_Plex_Mono({
+const code = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-code',
-  weight: ['400', '500'],
+  weight: ['400', '500', '600'],
+})
+
+const cjkSans = Noto_Sans_SC({
+  display: 'swap',
+  preload: false,
+  variable: '--font-cjk-sans',
+  weight: ['400', '500', '600', '700'],
+})
+
+const cjkSerif = Noto_Serif_SC({
+  display: 'swap',
+  preload: false,
+  variable: '--font-cjk-serif',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -54,7 +74,13 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       <body>
         <ThemeRuntime />
         <div
-          className={`${sans.variable} ${serif.variable} ${code.variable}`}
+          className={[
+            sans.variable,
+            serif.variable,
+            code.variable,
+            cjkSans.variable,
+            cjkSerif.variable,
+          ].join(' ')}
           data-editorial-shell="true"
         >
           <main>{children}</main>

@@ -26,7 +26,7 @@
 .bibliography-field__eyebrow {
   margin: 0 0 0.25rem;
   font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--theme-elevation-600);
 }
@@ -74,7 +74,7 @@
 
 .bibliography-field__upload-copy span {
   font-size: 0.75rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--theme-elevation-600);
 }

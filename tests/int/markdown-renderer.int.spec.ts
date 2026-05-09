@@ -35,6 +35,7 @@ describe('markdown renderer', () => {
 `)
 
     expect(html).toContain('md-callout--note')
+    expect(html).toContain('data-article-block="callout"')
     expect(html).toContain('data-callout-label="Note"')
     expect(html).toContain('This content should render as a note callout.')
     expect(html).not.toContain('[!NOTE]')
@@ -70,7 +71,8 @@ describe('markdown renderer', () => {
 > This is just a quote.
 `)
 
-    expect(html).toContain('<blockquote>')
+    expect(html).toMatch(/<blockquote[^>]*data-article-block="blockquote"[^>]*>/)
+    expect(html).toContain('data-article-block="blockquote"')
     expect(html).not.toContain('md-callout')
   })
 
@@ -84,6 +86,7 @@ See [@fig:overview].
     const html = renderMarkdown(source)
 
     expect(html).toContain('id="ref-fig-overview"')
+    expect(html).toContain('data-article-block="figure"')
     expect(html).toContain('href="#ref-fig-overview"')
     expect(html).toContain('>Figure 1<')
     expect(html).toContain('Figure 1. Overall architecture')
@@ -130,6 +133,7 @@ See [@tbl:benchmark].
     const html = renderMarkdown(source)
 
     expect(html).toContain('id="ref-tbl-benchmark"')
+    expect(html).toContain('data-article-block="table"')
     expect(html).toContain('href="#ref-tbl-benchmark"')
     expect(html).toContain('>Table 1<')
     expect(html).toContain('Table 1. Benchmark results')
@@ -169,6 +173,7 @@ See [@smith2024], [@fig:overview], [Overview](#overview), and [Payload](https://
     })
 
     expect(html).toContain('data-link-preview-kind="bibliography"')
+    expect(html).toContain('data-article-block="citation-link"')
     expect(html).toContain('data-link-preview-title="Designing Blogs that Respect References"')
     expect(html).toContain('data-link-preview-kind="articleElement"')
     expect(html).toContain('data-link-preview-title="Figure 1"')
@@ -194,15 +199,32 @@ See [@smith2024], [@fig:overview], [Overview](#overview), and [Payload](https://
     expect(html).toMatch(
       /<h2(?=[^>]*id="first-section")(?=[^>]*data-article-heading="true")(?=[^>]*data-article-heading-level="2")(?=[^>]*data-article-heading-number="1")[^>]*>First section<\/h2>/,
     )
+    expect(html).toContain('data-article-block="heading"')
     expect(html).toMatch(
       /<h3(?=[^>]*id="nested-section")(?=[^>]*data-article-heading="true")(?=[^>]*data-article-heading-level="3")(?=[^>]*data-article-heading-number="1\.1")[^>]*>Nested section<\/h3>/,
     )
     expect(html).toMatch(
       /<h4(?=[^>]*id="deep-section")(?=[^>]*data-article-heading="true")(?=[^>]*data-article-heading-level="4")(?=[^>]*data-article-heading-number="1\.1\.1")[^>]*>Deep section<\/h4>/,
     )
-    expect(html).toContain('<h1 id="body-title">Body title</h1>')
-    expect(html).toContain('<h5 id="unnumbered-section">Unnumbered section</h5>')
+    expect(html).toMatch(
+      /<h1(?=[^>]*id="body-title")(?=[^>]*data-article-block="heading")[^>]*>Body title<\/h1>/,
+    )
+    expect(html).toMatch(
+      /<h5(?=[^>]*id="unnumbered-section")(?=[^>]*data-article-block="heading")[^>]*>Unnumbered section<\/h5>/,
+    )
     expect(html).not.toContain('>1 First section<')
+  })
+
+  it('marks common structural blocks for article design tokens', () => {
+    const html = renderMarkdown(`
+- First item
+- Second item
+
+---
+`)
+
+    expect(html).toMatch(/<ul(?=[^>]*data-article-block="list")[^>]*>/)
+    expect(html).toMatch(/<hr(?=[^>]*data-article-block="divider")[^>]*\/>/)
   })
 
   it('preserves fenced tsx code blocks with a visible language label', () => {
@@ -217,6 +239,7 @@ export function Demo() {
     const html = renderMarkdown(source)
 
     expect(html).toContain('data-language="tsx"')
+    expect(html).toContain('data-article-block="code-block"')
     expect(html).toContain('data-highlighted="true"')
     expect(html).toContain('data-highlight-language="typescript"')
     expect(html).toContain('language-tsx')
@@ -238,9 +261,11 @@ This body should render inside the component.
     const html = renderMarkdown(source)
 
     expect(html).toContain('data-markdown-component="notice-card"')
+    expect(html).toContain('data-article-block="notice-card"')
     expect(html).toContain('Rendered component')
     expect(html).toContain('This body should render inside the component.')
     expect(html).toContain('data-markdown-component="feature-grid"')
+    expect(html).toContain('data-article-block="feature-grid"')
     expect(html).toContain('Figure refs')
   })
 })

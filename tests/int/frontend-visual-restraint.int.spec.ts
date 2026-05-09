@@ -66,9 +66,9 @@ describe('frontend visual restraint', () => {
   it('defines restrained tracking tokens for recurring editorial labels', () => {
     const styles = readProjectFile('src/app/(frontend)/styles.css')
 
-    expect(styles).toContain('--zblog-tracking-meta: 0.08em;')
-    expect(styles).toContain('--zblog-tracking-badge: 0.04em;')
-    expect(styles).toContain('--zblog-tracking-label: 0.06em;')
+    expect(styles).toContain('--zblog-tracking-meta: 0;')
+    expect(styles).toContain('--zblog-tracking-badge: 0;')
+    expect(styles).toContain('--zblog-tracking-label: 0;')
   })
 
   it('defines a compact typography scale for dense interface text', () => {
@@ -84,7 +84,7 @@ describe('frontend visual restraint', () => {
   it('defines restrained code font and syntax tokens for article code blocks', () => {
     const styles = readProjectFile('src/app/(frontend)/styles.css')
 
-    expect(styles).toMatch(/--zblog-code-font-family:\s*var\(--font-code\)/)
+    expect(styles).toMatch(/--zblog-code-font-family:\s*var\(--font-code,\s*'JetBrains Mono'\)/)
     expect(styles).toContain('--zblog-codeblock-background: #111318;')
     expect(styles).toContain('background: var(--zblog-codeblock-background);')
     expect(styles).toContain('--zblog-syntax-keyword:')
