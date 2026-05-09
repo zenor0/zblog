@@ -12,9 +12,13 @@ import { PostViewDedupe } from './collections/PostViewDedupe'
 import { PostViewMetrics } from './collections/PostViewMetrics'
 import { SiteSettings } from './globals/SiteSettings'
 import { defaultLocale, payloadLocales } from './lib/locales'
+import { ensureRuntimeDirectories } from './lib/runtime-directories'
+import { defaultDatabaseURL } from './lib/runtime-paths'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+ensureRuntimeDirectories()
 
 export default buildConfig({
   admin: {
@@ -37,7 +41,7 @@ export default buildConfig({
   },
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URL || '',
+      url: process.env.DATABASE_URL || defaultDatabaseURL,
     },
   }),
   sharp,

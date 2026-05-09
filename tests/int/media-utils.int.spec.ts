@@ -56,10 +56,10 @@ describe('media utilities', () => {
 
   it('only resolves local upload paths inside the media directory', () => {
     expect(resolveLocalMediaPath('/media/research/report.pdf')).toBe(
-      path.resolve(process.cwd(), 'media', 'research', 'report.pdf'),
+      path.resolve(process.cwd(), '.data', 'media', 'research', 'report.pdf'),
     )
     expect(resolveLocalMediaPath('/api/media/file/report.pdf')).toBe(
-      path.resolve(process.cwd(), 'media', 'report.pdf'),
+      path.resolve(process.cwd(), '.data', 'media', 'report.pdf'),
     )
     expect(resolveLocalMediaPath('/media/../secret.pdf')).toBeNull()
     expect(resolveLocalMediaPath('/api/media/file/..%2Fsecret.pdf')).toBeNull()

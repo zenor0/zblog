@@ -16,8 +16,9 @@ import {
   seedMarkdownShowcaseSlug,
   seedMarkdownShowcaseZhTitle,
 } from '@/lib/seed-blog-content'
+import { seedAssetsDir } from '@/lib/runtime-paths'
 
-const seedDir = path.resolve(process.cwd(), '.seed-assets')
+const seedDir = seedAssetsDir
 
 const heroSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
