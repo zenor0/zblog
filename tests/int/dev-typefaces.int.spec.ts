@@ -53,6 +53,36 @@ describe('dev typeface candidates', () => {
     }
   })
 
+  it('keeps Latin font stacks from preempting the selected Chinese font', () => {
+    const chineseFallbacks = [
+      'Noto Sans SC',
+      'Noto Serif SC',
+      'Source Han Sans SC',
+      'Source Han Serif SC',
+      'PingFang SC',
+      'Microsoft YaHei',
+      'Songti SC',
+      'SimSun',
+    ]
+    const genericFallbacks = new Set([
+      'sans-serif',
+      'serif',
+      'system-ui',
+      'ui-sans-serif',
+      'ui-serif',
+    ])
+
+    for (const option of typefaceFontOptions.latin) {
+      expect(chineseFallbacks.filter((fallback) => option.stack.includes(fallback))).toEqual([])
+      expect(
+        option.stack
+          .split(',')
+          .map((font) => font.trim())
+          .filter((font) => genericFallbacks.has(font)),
+      ).toEqual([])
+    }
+  })
+
   it('defines multiple language samples for code highlighting previews', () => {
     expect(typefaceCodeSamples.map((sample) => sample.id)).toEqual(['tsx', 'json', 'bash', 'css'])
     expect(typefaceCodeSamples.every((sample) => sample.code.trim().length > 0)).toBe(true)
