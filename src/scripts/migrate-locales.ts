@@ -1,6 +1,8 @@
 import path from 'path'
 import { DatabaseSync } from 'node:sqlite'
 
+import { defaultDatabasePath } from '@/lib/runtime-paths'
+
 const localeRenames = [
   {
     from: 'zh-CN',
@@ -48,7 +50,7 @@ function resolveDatabasePaths(): string[] {
     return [path.resolve(process.cwd(), databaseUrl)]
   }
 
-  return [path.resolve(process.cwd(), 'zblog.db')]
+  return [defaultDatabasePath]
 }
 
 function hasTable(database: DatabaseSync, tableName: string): boolean {

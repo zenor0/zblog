@@ -8,11 +8,11 @@ import type { User } from '@/payload-types'
 import { describe, it, beforeAll, expect } from 'vitest'
 
 import { importPostWorkspace } from '@/lib/post-package-import'
-import { mediaPreviewDir, mediaUploadDir } from '@/lib/uploads'
+import { mediaPreviewDir, mediaUploadDir, resolveRuntimePath, runtimeStateDir } from '@/lib/runtime-paths'
 import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
 
 let payload: Payload
-const testDatabasePath = path.resolve(process.cwd(), 'zblog.test.db')
+const testDatabasePath = resolveRuntimePath('zblog.test.db')
 const embeddedBibliographySource = `@article{doe2025,
   author = {Doe, Jamie},
   title = {Composable Publishing Workflows},
@@ -77,7 +77,11 @@ async function readWorkspaceFiles(rootDir: string, currentDir = rootDir): Promis
 describe('API', () => {
   beforeAll(async () => {
     process.env.DATABASE_URL = `file:${testDatabasePath}`
+    process.env.PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || 'test-payload-secret'
 
+    await fs.mkdir(runtimeStateDir, {
+      recursive: true,
+    })
     await fs.rm(testDatabasePath, {
       force: true,
     })
