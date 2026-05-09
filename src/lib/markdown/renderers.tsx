@@ -3,6 +3,7 @@ import React from 'react'
 import { MediaDetails } from '@/components/frontend/MediaDetails'
 import { MediaSurface } from '@/components/frontend/MediaSurface'
 import { resolveMediaAsset, resolveMediaCaption } from '@/lib/media'
+import { extractCodeLanguageFromClassName } from '@/lib/markdown/code-highlighting'
 import type { MarkdownMediaLike, MarkdownMediaRenderResult } from '@/lib/markdown/types'
 
 function resolveMarkdownMedia(props: {
@@ -12,7 +13,7 @@ function resolveMarkdownMedia(props: {
   title?: null | string
 }): MarkdownMediaRenderResult | null {
   const source = typeof props.src === 'string' ? props.src : null
-  const media = source ? props.mediaBySource?.[source] ?? null : null
+  const media = source ? (props.mediaBySource?.[source] ?? null) : null
   const asset = resolveMediaAsset({
     alt: props.alt,
     media,
@@ -52,7 +53,12 @@ export function MarkdownImage(props: {
   if (asset.kind === 'pdf' || asset.kind === 'unknown') {
     return (
       <span className="markdown-media">
-        <a className="markdown-media-link" href={asset.downloadURL} rel="noreferrer" target="_blank">
+        <a
+          className="markdown-media-link"
+          href={asset.downloadURL}
+          rel="noreferrer"
+          target="_blank"
+        >
           {surface}
         </a>
         <MediaDetails caption={caption} className="markdown-media__details" credit={credit} />
@@ -109,14 +115,12 @@ export function extractCodeBlockLanguage(children: React.ReactNode) {
       continue
     }
 
-    const className =
-      typeof (child.props as { className?: unknown }).className === 'string'
-        ? (child.props as { className: string }).className
-        : ''
-    const languageMatch = className.match(/language-([a-z0-9-]+)/i)
+    const language = extractCodeLanguageFromClassName(
+      (child.props as { className?: unknown }).className,
+    )
 
-    if (languageMatch) {
-      return languageMatch[1].toLowerCase()
+    if (language) {
+      return language
     }
   }
 

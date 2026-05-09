@@ -150,8 +150,13 @@ export function Demo() {
     const html = renderMarkdown(source)
 
     expect(html).toContain('data-language="tsx"')
+    expect(html).toContain('data-highlighted="true"')
+    expect(html).toContain('data-highlight-language="typescript"')
     expect(html).toContain('language-tsx')
-    expect(html).toContain('&lt;div&gt;Hello&lt;/div&gt;')
+    expect(html).toContain('hljs-keyword')
+    expect(html).toContain('&lt;')
+    expect(html).toContain('Hello')
+    expect(html).not.toContain('<div>Hello</div>')
   })
 
   it('renders whitelisted JSX-like markdown components', () => {

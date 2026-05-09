@@ -14,6 +14,10 @@ import { extractMarkdownHeadings } from '@/lib/markdown-headings'
 
 import { extractMarkdownMediaSources, prepareMarkdownSource } from '@/lib/markdown/article-syntax'
 import {
+  extractCodeLanguageFromClassName,
+  highlightCodeSnippet,
+} from '@/lib/markdown/code-highlighting'
+import {
   articleElementsPlugin,
   citationPlugin,
   githubCalloutBlockquotePlugin,
@@ -69,9 +73,14 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
   const resolvedHeadings = headings ?? extractMarkdownHeadings(source)
   let headingCursor = 0
 
-  const renderHeading =
-    (tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'): NonNullable<Components[typeof tag]> => {
-    const HeadingRenderer: NonNullable<Components[typeof tag]> = ({ children, node: _node, ...rest }) => {
+  const renderHeading = (
+    tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+  ): NonNullable<Components[typeof tag]> => {
+    const HeadingRenderer: NonNullable<Components[typeof tag]> = ({
+      children,
+      node: _node,
+      ...rest
+    }) => {
       const heading = resolvedHeadings[headingCursor]
       const id = heading?.id
       const Tag = tag
@@ -126,11 +135,34 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         </aside>
       )
     },
-    code: ({ children, className, node: _node, ...rest }: any) => (
-      <code {...rest} className={className}>
-        {children}
-      </code>
-    ),
+    code: ({ children, className, node: _node, ...rest }: any) => {
+      const language = extractCodeLanguageFromClassName(className)
+
+      if (!language) {
+        return (
+          <code {...rest} className={className}>
+            {children}
+          </code>
+        )
+      }
+
+      const code = String(children).replace(/\n$/, '')
+      const highlighted = highlightCodeSnippet(code, language)
+
+      return (
+        <code
+          {...rest}
+          className={joinClassNames(
+            className,
+            'markdown-codeblock__code',
+            highlighted.highlighted ? 'markdown-codeblock__code--highlighted' : undefined,
+          )}
+          data-highlight-language={highlighted.language ?? undefined}
+          data-highlighted={highlighted.highlighted ? 'true' : undefined}
+          dangerouslySetInnerHTML={{ __html: highlighted.html }}
+        />
+      )
+    },
     h1: renderHeading('h1'),
     h2: renderHeading('h2'),
     h3: renderHeading('h3'),
@@ -153,7 +185,11 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
         : null
       const imageProps = imageNode?.properties ?? {}
 
-      if (articleKind === 'fig' && typeof articleAnchorId === 'string' && typeof articleNumber === 'string') {
+      if (
+        articleKind === 'fig' &&
+        typeof articleAnchorId === 'string' &&
+        typeof articleNumber === 'string'
+      ) {
         return (
           <MarkdownFigure
             alt={typeof imageProps.alt === 'string' ? imageProps.alt : null}
