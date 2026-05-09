@@ -7,6 +7,7 @@ import { defaultLocale, normalizeLocale, supportedLocales } from '@/lib/locales'
 import {
   buildContentAssetSummary,
   buildPublishingSnapshot,
+  formatDate,
   formatStatus,
   getCoverageBadgeLabel,
   getCoverageTone,
@@ -19,6 +20,7 @@ import {
   type LocaleInsight,
   type LocaleSnapshot,
 } from '@/components/payload/postOverviewSummary'
+import { getPostViewMetricKey, type PostViewMetricSummary } from '@/lib/post-views'
 
 import './post-insights.scss'
 
@@ -157,6 +159,55 @@ async function loadResourceSummary(args: {
   }
 }
 
+function normalizeReaderMetrics(value: unknown): PostViewMetricSummary {
+  const metric = value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+
+  return {
+    lastViewedAt: typeof metric.lastViewedAt === 'string' ? metric.lastViewedAt : null,
+    rawHits: typeof metric.rawHits === 'number' && Number.isFinite(metric.rawHits) ? metric.rawHits : 0,
+    uniqueVisitors:
+      typeof metric.uniqueVisitors === 'number' && Number.isFinite(metric.uniqueVisitors)
+        ? metric.uniqueVisitors
+        : 0,
+    viewCount:
+      typeof metric.viewCount === 'number' && Number.isFinite(metric.viewCount) ? metric.viewCount : 0,
+  }
+}
+
+async function loadReaderMetrics(args: {
+  activeLocale: AppLocale
+  id: number | string
+  req: UIFieldServerProps['req']
+}): Promise<PostViewMetricSummary> {
+  const postId = typeof args.id === 'number' ? args.id : Number(args.id)
+
+  if (!Number.isInteger(postId) || postId <= 0) {
+    return normalizeReaderMetrics(null)
+  }
+
+  const metrics = await args.req.payload.find({
+    collection: 'post-view-metrics',
+    depth: 0,
+    limit: 1,
+    pagination: false,
+    req: buildLocalRequest({
+      req: args.req,
+    }),
+    user: args.req.user,
+    where: {
+      metricKey: {
+        equals: getPostViewMetricKey({
+          locale: args.activeLocale,
+          postId,
+        }),
+      },
+    },
+    ...getAccessOverride(args.req.user),
+  })
+
+  return normalizeReaderMetrics(metrics.docs[0])
+}
+
 async function buildBibliographySummary(
   bibliography: null | Post['bibliography'] | undefined,
 ): Promise<BibliographySummary> {
@@ -194,7 +245,7 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
   const activeLocale =
     normalizeLocale(typeof req.locale === 'string' ? req.locale : undefined) ?? defaultLocale
 
-  const [locales, references, resources] = await Promise.all([
+  const [locales, references, resources, readerMetrics] = await Promise.all([
     Promise.all(
       supportedLocales.map(async (locale) => {
         const snapshot = await loadLocaleSnapshot({
@@ -217,6 +268,11 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
       req,
     }),
     loadResourceSummary({
+      id,
+      req,
+    }),
+    loadReaderMetrics({
+      activeLocale,
       id,
       req,
     }),
@@ -391,6 +447,34 @@ export const PostInsights: UIFieldServerComponent = async ({ id, req }) => {
             <div className="post-insights__metric">
               <span className="post-insights__metric-label">Media files</span>
               <strong>{resources.media}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="post-insights__section">
+          <header className="post-insights__section-header">
+            <div>
+              <h3>Reader metrics</h3>
+              <p>Aggregated from public article views for the active locale.</p>
+            </div>
+          </header>
+
+          <div className="post-insights__metric-list">
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Public views</span>
+              <strong>{readerMetrics.viewCount}</strong>
+            </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Unique visitors</span>
+              <strong>{readerMetrics.uniqueVisitors}</strong>
+            </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Raw hits</span>
+              <strong>{readerMetrics.rawHits}</strong>
+            </div>
+            <div className="post-insights__metric">
+              <span className="post-insights__metric-label">Last viewed</span>
+              <strong>{formatDate(readerMetrics.lastViewedAt, activeLocale)}</strong>
             </div>
           </div>
         </section>

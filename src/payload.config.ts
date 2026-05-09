@@ -8,6 +8,8 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+import { PostViewDedupe } from './collections/PostViewDedupe'
+import { PostViewMetrics } from './collections/PostViewMetrics'
 import { SiteSettings } from './globals/SiteSettings'
 import { defaultLocale, payloadLocales } from './lib/locales'
 
@@ -21,7 +23,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts],
+  collections: [Users, Media, Posts, PostViewMetrics, PostViewDedupe],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   localization: {

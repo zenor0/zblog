@@ -48,7 +48,17 @@ describe('PostInsights', () => {
         updatedAt: '2026-04-02T10:00:00.000Z',
       })
 
-    const find = vi.fn().mockResolvedValueOnce({ totalDocs: 3 })
+    const find = vi.fn().mockResolvedValueOnce({ totalDocs: 3 }).mockResolvedValueOnce({
+      docs: [
+        {
+          lastViewedAt: '2026-04-02T11:00:00.000Z',
+          rawHits: 14,
+          uniqueVisitors: 9,
+          viewCount: 12,
+        },
+      ],
+      totalDocs: 1,
+    })
 
     const markup = renderToStaticMarkup(
       await (PostInsights as any)({
@@ -71,6 +81,11 @@ describe('PostInsights', () => {
     expect(markup).toContain('Locale coverage')
     expect(markup).toContain('Content assets')
     expect(markup).toContain('Owned resources')
+    expect(markup).toContain('Reader metrics')
+    expect(markup).toContain('Public views')
+    expect(markup).toContain('12')
+    expect(markup).toContain('Raw hits')
+    expect(markup).toContain('14')
     expect(markup).toContain('payload-overview')
     expect(markup).toContain('1 entries')
     expect(markup).toContain('references.bib')

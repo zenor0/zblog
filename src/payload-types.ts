@@ -70,6 +70,8 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    'post-view-metrics': PostViewMetric;
+    'post-view-dedupe': PostViewDedupe;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +87,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'post-view-metrics': PostViewMetricsSelect<false> | PostViewMetricsSelect<true>;
+    'post-view-dedupe': PostViewDedupeSelect<false> | PostViewDedupeSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -264,6 +268,37 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-view-metrics".
+ */
+export interface PostViewMetric {
+  id: number;
+  metricKey: string;
+  post: number | Post;
+  locale: 'zh-Hans' | 'en';
+  viewCount: number;
+  rawHits: number;
+  uniqueVisitors: number;
+  lastViewedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-view-dedupe".
+ */
+export interface PostViewDedupe {
+  id: number;
+  dedupeKey: string;
+  post: number | Post;
+  locale: 'zh-Hans' | 'en';
+  firstSeenAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -389,6 +424,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'post-view-metrics';
+        value: number | PostViewMetric;
+      } | null)
+    | ({
+        relationTo: 'post-view-dedupe';
+        value: number | PostViewDedupe;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -529,6 +572,35 @@ export interface PostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-view-metrics_select".
+ */
+export interface PostViewMetricsSelect<T extends boolean = true> {
+  metricKey?: T;
+  post?: T;
+  locale?: T;
+  viewCount?: T;
+  rawHits?: T;
+  uniqueVisitors?: T;
+  lastViewedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-view-dedupe_select".
+ */
+export interface PostViewDedupeSelect<T extends boolean = true> {
+  dedupeKey?: T;
+  post?: T;
+  locale?: T;
+  firstSeenAt?: T;
+  lastSeenAt?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
