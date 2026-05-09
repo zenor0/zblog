@@ -76,4 +76,28 @@ describe('TypefaceLabClient', () => {
     expect(codeblock.getAttribute('data-language')).toBe('json')
     expect(codeblock.innerHTML).toContain('hljs-')
   })
+
+  it('places the selected Chinese font before generic Chinese fallbacks in the preview stack', () => {
+    render(
+      <TypefaceLabClient
+        criteria={typefaceCandidateCriteria}
+        fontOptions={typefaceFontOptions}
+        highlightedCodeSamples={buildHighlightedCodeSamples()}
+        schemes={typefaceCandidateSchemes}
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('中文字体'), {
+      target: { value: 'zcool-xiaowei' },
+    })
+
+    const style = screen.getByTestId('typeface-main-preview').getAttribute('style') ?? ''
+    const selectedChineseFontIndex = style.indexOf('ZCOOL XiaoWei')
+    const earlyChineseFallbackIndex = style.indexOf('Noto Sans SC')
+
+    expect(selectedChineseFontIndex).toBeGreaterThan(-1)
+    expect(
+      earlyChineseFallbackIndex === -1 || selectedChineseFontIndex < earlyChineseFallbackIndex,
+    ).toBe(true)
+  })
 })

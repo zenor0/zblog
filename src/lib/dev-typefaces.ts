@@ -107,17 +107,17 @@ const systemHeitiStack =
   '"Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif'
 
 const sourceSans3Stack =
-  'var(--font-sans-ui), "Source Sans 3", "Noto Sans SC", "PingFang SC", sans-serif'
+  'var(--font-sans-ui), "Source Sans 3"'
 
-const newsreaderStack = 'var(--font-serif-display), Newsreader, Georgia, ui-serif, serif'
+const newsreaderStack = 'var(--font-serif-display), Newsreader, Georgia'
 
 const interStack =
-  'var(--dev-font-inter), Inter, "Source Sans 3", ui-sans-serif, system-ui, sans-serif'
+  'var(--dev-font-inter), Inter, "Source Sans 3"'
 
-const loraStack = 'var(--dev-font-lora), Lora, Georgia, ui-serif, serif'
+const loraStack = 'var(--dev-font-lora), Lora, Georgia'
 
 const ibmPlexSansStack =
-  'var(--dev-font-ibm-plex-sans), "IBM Plex Sans", "Source Sans 3", ui-sans-serif, system-ui, sans-serif'
+  'var(--dev-font-ibm-plex-sans), "IBM Plex Sans", "Source Sans 3"'
 
 const ibmPlexMonoStack =
   'var(--dev-font-ibm-plex-mono), "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace'
