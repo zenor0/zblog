@@ -2,6 +2,7 @@ import type { JSX } from 'react'
 
 import { FeatureGrid } from '@/components/frontend/markdown-components/FeatureGrid'
 import { NoticeCard } from '@/components/frontend/markdown-components/NoticeCard'
+export { articleBlockRegistry } from '@/lib/article-design'
 
 export type MarkdownComponentDirectiveName = 'feature-grid' | 'notice-card'
 export type MarkdownComponentJsxTag = 'FeatureGrid' | 'NoticeCard'

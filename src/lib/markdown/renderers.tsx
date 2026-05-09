@@ -52,7 +52,7 @@ export function MarkdownImage(props: {
 
   if (asset.kind === 'pdf' || asset.kind === 'unknown') {
     return (
-      <span className="markdown-media">
+      <span className="markdown-media" data-article-block="media">
         <a
           className="markdown-media-link"
           href={asset.downloadURL}
@@ -67,7 +67,7 @@ export function MarkdownImage(props: {
   }
 
   return (
-    <span className="markdown-media">
+    <span className="markdown-media" data-article-block="media">
       {surface}
       <MediaDetails caption={caption} className="markdown-media__details" credit={credit} />
     </span>
@@ -100,7 +100,11 @@ export function MarkdownFigure(props: {
     )
 
   return (
-    <figure className="markdown-figure markdown-figure--image" id={props.anchorId}>
+    <figure
+      className="markdown-figure markdown-figure--image"
+      data-article-block="figure"
+      id={props.anchorId}
+    >
       {figureSurface}
       <figcaption className="markdown-figure__details">
         <MediaDetails caption={resolvedCaption} credit={credit} />

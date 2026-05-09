@@ -700,33 +700,33 @@ export interface SiteSetting {
     defaultSocialImage?: (number | null) | Media;
   };
   /**
-   * Configure the default article reading layout preset and a small set of safe spacing overrides.
+   * Configure the code-owned article design preset and a small set of safe spacing overrides.
    */
   articleLayout: {
     /**
-     * Choose the default reading rhythm for public article pages. Dense is the current preferred baseline.
+     * Choose the default article design preset for public article pages.
      */
-    preset: 'dense-technical' | 'prose-baseline' | 'editorial-balanced' | 'current';
+    preset: 'compact-editorial' | 'balanced-editorial' | 'current';
     /**
-     * Optional font stack overrides. Leave blank to inherit the selected layout preset.
+     * Optional font stack overrides. Leave blank to inherit the selected design preset.
      */
     typography?: {
       /**
-       * Western text font stack.
+       * Western body text font stack.
        */
-      latinFont?: ('system-sans' | 'system-serif' | 'literary-serif') | null;
+      latinFont?: ('source-sans-3' | 'inter' | 'newsreader') | null;
       /**
-       * Chinese/Japanese/Korean fallback stack.
+       * Chinese body text fallback stack.
        */
-      cjkFont?: ('system-cjk-sans' | 'heiti-sans' | 'songti-serif' | 'kaiti-serif') | null;
+      cjkFont?: ('noto-sans-sc' | 'noto-serif-sc' | 'system-cjk-sans') | null;
       /**
-       * Heading font stack.
+       * Heading font stack. The default keeps headings in a serif voice.
        */
-      headingFont?: ('inherit' | 'display-serif' | 'compact-sans') | null;
+      headingFont?: ('editorial-serif' | 'body-sans') | null;
       /**
        * Inline and block code font stack.
        */
-      codeFont?: ('article-mono' | 'system-mono' | 'technical-mono') | null;
+      codeFont?: ('jetbrains-mono' | 'system-mono') | null;
     };
     /**
      * Optional safe CSS token overrides. Leave blank to use the selected preset values.

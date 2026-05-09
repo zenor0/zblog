@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  articleBlockRegistry,
   findMarkdownComponentByDirectiveName,
   findMarkdownComponentByJsxTag,
   markdownComponentDefinitions,
@@ -27,5 +28,16 @@ describe('markdown component registry', () => {
     for (const definition of markdownComponentDefinitions) {
       expect(markdownComponentRenderers[definition.directiveName]).toBeTypeOf('function')
     }
+  })
+
+  it('registers markdown components as article design blocks', () => {
+    expect(articleBlockRegistry['notice-card']).toMatchObject({
+      id: 'notice-card',
+      tokenNamespace: '--article-block-notice',
+    })
+    expect(articleBlockRegistry['feature-grid']).toMatchObject({
+      id: 'feature-grid',
+      tokenNamespace: '--article-block-feature-grid',
+    })
   })
 })

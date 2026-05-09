@@ -5,7 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { SiteFooter } from '@/components/frontend/SiteFooter'
 import { getMessagesForLocale } from '@/i18n/loadMessages'
 import { requireLocale } from '@/i18n/routing'
-import { resolveArticleLayoutConfig } from '@/lib/article-layout'
+import { resolveArticleDesignConfig } from '@/lib/article-design'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export default async function LocaleLayout(props: {
@@ -20,13 +20,14 @@ export default async function LocaleLayout(props: {
   setRequestLocale(locale)
 
   const siteSettings = await getSiteSettings(locale)
-  const articleLayout = resolveArticleLayoutConfig(siteSettings.articleLayout)
+  const articleLayout = resolveArticleDesignConfig(siteSettings.articleLayout)
   const articleLayoutStyle =
     articleLayout.presetID === 'current' ? undefined : (articleLayout.style as CSSProperties)
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <div
+        data-article-design-preset={articleLayout.presetID}
         data-article-layout-preset={articleLayout.presetID}
         data-site-article-layout=""
         style={articleLayoutStyle}

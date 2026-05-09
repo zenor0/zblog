@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
+import type { CSSProperties } from 'react'
 
 import { PostArticle } from '@/components/frontend/PostArticle'
 import { defaultLocale, getLocaleLabel } from '@/lib/locales'
+import { resolveArticleLayoutConfig } from '@/lib/article-layout'
 
 import { ArticleLayoutLabControls } from './ArticleLayoutLabControls'
 import {
   articleLayoutDemoResolvedPost,
   articleLayoutMarkdownMediaBySource,
 } from './articleLayoutDemo'
+import { defaultArticleLayoutPresetID } from './articleLayoutPresets'
 
 export const metadata: Metadata = {
   title: 'Article Layout Lab',
@@ -15,8 +18,15 @@ export const metadata: Metadata = {
 }
 
 export default function ArticleLayoutLabPage() {
+  const defaultLayout = resolveArticleLayoutConfig({ preset: defaultArticleLayoutPresetID })
+
   return (
-    <>
+    <div
+      data-article-design-preset={defaultLayout.presetID}
+      data-article-layout-lab-root=""
+      data-article-layout-preset={defaultLayout.presetID}
+      style={defaultLayout.style as CSSProperties}
+    >
       <ArticleLayoutLabControls />
       <PostArticle
         backHref="/dev"
@@ -34,6 +44,6 @@ export default function ArticleLayoutLabPage() {
         previewExitPath="/dev/article-layout"
         resolved={articleLayoutDemoResolvedPost}
       />
-    </>
+    </div>
   )
 }

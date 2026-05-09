@@ -27,6 +27,7 @@ export function NoticeCard(props: {
   return (
     <Card
       className={cn('my-6 gap-0 overflow-hidden shadow-none', toneClasses[tone])}
+      data-article-block="notice-card"
       data-markdown-component="notice-card"
       data-tone={tone}
     >

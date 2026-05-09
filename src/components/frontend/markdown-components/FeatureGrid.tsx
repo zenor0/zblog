@@ -56,7 +56,11 @@ export function FeatureGrid(props: { items?: unknown }) {
   }
 
   return (
-    <div className="my-6 grid gap-4 sm:grid-cols-2" data-markdown-component="feature-grid">
+    <div
+      className="my-6 grid gap-4 sm:grid-cols-2"
+      data-article-block="feature-grid"
+      data-markdown-component="feature-grid"
+    >
       {items.map((item) => (
         <Card
           className="gap-0 border-border/80 shadow-none"
