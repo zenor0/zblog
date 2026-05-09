@@ -1,5 +1,6 @@
 export type MarkdownHeading = {
   depth: number
+  displayNumber?: string
   id: string
   text: string
 }
@@ -37,8 +38,50 @@ function createHeadingID(text: string, seen: Map<string, number>) {
   return nextCount === 1 ? base : `${base}-${nextCount}`
 }
 
+function createHeadingDisplayNumber(depth: number, counters: number[]) {
+  if (depth === 1) {
+    counters.fill(0)
+    return undefined
+  }
+
+  if (depth < 2 || depth > 4) {
+    return undefined
+  }
+
+  for (let level = 2; level < depth; level += 1) {
+    if (counters[level] === 0) {
+      counters[level] = 1
+    }
+  }
+
+  counters[depth] = (counters[depth] ?? 0) + 1
+
+  for (let level = depth + 1; level <= 4; level += 1) {
+    counters[level] = 0
+  }
+
+  return Array.from({ length: depth - 1 }, (_, index) => counters[index + 2]).join('.')
+}
+
+function createHeading(
+  depth: number,
+  text: string,
+  seenIDs: Map<string, number>,
+  counters: number[],
+) {
+  const displayNumber = createHeadingDisplayNumber(depth, counters)
+
+  return {
+    ...(displayNumber ? { displayNumber } : {}),
+    depth,
+    id: createHeadingID(text, seenIDs),
+    text,
+  }
+}
+
 export function extractMarkdownHeadings(source: string): MarkdownHeading[] {
   const headings: MarkdownHeading[] = []
+  const displayNumberCounters = [0, 0, 0, 0, 0]
   const seenIDs = new Map<string, number>()
   const lines = source.split(/\r?\n/)
   let activeFence: null | string = null
@@ -69,11 +112,7 @@ export function extractMarkdownHeadings(source: string): MarkdownHeading[] {
       const text = normalizeHeadingText(atxMatch[2])
 
       if (text) {
-        headings.push({
-          depth: atxMatch[1].length,
-          id: createHeadingID(text, seenIDs),
-          text,
-        })
+        headings.push(createHeading(atxMatch[1].length, text, seenIDs, displayNumberCounters))
       }
 
       continue
@@ -86,11 +125,14 @@ export function extractMarkdownHeadings(source: string): MarkdownHeading[] {
       continue
     }
 
-    headings.push({
-      depth: underline[1][0] === '=' ? 1 : 2,
-      id: createHeadingID(currentText, seenIDs),
-      text: currentText,
-    })
+    headings.push(
+      createHeading(
+        underline[1][0] === '=' ? 1 : 2,
+        currentText,
+        seenIDs,
+        displayNumberCounters,
+      ),
+    )
     index += 1
   }
 

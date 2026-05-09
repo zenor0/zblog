@@ -82,6 +82,7 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       ...rest
     }) => {
       const heading = resolvedHeadings[headingCursor]
+      const displayNumber = heading?.displayNumber
       const id = heading?.id
       const Tag = tag
 
@@ -90,7 +91,13 @@ export function MarkdownRenderer(props: MarkdownRendererProps) {
       }
 
       return (
-        <Tag {...rest} id={id}>
+        <Tag
+          {...rest}
+          data-article-heading={displayNumber ? 'true' : undefined}
+          data-article-heading-level={displayNumber ? String(heading.depth) : undefined}
+          data-article-heading-number={displayNumber}
+          id={id}
+        >
           {children}
         </Tag>
       )
