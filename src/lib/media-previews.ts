@@ -1,11 +1,7 @@
 import fs from 'node:fs/promises'
 
-import {
-  buildPDFPreviewFilename,
-  buildPDFPreviewURL,
-  resolveLocalMediaFilePath,
-  resolveLocalMediaPreviewPath,
-} from '@/lib/media'
+import { buildPDFPreviewFilename, buildPDFPreviewURL } from '@/lib/media'
+import { resolveLocalMediaFilePath, resolveLocalMediaPreviewPath } from '@/lib/media-server'
 import { persistPDFPreviewSVG } from '@/lib/pdf-preview'
 
 export type MediaPreviewStatus = 'failed' | 'pending' | 'ready'

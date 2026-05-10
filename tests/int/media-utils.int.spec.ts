@@ -6,10 +6,10 @@ import { buildPDFPreviewFallbackSVG } from '@/lib/pdf-preview'
 import {
   inferMediaKind,
   resolveAttachmentDescription,
-  resolveLocalMediaPath,
   resolveMediaAsset,
   resolveMediaCaption,
 } from '@/lib/media'
+import { resolveLocalMediaPath } from '@/lib/media-server'
 
 describe('media utilities', () => {
   it('classifies raster, vector, and pdf assets', () => {
@@ -76,7 +76,9 @@ describe('media utilities', () => {
     })
 
     expect(svg).toContain('<metadata id="zblog-render-metadata">')
-    expect(svg).toContain('&quot;debugReason&quot;:&quot;Could not map media URL to local upload path&quot;')
+    expect(svg).toContain(
+      '&quot;debugReason&quot;:&quot;Could not map media URL to local upload path&quot;',
+    )
     expect(svg).toContain('&quot;watermarkToken&quot;:&quot;reader-42&quot;')
     expect(svg).toContain('Page 2')
   })

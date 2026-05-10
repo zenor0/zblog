@@ -6,7 +6,7 @@ import { SiteFooter } from '@/components/frontend/SiteFooter'
 import { getMessagesForLocale } from '@/i18n/loadMessages'
 import { requireLocale } from '@/i18n/routing'
 import { resolveArticleDesignConfig } from '@/lib/article-design'
-import { getSiteSettings } from '@/lib/site-settings'
+import { getResolvedSiteSettings } from '@/lib/site-settings'
 
 export default async function LocaleLayout(props: {
   children: ReactNode
@@ -19,7 +19,7 @@ export default async function LocaleLayout(props: {
 
   setRequestLocale(locale)
 
-  const siteSettings = await getSiteSettings(locale)
+  const siteSettings = await getResolvedSiteSettings(locale)
   const articleLayout = resolveArticleDesignConfig(siteSettings.articleLayout)
   const articleLayoutStyle =
     articleLayout.presetID === 'current' ? undefined : (articleLayout.style as CSSProperties)

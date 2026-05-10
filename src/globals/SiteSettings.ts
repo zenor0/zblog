@@ -1,6 +1,7 @@
 import type { Field, GlobalConfig } from 'payload'
 
 import {
+  articleDesignAdvancedControlConfigs,
   articleDesignCJKFontOptions,
   articleDesignCodeFontOptions,
   articleDesignHeadingFontOptions,
@@ -10,6 +11,10 @@ import {
   validateArticleDesignLength,
   validateArticleDesignLineHeight,
 } from '@/lib/article-design'
+import {
+  validateCustomVariableKey,
+  validateSiteSettingReferences,
+} from '@/lib/site-settings-config'
 
 const localizedHeroDefaults = {
   en: {
@@ -134,6 +139,311 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
     ],
   }
 }
+
+type SiteSettingsSectionEditorMode = 'form' | 'yaml'
+
+function siteSettingsEditorModeCondition(
+  modeFieldName: string,
+  mode: SiteSettingsSectionEditorMode,
+) {
+  return (_: unknown, siblingData: Record<string, unknown> | undefined) => {
+    const currentMode = siblingData?.[modeFieldName]
+
+    return mode === 'yaml' ? currentMode === 'yaml' : currentMode !== 'yaml'
+  }
+}
+
+function siteSettingsSectionModeSwitchField(args: { label: string; name: string }): Field {
+  return {
+    name: args.name,
+    type: 'radio',
+    admin: {
+      components: {
+        Field: '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+      },
+    },
+    defaultValue: 'form',
+    label: args.label,
+    options: [
+      {
+        label: 'Form',
+        value: 'form',
+      },
+      {
+        label: 'YAML',
+        value: 'yaml',
+      },
+    ],
+    virtual: true,
+  }
+}
+
+function siteSettingsRawConfigField(args: { modeFieldName?: string; name: string }): Field {
+  return {
+    name: args.name,
+    type: 'ui',
+    admin: {
+      ...(args.modeFieldName
+        ? {
+            condition: siteSettingsEditorModeCondition(args.modeFieldName, 'yaml'),
+          }
+        : {}),
+      components: {
+        Field: '/components/payload/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
+      },
+    },
+  }
+}
+
+function siteSettingsSectionFormPanel(args: { fields: Field[]; modeFieldName: string }): Field {
+  return {
+    type: 'group',
+    admin: {
+      className: 'site-settings-section-editor__form-panel',
+      condition: siteSettingsEditorModeCondition(args.modeFieldName, 'form'),
+      hideGutter: true,
+    },
+    fields: args.fields,
+    label: false,
+  }
+}
+
+function siteSettingsSectionEditorFields(args: {
+  formFields: Field[]
+  modeFieldLabel: string
+  modeFieldName: string
+  rawConfigName: string
+}): Field[] {
+  return [
+    siteSettingsSectionModeSwitchField({
+      label: args.modeFieldLabel,
+      name: args.modeFieldName,
+    }),
+    siteSettingsSectionFormPanel({
+      fields: args.formFields,
+      modeFieldName: args.modeFieldName,
+    }),
+    siteSettingsRawConfigField({
+      modeFieldName: args.modeFieldName,
+      name: args.rawConfigName,
+    }),
+  ]
+}
+
+function siteSettingsTopLevelSectionFields(args: {
+  formFields: Field[]
+  modeFieldLabel: string
+  modeFieldName: string
+  rawConfigName: string
+}): Field[] {
+  return siteSettingsSectionEditorFields(args)
+}
+
+const globalVariableFields: Field[] = [
+  {
+    name: 'owner',
+    type: 'group',
+    admin: {
+      description:
+        'Reusable owner identity for SEO, footer, homepage, previews, and the future setup wizard.',
+    },
+    label: 'Owner',
+    fields: [
+      {
+        name: 'name',
+        type: 'text',
+        label: 'Name',
+      },
+      {
+        name: 'handle',
+        type: 'text',
+        admin: {
+          description: 'Public handle, such as @your-id.',
+        },
+        label: 'Handle',
+      },
+      {
+        name: 'email',
+        type: 'email',
+        label: 'Email',
+      },
+      {
+        name: 'bio',
+        type: 'textarea',
+        label: 'Bio',
+        localized: true,
+      },
+      {
+        name: 'websiteUrl',
+        type: 'text',
+        label: 'Website URL',
+      },
+      {
+        name: 'avatar',
+        type: 'relationship',
+        label: 'Avatar',
+        relationTo: 'media',
+      },
+    ],
+  },
+  {
+    name: 'assets',
+    type: 'group',
+    admin: {
+      description:
+        'Shared media references. YAML uses Payload media IDs, while frontend output resolves the relationship when Payload populates it.',
+    },
+    label: 'Shared assets',
+    fields: [
+      {
+        name: 'logo',
+        type: 'relationship',
+        label: 'Logo',
+        relationTo: 'media',
+      },
+      {
+        name: 'icon',
+        type: 'relationship',
+        label: 'Icon',
+        relationTo: 'media',
+      },
+      {
+        name: 'avatar',
+        type: 'relationship',
+        label: 'Avatar',
+        relationTo: 'media',
+      },
+      {
+        name: 'defaultSocialImage',
+        type: 'relationship',
+        label: 'Default social image',
+        relationTo: 'media',
+      },
+    ],
+  },
+  {
+    name: 'socialLinks',
+    type: 'array',
+    admin: {
+      description:
+        'Shared social profiles. They can be referenced as {{social.github.label}} and {{social.github.url}}.',
+    },
+    label: 'Social links',
+    labels: {
+      plural: 'Social links',
+      singular: 'Social link',
+    },
+    fields: [
+      {
+        name: 'platform',
+        type: 'select',
+        label: 'Platform',
+        options: footerSocialPlatformOptions.map((value) => ({
+          label: value,
+          value,
+        })),
+        required: true,
+      },
+      {
+        name: 'label',
+        type: 'text',
+        label: 'Label',
+        localized: true,
+        required: true,
+      },
+      {
+        name: 'url',
+        type: 'text',
+        label: 'URL',
+        required: true,
+      },
+      {
+        name: 'openInNewTab',
+        type: 'checkbox',
+        defaultValue: true,
+        label: 'Open in new tab',
+      },
+    ],
+  },
+  {
+    name: 'contactItems',
+    type: 'array',
+    admin: {
+      description:
+        'Reusable contact variables, referenced as {{contact.press.value}} or {{contact.press.url}}.',
+    },
+    label: 'Contact variables',
+    labels: {
+      plural: 'Contact variables',
+      singular: 'Contact variable',
+    },
+    fields: [
+      {
+        name: 'key',
+        type: 'text',
+        admin: {
+          description: 'Reference key, for example press or newsletter.',
+        },
+        label: 'Key',
+        required: true,
+        validate: validateCustomVariableKey,
+      },
+      {
+        name: 'label',
+        type: 'text',
+        label: 'Label',
+        localized: true,
+      },
+      {
+        name: 'value',
+        type: 'text',
+        label: 'Value',
+        localized: true,
+      },
+      {
+        name: 'url',
+        type: 'text',
+        label: 'URL',
+      },
+    ],
+  },
+  {
+    name: 'customVariables',
+    type: 'array',
+    admin: {
+      description:
+        'Small string variables for repeated copy. Reference them with {{custom.variableKey}}.',
+    },
+    label: 'Custom variables',
+    labels: {
+      plural: 'Custom variables',
+      singular: 'Custom variable',
+    },
+    fields: [
+      {
+        name: 'key',
+        type: 'text',
+        admin: {
+          description: 'Reference key after custom., for example tagline.',
+        },
+        label: 'Key',
+        required: true,
+        validate: validateCustomVariableKey,
+      },
+      {
+        name: 'value',
+        type: 'textarea',
+        label: 'Value',
+        localized: true,
+      },
+      {
+        name: 'description',
+        type: 'text',
+        label: 'Description',
+      },
+    ],
+  },
+]
 
 const footerFields: Field[] = [
   {
@@ -402,6 +712,61 @@ const footerFields: Field[] = [
   },
 ]
 
+const footerLayoutFields: Field[] = [
+  {
+    type: 'row',
+    admin: {
+      className: 'site-settings-preview-grid site-settings-preview-grid--footer',
+    },
+    fields: [
+      {
+        type: 'collapsible',
+        admin: {
+          className: 'site-settings-preview-grid__controls',
+          initCollapsed: false,
+        },
+        fields: siteSettingsSectionEditorFields({
+          formFields: footerFields,
+          modeFieldLabel: 'Footer editing mode',
+          modeFieldName: 'footerEditorMode',
+          rawConfigName: 'footerRawConfig',
+        }),
+        label: 'Footer controls',
+      },
+      {
+        name: 'footerPreview',
+        type: 'ui',
+        admin: {
+          components: {
+            Field: '/components/payload/SiteFooterPreview#SiteFooterPreview',
+          },
+        },
+      },
+    ],
+  },
+]
+
+function articleDesignAdvancedField(
+  config: (typeof articleDesignAdvancedControlConfigs)[number],
+): Field {
+  return {
+    name: config.name,
+    type: 'text',
+    admin: {
+      components: {
+        Field: '/components/payload/ArticleDesignRangeField#ArticleDesignRangeField',
+      },
+      description: config.description,
+      width: '50%',
+    },
+    label: config.label,
+    validate:
+      config.name === 'bodyLineHeight'
+        ? validateArticleDesignLineHeight
+        : validateArticleDesignLength,
+  }
+}
+
 const articleLayoutFields: Field[] = [
   {
     type: 'row',
@@ -415,165 +780,87 @@ const articleLayoutFields: Field[] = [
           className: 'article-layout-settings__controls',
           initCollapsed: false,
         },
-        fields: [
-          {
-            name: 'preset',
-            type: 'select',
-            admin: {
-              description: 'Choose the default article design preset for public article pages.',
+        fields: siteSettingsSectionEditorFields({
+          formFields: [
+            {
+              name: 'preset',
+              type: 'select',
+              admin: {
+                description: 'Choose the default article design preset for public article pages.',
+              },
+              defaultValue: defaultArticleDesignPresetID,
+              label: 'Preset',
+              options: articleDesignPresetOptions,
+              required: true,
             },
-            defaultValue: defaultArticleDesignPresetID,
-            label: 'Preset',
-            options: articleDesignPresetOptions,
-            required: true,
-          },
-          {
-            name: 'typography',
-            type: 'group',
-            admin: {
-              description:
-                'Optional font stack overrides. Leave blank to inherit the selected design preset.',
-              width: '100%',
+            {
+              name: 'typography',
+              type: 'group',
+              admin: {
+                description:
+                  'Optional font stack overrides. Leave blank to inherit the selected design preset.',
+                width: '100%',
+              },
+              fields: [
+                {
+                  name: 'latinFont',
+                  type: 'select',
+                  admin: {
+                    description: 'Western body text font stack.',
+                    width: '50%',
+                  },
+                  label: 'Latin font',
+                  options: [...articleDesignLatinFontOptions],
+                },
+                {
+                  name: 'cjkFont',
+                  type: 'select',
+                  admin: {
+                    description: 'Chinese body text fallback stack.',
+                    width: '50%',
+                  },
+                  label: 'CJK font',
+                  options: [...articleDesignCJKFontOptions],
+                },
+                {
+                  name: 'headingFont',
+                  type: 'select',
+                  admin: {
+                    description: 'Heading font stack. The default keeps headings in a serif voice.',
+                    width: '50%',
+                  },
+                  label: 'Heading font',
+                  options: [...articleDesignHeadingFontOptions],
+                },
+                {
+                  name: 'codeFont',
+                  type: 'select',
+                  admin: {
+                    description: 'Inline and block code font stack.',
+                    width: '50%',
+                  },
+                  label: 'Code font',
+                  options: [...articleDesignCodeFontOptions],
+                },
+              ],
+              label: 'Typography',
             },
-            fields: [
-              {
-                name: 'latinFont',
-                type: 'select',
-                admin: {
-                  description: 'Western body text font stack.',
-                  width: '50%',
-                },
-                label: 'Latin font',
-                options: [...articleDesignLatinFontOptions],
+            {
+              name: 'advanced',
+              type: 'group',
+              admin: {
+                description:
+                  'Optional safe CSS token overrides. Sliders start from the selected preset defaults.',
+                width: '100%',
               },
-              {
-                name: 'cjkFont',
-                type: 'select',
-                admin: {
-                  description: 'Chinese body text fallback stack.',
-                  width: '50%',
-                },
-                label: 'CJK font',
-                options: [...articleDesignCJKFontOptions],
-              },
-              {
-                name: 'headingFont',
-                type: 'select',
-                admin: {
-                  description: 'Heading font stack. The default keeps headings in a serif voice.',
-                  width: '50%',
-                },
-                label: 'Heading font',
-                options: [...articleDesignHeadingFontOptions],
-              },
-              {
-                name: 'codeFont',
-                type: 'select',
-                admin: {
-                  description: 'Inline and block code font stack.',
-                  width: '50%',
-                },
-                label: 'Code font',
-                options: [...articleDesignCodeFontOptions],
-              },
-            ],
-            label: 'Typography',
-          },
-          {
-            name: 'advanced',
-            type: 'group',
-            admin: {
-              description:
-                'Optional safe CSS token overrides. Leave blank to use the selected preset values.',
-              width: '100%',
+              fields: articleDesignAdvancedControlConfigs.map(articleDesignAdvancedField),
+              label: 'Advanced overrides',
             },
-            fields: [
-              {
-                name: 'contentWidth',
-                type: 'text',
-                admin: {
-                  description:
-                    'Controls both the reading column and prose max width, such as 76ch.',
-                  width: '50%',
-                },
-                label: 'Content width',
-                validate: validateArticleDesignLength,
-              },
-              {
-                name: 'bodyFontSize',
-                type: 'text',
-                admin: {
-                  description: 'Body text size, such as 0.98rem or 17px.',
-                  width: '50%',
-                },
-                label: 'Body font size',
-                validate: validateArticleDesignLength,
-              },
-              {
-                name: 'bodyLineHeight',
-                type: 'text',
-                admin: {
-                  description: 'Unitless body line-height ratio, such as 1.65.',
-                  width: '50%',
-                },
-                label: 'Body line height',
-                validate: validateArticleDesignLineHeight,
-              },
-              {
-                name: 'paragraphGap',
-                type: 'text',
-                admin: {
-                  description: 'Vertical gap between consecutive paragraphs, such as 0.75rem.',
-                  width: '50%',
-                },
-                label: 'Paragraph gap',
-                validate: validateArticleDesignLength,
-              },
-              {
-                name: 'flowGap',
-                type: 'text',
-                admin: {
-                  description: 'Default vertical flow gap between ordinary article elements.',
-                  width: '50%',
-                },
-                label: 'Flow gap',
-                validate: validateArticleDesignLength,
-              },
-              {
-                name: 'blockGap',
-                type: 'text',
-                admin: {
-                  description: 'Outer vertical gap for figures, tables, code blocks, and callouts.',
-                  width: '50%',
-                },
-                label: 'Rich block gap',
-                validate: validateArticleDesignLength,
-              },
-              {
-                name: 'captionGap',
-                type: 'text',
-                admin: {
-                  description: 'Internal gap between media/table surfaces and their captions.',
-                  width: '50%',
-                },
-                label: 'Caption gap',
-                validate: validateArticleDesignLength,
-              },
-              {
-                name: 'gridGap',
-                type: 'text',
-                admin: {
-                  description:
-                    'Desktop gap between the reading column and the table of contents rail.',
-                  width: '50%',
-                },
-                label: 'Reading grid gap',
-                validate: validateArticleDesignLength,
-              },
-            ],
-            label: 'Advanced overrides',
-          },
-        ],
+          ],
+          modeFieldLabel: 'Article design editing mode',
+          modeFieldName: 'articleLayoutEditorMode',
+          rawConfigName: 'articleLayoutRawConfig',
+        }),
         label: 'Article design controls',
       },
       {
@@ -597,6 +884,24 @@ export const SiteSettings: GlobalConfig = {
       'Configure the homepage hero copy and the structured footer content shown on the frontend.',
     group: 'Frontend',
   },
+  hooks: {
+    beforeChange: [
+      async ({ data, originalDoc }) => {
+        const validation = validateSiteSettingReferences({
+          ...(originalDoc && typeof originalDoc === 'object' ? originalDoc : {}),
+          ...(data && typeof data === 'object' ? data : {}),
+        })
+
+        if (!validation.valid) {
+          throw new Error(
+            `Unknown site setting reference: ${validation.unknownReferences.join(', ')}.`,
+          )
+        }
+
+        return data
+      },
+    ],
+  },
   fields: [
     {
       type: 'tabs',
@@ -604,97 +909,122 @@ export const SiteSettings: GlobalConfig = {
         {
           id: 'general',
           label: 'General',
-          fields: [
-            {
-              name: 'siteName',
-              type: 'text',
-              defaultValue: 'ZBlog',
-              label: 'Site name',
-              required: true,
-            },
-            {
-              name: 'siteDescription',
-              type: 'textarea',
-              defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'siteDescription'),
-              label: 'Site description',
-              localized: true,
-            },
-          ],
+          fields: siteSettingsTopLevelSectionFields({
+            rawConfigName: 'generalRawConfig',
+            modeFieldLabel: 'General editing mode',
+            modeFieldName: 'generalEditorMode',
+            formFields: [
+              {
+                name: 'siteName',
+                type: 'text',
+                defaultValue: 'ZBlog',
+                label: 'Site name',
+                required: true,
+              },
+              {
+                name: 'siteDescription',
+                type: 'textarea',
+                defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'siteDescription'),
+                label: 'Site description',
+                localized: true,
+              },
+              {
+                name: 'globalVariables',
+                type: 'group',
+                admin: {
+                  description:
+                    'Shared variables used by other site setting sections. Use {{site.name}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.',
+                },
+                label: 'Global variables',
+                fields: globalVariableFields,
+              },
+            ],
+          }),
         },
         {
           id: 'homepage',
           label: 'Homepage',
-          fields: [
-            {
-              name: 'homeHero',
-              type: 'group',
-              label: 'Homepage hero',
-              fields: [
-                {
-                  name: 'eyebrow',
-                  type: 'text',
-                  defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'eyebrow'),
-                  label: 'Eyebrow',
-                  localized: true,
-                },
-                {
-                  name: 'title',
-                  type: 'text',
-                  defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'title'),
-                  label: 'Title',
-                  localized: true,
-                },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'description'),
-                  label: 'Description',
-                  localized: true,
-                },
-              ],
-            },
-          ],
+          fields: siteSettingsTopLevelSectionFields({
+            rawConfigName: 'homepageRawConfig',
+            modeFieldLabel: 'Homepage editing mode',
+            modeFieldName: 'homepageEditorMode',
+            formFields: [
+              {
+                name: 'homeHero',
+                type: 'group',
+                label: 'Homepage hero',
+                fields: [
+                  {
+                    name: 'eyebrow',
+                    type: 'text',
+                    defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'eyebrow'),
+                    label: 'Eyebrow',
+                    localized: true,
+                  },
+                  {
+                    name: 'title',
+                    type: 'text',
+                    defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'title'),
+                    label: 'Title',
+                    localized: true,
+                  },
+                  {
+                    name: 'description',
+                    type: 'textarea',
+                    defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'description'),
+                    label: 'Description',
+                    localized: true,
+                  },
+                ],
+              },
+            ],
+          }),
         },
         {
           id: 'seo',
           label: 'SEO',
-          fields: [
-            {
-              name: 'seo',
-              type: 'group',
-              label: 'SEO & sharing',
-              fields: [
-                {
-                  name: 'homeTitle',
-                  type: 'text',
-                  admin: {
-                    description:
-                      'Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.',
+          fields: siteSettingsTopLevelSectionFields({
+            rawConfigName: 'seoRawConfig',
+            modeFieldLabel: 'SEO editing mode',
+            modeFieldName: 'seoEditorMode',
+            formFields: [
+              {
+                name: 'seo',
+                type: 'group',
+                label: 'SEO & sharing',
+                fields: [
+                  {
+                    name: 'homeTitle',
+                    type: 'text',
+                    admin: {
+                      description:
+                        'Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.',
+                    },
+                    localized: true,
+                    maxLength: 70,
+                    label: 'Homepage SEO title',
                   },
-                  localized: true,
-                  maxLength: 70,
-                  label: 'Homepage SEO title',
-                },
-                {
-                  name: 'homeDescription',
-                  type: 'textarea',
-                  admin: {
-                    description:
-                      'Optional SEO description override for the localized homepage. Leave blank to reuse the site description.',
+                  {
+                    name: 'homeDescription',
+                    type: 'textarea',
+                    admin: {
+                      description:
+                        'Optional SEO description override for the localized homepage. Leave blank to reuse the site description.',
+                    },
+                    localized: true,
+                    maxLength: 180,
+                    label: 'Homepage SEO description',
                   },
-                  localized: true,
-                  maxLength: 180,
-                  label: 'Homepage SEO description',
-                },
-                {
-                  name: 'defaultSocialImage',
-                  type: 'relationship',
-                  relationTo: 'media',
-                  label: 'Default social image',
-                },
-              ],
-            },
-          ],
+                  {
+                    name: 'defaultSocialImage',
+                    type: 'relationship',
+                    relationTo: 'media',
+                    label: 'Default social image',
+                  },
+                ],
+              },
+            ],
+          }),
         },
         {
           id: 'article-layout',
@@ -720,7 +1050,7 @@ export const SiteSettings: GlobalConfig = {
               name: 'footer',
               type: 'group',
               label: 'Footer',
-              fields: footerFields,
+              fields: footerLayoutFields,
             },
           ],
         },
