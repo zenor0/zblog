@@ -1,9 +1,7 @@
 'use client'
 
-import { startTransition, useEffect, useMemo, useState } from 'react'
+import { startTransition, useEffect, useState } from 'react'
 
-import { ArticleLinkPreviewLink } from '@/components/frontend/ArticleLinkPreviewLink'
-import { buildHeadingLinkPreviews } from '@/lib/article-link-previews'
 import { cn } from '@/lib/utils'
 import type { MarkdownHeading } from '@/lib/markdown-headings'
 
@@ -60,7 +58,6 @@ export function PostTableOfContents(props: PostTableOfContentsProps) {
   const { headings, label, progressLabel } = props
   const [activeID, setActiveID] = useState(headings[0]?.id ?? '')
   const [progress, setProgress] = useState(0)
-  const linkPreviews = useMemo(() => buildHeadingLinkPreviews(headings), [headings])
 
   useEffect(() => {
     let frame = 0
@@ -110,7 +107,7 @@ export function PostTableOfContents(props: PostTableOfContentsProps) {
         <ol className="flex flex-col gap-2">
           {headings.map((heading) => (
             <li key={heading.id}>
-              <ArticleLinkPreviewLink
+              <a
                 aria-current={activeID === heading.id ? 'location' : undefined}
                 className={cn(
                   'block min-w-0 border-l border-transparent pl-3 text-[13px] leading-5 text-foreground/62 wrap-anywhere transition-colors hover:border-border hover:text-foreground',
@@ -119,10 +116,9 @@ export function PostTableOfContents(props: PostTableOfContentsProps) {
                   activeID === heading.id && 'border-foreground text-foreground',
                 )}
                 href={`#${heading.id}`}
-                preview={linkPreviews[`#${heading.id}`]}
               >
                 {heading.text}
-              </ArticleLinkPreviewLink>
+              </a>
             </li>
           ))}
         </ol>
