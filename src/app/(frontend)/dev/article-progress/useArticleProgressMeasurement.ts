@@ -9,7 +9,8 @@ import {
   clamp,
   formatPercent,
   getHeadingState,
-  getTocX,
+  getTocPathWidth,
+  getTocTrackX,
   initialProgress,
   mapDocumentYToPathOffset,
   readingOffsets,
@@ -25,6 +26,8 @@ type UseArticleProgressMeasurementArgs = {
   bendScale: number
   displayedHeadings: MarkdownHeading[]
   indentScale: number
+  isTrackOffsetLocked: boolean
+  lockedTrackOffsetPx: number
   pathStyle: PathStyle
   scrollLeadScale: number
   showDebugBoundaries: boolean
@@ -84,6 +87,8 @@ export function useArticleProgressMeasurement(args: UseArticleProgressMeasuremen
     bendScale,
     displayedHeadings,
     indentScale,
+    isTrackOffsetLocked,
+    lockedTrackOffsetPx,
     pathStyle,
     scrollLeadScale,
     showDebugBoundaries,
@@ -246,6 +251,7 @@ export function useArticleProgressMeasurement(args: UseArticleProgressMeasuremen
     let pathD = ''
     let pathHeight = 1
     let pathLength = 1
+    let pathWidth = tocPath.width
 
     if (tocListElement) {
       const listRect = tocListElement.getBoundingClientRect()
@@ -261,15 +267,26 @@ export function useArticleProgressMeasurement(args: UseArticleProgressMeasuremen
         }
 
         const itemRect = itemElement.getBoundingClientRect()
+        const titleElement = itemElement.querySelector<HTMLElement>('.dev-progress-map__title')
+        const titleRect = titleElement?.getBoundingClientRect()
+        const titleLeftX = titleRect ? titleRect.left - listRect.left : null
 
         points.push({
           documentY: headingTops[index] ?? articleTop,
-          x: getTocX(heading.depth as HeadingLevel, indentScale, trackOverlapScale),
+          x: getTocTrackX({
+            indentScale,
+            isTrackOffsetLocked,
+            level: heading.depth as HeadingLevel,
+            lockedTrackOffsetPx,
+            titleLeftX,
+            trackOverlapScale,
+          }),
           y: itemRect.top + itemRect.height / 2 - listRect.top,
         })
 
         return points
       }, [])
+      pathWidth = getTocPathWidth(headingPoints, indentScale, trackOverlapScale)
 
       const lastPoint = headingPoints.at(-1)
 
@@ -386,8 +403,7 @@ export function useArticleProgressMeasurement(args: UseArticleProgressMeasuremen
       pathD,
       pathHeight,
       pathLength,
-      pathWidth:
-        tocPath.width + Math.max(indentScale - 1, 0) * tocPath.depthX * 2 + trackOverlapScale * 16,
+      pathWidth,
       visibleEndPercent,
       visibleStartPercent,
     })
@@ -397,6 +413,8 @@ export function useArticleProgressMeasurement(args: UseArticleProgressMeasuremen
     bendScale,
     displayedHeadings,
     indentScale,
+    isTrackOffsetLocked,
+    lockedTrackOffsetPx,
     paintProgress,
     pathStyle,
     scrollLeadScale,

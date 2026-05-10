@@ -3,12 +3,14 @@
 import type { Dispatch, SetStateAction } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 
 import {
   headingLevelOptions,
   lineWeightOptions,
   pathStyleOptions,
   railHeightOptions,
+  tocTrackOffset,
   type HeadingLevel,
   type LineWeight,
   type PathStyle,
@@ -19,14 +21,18 @@ type ArticleProgressControlsProps = {
   activeLabel: string
   bendScale: number
   indentScale: number
+  isTrackOffsetLocked: boolean
   lineWeight: LineWeight
+  lockedTrackOffsetPx: number
   pathStyle: PathStyle
   railHeight: RailHeight
   readingRangeLabel: string
   scrollLeadScale: number
   setBendScale: Dispatch<SetStateAction<number>>
   setIndentScale: Dispatch<SetStateAction<number>>
+  setIsTrackOffsetLocked: Dispatch<SetStateAction<boolean>>
   setLineWeight: Dispatch<SetStateAction<LineWeight>>
+  setLockedTrackOffsetPx: Dispatch<SetStateAction<number>>
   setPathStyle: Dispatch<SetStateAction<PathStyle>>
   setRailHeight: Dispatch<SetStateAction<RailHeight>>
   setScrollLeadScale: Dispatch<SetStateAction<number>>
@@ -45,14 +51,18 @@ export function ArticleProgressControls(props: ArticleProgressControlsProps) {
     activeLabel,
     bendScale,
     indentScale,
+    isTrackOffsetLocked,
     lineWeight,
+    lockedTrackOffsetPx,
     pathStyle,
     railHeight,
     readingRangeLabel,
     scrollLeadScale,
     setBendScale,
     setIndentScale,
+    setIsTrackOffsetLocked,
     setLineWeight,
+    setLockedTrackOffsetPx,
     setPathStyle,
     setRailHeight,
     setScrollLeadScale,
@@ -177,12 +187,50 @@ export function ArticleProgressControls(props: ArticleProgressControlsProps) {
       </div>
 
       <div className="dev-progress-floating-controls__row">
+        <label className="dev-progress-floating-controls__label" htmlFor="dev-progress-lock">
+          锁距
+        </label>
+        <div className="dev-progress-floating-controls__switch">
+          <Switch
+            checked={isTrackOffsetLocked}
+            id="dev-progress-lock"
+            onCheckedChange={setIsTrackOffsetLocked}
+            size="sm"
+          />
+          <span>{isTrackOffsetLocked ? '固定' : '自由'}</span>
+        </div>
+      </div>
+
+      <div className="dev-progress-floating-controls__row">
+        <label className="dev-progress-floating-controls__label" htmlFor="dev-progress-locked-gap">
+          距边
+        </label>
+        <div className="dev-progress-floating-controls__range">
+          <input
+            aria-label="目录线距标题边缘"
+            disabled={!isTrackOffsetLocked}
+            id="dev-progress-locked-gap"
+            max={tocTrackOffset.maxLockedPx}
+            min={tocTrackOffset.minLockedPx}
+            onChange={(event) => {
+              setLockedTrackOffsetPx(Number(event.currentTarget.value))
+            }}
+            step="1"
+            type="range"
+            value={lockedTrackOffsetPx}
+          />
+          <span>{lockedTrackOffsetPx.toFixed(0)}px</span>
+        </div>
+      </div>
+
+      <div className="dev-progress-floating-controls__row">
         <label className="dev-progress-floating-controls__label" htmlFor="dev-progress-overlap">
           穿插
         </label>
         <div className="dev-progress-floating-controls__range">
           <input
             aria-label="目录线进入标题区域程度"
+            disabled={isTrackOffsetLocked}
             id="dev-progress-overlap"
             max="1"
             min="0"

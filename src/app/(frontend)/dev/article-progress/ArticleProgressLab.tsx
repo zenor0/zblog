@@ -12,6 +12,7 @@ import {
   headingLevelOptions,
   railHeightValues,
   readingOffsets,
+  tocTrackOffset,
   type HeadingLevel,
   type LineWeight,
   type PathStyle,
@@ -32,6 +33,8 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
   const [railHeight, setRailHeight] = useState<RailHeight>('regular')
   const [bendScale, setBendScale] = useState(0.48)
   const [indentScale, setIndentScale] = useState(1)
+  const [isTrackOffsetLocked, setIsTrackOffsetLocked] = useState(true)
+  const [lockedTrackOffsetPx, setLockedTrackOffsetPx] = useState(tocTrackOffset.defaultLockedPx)
   const [spacingScale, setSpacingScale] = useState(0.72)
   const [trackOverlapScale, setTrackOverlapScale] = useState(0.46)
   const [scrollLeadScale, setScrollLeadScale] = useState(0.46)
@@ -62,6 +65,8 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
     bendScale,
     displayedHeadings,
     indentScale,
+    isTrackOffsetLocked,
+    lockedTrackOffsetPx,
     pathStyle,
     scrollLeadScale,
     showDebugBoundaries,
@@ -130,14 +135,18 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
         activeLabel={activeLabel}
         bendScale={bendScale}
         indentScale={indentScale}
+        isTrackOffsetLocked={isTrackOffsetLocked}
         lineWeight={lineWeight}
+        lockedTrackOffsetPx={lockedTrackOffsetPx}
         pathStyle={pathStyle}
         railHeight={railHeight}
         readingRangeLabel={readingRangeLabel}
         scrollLeadScale={scrollLeadScale}
         setBendScale={setBendScale}
         setIndentScale={setIndentScale}
+        setIsTrackOffsetLocked={setIsTrackOffsetLocked}
         setLineWeight={setLineWeight}
+        setLockedTrackOffsetPx={setLockedTrackOffsetPx}
         setPathStyle={setPathStyle}
         setRailHeight={setRailHeight}
         setScrollLeadScale={setScrollLeadScale}

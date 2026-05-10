@@ -39,10 +39,18 @@ export const readingOffsets = {
 export const tocPath = {
   bottomPadding: 10,
   depthX: 12,
+  minX: 6,
+  rightPadding: 18,
   startX: 10,
   titleDepthX: 13.2,
   titleStartX: 36,
   width: 76,
+}
+
+export const tocTrackOffset = {
+  defaultLockedPx: 22,
+  maxLockedPx: 30,
+  minLockedPx: 10,
 }
 
 export const headingLevelOptions: { label: string; value: HeadingLevel }[] = [
@@ -111,6 +119,53 @@ export function getTocX(level: HeadingLevel, indentScale: number, trackOverlapSc
   const overlapWeight = trackOverlapScale * (depth / 2)
 
   return gutterX + (titleEdgeX - gutterX) * overlapWeight
+}
+
+export function getTocTitleStartX(level: HeadingLevel, indentScale: number) {
+  const depth = level - 2
+
+  return tocPath.titleStartX + depth * tocPath.titleDepthX * indentScale
+}
+
+export function getTocTrackX(args: {
+  indentScale: number
+  isTrackOffsetLocked: boolean
+  level: HeadingLevel
+  lockedTrackOffsetPx: number
+  titleLeftX?: null | number
+  trackOverlapScale: number
+}) {
+  const {
+    indentScale,
+    isTrackOffsetLocked,
+    level,
+    lockedTrackOffsetPx,
+    titleLeftX,
+    trackOverlapScale,
+  } = args
+
+  if (!isTrackOffsetLocked) {
+    return getTocX(level, indentScale, trackOverlapScale)
+  }
+
+  const resolvedTitleLeftX =
+    typeof titleLeftX === 'number' && Number.isFinite(titleLeftX)
+      ? titleLeftX
+      : getTocTitleStartX(level, indentScale)
+
+  return Math.max(resolvedTitleLeftX - lockedTrackOffsetPx, tocPath.minX)
+}
+
+export function getTocPathWidth(
+  points: TocPoint[],
+  indentScale: number,
+  trackOverlapScale: number,
+) {
+  const baselineWidth =
+    tocPath.width + Math.max(indentScale - 1, 0) * tocPath.depthX * 2 + trackOverlapScale * 16
+  const widestPointX = points.reduce((width, point) => Math.max(width, point.x), baselineWidth)
+
+  return Math.ceil(widestPointX + tocPath.rightPadding)
 }
 
 function getRoundedCornerRadius(startPoint: TocPoint, endPoint: TocPoint, bendScale: number) {

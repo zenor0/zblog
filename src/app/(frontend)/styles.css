@@ -1272,8 +1272,22 @@ html[data-zblog-preview-theme='light'] {
     line-height: var(--zblog-type-badge-line);
   }
 
+  .dev-progress-floating-controls__switch {
+    @apply flex items-center justify-between gap-2 text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+  }
+
   .dev-progress-floating-controls__range input {
     @apply h-1 w-full cursor-pointer appearance-none bg-border;
+  }
+
+  .dev-progress-floating-controls__range input:disabled {
+    @apply cursor-not-allowed opacity-45;
+  }
+
+  .dev-progress-floating-controls__range input:disabled + span {
+    @apply opacity-50;
   }
 
   .dev-progress-floating-controls__range input::-webkit-slider-thumb {
