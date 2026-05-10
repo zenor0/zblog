@@ -167,8 +167,15 @@ test.describe('Frontend', () => {
 
       return targetRect ? Math.abs(buttonRect.top - targetRect.top) : Number.POSITIVE_INFINITY
     })
+    const returnButtonIsLeftOfTarget = await returnButton.evaluate((button) => {
+      const buttonRect = button.getBoundingClientRect()
+      const targetRect = document.getElementById('ref-fig-seed-hero')?.getBoundingClientRect()
+
+      return targetRect ? buttonRect.left < targetRect.left : false
+    })
 
     expect(returnButtonDistance).toBeLessThan(80)
+    expect(returnButtonIsLeftOfTarget).toBe(true)
     await returnButton.click()
     await expect(returnButton).toBeHidden()
   })

@@ -12,6 +12,7 @@ import {
   scheduleArticleAnchorScroll,
   scrollToArticleAnchorTarget,
   shouldDeferArticleAnchorScroll,
+  watchArticleAnchorScrollCompletion,
 } from '@/components/frontend/article-anchor-navigation-utils'
 
 const anchorHighlightAttribute = 'data-article-anchor-highlight'
@@ -43,18 +44,10 @@ function resolveReturnButtonPosition(target: HTMLElement, button: HTMLButtonElem
   const maxLeft = Math.max(viewportPadding, window.innerWidth - buttonWidth - viewportPadding)
   const maxTop = Math.max(viewportPadding, window.innerHeight - buttonHeight - viewportPadding)
   const top = clamp(rect.top, viewportPadding, maxTop)
-  let left = rect.right + returnButtonOffset
-
-  if (left + buttonWidth > window.innerWidth - viewportPadding) {
-    left = rect.left - buttonWidth - returnButtonOffset
-  }
-
-  if (left < viewportPadding || left + buttonWidth > window.innerWidth - viewportPadding) {
-    left = clamp(rect.left, viewportPadding, maxLeft)
-  }
+  const leftOfTarget = rect.left - buttonWidth - returnButtonOffset
 
   return {
-    left: Math.round(left),
+    left: Math.round(clamp(leftOfTarget, viewportPadding, maxLeft)),
     top: Math.round(top),
   } satisfies ReturnButtonPosition
 }
@@ -64,6 +57,8 @@ export function ArticleAnchorNavigation(props: { returnLabel: string }) {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const highlightedTargetRef = useRef<HTMLElement | null>(null)
   const highlightTimeoutRef = useRef<null | number>(null)
+  const scrollObservationCleanupRef = useRef<null | (() => void)>(null)
+  const scrollSessionRef = useRef(0)
   const [returnState, setReturnState] = useState<null | ReturnState>(null)
 
   const clearHighlight = useCallback(() => {
@@ -89,6 +84,60 @@ export function ArticleAnchorNavigation(props: { returnLabel: string }) {
       }, anchorHighlightDuration)
     },
     [clearHighlight],
+  )
+
+  const clearScrollObservation = useCallback(() => {
+    scrollObservationCleanupRef.current?.()
+    scrollObservationCleanupRef.current = null
+  }, [])
+
+  const revealReturnState = useCallback(
+    (target: HTMLElement, top: number) => {
+      clearHighlight()
+
+      setReturnState({
+        position: resolveReturnButtonPosition(target, buttonRef.current),
+        targetID: target.id,
+        top,
+      })
+
+      highlightTarget(target)
+    },
+    [clearHighlight, highlightTarget],
+  )
+
+  const beginReturnStateReveal = useCallback(
+    (args: {
+      behavior: ScrollBehavior
+      session: number
+      target: HTMLElement
+      targetTop: number
+      top: number
+    }) => {
+      if (scrollSessionRef.current !== args.session) {
+        return
+      }
+
+      clearScrollObservation()
+
+      if (args.behavior === 'auto') {
+        revealReturnState(args.target, args.top)
+        return
+      }
+
+      scrollObservationCleanupRef.current = watchArticleAnchorScrollCompletion({
+        onComplete: () => {
+          if (scrollSessionRef.current !== args.session) {
+            return
+          }
+
+          scrollObservationCleanupRef.current = null
+          revealReturnState(args.target, args.top)
+        },
+        targetTop: args.targetTop,
+      })
+    },
+    [clearScrollObservation, revealReturnState],
   )
 
   const syncReturnPosition = useCallback(() => {
@@ -118,9 +167,10 @@ export function ArticleAnchorNavigation(props: { returnLabel: string }) {
 
   useEffect(() => {
     return () => {
+      clearScrollObservation()
       clearHighlight()
     }
-  }, [clearHighlight])
+  }, [clearHighlight, clearScrollObservation])
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -139,19 +189,30 @@ export function ArticleAnchorNavigation(props: { returnLabel: string }) {
       event.preventDefault()
 
       const behavior = readArticleAnchorScrollBehavior()
+      const session = ++scrollSessionRef.current
+      const returnTop = window.scrollY
 
-      setReturnState({
-        position: resolveReturnButtonPosition(target, buttonRef.current),
-        targetID: target.id,
-        top: window.scrollY,
-      })
+      setReturnState(null)
+      clearHighlight()
+      clearScrollObservation()
 
-      highlightTarget(target)
+      const reveal = (targetTop: number) => {
+        beginReturnStateReveal({
+          behavior,
+          session,
+          target,
+          targetTop,
+          top: returnTop,
+        })
+      }
 
       if (shouldDeferArticleAnchorScroll(target)) {
-        scheduleArticleAnchorScroll(target, behavior)
+        void scheduleArticleAnchorScroll(target, behavior).then((targetTop) => {
+          reveal(targetTop)
+        })
       } else {
-        scrollToArticleAnchorTarget(target, behavior)
+        const targetTop = scrollToArticleAnchorTarget(target, behavior)
+        reveal(targetTop)
       }
 
       if (window.location.hash !== href) {
@@ -164,7 +225,7 @@ export function ArticleAnchorNavigation(props: { returnLabel: string }) {
     return () => {
       document.removeEventListener('click', handleClick)
     }
-  }, [highlightTarget])
+  }, [beginReturnStateReveal, clearHighlight, clearScrollObservation])
 
   useEffect(() => {
     if (!returnState) {
@@ -203,6 +264,8 @@ export function ArticleAnchorNavigation(props: { returnLabel: string }) {
       className="article-anchor-return"
       data-anchor-return-positioned="true"
       onClick={() => {
+        clearHighlight()
+        clearScrollObservation()
         window.scrollTo({
           behavior: readArticleAnchorScrollBehavior(),
           top: returnState.top,
