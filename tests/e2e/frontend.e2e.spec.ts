@@ -53,6 +53,45 @@ test.describe('Frontend', () => {
     await expect(page.getByText('Designing Blogs that Respect References')).toBeVisible()
   })
 
+  test('keeps configured article width aligned across frontmatter, hero, and body', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 900, width: 1100 })
+    await page.goto('/dev/article-layout')
+
+    const metrics = await page.evaluate(() => {
+      const getRect = (selector: string) => {
+        const element = document.querySelector<HTMLElement>(selector)
+
+        if (!element) {
+          throw new Error(`Missing element for selector: ${selector}`)
+        }
+
+        const rect = element.getBoundingClientRect()
+
+        return {
+          left: rect.left,
+          width: rect.width,
+        }
+      }
+
+      return {
+        body: getRect('[data-post-reading-root]'),
+        frontmatter: getRect('[data-article-frontmatter]'),
+        hero: getRect('[data-article-reading-column] > figure'),
+        pageFrame: getRect('.page-frame'),
+        readingColumn: getRect('[data-article-reading-column]'),
+      }
+    })
+
+    expect(metrics.readingColumn.width).toBeLessThan(metrics.pageFrame.width - 120)
+
+    for (const region of [metrics.frontmatter, metrics.hero, metrics.body]) {
+      expect(Math.abs(region.left - metrics.readingColumn.left)).toBeLessThanOrEqual(1)
+      expect(Math.abs(region.width - metrics.readingColumn.width)).toBeLessThanOrEqual(1)
+    }
+  })
+
   test('can view seeded version history', async ({ page }) => {
     await page.goto('/zh-hans/posts/seed-citation-demo/history')
 
