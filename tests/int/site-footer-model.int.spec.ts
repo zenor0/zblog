@@ -1,8 +1,22 @@
 import { describe, expect, it } from 'vitest'
 
-import { normalizeSiteFooter, resolveFooterLink } from '@/components/frontend/site-footer'
+import {
+  defaultSiteFooterLayoutStyle,
+  normalizeSiteFooter,
+  resolveFooterLink,
+  siteFooterLayoutStyleOptions,
+} from '@/components/frontend/site-footer'
 
 describe('site footer model helpers', () => {
+  it('defines the selectable footer layout styles', () => {
+    expect(defaultSiteFooterLayoutStyle).toBe('compact')
+    expect(siteFooterLayoutStyleOptions.map((option) => option.value)).toEqual([
+      'compact',
+      'directory',
+      'ledger',
+      'balanced',
+    ])
+  })
   it('resolves internal and external footer links', () => {
     expect(
       resolveFooterLink('en', {
@@ -42,6 +56,7 @@ describe('site footer model helpers', () => {
             description: 'Editorial notes and product writing.',
             supportingText: null,
           },
+          layoutStyle: 'directory',
           navigationSections: [
             {
               title: 'Read',
@@ -75,10 +90,26 @@ describe('site footer model helpers', () => {
     })
 
     expect(footer?.brand.name).toBe('ZBlog')
+    expect(footer?.layoutStyle).toBe('directory')
     expect(footer?.navigationSections).toHaveLength(1)
     expect(footer?.socialLinks[0]?.label).toBe('@your-github-id')
     expect(footer?.socialLinks[0]?.href).toBe('https://github.com/zenor0')
     expect(footer?.contactItems[0]?.value).toBe('hi@example.com')
     expect(footer?.legalLinks).toHaveLength(0)
+  })
+
+  it('falls back to the compact layout when the stored style is missing or unknown', () => {
+    const footer = normalizeSiteFooter({
+      locale: 'zh-Hans',
+      settings: {
+        siteName: 'ZBlog',
+        footer: {
+          layoutStyle: 'unknown',
+          compliance: { copyright: 'Copyright 2026 ZBlog. All rights reserved.', filings: [] },
+        },
+      } as any,
+    })
+
+    expect(footer?.layoutStyle).toBe('compact')
   })
 })

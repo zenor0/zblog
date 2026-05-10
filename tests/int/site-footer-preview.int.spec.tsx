@@ -15,6 +15,7 @@ describe('SiteFooterPreview', () => {
     mockedFormFields = {
       footer: {
         value: {
+          layoutStyle: 'balanced',
           brand: {
             description: '技术、产品与日常工作的记录。',
             link: { internalPath: '/', openInNewTab: false, type: 'internal' },

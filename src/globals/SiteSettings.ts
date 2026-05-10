@@ -15,6 +15,10 @@ import {
   validateCustomVariableKey,
   validateSiteSettingReferences,
 } from '@/lib/site-settings-config'
+import {
+  defaultSiteFooterLayoutStyle,
+  siteFooterLayoutStyleOptions,
+} from '@/lib/site-footer-layout'
 
 const localizedHeroDefaults = {
   en: {
@@ -446,6 +450,21 @@ const globalVariableFields: Field[] = [
 ]
 
 const footerFields: Field[] = [
+  {
+    name: 'layoutStyle',
+    type: 'select',
+    admin: {
+      description:
+        'Controls the frontend footer layout. Preview every option under /dev/footer-layouts.',
+    },
+    defaultValue: defaultSiteFooterLayoutStyle,
+    label: 'Layout style',
+    options: siteFooterLayoutStyleOptions.map((option) => ({
+      label: option.label,
+      value: option.value,
+    })),
+    required: true,
+  },
   {
     name: 'brand',
     type: 'group',

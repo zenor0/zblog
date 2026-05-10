@@ -296,6 +296,7 @@ function readFooterData(fields: SiteFooterPreviewFormState | undefined) {
       filings: readComplianceFilings(fields, 'footer.compliance.filings', compliance.filings),
     },
     contactItems: readContactItems(fields, 'footer.contactItems', footer.contactItems),
+    layoutStyle: readStringField(fields, 'footer.layoutStyle', footer.layoutStyle),
     legalLinks: readLegalLinks(fields, 'footer.legalLinks', footer.legalLinks),
     navigationSections: readNavigationSections(
       fields,

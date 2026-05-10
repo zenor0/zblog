@@ -40,6 +40,7 @@ describe('Site settings footer config', () => {
       controlsField.fields[1].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
     ).toBe(false)
     expect(controlsField.fields[1].fields.map((field: any) => field.name)).toEqual([
+      'layoutStyle',
       'brand',
       'navigationSections',
       'socialLinks',
@@ -54,6 +55,16 @@ describe('Site settings footer config', () => {
     ).toBe(true)
 
     const previewField = allFooterFields.find((field: any) => field.name === 'footerPreview') as any
+    const layoutStyleField = controlsField.fields[1].fields.find(
+      (field: any) => field.name === 'layoutStyle',
+    ) as any
+    expect(layoutStyleField.defaultValue).toBe('compact')
+    expect(layoutStyleField.options.map((option: any) => option.value)).toEqual([
+      'compact',
+      'directory',
+      'ledger',
+      'balanced',
+    ])
 
     expect(previewField.type).toBe('ui')
     expect(previewField.admin.components.Field).toBe(

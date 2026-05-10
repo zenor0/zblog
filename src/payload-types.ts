@@ -851,6 +851,10 @@ export interface SiteSetting {
   footer: {
     footerEditorMode?: ('form' | 'yaml') | null;
     /**
+     * Controls the frontend footer layout. Preview every option under /dev/footer-layouts.
+     */
+    layoutStyle: 'compact' | 'directory' | 'ledger' | 'balanced';
+    /**
      * Top-left identity in the footer directory layer. Keep this concise so the navigation groups can balance beside it.
      */
     brand: {
@@ -1077,6 +1081,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | T
     | {
         footerEditorMode?: T;
+        layoutStyle?: T;
         brand?:
           | T
           | {
