@@ -681,13 +681,85 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface SiteSetting {
   id: number;
+  generalEditorMode?: ('form' | 'yaml') | null;
   siteName: string;
   siteDescription?: string | null;
+  /**
+   * Shared variables used by other site setting sections. Use {{site.name}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.
+   */
+  globalVariables?: {
+    /**
+     * Reusable owner identity for SEO, footer, homepage, previews, and the future setup wizard.
+     */
+    owner?: {
+      name?: string | null;
+      /**
+       * Public handle, such as @your-id.
+       */
+      handle?: string | null;
+      email?: string | null;
+      bio?: string | null;
+      websiteUrl?: string | null;
+      avatar?: (number | null) | Media;
+    };
+    /**
+     * Shared media references. YAML uses Payload media IDs, while frontend output resolves the relationship when Payload populates it.
+     */
+    assets?: {
+      logo?: (number | null) | Media;
+      icon?: (number | null) | Media;
+      avatar?: (number | null) | Media;
+      defaultSocialImage?: (number | null) | Media;
+    };
+    /**
+     * Shared social profiles. They can be referenced as {{social.github.label}} and {{social.github.url}}.
+     */
+    socialLinks?:
+      | {
+          platform: 'github' | 'x' | 'linkedin' | 'youtube' | 'instagram' | 'discord' | 'rss' | 'email' | 'other';
+          label: string;
+          url: string;
+          openInNewTab?: boolean | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Reusable contact variables, referenced as {{contact.press.value}} or {{contact.press.url}}.
+     */
+    contactItems?:
+      | {
+          /**
+           * Reference key, for example press or newsletter.
+           */
+          key: string;
+          label?: string | null;
+          value?: string | null;
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Small string variables for repeated copy. Reference them with {{custom.variableKey}}.
+     */
+    customVariables?:
+      | {
+          /**
+           * Reference key after custom., for example tagline.
+           */
+          key: string;
+          value?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  homepageEditorMode?: ('form' | 'yaml') | null;
   homeHero?: {
     eyebrow?: string | null;
     title?: string | null;
     description?: string | null;
   };
+  seoEditorMode?: ('form' | 'yaml') | null;
   seo?: {
     /**
      * Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.
@@ -703,6 +775,7 @@ export interface SiteSetting {
    * Configure the code-owned article design preset and a small set of safe spacing overrides.
    */
   articleLayout: {
+    articleLayoutEditorMode?: ('form' | 'yaml') | null;
     /**
      * Choose the default article design preset for public article pages.
      */
@@ -714,38 +787,47 @@ export interface SiteSetting {
       /**
        * Western body text font stack.
        */
-      latinFont?: ('source-sans-3' | 'inter' | 'newsreader') | null;
+      latinFont?: ('source-sans-3' | 'system-sans' | 'inter' | 'ibm-plex-sans' | 'newsreader' | 'georgia') | null;
       /**
        * Chinese body text fallback stack.
        */
-      cjkFont?: ('noto-sans-sc' | 'noto-serif-sc' | 'system-cjk-sans') | null;
+      cjkFont?:
+        | (
+            | 'noto-sans-sc'
+            | 'source-han-sans-sc'
+            | 'noto-serif-sc'
+            | 'source-han-serif-sc'
+            | 'system-cjk-sans'
+            | 'system-cjk-serif'
+          )
+        | null;
       /**
        * Heading font stack. The default keeps headings in a serif voice.
        */
-      headingFont?: ('editorial-serif' | 'body-sans') | null;
+      headingFont?: ('editorial-serif' | 'system-serif' | 'display-sans' | 'body-sans') | null;
       /**
        * Inline and block code font stack.
        */
-      codeFont?: ('jetbrains-mono' | 'system-mono') | null;
+      codeFont?: ('jetbrains-mono' | 'source-code-pro' | 'system-mono' | 'ui-mono') | null;
     };
     /**
-     * Optional safe CSS token overrides. Leave blank to use the selected preset values.
+     * Optional safe CSS token overrides. Sliders start from the selected preset defaults.
      */
     advanced?: {
       /**
-       * Controls both the reading column and prose max width, such as 76ch.
+       * Controls both the reading column and prose max width.
        */
       contentWidth?: string | null;
       /**
-       * Body text size, such as 0.98rem or 17px.
+       * Body text size in rem.
        */
       bodyFontSize?: string | null;
       /**
-       * Unitless body line-height ratio, such as 1.65.
+       * Unitless body line-height ratio.
        */
       bodyLineHeight?: string | null;
       /**
-       * Vertical gap between consecutive paragraphs, such as 0.75rem.
+       * Vertical gap between consecutive paragraphs.
        */
       paragraphGap?: string | null;
       /**
@@ -767,6 +849,7 @@ export interface SiteSetting {
     };
   };
   footer: {
+    footerEditorMode?: ('form' | 'yaml') | null;
     /**
      * Top-left identity in the footer directory layer. Keep this concise so the navigation groups can balance beside it.
      */
@@ -897,8 +980,58 @@ export interface SiteSetting {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
+  generalEditorMode?: T;
   siteName?: T;
   siteDescription?: T;
+  globalVariables?:
+    | T
+    | {
+        owner?:
+          | T
+          | {
+              name?: T;
+              handle?: T;
+              email?: T;
+              bio?: T;
+              websiteUrl?: T;
+              avatar?: T;
+            };
+        assets?:
+          | T
+          | {
+              logo?: T;
+              icon?: T;
+              avatar?: T;
+              defaultSocialImage?: T;
+            };
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              label?: T;
+              url?: T;
+              openInNewTab?: T;
+              id?: T;
+            };
+        contactItems?:
+          | T
+          | {
+              key?: T;
+              label?: T;
+              value?: T;
+              url?: T;
+              id?: T;
+            };
+        customVariables?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  homepageEditorMode?: T;
   homeHero?:
     | T
     | {
@@ -906,6 +1039,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  seoEditorMode?: T;
   seo?:
     | T
     | {
@@ -916,6 +1050,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   articleLayout?:
     | T
     | {
+        articleLayoutEditorMode?: T;
         preset?: T;
         typography?:
           | T
@@ -941,6 +1076,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   footer?:
     | T
     | {
+        footerEditorMode?: T;
         brand?:
           | T
           | {

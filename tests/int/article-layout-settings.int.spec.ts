@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import { SiteSettings } from '@/globals/SiteSettings'
 import {
+  articleDesignAdvancedControlConfigs,
+  articleDesignCJKFontOptions,
+  articleDesignCodeFontOptions,
+  articleDesignHeadingFontOptions,
+  articleDesignLatinFontOptions,
   articleDesignPresets,
   defaultArticleDesignPresetID,
   resolveArticleDesignConfig,
@@ -11,6 +16,9 @@ function collectFields(fields: any[]): any[] {
   return fields.flatMap((field) => [
     field,
     ...(Array.isArray(field.fields) ? collectFields(field.fields) : []),
+    ...(Array.isArray(field.tabs)
+      ? field.tabs.flatMap((tab: any) => collectFields(tab.fields ?? []))
+      : []),
   ])
 }
 
@@ -18,7 +26,7 @@ describe('article layout settings', () => {
   it('exposes compact article design controls and live preview in site settings', () => {
     const tabsField = SiteSettings.fields.find((field: any) => field.type === 'tabs') as any
     const articleLayoutTab = tabsField.tabs.find((tab: any) => tab.id === 'article-layout') as any
-    const articleLayoutField = articleLayoutTab.fields.find(
+    const articleLayoutField = collectFields(articleLayoutTab.fields).find(
       (field: any) => field.name === 'articleLayout',
     ) as any
     const layoutRow = articleLayoutField.fields[0] as any
@@ -37,6 +45,21 @@ describe('article layout settings', () => {
     expect(layoutRow.admin.className).toBe('article-layout-settings-grid')
     expect(controlsField.label).toBe('Article design controls')
     expect(controlsField.admin.width).toBeUndefined()
+    expect(controlsField.fields[0].name).toBe('articleLayoutEditorMode')
+    expect(controlsField.fields[0].admin.components.Field).toBe(
+      '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+    )
+    expect(controlsField.fields[1].type).toBe('group')
+    expect(
+      controlsField.fields[1].admin.condition({}, { articleLayoutEditorMode: 'form' }, {} as any),
+    ).toBe(true)
+    expect(
+      controlsField.fields[1].admin.condition({}, { articleLayoutEditorMode: 'yaml' }, {} as any),
+    ).toBe(false)
+    expect(controlsField.fields[2].name).toBe('articleLayoutRawConfig')
+    expect(
+      controlsField.fields[2].admin.condition({}, { articleLayoutEditorMode: 'yaml' }, {} as any),
+    ).toBe(true)
 
     const presetField = allLayoutFields.find((field: any) => field.name === 'preset') as any
 
@@ -54,6 +77,10 @@ describe('article layout settings', () => {
       'headingFont',
       'codeFont',
     ])
+    expect(articleDesignLatinFontOptions.length).toBeGreaterThanOrEqual(5)
+    expect(articleDesignCJKFontOptions.length).toBeGreaterThanOrEqual(5)
+    expect(articleDesignHeadingFontOptions.length).toBeGreaterThanOrEqual(4)
+    expect(articleDesignCodeFontOptions.length).toBeGreaterThanOrEqual(4)
     expect(typographyField.fields.every((field: any) => field.admin.width === '50%')).toBe(true)
 
     const advancedField = allLayoutFields.find((field: any) => field.name === 'advanced') as any
@@ -70,6 +97,17 @@ describe('article layout settings', () => {
     ])
     expect(advancedField.admin.width).toBe('100%')
     expect(advancedField.fields.every((field: any) => field.admin.width === '50%')).toBe(true)
+    expect(advancedField.fields.every((field: any) => field.type === 'text')).toBe(true)
+    expect(
+      advancedField.fields.every(
+        (field: any) =>
+          field.admin.components.Field ===
+          '/components/payload/ArticleDesignRangeField#ArticleDesignRangeField',
+      ),
+    ).toBe(true)
+    expect(articleDesignAdvancedControlConfigs.map((config) => config.name)).toEqual(
+      advancedField.fields.map((field: any) => field.name),
+    )
 
     const previewField = allLayoutFields.find((field: any) => field.name === 'preview') as any
 
@@ -101,6 +139,23 @@ describe('article layout settings', () => {
     expect(resolved.style['--article-layout-paragraph-gap']).toBe('0.95rem')
   })
 
+  it('resolves richer controlled typography options into article font tokens', () => {
+    const resolved = resolveArticleDesignConfig({
+      preset: 'compact-editorial',
+      typography: {
+        cjkFont: 'source-han-serif-sc',
+        codeFont: 'ui-mono',
+        headingFont: 'system-serif',
+        latinFont: 'system-sans',
+      },
+    })
+
+    expect(resolved.style['--article-layout-latin-font-family']).toContain('system-ui')
+    expect(resolved.style['--article-layout-cjk-font-family']).toContain('Source Han Serif SC')
+    expect(resolved.style['--article-layout-heading-font-family']).toContain('Georgia')
+    expect(resolved.style['--article-layout-code-font-family']).toContain('ui-monospace')
+  })
+
   it('resolves controlled typography settings into article font tokens', () => {
     const resolved = resolveArticleDesignConfig({
       preset: 'compact-editorial',
@@ -113,6 +168,9 @@ describe('article layout settings', () => {
     })
 
     expect(resolved.style['--article-layout-latin-font-family']).toContain('Source Sans 3')
+    expect(resolved.style['--article-layout-latin-font-family']).not.toMatch(
+      /\b(?:sans-serif|serif)\b/,
+    )
     expect(resolved.style['--article-layout-cjk-font-family']).toContain('Noto Sans SC')
     expect(resolved.style['--article-layout-heading-font-family']).toContain('Newsreader')
     expect(resolved.style['--article-layout-code-font-family']).toContain('JetBrains Mono')

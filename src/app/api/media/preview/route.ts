@@ -2,11 +2,8 @@ import { access, readFile } from 'node:fs/promises'
 
 import type { NextRequest } from 'next/server'
 
-import {
-  getSourceFilenameFromPDFPreviewFilename,
-  resolveLocalMediaFilePath,
-  resolveLocalMediaPreviewPath,
-} from '@/lib/media'
+import { getSourceFilenameFromPDFPreviewFilename } from '@/lib/media'
+import { resolveLocalMediaFilePath, resolveLocalMediaPreviewPath } from '@/lib/media-server'
 import { buildPDFPreviewFallbackSVG } from '@/lib/pdf-preview'
 import { persistPDFPreviewSVG } from '@/lib/pdf-preview'
 
@@ -20,9 +17,7 @@ function buildSVGResponse(args: {
   return new Response(args.svg, {
     headers: {
       'Cache-Control':
-        args.cache === 'fallback'
-          ? 'no-store, max-age=0'
-          : 'public, max-age=31536000, immutable',
+        args.cache === 'fallback' ? 'no-store, max-age=0' : 'public, max-age=31536000, immutable',
       'Content-Type': 'image/svg+xml; charset=utf-8',
       'X-ZBlog-Preview-Cache': args.cache,
       'X-ZBlog-Preview-Reason': args.reason ?? '',

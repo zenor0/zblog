@@ -15,7 +15,7 @@ import {
   buildSeoDescription,
   serializeStructuredData,
 } from '@/lib/seo'
-import { getSiteSettings } from '@/lib/site-settings'
+import { getResolvedSiteSettings } from '@/lib/site-settings'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>
@@ -23,7 +23,7 @@ export async function generateMetadata(props: {
   const { locale: localeParam } = await props.params
   const locale = requireLocale(localeParam)
   const home = await getTranslations({ locale, namespace: 'HomePage' })
-  const siteSettings = await getSiteSettings(locale)
+  const siteSettings = await getResolvedSiteSettings(locale)
   const title = siteSettings.seo?.homeTitle || siteSettings.homeHero?.title || home('heroTitle')
   const description = buildSeoDescription({
     fallback:
@@ -51,7 +51,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
   const locale = requireLocale(localeParam)
   const common = await getTranslations({ locale, namespace: 'Common' })
   const home = await getTranslations({ locale, namespace: 'HomePage' })
-  const siteSettings = await getSiteSettings(locale)
+  const siteSettings = await getResolvedSiteSettings(locale)
   const posts = await getPublishedPosts(locale)
   const heroEyebrow = siteSettings.homeHero?.eyebrow || siteSettings.siteName || common('siteLabel')
   const heroTitle = siteSettings.homeHero?.title || home('heroTitle')

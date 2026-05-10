@@ -178,30 +178,57 @@ export type ResolvedArticleDesignConfig = {
 
 export const defaultArticleDesignPresetID: ArticleDesignPresetID = 'compact-editorial'
 
+export type ArticleDesignAdvancedControlName = keyof ArticleDesignAdvancedSettings
+
+export type ArticleDesignAdvancedControlConfig = {
+  defaultToken: ArticleDesignTokenName
+  description: string
+  label: string
+  max: number
+  min: number
+  name: ArticleDesignAdvancedControlName
+  step: number
+  unit: '' | 'ch' | 'rem'
+}
+
 const articleDesignLatinFontStacks = {
-  'source-sans-3': 'var(--font-sans-ui, "Source Sans 3"), "Source Sans 3", sans-serif',
-  inter: 'Inter, var(--font-sans-ui, "Source Sans 3"), sans-serif',
-  newsreader: 'var(--font-serif-display, Newsreader), Newsreader, Georgia, serif',
+  'source-sans-3': 'var(--font-sans-ui, "Source Sans 3"), "Source Sans 3"',
+  'system-sans': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI"',
+  inter: 'Inter, var(--font-sans-ui, "Source Sans 3")',
+  'ibm-plex-sans': '"IBM Plex Sans", var(--font-sans-ui, "Source Sans 3"), "Source Sans 3"',
+  newsreader: 'var(--font-serif-display, Newsreader), Newsreader, Georgia',
+  georgia: 'Georgia, "Times New Roman"',
 } as const
 
 const articleDesignCJKFontStacks = {
   'noto-sans-sc':
     'var(--font-cjk-sans, "Noto Sans SC"), "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif',
+  'source-han-sans-sc':
+    '"Source Han Sans SC", var(--font-cjk-sans, "Noto Sans SC"), "Noto Sans SC", "PingFang SC", sans-serif',
   'noto-serif-sc':
     'var(--font-cjk-serif, "Noto Serif SC"), "Noto Serif SC", "Source Han Serif SC", "Songti SC", SimSun, serif',
+  'source-han-serif-sc':
+    '"Source Han Serif SC", var(--font-cjk-serif, "Noto Serif SC"), "Noto Serif SC", "Songti SC", SimSun, serif',
   'system-cjk-sans': '"PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif',
+  'system-cjk-serif': '"Songti SC", SimSun, "Noto Serif CJK SC", serif',
 } as const
 
 const articleDesignHeadingFontStacks = {
   'body-sans': 'var(--article-layout-latin-font-family), var(--article-layout-cjk-font-family)',
+  'display-sans':
+    'var(--font-sans-ui, "Source Sans 3"), "Source Sans 3", var(--article-layout-cjk-font-family)',
   'editorial-serif':
     'var(--font-serif-display, Newsreader), Newsreader, Georgia, var(--font-cjk-serif, "Noto Serif SC"), "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif',
+  'system-serif': 'Georgia, "Times New Roman", var(--article-layout-cjk-font-family), serif',
 } as const
 
 const articleDesignCodeFontStacks = {
   'jetbrains-mono':
     'var(--font-code, "JetBrains Mono"), "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace',
+  'source-code-pro':
+    '"Source Code Pro", var(--font-code, "JetBrains Mono"), "SFMono-Regular", Consolas, monospace',
   'system-mono': '"SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace',
+  'ui-mono': 'ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace',
 } as const
 
 type ArticleDesignLatinFontID = keyof typeof articleDesignLatinFontStacks
@@ -215,12 +242,24 @@ export const articleDesignLatinFontOptions = [
     value: 'source-sans-3',
   },
   {
+    label: 'System sans',
+    value: 'system-sans',
+  },
+  {
     label: 'Inter',
     value: 'inter',
   },
   {
+    label: 'IBM Plex Sans',
+    value: 'ibm-plex-sans',
+  },
+  {
     label: 'Newsreader',
     value: 'newsreader',
+  },
+  {
+    label: 'Georgia',
+    value: 'georgia',
   },
 ] as const
 
@@ -230,12 +269,24 @@ export const articleDesignCJKFontOptions = [
     value: 'noto-sans-sc',
   },
   {
+    label: 'Source Han Sans SC',
+    value: 'source-han-sans-sc',
+  },
+  {
     label: 'Noto Serif SC',
     value: 'noto-serif-sc',
   },
   {
+    label: 'Source Han Serif SC',
+    value: 'source-han-serif-sc',
+  },
+  {
     label: 'System CJK sans',
     value: 'system-cjk-sans',
+  },
+  {
+    label: 'System CJK serif',
+    value: 'system-cjk-serif',
   },
 ] as const
 
@@ -243,6 +294,14 @@ export const articleDesignHeadingFontOptions = [
   {
     label: 'Editorial serif',
     value: 'editorial-serif',
+  },
+  {
+    label: 'System serif',
+    value: 'system-serif',
+  },
+  {
+    label: 'Display sans',
+    value: 'display-sans',
   },
   {
     label: 'Body sans',
@@ -256,10 +315,101 @@ export const articleDesignCodeFontOptions = [
     value: 'jetbrains-mono',
   },
   {
+    label: 'Source Code Pro',
+    value: 'source-code-pro',
+  },
+  {
     label: 'System mono',
     value: 'system-mono',
   },
+  {
+    label: 'UI mono',
+    value: 'ui-mono',
+  },
 ] as const
+
+export const articleDesignAdvancedControlConfigs = [
+  {
+    defaultToken: '--article-layout-reading-column-max',
+    description: 'Controls both the reading column and prose max width.',
+    label: 'Content width',
+    max: 82,
+    min: 58,
+    name: 'contentWidth',
+    step: 1,
+    unit: 'ch',
+  },
+  {
+    defaultToken: '--article-layout-copy-font-size',
+    description: 'Body text size in rem.',
+    label: 'Body font size',
+    max: 1.16,
+    min: 0.9,
+    name: 'bodyFontSize',
+    step: 0.01,
+    unit: 'rem',
+  },
+  {
+    defaultToken: '--article-layout-copy-line-height',
+    description: 'Unitless body line-height ratio.',
+    label: 'Body line height',
+    max: 1.86,
+    min: 1.45,
+    name: 'bodyLineHeight',
+    step: 0.01,
+    unit: '',
+  },
+  {
+    defaultToken: '--article-layout-paragraph-gap',
+    description: 'Vertical gap between consecutive paragraphs.',
+    label: 'Paragraph gap',
+    max: 1.45,
+    min: 0.55,
+    name: 'paragraphGap',
+    step: 0.01,
+    unit: 'rem',
+  },
+  {
+    defaultToken: '--article-layout-flow-gap',
+    description: 'Default vertical flow gap between ordinary article elements.',
+    label: 'Flow gap',
+    max: 1.55,
+    min: 0.6,
+    name: 'flowGap',
+    step: 0.01,
+    unit: 'rem',
+  },
+  {
+    defaultToken: '--article-layout-block-gap',
+    description: 'Outer vertical gap for figures, tables, code blocks, and callouts.',
+    label: 'Rich block gap',
+    max: 3,
+    min: 1.2,
+    name: 'blockGap',
+    step: 0.05,
+    unit: 'rem',
+  },
+  {
+    defaultToken: '--article-layout-caption-gap',
+    description: 'Internal gap between media/table surfaces and their captions.',
+    label: 'Caption gap',
+    max: 0.85,
+    min: 0.2,
+    name: 'captionGap',
+    step: 0.01,
+    unit: 'rem',
+  },
+  {
+    defaultToken: '--article-layout-grid-gap',
+    description: 'Desktop gap between the reading column and the table of contents rail.',
+    label: 'Reading grid gap',
+    max: 4,
+    min: 1.25,
+    name: 'gridGap',
+    step: 0.05,
+    unit: 'rem',
+  },
+] as const satisfies readonly ArticleDesignAdvancedControlConfig[]
 
 const compactEditorialTokens: ArticleDesignTokens = {
   '--article-block-callout-padding': '0.95rem 1rem',
@@ -379,6 +529,75 @@ function getPresetByID(value: unknown) {
   const presetID = isArticleDesignPresetID(value) ? value : defaultArticleDesignPresetID
 
   return articleDesignPresets.find((preset) => preset.id === presetID) ?? articleDesignPresets[0]
+}
+
+export function getArticleDesignAdvancedControlConfig(value: unknown) {
+  return articleDesignAdvancedControlConfigs.find((config) => config.name === value) ?? null
+}
+
+function trimFormattedNumber(value: string) {
+  return value.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '')
+}
+
+export function formatArticleDesignAdvancedControlValue(
+  config: ArticleDesignAdvancedControlConfig,
+  value: number,
+) {
+  const precision = config.step < 0.05 ? 2 : config.step < 1 ? 1 : 0
+  const formatted = trimFormattedNumber(value.toFixed(precision))
+
+  return `${formatted}${config.unit}`
+}
+
+export function parseArticleDesignAdvancedControlValue(
+  config: ArticleDesignAdvancedControlConfig,
+  value: unknown,
+) {
+  const normalized = normalizeTokenValue(value)
+
+  if (!normalized) {
+    return null
+  }
+
+  const numberPattern =
+    config.unit === '' ? /^(\d+(?:\.\d+)?)$/ : new RegExp(`^(\\d+(?:\\.\\d+)?)${config.unit}$`)
+  const match = normalized.match(numberPattern)
+
+  if (!match) {
+    return null
+  }
+
+  const numericValue = Number(match[1])
+
+  if (!Number.isFinite(numericValue)) {
+    return null
+  }
+
+  return Math.min(config.max, Math.max(config.min, numericValue))
+}
+
+export function getArticleDesignAdvancedControlDefaultValue(
+  name: ArticleDesignAdvancedControlName,
+  presetID: unknown,
+) {
+  const config = getArticleDesignAdvancedControlConfig(name)
+
+  if (!config) {
+    return ''
+  }
+
+  const fallbackPreset = getPresetByID(defaultArticleDesignPresetID)
+  const preset = getPresetByID(presetID)
+  const tokenValue =
+    preset.tokens[config.defaultToken] ??
+    fallbackPreset.tokens[config.defaultToken] ??
+    formatArticleDesignAdvancedControlValue(config, config.min)
+
+  const numericValue = parseArticleDesignAdvancedControlValue(config, tokenValue)
+
+  return numericValue == null
+    ? String(tokenValue)
+    : formatArticleDesignAdvancedControlValue(config, numericValue)
 }
 
 function applyLengthOverride(

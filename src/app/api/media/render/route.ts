@@ -2,7 +2,8 @@ import { access } from 'node:fs/promises'
 
 import type { NextRequest } from 'next/server'
 
-import { getMediaFilename, inferMediaKind, resolveLocalMediaPath } from '@/lib/media'
+import { getMediaFilename, inferMediaKind } from '@/lib/media'
+import { resolveLocalMediaPath } from '@/lib/media-server'
 import { buildPDFPreviewFallbackSVG, renderPDFPreviewSVG } from '@/lib/pdf-preview'
 
 export const runtime = 'nodejs'
@@ -36,11 +37,7 @@ function resolvePageNumber(rawValue: null | string) {
   return Math.min(parsed, 20)
 }
 
-function logFallback(args: {
-  reason: string
-  resolvedPath?: null | string
-  sourceURL: string
-}) {
+function logFallback(args: { reason: string; resolvedPath?: null | string; sourceURL: string }) {
   console.warn('[media-render] PDF fallback:', {
     reason: args.reason,
     resolvedPath: args.resolvedPath ?? null,
@@ -136,7 +133,9 @@ export async function GET(request: NextRequest) {
   })
 
   if (preview.usedFallback) {
-    const reason = preview.error ? `pdftocairo conversion failed: ${preview.error}` : 'pdftocairo conversion failed'
+    const reason = preview.error
+      ? `pdftocairo conversion failed: ${preview.error}`
+      : 'pdftocairo conversion failed'
     logFallback({
       reason,
       resolvedPath: localPath,

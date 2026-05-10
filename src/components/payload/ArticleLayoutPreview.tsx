@@ -7,12 +7,12 @@ import { useFormFields } from '@payloadcms/ui'
 import { useMemo } from 'react'
 
 import {
-  articleDesignPresets,
   resolveArticleDesignConfig,
   type ArticleDesignAdvancedSettings,
   type ArticleDesignSettingsInput,
   type ArticleDesignTypographySettings,
 } from '@/lib/article-design'
+import { MarkdownRenderer } from '@/lib/markdown'
 
 import './article-layout-preview.scss'
 
@@ -39,6 +39,27 @@ const typographyOverrideKeys = [
   'headingFont',
   'latinFont',
 ] as const satisfies ReadonlyArray<keyof ArticleDesignTypographySettings>
+
+const articleDesignPreviewMarkdown = `## 字体系统应该让重点自然浮出来，而不是每个字都在喊。
+
+正文使用非衬线字体保持信息密度，English terms stay calm in the same rhythm. **真正重要的信息** 通过字重和位置被读者识别，而不是依靠夸张字号。
+
+段内行距保持紧凑，段落之间留出更明确的停顿，代码、引用、表格和提示块则通过统一 block tokens 接入同一套视觉系统。
+
+> 元信息、标签和说明文字不应该和正文抢层级；它们只需要刚好能被看见。
+
+> [!NOTE]
+> Callout blocks share the same spacing rhythm.
+
+\`\`\`ts
+const design = resolveArticleDesignConfig(settings)
+\`\`\`
+
+| Token | What it changes |
+| --- | --- |
+| Copy width | Reading comfort |
+| Block gap | Code, figures, tables |
+`
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -114,7 +135,6 @@ export const ArticleLayoutPreview: UIFieldClientComponent = () => {
   const fields = useFormFields(([formFields]) => formFields as ArticleLayoutFormState)
   const settings = useMemo(() => readArticleLayoutSettings(fields), [fields])
   const resolved = useMemo(() => resolveArticleDesignConfig(settings), [settings])
-  const preset = articleDesignPresets.find((item) => item.id === resolved.presetID)
 
   return (
     <section
@@ -126,56 +146,28 @@ export const ArticleLayoutPreview: UIFieldClientComponent = () => {
     >
       <div className="article-design-preview__header article-layout-preview__header">
         <span>Article design preview</span>
-        <strong>{preset?.label ?? resolved.presetID}</strong>
       </div>
 
       <div className="article-design-preview__surface article-layout-preview__surface">
-        <article className="article-design-preview__copy article-layout-preview__copy">
-          <div className="article-design-preview__meta">Preview / Article design system</div>
-          <h2>字体系统应该让重点自然浮出来，而不是每个字都在喊。</h2>
-          <p>
-            正文使用非衬线字体保持信息密度，English terms stay calm in the same rhythm.
-            <strong>真正重要的信息</strong> 通过字重和位置被读者识别，而不是依靠夸张字号。
-          </p>
-          <p>
-            段内行距保持紧凑，段落之间留出更明确的停顿，代码、引用、表格和提示块则通过统一
-            block tokens 接入同一套视觉系统。
-          </p>
+        <article className="article-design-preview__article" data-article-layout="">
+          <div className="article-design-preview__reading-column" data-article-reading-column="">
+            <header className="article-design-preview__frontmatter" data-article-frontmatter="">
+              <p className="section-kicker">Published</p>
+              <h1>文章页面的视觉设置应该在后台直接看到结果</h1>
+              <p>
+                This preview uses the production Markdown renderer, so headings, callouts, code,
+                tables, and links follow the same component path as public article pages.
+              </p>
+            </header>
 
-          <blockquote data-article-block="blockquote">
-            元信息、标签和说明文字不应该和正文抢层级；它们只需要刚好能被看见。
-          </blockquote>
-
-          <aside className="md-callout md-callout--note" data-article-block="callout">
-            <div className="md-callout__title">Note</div>
-            <div className="md-callout__content">Callout blocks share the same spacing rhythm.</div>
-          </aside>
-
-          <pre
-            className="article-design-preview__code article-layout-preview__code"
-            data-article-block="code-block"
-            data-testid="article-design-preview-codeblock"
-          >
-            <code>{`const design = resolveArticleDesignConfig(settings)`}</code>
-          </pre>
-
-          <figure
-            className="article-design-preview__figure article-layout-preview__figure"
-            data-article-block="figure"
-          >
-            <div className="article-design-preview__media article-layout-preview__media" />
-            <figcaption>Captions sit close to images so the pair reads as one unit.</figcaption>
-          </figure>
+            <div
+              className="article-copy article-design-preview__copy"
+              data-testid="article-design-preview-copy"
+            >
+              <MarkdownRenderer source={articleDesignPreviewMarkdown} />
+            </div>
+          </div>
         </article>
-
-        <aside aria-label="Article design summary" className="article-design-preview__summary">
-          <span>Typography</span>
-          <strong>Serif headings / sans body / JetBrains code</strong>
-          <span>Rhythm</span>
-          <strong>Compact lines with clearer paragraph breaks</strong>
-          <span>Blocks</span>
-          <strong>Registry-driven article block tokens</strong>
-        </aside>
       </div>
     </section>
   )

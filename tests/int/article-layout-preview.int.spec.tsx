@@ -47,9 +47,18 @@ describe('ArticleLayoutPreview', () => {
     expect(preview.getAttribute('style')).toContain('Noto Sans SC')
     expect(preview.getAttribute('style')).toContain('JetBrains Mono')
     expect(screen.getByText('Article design preview')).toBeTruthy()
-    expect(screen.getByText('Compact editorial')).toBeTruthy()
+    expect(screen.queryByText('Compact editorial')).toBeNull()
+    expect(screen.queryByText('Typography')).toBeNull()
+    expect(screen.queryByText('Rhythm')).toBeNull()
+    expect(screen.queryByText('Blocks')).toBeNull()
     expect(screen.getByText(/字体系统应该让重点自然浮出来/)).toBeTruthy()
-    expect(screen.getByTestId('article-design-preview-codeblock')).toBeTruthy()
+
+    const copy = screen.getByTestId('article-design-preview-copy')
+
+    expect(copy.className).toContain('article-copy')
+    expect(preview.innerHTML).toContain('markdown-codeblock')
+    expect(preview.innerHTML).toContain('data-article-block="callout"')
+    expect(preview.innerHTML).toContain('markdown-table__scroll')
   })
 
   it('prefers live path values over stale article layout group values', () => {

@@ -16,7 +16,7 @@ import {
   buildSeoDescription,
   serializeStructuredData,
 } from '@/lib/seo'
-import { getSiteSettings } from '@/lib/site-settings'
+import { getResolvedSiteSettings } from '@/lib/site-settings'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string; slug: string }>
@@ -24,7 +24,7 @@ export async function generateMetadata(props: {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
   const article = await getTranslations({ locale, namespace: 'Article' })
-  const requestedSiteSettings = await getSiteSettings(locale)
+  const requestedSiteSettings = await getResolvedSiteSettings(locale)
   const resolved = await getPostBySlug({
     locale,
     slug,
@@ -43,7 +43,7 @@ export async function generateMetadata(props: {
   const availableLocales = await getRenderablePostLocales({ slug })
   const canonicalLocale = resolved.usedFallback ? resolved.resolvedLocale : locale
   const canonicalPath = `/posts/${encodeURIComponent(resolved.post.slug)}`
-  const siteSettings = await getSiteSettings(canonicalLocale)
+  const siteSettings = await getResolvedSiteSettings(canonicalLocale)
   const metaImage =
     resolved.post.seo?.metaImage && typeof resolved.post.seo.metaImage === 'object'
       ? resolved.post.seo.metaImage
@@ -96,7 +96,7 @@ export default async function PostPage(props: {
     notFound()
   }
 
-  const siteSettings = await getSiteSettings(resolved.resolvedLocale)
+  const siteSettings = await getResolvedSiteSettings(resolved.resolvedLocale)
   const payload = await getPayloadClient()
   const postViewMetric = await getPostViewMetric({
     locale: resolved.resolvedLocale,

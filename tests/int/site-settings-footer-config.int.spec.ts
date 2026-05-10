@@ -2,14 +2,44 @@ import { describe, expect, it } from 'vitest'
 
 import { SiteSettings } from '@/globals/SiteSettings'
 
+function collectFields(fields: any[]): any[] {
+  return fields.flatMap((field) => [
+    field,
+    ...(Array.isArray(field.fields) ? collectFields(field.fields) : []),
+    ...(Array.isArray(field.tabs)
+      ? field.tabs.flatMap((tab: any) => collectFields(tab.fields ?? []))
+      : []),
+  ])
+}
+
 describe('Site settings footer config', () => {
-  it('defines the rebuilt footer groups and reusable link shape', () => {
+  it('defines the rebuilt footer controls with a production-backed preview area', () => {
     const tabsField = SiteSettings.fields.find((field: any) => field.type === 'tabs') as any
     const footerTab = tabsField.tabs.find((tab: any) => tab.id === 'footer') as any
-    const footerField = footerTab.fields.find((field: any) => field.name === 'footer') as any
+    const footerField = collectFields(footerTab.fields).find(
+      (field: any) => field.name === 'footer',
+    ) as any
+    const layoutRow = footerField.fields[0] as any
+    const controlsField = layoutRow.fields.find((field: any) => field.type === 'collapsible') as any
+    const allFooterFields = collectFields(footerField.fields)
 
     expect(footerField.type).toBe('group')
-    expect(footerField.fields.map((field: any) => field.name)).toEqual([
+    expect(layoutRow.type).toBe('row')
+    expect(layoutRow.admin.className).toContain('site-settings-preview-grid')
+    expect(controlsField.label).toBe('Footer controls')
+    expect(controlsField.admin.className).toContain('site-settings-preview-grid__controls')
+    expect(controlsField.fields[0].name).toBe('footerEditorMode')
+    expect(controlsField.fields[0].admin.components.Field).toBe(
+      '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+    )
+    expect(controlsField.fields[1].type).toBe('group')
+    expect(
+      controlsField.fields[1].admin.condition({}, { footerEditorMode: 'form' }, {} as any),
+    ).toBe(true)
+    expect(
+      controlsField.fields[1].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
+    ).toBe(false)
+    expect(controlsField.fields[1].fields.map((field: any) => field.name)).toEqual([
       'brand',
       'navigationSections',
       'socialLinks',
@@ -18,8 +48,19 @@ describe('Site settings footer config', () => {
       'compliance',
       'bottomBar',
     ])
+    expect(controlsField.fields[2].name).toBe('footerRawConfig')
+    expect(
+      controlsField.fields[2].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
+    ).toBe(true)
 
-    const brandField = footerField.fields.find((field: any) => field.name === 'brand') as any
+    const previewField = allFooterFields.find((field: any) => field.name === 'footerPreview') as any
+
+    expect(previewField.type).toBe('ui')
+    expect(previewField.admin.components.Field).toBe(
+      '/components/payload/SiteFooterPreview#SiteFooterPreview',
+    )
+
+    const brandField = allFooterFields.find((field: any) => field.name === 'brand') as any
     expect(brandField.admin.description).toContain('Top-left identity')
     expect(brandField.fields.map((field: any) => field.name)).toEqual([
       'logo',
@@ -37,7 +78,7 @@ describe('Site settings footer config', () => {
       'openInNewTab',
     ])
 
-    const socialLinksField = footerField.fields.find(
+    const socialLinksField = allFooterFields.find(
       (field: any) => field.name === 'socialLinks',
     ) as any
     expect(socialLinksField.admin.description).toContain('Middle profile layer')
@@ -49,14 +90,12 @@ describe('Site settings footer config', () => {
     ])
     expect(socialLinksField.fields.find((field: any) => field.name === 'label').required).toBe(true)
 
-    const navigationSectionsField = footerField.fields.find(
+    const navigationSectionsField = allFooterFields.find(
       (field: any) => field.name === 'navigationSections',
     ) as any
     expect(navigationSectionsField.admin.description).toContain('Top directory layer')
 
-    const legalLinksField = footerField.fields.find(
-      (field: any) => field.name === 'legalLinks',
-    ) as any
+    const legalLinksField = allFooterFields.find((field: any) => field.name === 'legalLinks') as any
     expect(legalLinksField.admin.description).toContain('Bottom-left metadata layer')
   })
 })

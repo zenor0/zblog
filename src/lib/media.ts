@@ -1,11 +1,6 @@
-import path from 'node:path'
-
 import type { Media } from '@/payload-types'
 
-import { mediaPreviewDir, mediaUploadDir } from '@/lib/uploads'
-
 const localOrigin = 'http://zblog.local'
-const payloadMediaPrefixes = ['/api/media/file/', '/media/'] as const
 const pdfPreviewSuffixPattern = /\.page-(\d+)\.svg$/i
 
 export type MediaKind = 'image' | 'pdf' | 'unknown' | 'vector'
@@ -56,21 +51,6 @@ function usesDefaultPDFPreview(options: MediaRenderOptions = {}): boolean {
   )
 }
 
-function resolveSafePath(rootDir: string, relativePath: string): null | string {
-  if (relativePath.length === 0) {
-    return null
-  }
-
-  const resolvedPath = path.resolve(rootDir, relativePath)
-  const normalizedRoot = `${path.resolve(rootDir)}${path.sep}`
-
-  if (!resolvedPath.startsWith(normalizedRoot)) {
-    return null
-  }
-
-  return resolvedPath
-}
-
 function getPathnameFromSource(sourceURL: string): null | string {
   try {
     return new URL(sourceURL, localOrigin).pathname
@@ -90,7 +70,19 @@ function getExtension(sourceURL: null | string): null | string {
     return null
   }
 
-  const extension = path.extname(pathname).trim().toLowerCase()
+  const filename = getMediaFilename(pathname)
+
+  if (!filename) {
+    return null
+  }
+
+  const dotIndex = filename.lastIndexOf('.')
+
+  if (dotIndex <= 0 || dotIndex === filename.length - 1) {
+    return null
+  }
+
+  const extension = filename.slice(dotIndex).trim().toLowerCase()
 
   return extension.length > 0 ? extension : null
 }
@@ -108,15 +100,12 @@ export function getMediaFilename(sourceURL: null | string): null | string {
     return null
   }
 
-  const basename = path.basename(pathname)
+  const basename = pathname.split('/').filter(Boolean).at(-1) ?? ''
 
   return basename.length > 0 ? basename : null
 }
 
-export function inferMediaKind(args: {
-  mimeType?: null | string
-  src?: null | string
-}): MediaKind {
+export function inferMediaKind(args: { mimeType?: null | string; src?: null | string }): MediaKind {
   const mimeType = args.mimeType?.trim().toLowerCase() ?? null
   const extension = getExtension(args.src ?? null)
 
@@ -134,9 +123,20 @@ export function inferMediaKind(args: {
 
   if (
     extension &&
-    ['.avif', '.bmp', '.gif', '.heic', '.heif', '.ico', '.jpeg', '.jpg', '.png', '.tif', '.tiff', '.webp'].includes(
-      extension,
-    )
+    [
+      '.avif',
+      '.bmp',
+      '.gif',
+      '.heic',
+      '.heif',
+      '.ico',
+      '.jpeg',
+      '.jpg',
+      '.png',
+      '.tif',
+      '.tiff',
+      '.webp',
+    ].includes(extension)
   ) {
     return 'image'
   }
@@ -198,20 +198,16 @@ export function buildPDFPreviewURL(sourceURL: string, page = 1): null | string {
   return `/api/media/preview?${searchParams.toString()}`
 }
 
-export function resolveLocalMediaFilePath(filename: string): null | string {
-  return resolveSafePath(mediaUploadDir, filename)
-}
-
-export function resolveLocalMediaPreviewPath(previewFilename: string): null | string {
-  return resolveSafePath(mediaPreviewDir, previewFilename)
-}
-
 export function resolveMediaCaption(args: {
   alt?: null | string
   caption?: null | string
   title?: null | string
 }): null | string {
-  return normalizeMediaText(args.caption) ?? normalizeMediaText(args.title) ?? normalizeMediaText(args.alt)
+  return (
+    normalizeMediaText(args.caption) ??
+    normalizeMediaText(args.title) ??
+    normalizeMediaText(args.alt)
+  )
 }
 
 export function resolveAttachmentDescription(args: {
@@ -257,7 +253,7 @@ export function resolveMediaAsset(args: {
     previewURL:
       kind === 'pdf'
         ? usesDefaultPDFPreview(args.options)
-          ? args.media?.previewSVGURL ?? buildMediaRenderURL(sourceURL, args.options)
+          ? (args.media?.previewSVGURL ?? buildMediaRenderURL(sourceURL, args.options))
           : buildMediaRenderURL(sourceURL, args.options)
         : kind === 'unknown'
           ? null
@@ -265,32 +261,4 @@ export function resolveMediaAsset(args: {
     src: sourceURL,
     width: args.media?.width ?? null,
   }
-}
-
-export function resolveLocalMediaPath(sourceURL: string): null | string {
-  const pathname = getPathnameFromSource(sourceURL)
-
-  if (!pathname) {
-    return null
-  }
-
-  const matchedPrefix = payloadMediaPrefixes.find((prefix) => pathname.startsWith(prefix))
-
-  if (!matchedPrefix) {
-    return null
-  }
-
-  const rawRelativePath = pathname.slice(matchedPrefix.length)
-
-  if (rawRelativePath.length === 0) {
-    return null
-  }
-
-  const relativePath = decodeURIComponent(rawRelativePath)
-
-  if (relativePath.length === 0) {
-    return null
-  }
-
-  return resolveSafePath(mediaUploadDir, relativePath)
 }
