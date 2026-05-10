@@ -198,7 +198,9 @@ html[data-zblog-theme='light'] {
   .citation-link,
   [data-toc-rail] a,
   .article-anchor-return,
+  [data-article-anchor-highlight='true'],
   [data-slot='hover-card-content'] {
+    animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
@@ -539,8 +541,33 @@ html[data-zblog-preview-theme='light'] {
   }
 
   .article-anchor-return {
-    @apply fixed bottom-5 right-5 shadow-none;
+    @apply fixed shadow-none;
+    max-width: calc(100vw - 2rem);
     z-index: 40;
+  }
+
+  [data-article-anchor-highlight='true'] {
+    animation: article-anchor-highlight 1800ms ease-out;
+    background-color: color-mix(in oklch, var(--accent) 22%, transparent);
+    outline: 1px solid color-mix(in oklch, var(--foreground) 16%, transparent);
+    outline-offset: 0.35rem;
+  }
+
+  @keyframes article-anchor-highlight {
+    0% {
+      background-color: color-mix(in oklch, var(--accent) 26%, transparent);
+      outline-color: color-mix(in oklch, var(--foreground) 20%, transparent);
+    }
+
+    72% {
+      background-color: color-mix(in oklch, var(--accent) 16%, transparent);
+      outline-color: color-mix(in oklch, var(--foreground) 13%, transparent);
+    }
+
+    100% {
+      background-color: transparent;
+      outline-color: transparent;
+    }
   }
 
   .markdown-figure {

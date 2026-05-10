@@ -120,6 +120,11 @@ test.describe('Frontend', () => {
   test('shows article link previews and a return control for in-page jumps', async ({ page }) => {
     await page.goto('/zh-hans/posts/seed-markdown-showcase')
 
+    const tocLink = page.locator('[data-toc-rail] a', { hasText: '图表与交叉引用' }).first()
+
+    await tocLink.hover()
+    await expect(page.locator('[data-slot="hover-card-content"]')).toHaveCount(0)
+
     const bibliographyLink = page.locator('[data-post-reading-root] a[href="#reference-1"]').first()
 
     await bibliographyLink.hover()
@@ -146,6 +151,24 @@ test.describe('Frontend', () => {
     const returnButton = page.getByRole('button', { name: '回到原阅读位置' })
 
     await expect(returnButton).toBeVisible()
+    await expect
+      .poll(async () => {
+        return page.locator('#ref-fig-seed-hero').evaluate((element) => {
+          const top = element.getBoundingClientRect().top
+
+          return top > window.innerHeight * 0.2 && top < window.innerHeight * 0.36
+        })
+      })
+      .toBe(true)
+
+    const returnButtonDistance = await returnButton.evaluate((button) => {
+      const buttonRect = button.getBoundingClientRect()
+      const targetRect = document.getElementById('ref-fig-seed-hero')?.getBoundingClientRect()
+
+      return targetRect ? Math.abs(buttonRect.top - targetRect.top) : Number.POSITIVE_INFINITY
+    })
+
+    expect(returnButtonDistance).toBeLessThan(80)
     await returnButton.click()
     await expect(returnButton).toBeHidden()
   })

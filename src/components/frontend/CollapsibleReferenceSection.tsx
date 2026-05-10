@@ -3,6 +3,10 @@
 import { ChevronDownIcon, LibraryBigIcon } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 
+import {
+  getHashTarget,
+  scheduleArticleAnchorScroll,
+} from '@/components/frontend/article-anchor-navigation-utils'
 import { cn } from '@/lib/utils'
 
 type CollapsibleReferenceSectionProps = {
@@ -16,6 +20,14 @@ export function CollapsibleReferenceSection(props: CollapsibleReferenceSectionPr
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
+    const scrollToReference = (hash: string) => {
+      const target = getHashTarget(hash)
+
+      if (target) {
+        scheduleArticleAnchorScroll(target)
+      }
+    }
+
     const syncWithHash = () => {
       const hash = window.location.hash
 
@@ -26,13 +38,7 @@ export function CollapsibleReferenceSection(props: CollapsibleReferenceSectionPr
       setOpen(true)
 
       if (hash.startsWith('#reference-')) {
-        window.requestAnimationFrame(() => {
-          window.requestAnimationFrame(() => {
-            document.getElementById(hash.slice(1))?.scrollIntoView({
-              block: 'start',
-            })
-          })
-        })
+        scrollToReference(hash)
       }
     }
 
@@ -47,16 +53,6 @@ export function CollapsibleReferenceSection(props: CollapsibleReferenceSectionPr
 
       if (href === '#references' || href.startsWith('#reference-')) {
         setOpen(true)
-
-        if (href.startsWith('#reference-')) {
-          window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(() => {
-              document.getElementById(href.slice(1))?.scrollIntoView({
-                block: 'start',
-              })
-            })
-          })
-        }
       }
     }
 
