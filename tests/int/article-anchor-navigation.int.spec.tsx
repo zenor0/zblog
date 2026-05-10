@@ -96,12 +96,18 @@ describe('ArticleAnchorNavigation', () => {
 
     const target = screen.getByText('Target')
 
+    expect(target.getAttribute('data-article-anchor-highlight')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Return to reading position' })).toBeNull()
+
+    setScrollY(696)
+    fireEvent.scroll(window)
+
+    const returnButton = await screen.findByRole('button', { name: 'Return to reading position' })
+
     expect(target.getAttribute('data-article-anchor-highlight')).toBe('true')
 
-    const returnButton = screen.getByRole('button', { name: 'Return to reading position' })
-
     await waitFor(() => {
-      expect(returnButton.style.left).toBe('932px')
+      expect(returnButton.style.left).toBe('98px')
       expect(returnButton.style.top).toBe('500px')
     })
 
@@ -148,5 +154,8 @@ describe('ArticleAnchorNavigation', () => {
       behavior: 'auto',
       top: 252,
     })
+    expect(screen.getByRole('button', { name: 'Return to reading position' }).style.left).toBe(
+      '38px',
+    )
   })
 })

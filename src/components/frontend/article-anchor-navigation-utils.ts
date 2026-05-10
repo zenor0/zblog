@@ -65,6 +65,70 @@ export function scrollToArticleAnchorTarget(
   return top
 }
 
+export function watchArticleAnchorScrollCompletion(args: {
+  onComplete: () => void
+  settleDelayMs?: number
+  targetTop: number
+}) {
+  const settleDelayMs = args.settleDelayMs ?? 140
+  const settleThreshold = 1
+  let completed = false
+  let started = Math.abs(window.scrollY - args.targetTop) <= settleThreshold
+  let timeout: number | null = null
+
+  const clearTimeoutHandle = () => {
+    if (timeout != null) {
+      window.clearTimeout(timeout)
+      timeout = null
+    }
+  }
+
+  const detach = () => {
+    window.removeEventListener('scroll', handleScroll)
+  }
+
+  const complete = () => {
+    if (completed) {
+      return
+    }
+
+    completed = true
+    clearTimeoutHandle()
+    detach()
+    args.onComplete()
+  }
+
+  const arm = () => {
+    clearTimeoutHandle()
+    timeout = window.setTimeout(complete, settleDelayMs)
+  }
+
+  const handleScroll = () => {
+    if (completed) {
+      return
+    }
+
+    started = true
+    arm()
+  }
+
+  window.addEventListener('scroll', handleScroll, { passive: true })
+
+  if (started) {
+    arm()
+  }
+
+  return () => {
+    if (completed) {
+      return
+    }
+
+    completed = true
+    clearTimeoutHandle()
+    detach()
+  }
+}
+
 export function shouldDeferArticleAnchorScroll(target: Element) {
   return Boolean(target.closest('details:not([open])'))
 }
@@ -73,9 +137,11 @@ export function scheduleArticleAnchorScroll(
   target: Element,
   behavior = readArticleAnchorScrollBehavior(),
 ) {
-  window.requestAnimationFrame(() => {
+  return new Promise<number>((resolve) => {
     window.requestAnimationFrame(() => {
-      scrollToArticleAnchorTarget(target, behavior)
+      window.requestAnimationFrame(() => {
+        resolve(scrollToArticleAnchorTarget(target, behavior))
+      })
     })
   })
 }

@@ -548,24 +548,28 @@ html[data-zblog-preview-theme='light'] {
 
   [data-article-anchor-highlight='true'] {
     animation: article-anchor-highlight 1800ms ease-out;
-    background-color: color-mix(in oklch, var(--accent) 22%, transparent);
-    outline: 1px solid color-mix(in oklch, var(--foreground) 16%, transparent);
-    outline-offset: 0.35rem;
+    background-color: color-mix(in oklch, var(--accent) 34%, transparent);
+    box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--accent) 13%, transparent);
+    outline: 1px solid color-mix(in oklch, var(--foreground) 24%, transparent);
+    outline-offset: 0.42rem;
   }
 
   @keyframes article-anchor-highlight {
     0% {
-      background-color: color-mix(in oklch, var(--accent) 26%, transparent);
-      outline-color: color-mix(in oklch, var(--foreground) 20%, transparent);
+      background-color: color-mix(in oklch, var(--accent) 42%, transparent);
+      box-shadow: 0 0 0 0.55rem color-mix(in oklch, var(--accent) 18%, transparent);
+      outline-color: color-mix(in oklch, var(--foreground) 32%, transparent);
     }
 
     72% {
-      background-color: color-mix(in oklch, var(--accent) 16%, transparent);
-      outline-color: color-mix(in oklch, var(--foreground) 13%, transparent);
+      background-color: color-mix(in oklch, var(--accent) 24%, transparent);
+      box-shadow: 0 0 0 0.42rem color-mix(in oklch, var(--accent) 10%, transparent);
+      outline-color: color-mix(in oklch, var(--foreground) 18%, transparent);
     }
 
     100% {
       background-color: transparent;
+      box-shadow: 0 0 0 0 transparent;
       outline-color: transparent;
     }
   }
