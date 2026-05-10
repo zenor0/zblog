@@ -1360,6 +1360,20 @@ html[data-zblog-preview-theme='light'] {
     line-height: var(--article-layout-copy-line-height);
   }
 
+  [data-article-layout-preset]:not([data-article-layout-preset='current'])
+    [data-article-reading-column] {
+    width: 100%;
+    max-width: var(--article-layout-reading-column-max);
+    justify-self: center;
+  }
+
+  [data-article-layout-preset]:not([data-article-layout-preset='current'])
+    [data-article-reading-column]
+    .article-copy {
+    width: 100%;
+    max-width: 100%;
+  }
+
   [data-article-layout-preset]:not([data-article-layout-preset='current']) .article-copy > * + * {
     margin-top: var(--article-layout-flow-gap);
   }
@@ -1517,11 +1531,6 @@ html[data-zblog-preview-theme='light'] {
       grid-template-columns: minmax(0, var(--article-layout-reading-column-max)) 17rem !important;
       column-gap: var(--article-layout-grid-gap) !important;
       justify-content: center;
-    }
-
-    [data-article-layout-preset]:not([data-article-layout-preset='current'])
-      [data-article-reading-column] {
-      max-width: var(--article-layout-reading-column-max);
     }
   }
 }
