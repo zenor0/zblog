@@ -15,6 +15,12 @@ export const siteFooterLayoutStyleOptions = [
     label: 'Compliance ledger',
     value: 'ledger',
   },
+  {
+    description:
+      'A three-layer directory with profile links centered between navigation and compliance metadata.',
+    label: 'Balanced directory',
+    value: 'balanced',
+  },
 ] as const
 
 export type SiteFooterLayoutStyle = (typeof siteFooterLayoutStyleOptions)[number]['value']

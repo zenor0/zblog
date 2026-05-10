@@ -65,7 +65,7 @@ const footerLayoutPreviewSettings = {
     socialLinks: [
       {
         platform: 'github',
-        label: 'GitHub',
+        label: '@your-github-id',
         openInNewTab: true,
         url: 'https://github.com/zenor0',
       },
@@ -133,7 +133,7 @@ export default function FooterLayoutLabPage() {
             用真实 footer 字段对比信息型排版。
           </h1>
           <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
-            /dev/footer-layouts 集中预览三个可配置方案。内容都来自同一组 footer
+            /dev/footer-layouts 集中预览四个可配置方案。内容都来自同一组 footer
             配置字段，选择后只需要在 Site Settings 里切换布局样式。
           </p>
         </div>

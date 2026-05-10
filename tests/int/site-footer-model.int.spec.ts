@@ -14,6 +14,7 @@ describe('site footer model helpers', () => {
       'compact',
       'directory',
       'ledger',
+      'balanced',
     ])
   })
 

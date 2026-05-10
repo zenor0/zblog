@@ -770,7 +770,7 @@ export interface SiteSetting {
     /**
      * Controls the frontend footer layout. Preview every option under /dev/footer-layouts.
      */
-    layoutStyle: 'compact' | 'directory' | 'ledger';
+    layoutStyle: 'compact' | 'directory' | 'ledger' | 'balanced';
     brand: {
       logo?: (number | null) | Media;
       name?: string | null;

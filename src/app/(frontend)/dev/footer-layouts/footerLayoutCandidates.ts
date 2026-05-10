@@ -16,6 +16,12 @@ export const footerLayoutCandidates = [
     layoutStyle: 'ledger',
     title: '方案 C：备案信息型',
   },
+  {
+    description:
+      '结合目录顶栏和三层结构：上方导航，中间放站主联系方式与社交账号，下方左右平衡地放备案、法律与版权信息。',
+    layoutStyle: 'balanced',
+    title: '方案 D：平衡目录型',
+  },
 ] satisfies {
   description: string
   layoutStyle: SiteFooterLayoutStyle

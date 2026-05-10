@@ -28,6 +28,7 @@ describe('Site settings footer config', () => {
       'compact',
       'directory',
       'ledger',
+      'balanced',
     ])
 
     const brandField = footerField.fields.find((field: any) => field.name === 'brand') as any
