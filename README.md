@@ -26,7 +26,7 @@ That's it! Changes made in `./src` will be reflected in your app. Follow the on-
 
 ## Project docs
 
-- [Locale Policy](./docs/locale-policy.md): canonical locale tags, lowercase public URL slugs, browser language negotiation, and the process for adding or renaming locales.
+- [Project documentation](./docs/README.md): frontend design system, article layout, Markdown rendering, post editor IA, bibliography, footer, localization, and development labs.
 - Runtime state: `ZBLOG_STATE_DIR` defaults to `.data`; keep `DATABASE_URL=file:.data/zblog.db` unless you intentionally point SQLite at another file.
 
 #### Docker (Optional)
