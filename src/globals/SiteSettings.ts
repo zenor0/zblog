@@ -10,10 +10,6 @@ import {
   validateArticleDesignLength,
   validateArticleDesignLineHeight,
 } from '@/lib/article-design'
-import {
-  defaultSiteFooterLayoutStyle,
-  siteFooterLayoutStyleOptions,
-} from '@/lib/site-footer-layout'
 
 const localizedHeroDefaults = {
   en: {
@@ -141,23 +137,12 @@ function footerLinkField(args: { label: string; name?: string; required?: boolea
 
 const footerFields: Field[] = [
   {
-    name: 'layoutStyle',
-    type: 'select',
-    admin: {
-      description:
-        'Controls the frontend footer layout. Preview every option under /dev/footer-layouts.',
-    },
-    defaultValue: defaultSiteFooterLayoutStyle,
-    label: 'Layout style',
-    options: siteFooterLayoutStyleOptions.map((option) => ({
-      label: option.label,
-      value: option.value,
-    })),
-    required: true,
-  },
-  {
     name: 'brand',
     type: 'group',
+    admin: {
+      description:
+        'Top-left identity in the footer directory layer. Keep this concise so the navigation groups can balance beside it.',
+    },
     label: 'Brand',
     fields: [
       {
@@ -175,12 +160,18 @@ const footerFields: Field[] = [
       {
         name: 'description',
         type: 'textarea',
+        admin: {
+          description: 'Short one-line description shown under the brand name.',
+        },
         label: 'Brand description',
         localized: true,
       },
       {
         name: 'supportingText',
         type: 'textarea',
+        admin: {
+          description: 'Optional secondary line shown below the brand description.',
+        },
         label: 'Supporting text',
         localized: true,
       },
@@ -192,6 +183,10 @@ const footerFields: Field[] = [
   {
     name: 'navigationSections',
     type: 'array',
+    admin: {
+      description:
+        'Top directory layer. Sections auto-flow across the right side of the footer and rebalance as entries are added.',
+    },
     label: 'Navigation sections',
     labels: {
       plural: 'Navigation sections',
@@ -238,6 +233,10 @@ const footerFields: Field[] = [
   {
     name: 'socialLinks',
     type: 'array',
+    admin: {
+      description:
+        'Middle profile layer. Platform controls the icon; label should be the visible account or handle, such as @your-github-id.',
+    },
     label: 'Social links',
     labels: {
       plural: 'Social links',
@@ -257,8 +256,13 @@ const footerFields: Field[] = [
       {
         name: 'label',
         type: 'text',
+        admin: {
+          description:
+            'Visible account label or handle. Use values like @your-github-id instead of repeating the platform name.',
+        },
         label: 'Label',
         localized: true,
+        required: true,
       },
       {
         name: 'url',
@@ -277,6 +281,10 @@ const footerFields: Field[] = [
   {
     name: 'contactItems',
     type: 'array',
+    admin: {
+      description:
+        'Middle profile layer. Use this for email, newsletter, or other owner contact records.',
+    },
     label: 'Contact items',
     labels: {
       plural: 'Contact items',
@@ -305,6 +313,10 @@ const footerFields: Field[] = [
   {
     name: 'legalLinks',
     type: 'array',
+    admin: {
+      description:
+        'Bottom-left metadata layer. Use for privacy, terms, and other low-frequency legal links.',
+    },
     label: 'Legal links',
     labels: {
       plural: 'Legal links',
@@ -327,6 +339,10 @@ const footerFields: Field[] = [
   {
     name: 'compliance',
     type: 'group',
+    admin: {
+      description:
+        'Bottom metadata layer. Filings render on the left; copyright renders on the right on desktop.',
+    },
     label: 'Compliance',
     fields: [
       {
@@ -370,6 +386,10 @@ const footerFields: Field[] = [
   {
     name: 'bottomBar',
     type: 'group',
+    admin: {
+      description:
+        'Bottom-right note shown with the copyright line, commonly used for powered-by or ownership text.',
+    },
     label: 'Bottom bar',
     fields: [
       {
@@ -400,8 +420,7 @@ const articleLayoutFields: Field[] = [
             name: 'preset',
             type: 'select',
             admin: {
-              description:
-                'Choose the default article design preset for public article pages.',
+              description: 'Choose the default article design preset for public article pages.',
             },
             defaultValue: defaultArticleDesignPresetID,
             label: 'Preset',

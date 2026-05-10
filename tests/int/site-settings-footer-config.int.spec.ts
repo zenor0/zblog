@@ -10,7 +10,6 @@ describe('Site settings footer config', () => {
 
     expect(footerField.type).toBe('group')
     expect(footerField.fields.map((field: any) => field.name)).toEqual([
-      'layoutStyle',
       'brand',
       'navigationSections',
       'socialLinks',
@@ -20,17 +19,8 @@ describe('Site settings footer config', () => {
       'bottomBar',
     ])
 
-    const layoutStyleField = footerField.fields.find(
-      (field: any) => field.name === 'layoutStyle',
-    ) as any
-    expect(layoutStyleField.defaultValue).toBe('compact')
-    expect(layoutStyleField.options.map((option: any) => option.value)).toEqual([
-      'compact',
-      'directory',
-      'ledger',
-    ])
-
     const brandField = footerField.fields.find((field: any) => field.name === 'brand') as any
+    expect(brandField.admin.description).toContain('Top-left identity')
     expect(brandField.fields.map((field: any) => field.name)).toEqual([
       'logo',
       'name',
@@ -50,11 +40,23 @@ describe('Site settings footer config', () => {
     const socialLinksField = footerField.fields.find(
       (field: any) => field.name === 'socialLinks',
     ) as any
+    expect(socialLinksField.admin.description).toContain('Middle profile layer')
     expect(socialLinksField.fields.map((field: any) => field.name)).toEqual([
       'platform',
       'label',
       'url',
       'openInNewTab',
     ])
+    expect(socialLinksField.fields.find((field: any) => field.name === 'label').required).toBe(true)
+
+    const navigationSectionsField = footerField.fields.find(
+      (field: any) => field.name === 'navigationSections',
+    ) as any
+    expect(navigationSectionsField.admin.description).toContain('Top directory layer')
+
+    const legalLinksField = footerField.fields.find(
+      (field: any) => field.name === 'legalLinks',
+    ) as any
+    expect(legalLinksField.admin.description).toContain('Bottom-left metadata layer')
   })
 })

@@ -1,13 +1,23 @@
 import Link from 'next/link'
+import {
+  AtSign,
+  ExternalLink,
+  Github,
+  Instagram,
+  Linkedin,
+  Mail,
+  MessageCircle,
+  Rss,
+  UserRound,
+  Youtube,
+  type LucideIcon,
+} from 'lucide-react'
 
-import type { NormalizedSiteFooter, SiteFooterLayoutStyle } from '@/components/frontend/site-footer'
+import type { NormalizedSiteFooter } from '@/components/frontend/site-footer'
 import type { AppLocale } from '@/lib/locales'
 import type { SiteSettings } from '@/lib/site-settings'
 
-import {
-  normalizeSiteFooter,
-  resolveSiteFooterLayoutStyle,
-} from '@/components/frontend/site-footer'
+import { normalizeSiteFooter } from '@/components/frontend/site-footer'
 import { cn } from '@/lib/utils'
 
 type FooterInlineItem = {
@@ -15,6 +25,24 @@ type FooterInlineItem = {
   label: string
   rel?: string
   target?: string
+}
+
+type FooterProfileItem = FooterInlineItem & {
+  icon: LucideIcon
+  iconKey: string
+  meta: null | string
+}
+
+const socialPlatformIcons: Record<string, LucideIcon> = {
+  discord: MessageCircle,
+  email: Mail,
+  github: Github,
+  instagram: Instagram,
+  linkedin: Linkedin,
+  other: ExternalLink,
+  rss: Rss,
+  x: AtSign,
+  youtube: Youtube,
 }
 
 function FooterTextLink(props: FooterInlineItem & { className?: string }) {
@@ -34,42 +62,30 @@ function FooterTextLink(props: FooterInlineItem & { className?: string }) {
   )
 }
 
-function getNavigationLinks(footer: NormalizedSiteFooter): FooterInlineItem[] {
-  return footer.navigationSections.flatMap((section) =>
-    section.links.map((item) => ({
-      href: item.href,
-      label: item.label,
-      rel: item.rel,
-      target: item.target,
-    })),
-  )
-}
-
-function getUtilityItems(footer: NormalizedSiteFooter): FooterInlineItem[] {
+function getProfileItems(footer: NormalizedSiteFooter): FooterProfileItem[] {
   return [
-    ...getNavigationLinks(footer),
-    ...footer.socialLinks.map((item) => ({
-      href: item.href,
-      label: item.label,
-      rel: item.rel,
-      target: item.target,
-    })),
     ...footer.contactItems.map((item) => ({
       href: item.href,
+      icon: item.label.toLowerCase().includes('email') ? Mail : UserRound,
+      iconKey: item.label.toLowerCase().includes('email') ? 'email' : 'contact',
       label: item.value,
+      meta: item.label,
       rel: item.rel,
       target: item.target,
     })),
-    ...footer.legalLinks.map((item) => ({
+    ...footer.socialLinks.map((item) => ({
       href: item.href,
+      icon: socialPlatformIcons[String(item.platform)] ?? ExternalLink,
+      iconKey: String(item.platform),
       label: item.label,
+      meta: null,
       rel: item.rel,
       target: item.target,
     })),
   ]
 }
 
-function FooterIdentity(props: { footer: NormalizedSiteFooter; showSupportingText?: boolean }) {
+function FooterIdentity(props: { footer: NormalizedSiteFooter }) {
   const { brand } = props.footer
   const content = (
     <div className="flex min-w-0 flex-col gap-2">
@@ -92,7 +108,7 @@ function FooterIdentity(props: { footer: NormalizedSiteFooter; showSupportingTex
         <p className="max-w-md text-sm leading-6 text-muted-foreground">{brand.description}</p>
       ) : null}
 
-      {props.showSupportingText && brand.supportingText ? (
+      {brand.supportingText ? (
         <p className="max-w-md text-sm leading-6 text-muted-foreground">{brand.supportingText}</p>
       ) : null}
     </div>
@@ -106,41 +122,6 @@ function FooterIdentity(props: { footer: NormalizedSiteFooter; showSupportingTex
     <Link className="block no-underline" href={brand.href} rel={brand.rel} target={brand.target}>
       {content}
     </Link>
-  )
-}
-
-function FooterMetadata(props: { className?: string; footer: NormalizedSiteFooter }) {
-  const { compliance } = props.footer
-  const hasMetadata =
-    compliance.filings.length > 0 || Boolean(compliance.copyright) || Boolean(compliance.note)
-
-  if (!hasMetadata) {
-    return null
-  }
-
-  return (
-    <div
-      className={cn('flex flex-col gap-2 text-sm leading-6 text-muted-foreground', props.className)}
-      data-footer-meta=""
-    >
-      {compliance.filings.length ? (
-        <dl className="flex flex-wrap gap-x-5 gap-y-1">
-          {compliance.filings.map((item) => (
-            <div className="flex flex-wrap gap-x-1.5" key={`${item.label}-${item.value}`}>
-              <dt>{item.label}</dt>
-              <dd>{item.href ? <Link href={item.href}>{item.value}</Link> : item.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-
-      {compliance.copyright || compliance.note ? (
-        <div className="flex flex-wrap gap-x-5 gap-y-1">
-          {compliance.copyright ? <p>{compliance.copyright}</p> : null}
-          {compliance.note ? <p>{compliance.note}</p> : null}
-        </div>
-      ) : null}
-    </div>
   )
 }
 
@@ -198,134 +179,132 @@ function FooterNavSections(props: { footer: NormalizedSiteFooter }) {
   )
 }
 
-function FooterContactRecords(props: { footer: NormalizedSiteFooter }) {
-  if (props.footer.contactItems.length === 0) {
+function FooterProfileItems(props: { footer: NormalizedSiteFooter }) {
+  const items = getProfileItems(props.footer)
+
+  if (items.length === 0) {
     return null
   }
 
   return (
-    <dl className="flex flex-col gap-2 text-sm leading-6">
-      {props.footer.contactItems.map((item) => (
-        <div className="grid gap-0.5" key={`${item.label}-${item.value}`}>
-          <dt className="editorial-meta">{item.label}</dt>
-          <dd>
-            <FooterTextLink
+    <section
+      aria-label="Owner profile links"
+      className="grid gap-4 border-t border-border py-5 sm:grid-cols-[repeat(auto-fit,minmax(13rem,1fr))]"
+      data-footer-adaptive-grid="profile"
+      data-footer-layer="profile"
+    >
+      {items.map((item) => {
+        const Icon = item.icon
+        const content = (
+          <>
+            <Icon
+              aria-hidden="true"
+              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+              data-footer-icon={item.iconKey}
+            />
+            <span className="grid min-w-0 gap-0.5">
+              {item.meta ? <span className="editorial-meta">{item.meta}</span> : null}
+              <span className="break-words text-sm leading-6 text-foreground">{item.label}</span>
+            </span>
+          </>
+        )
+
+        if (item.href) {
+          return (
+            <Link
+              className="flex min-w-0 gap-3 no-underline"
               href={item.href}
-              label={item.value}
+              key={`${item.meta}-${item.label}-${item.href}`}
               rel={item.rel}
               target={item.target}
-            />
-          </dd>
-        </div>
-      ))}
-    </dl>
-  )
-}
+            >
+              {content}
+            </Link>
+          )
+        }
 
-function DirectoryFooter(props: { footer: NormalizedSiteFooter }) {
-  const secondaryLinks: FooterInlineItem[] = [
-    ...props.footer.socialLinks.map((item) => ({
-      href: item.href,
-      label: item.label,
-      rel: item.rel,
-      target: item.target,
-    })),
-    ...props.footer.legalLinks.map((item) => ({
-      href: item.href,
-      label: item.label,
-      rel: item.rel,
-      target: item.target,
-    })),
-  ]
-
-  return (
-    <div className="page-frame py-8 sm:py-10">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)]">
-        <FooterIdentity footer={props.footer} showSupportingText />
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-footer-grid="">
-          <FooterNavSections footer={props.footer} />
-
-          {secondaryLinks.length ? (
-            <section aria-label="Footer utility links" className="flex flex-col gap-2">
-              <FooterInlineItems className="flex-col items-start gap-x-0" items={secondaryLinks} />
-            </section>
-          ) : null}
-
-          <section aria-label="Footer contact information">
-            <FooterContactRecords footer={props.footer} />
-          </section>
-        </div>
-      </div>
-
-      <FooterMetadata className="mt-8 border-t border-border pt-5" footer={props.footer} />
-    </div>
-  )
-}
-
-function CompactFooter(props: { footer: NormalizedSiteFooter }) {
-  return (
-    <div className="page-frame py-6 sm:py-8">
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <FooterIdentity footer={props.footer} />
-          <FooterInlineItems className="lg:justify-end" items={getUtilityItems(props.footer)} />
-        </div>
-
-        <FooterMetadata className="border-t border-border pt-4" footer={props.footer} />
-      </div>
-    </div>
-  )
-}
-
-function LedgerFooter(props: { footer: NormalizedSiteFooter }) {
-  const ledgerLinks = [
-    ...props.footer.legalLinks,
-    ...getNavigationLinks(props.footer),
-    ...props.footer.socialLinks.map((item) => ({
-      href: item.href,
-      label: item.label,
-      rel: item.rel,
-      target: item.target,
-    })),
-  ]
-
-  return (
-    <div className="page-frame py-6 sm:py-8">
-      <div className="grid gap-5">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-          <FooterIdentity footer={props.footer} />
-          <FooterInlineItems className="lg:justify-end" items={ledgerLinks} />
-        </div>
-
-        {props.footer.contactItems.length ? (
-          <div className="border-t border-border pt-4">
-            <FooterContactRecords footer={props.footer} />
+        return (
+          <div className="flex min-w-0 gap-3" key={`${item.meta}-${item.label}`}>
+            {content}
           </div>
-        ) : null}
+        )
+      })}
+    </section>
+  )
+}
 
-        <FooterMetadata className="border-t border-border pt-4" footer={props.footer} />
-      </div>
+function FooterMetadata(props: { footer: NormalizedSiteFooter }) {
+  const { compliance, legalLinks } = props.footer
+  const hasLeftContent = legalLinks.length > 0 || compliance.filings.length > 0
+  const hasRightContent = Boolean(compliance.copyright) || Boolean(compliance.note)
+
+  if (!hasLeftContent && !hasRightContent) {
+    return null
+  }
+
+  return (
+    <div
+      className="grid gap-4 border-t border-border pt-5 text-sm leading-6 text-muted-foreground lg:grid-cols-[minmax(0,1fr)_minmax(16rem,auto)]"
+      data-footer-layer="metadata"
+    >
+      {hasLeftContent ? (
+        <div className="flex flex-col gap-2" data-footer-meta-align="left">
+          <FooterInlineItems items={legalLinks} />
+
+          {compliance.filings.length ? (
+            <dl className="flex flex-wrap gap-x-5 gap-y-1">
+              {compliance.filings.map((item) => (
+                <div className="flex flex-wrap gap-x-1.5" key={`${item.label}-${item.value}`}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.href ? <Link href={item.href}>{item.value}</Link> : item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+        </div>
+      ) : null}
+
+      {hasRightContent ? (
+        <div
+          className="flex flex-col gap-1 lg:items-end lg:text-right"
+          data-footer-meta-align="right"
+        >
+          {compliance.copyright ? <p>{compliance.copyright}</p> : null}
+          {compliance.note ? <p>{compliance.note}</p> : null}
+        </div>
+      ) : null}
     </div>
   )
 }
 
-export function SiteFooterLayout(props: {
-  className?: string
-  footer: NormalizedSiteFooter
-  layoutStyle?: SiteFooterLayoutStyle
-}) {
-  const layoutStyle = resolveSiteFooterLayoutStyle(props.layoutStyle ?? props.footer.layoutStyle)
-
+export function SiteFooterLayout(props: { className?: string; footer: NormalizedSiteFooter }) {
   return (
     <footer
       className={cn('mt-16 border-t border-border', props.className)}
-      data-footer-layout={layoutStyle}
+      data-footer-layout="balanced"
       data-site-footer=""
     >
-      {layoutStyle === 'directory' ? <DirectoryFooter footer={props.footer} /> : null}
-      {layoutStyle === 'ledger' ? <LedgerFooter footer={props.footer} /> : null}
-      {layoutStyle === 'compact' ? <CompactFooter footer={props.footer} /> : null}
+      <div className="page-frame py-7 sm:py-9">
+        <div className="grid gap-5">
+          <div
+            className="grid gap-7 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)]"
+            data-footer-layer="directory"
+          >
+            <FooterIdentity footer={props.footer} />
+
+            <div
+              className="grid gap-6 sm:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]"
+              data-footer-adaptive-grid="directory"
+              data-footer-grid=""
+            >
+              <FooterNavSections footer={props.footer} />
+            </div>
+          </div>
+
+          <FooterProfileItems footer={props.footer} />
+          <FooterMetadata footer={props.footer} />
+        </div>
+      </div>
     </footer>
   )
 }

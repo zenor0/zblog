@@ -432,14 +432,6 @@ html[data-zblog-preview-theme='light'] {
     @apply items-start;
   }
 
-  [data-site-footer] [data-footer-link-description] {
-    @apply text-sm leading-6 text-muted-foreground;
-  }
-
-  [data-site-footer] [data-footer-bottom] {
-    @apply text-sm text-muted-foreground;
-  }
-
   .md-callout {
     @apply my-8 border border-border bg-muted/42 px-5 py-4 text-foreground/84;
     border-left-width: 0.22rem;
@@ -1475,8 +1467,8 @@ html[data-zblog-preview-theme='light'] {
     background: var(--article-block-code-background);
     border-color: var(--article-block-code-border-color);
     font-family:
-      var(--article-layout-code-font-family), var(--font-code, 'JetBrains Mono'),
-      'SFMono-Regular', Consolas, monospace;
+      var(--article-layout-code-font-family), var(--font-code, 'JetBrains Mono'), 'SFMono-Regular',
+      Consolas, monospace;
     padding: var(--article-layout-code-padding);
     font-size: var(--article-layout-code-font-size);
     line-height: var(--article-layout-code-line-height);
@@ -1489,8 +1481,8 @@ html[data-zblog-preview-theme='light'] {
     background: var(--article-block-inline-code-background);
     border-color: var(--article-block-inline-code-border-color);
     font-family:
-      var(--article-layout-code-font-family), var(--font-code, 'JetBrains Mono'),
-      'SFMono-Regular', Consolas, monospace;
+      var(--article-layout-code-font-family), var(--font-code, 'JetBrains Mono'), 'SFMono-Regular',
+      Consolas, monospace;
   }
 
   [data-article-layout-preset]:not([data-article-layout-preset='current']) .media-surface {

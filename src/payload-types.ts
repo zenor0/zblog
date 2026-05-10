@@ -768,13 +768,18 @@ export interface SiteSetting {
   };
   footer: {
     /**
-     * Controls the frontend footer layout. Preview every option under /dev/footer-layouts.
+     * Top-left identity in the footer directory layer. Keep this concise so the navigation groups can balance beside it.
      */
-    layoutStyle: 'compact' | 'directory' | 'ledger';
     brand: {
       logo?: (number | null) | Media;
       name?: string | null;
+      /**
+       * Short one-line description shown under the brand name.
+       */
       description?: string | null;
+      /**
+       * Optional secondary line shown below the brand description.
+       */
       supportingText?: string | null;
       link: {
         type: 'internal' | 'external';
@@ -786,6 +791,9 @@ export interface SiteSetting {
         openInNewTab?: boolean | null;
       };
     };
+    /**
+     * Top directory layer. Sections auto-flow across the right side of the footer and rebalance as entries are added.
+     */
     navigationSections?:
       | {
           title: string;
@@ -808,15 +816,24 @@ export interface SiteSetting {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Middle profile layer. Platform controls the icon; label should be the visible account or handle, such as @your-github-id.
+     */
     socialLinks?:
       | {
           platform: 'github' | 'x' | 'linkedin' | 'youtube' | 'instagram' | 'discord' | 'rss' | 'email' | 'other';
-          label?: string | null;
+          /**
+           * Visible account label or handle. Use values like @your-github-id instead of repeating the platform name.
+           */
+          label: string;
           url: string;
           openInNewTab?: boolean | null;
           id?: string | null;
         }[]
       | null;
+    /**
+     * Middle profile layer. Use this for email, newsletter, or other owner contact records.
+     */
     contactItems?:
       | {
           label: string;
@@ -833,6 +850,9 @@ export interface SiteSetting {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Bottom-left metadata layer. Use for privacy, terms, and other low-frequency legal links.
+     */
     legalLinks?:
       | {
           label: string;
@@ -848,6 +868,9 @@ export interface SiteSetting {
           id?: string | null;
         }[]
       | null;
+    /**
+     * Bottom metadata layer. Filings render on the left; copyright renders on the right on desktop.
+     */
     compliance?: {
       copyright?: string | null;
       filings?:
@@ -859,6 +882,9 @@ export interface SiteSetting {
           }[]
         | null;
     };
+    /**
+     * Bottom-right note shown with the copyright line, commonly used for powered-by or ownership text.
+     */
     bottomBar?: {
       note?: string | null;
     };
@@ -915,7 +941,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   footer?:
     | T
     | {
-        layoutStyle?: T;
         brand?:
           | T
           | {
