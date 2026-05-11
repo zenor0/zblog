@@ -76,6 +76,7 @@ describe('site settings config helpers', () => {
 
     expect(context['site.name']).toBe('ZBlog')
     expect(context['site.description']).toBe('Notes about building products.')
+    expect(context['site.currentYear']).toBe(String(new Date().getFullYear()))
     expect(context['owner.name']).toBe('Zenoro')
     expect(context['owner.handle']).toBe('@zenor0')
     expect(context['assets.logo']).toBe(11)

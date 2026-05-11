@@ -685,7 +685,7 @@ export interface SiteSetting {
   siteName: string;
   siteDescription?: string | null;
   /**
-   * Shared variables used by other site setting sections. Use {{site.name}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.
+   * Shared variables used by other site setting sections. Use {{site.name}}, {{site.currentYear}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.
    */
   globalVariables?: {
     /**

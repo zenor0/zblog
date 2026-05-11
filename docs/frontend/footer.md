@@ -6,6 +6,8 @@ The footer is Payload-backed, localized, and structured for a mature content sit
 
 The schema is defined in `SiteSettings.footer`; normalization lives in `src/components/frontend/site-footer.ts`; rendering lives in `src/components/frontend/SiteFooter.tsx`.
 
+The admin preview uses `/preview/site-footer` in an iframe so it runs inside the real frontend shell. The Payload field sends the current unsaved form values to that iframe with a same-origin `postMessage`, and the iframe renders the same normalized `SiteFooterLayout` used by production pages.
+
 ## Schema
 
 The footer group contains:
@@ -58,8 +60,25 @@ Available layout styles:
 - `compact`: default. A single compact record for links, copyright, and compliance numbers.
 - `directory`: grouped navigation and utility sections with compliance metadata below.
 - `ledger`: legal-first layout that keeps filings, copyright, and required links prominent.
+- `balanced`: a three-layer directory with navigation, profile links, and compliance metadata.
 
 The footer layout lab under `/dev/footer-layouts` exists to compare these styles with realistic content.
+
+## Starter Preset
+
+Footer controls include **Apply starter footer**. It replaces the current footer with a generic blog footer and fills in missing shared variables without overwriting existing owner, contact, or social data.
+
+The preset uses editable references:
+
+- `{{site.name}}`
+- `{{site.description}}`
+- `{{site.currentYear}}`
+- `{{custom.tagline}}`
+- `{{social.github.label}}` / `{{social.github.url}}`
+- `{{social.rss.label}}` / `{{social.rss.url}}`
+- `{{contact.email.label}}` / `{{contact.email.value}}` / `{{contact.email.url}}`
+
+After applying it, editors usually only need to change the site name, site description, owner name, email, GitHub URL, RSS URL, and tagline in General settings.
 
 ## Rendering Rules
 

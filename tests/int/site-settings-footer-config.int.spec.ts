@@ -28,18 +28,22 @@ describe('Site settings footer config', () => {
     expect(layoutRow.admin.className).toContain('site-settings-preview-grid')
     expect(controlsField.label).toBe('Footer controls')
     expect(controlsField.admin.className).toContain('site-settings-preview-grid__controls')
-    expect(controlsField.fields[0].name).toBe('footerEditorMode')
+    expect(controlsField.fields[0].name).toBe('footerPresetActions')
     expect(controlsField.fields[0].admin.components.Field).toBe(
+      '/components/payload/SiteFooterPresetActions#SiteFooterPresetActions',
+    )
+    expect(controlsField.fields[1].name).toBe('footerEditorMode')
+    expect(controlsField.fields[1].admin.components.Field).toBe(
       '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
     )
-    expect(controlsField.fields[1].type).toBe('group')
+    expect(controlsField.fields[2].type).toBe('group')
     expect(
-      controlsField.fields[1].admin.condition({}, { footerEditorMode: 'form' }, {} as any),
+      controlsField.fields[2].admin.condition({}, { footerEditorMode: 'form' }, {} as any),
     ).toBe(true)
     expect(
-      controlsField.fields[1].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
+      controlsField.fields[2].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
     ).toBe(false)
-    expect(controlsField.fields[1].fields.map((field: any) => field.name)).toEqual([
+    expect(controlsField.fields[2].fields.map((field: any) => field.name)).toEqual([
       'layoutStyle',
       'brand',
       'navigationSections',
@@ -49,13 +53,13 @@ describe('Site settings footer config', () => {
       'compliance',
       'bottomBar',
     ])
-    expect(controlsField.fields[2].name).toBe('footerRawConfig')
+    expect(controlsField.fields[3].name).toBe('footerRawConfig')
     expect(
-      controlsField.fields[2].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
+      controlsField.fields[3].admin.condition({}, { footerEditorMode: 'yaml' }, {} as any),
     ).toBe(true)
 
     const previewField = allFooterFields.find((field: any) => field.name === 'footerPreview') as any
-    const layoutStyleField = controlsField.fields[1].fields.find(
+    const layoutStyleField = controlsField.fields[2].fields.find(
       (field: any) => field.name === 'layoutStyle',
     ) as any
     expect(layoutStyleField.defaultValue).toBe('compact')

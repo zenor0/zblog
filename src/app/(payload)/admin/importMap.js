@@ -7,6 +7,7 @@ import { SiteSettingsSectionModeSwitch as SiteSettingsSectionModeSwitch_60975e27
 import { SiteSettingsRawSectionEditor as SiteSettingsRawSectionEditor_e257ed39de8837758218970fa7ed2fe0 } from '../../../components/payload/SiteSettingsRawSectionEditor'
 import { ArticleDesignRangeField as ArticleDesignRangeField_ab2a1c366ca907f04cdf55bb3f0326b2 } from '../../../components/payload/ArticleDesignRangeField'
 import { ArticleLayoutPreview as ArticleLayoutPreview_35a30d63e7f0d7b617d81e1657cd795c } from '../../../components/payload/ArticleLayoutPreview'
+import { SiteFooterPresetActions as SiteFooterPresetActions_227ee327d84611370354895c14b67e1e } from '../../../components/payload/SiteFooterPresetActions'
 import { SiteFooterPreview as SiteFooterPreview_82b6ef94fa126d5bb067b08661919ddd } from '../../../components/payload/SiteFooterPreview'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -21,6 +22,7 @@ export const importMap = {
   "/components/payload/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor": SiteSettingsRawSectionEditor_e257ed39de8837758218970fa7ed2fe0,
   "/components/payload/ArticleDesignRangeField#ArticleDesignRangeField": ArticleDesignRangeField_ab2a1c366ca907f04cdf55bb3f0326b2,
   "/components/payload/ArticleLayoutPreview#ArticleLayoutPreview": ArticleLayoutPreview_35a30d63e7f0d7b617d81e1657cd795c,
+  "/components/payload/SiteFooterPresetActions#SiteFooterPresetActions": SiteFooterPresetActions_227ee327d84611370354895c14b67e1e,
   "/components/payload/SiteFooterPreview#SiteFooterPreview": SiteFooterPreview_82b6ef94fa126d5bb067b08661919ddd,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

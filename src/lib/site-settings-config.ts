@@ -142,6 +142,7 @@ export function buildSiteVariableContext(settings: unknown): SiteSettingsReferen
 
   setContextValue(context, 'site.name', normalizeText(data.siteName))
   setContextValue(context, 'site.description', normalizeText(data.siteDescription))
+  setContextValue(context, 'site.currentYear', String(new Date().getFullYear()))
   setContextValue(context, 'owner.name', normalizeText(owner.name))
   setContextValue(context, 'owner.handle', normalizeText(owner.handle))
   setContextValue(context, 'owner.email', normalizeText(owner.email))

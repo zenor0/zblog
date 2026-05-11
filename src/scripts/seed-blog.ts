@@ -7,6 +7,8 @@ import { getPayload } from 'payload'
 
 import config from '@/payload.config'
 import type { Media, Post, User } from '@/payload-types'
+import { normalizeSiteFooter } from '@/components/frontend/site-footer'
+import { localeCodes } from '@/lib/locales'
 import {
   buildEnMarkdownShowcaseContent,
   buildZhMarkdownShowcaseContent,
@@ -16,6 +18,8 @@ import {
   seedMarkdownShowcaseSlug,
   seedMarkdownShowcaseZhTitle,
 } from '@/lib/seed-blog-content'
+import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/lib/site-footer-preset'
+import { resolveSiteSettingReferences } from '@/lib/site-settings-config'
 import { seedAssetsDir } from '@/lib/runtime-paths'
 
 const seedDir = seedAssetsDir
@@ -125,6 +129,40 @@ async function deleteExistingSeedContent(payload: Awaited<ReturnType<typeof getP
       },
     }),
   ])
+}
+
+async function seedSiteSettings(payload: Awaited<ReturnType<typeof getPayload>>) {
+  for (const locale of localeCodes) {
+    const settings = await payload.findGlobal({
+      slug: 'site-settings',
+      depth: 1,
+      fallbackLocale: 'zh-Hans',
+      locale,
+    })
+    const resolvedSettings = resolveSiteSettingReferences(settings)
+    const hasUsableFooter = normalizeSiteFooter({
+      locale,
+      settings: resolvedSettings,
+    })
+
+    if (hasUsableFooter) {
+      continue
+    }
+
+    const starter = getStarterSiteFooterPreset(locale)
+
+    await payload.updateGlobal({
+      slug: 'site-settings',
+      locale,
+      data: {
+        footer: starter.footer,
+        globalVariables: mergeStarterGlobalVariables(
+          settings.globalVariables,
+          starter.globalVariables,
+        ),
+      },
+    })
+  }
 }
 
 async function createSeedFiles(
@@ -372,6 +410,7 @@ async function main() {
   })
 
   await backfillUserRoles(payload)
+  await seedSiteSettings(payload)
   await deleteExistingSeedContent(payload)
 
   const assetPaths = await ensureSeedAssets()
