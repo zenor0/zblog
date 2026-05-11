@@ -1,0 +1,40 @@
+'use client'
+
+import type { UIFieldClientComponent } from 'payload'
+
+import { Button, toast, useField, useLocale } from '@payloadcms/ui'
+
+import type { SiteSettings } from '@/lib/site-settings'
+
+import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/lib/site-footer-preset'
+
+export const SiteFooterPresetActions: UIFieldClientComponent = () => {
+  const locale = useLocale()
+  const footer = useField<SiteSettings['footer']>({ path: 'footer' })
+  const globalVariables = useField<SiteSettings['globalVariables']>({ path: 'globalVariables' })
+
+  function applyStarterFooter() {
+    const preset = getStarterSiteFooterPreset(locale?.code)
+
+    footer.setValue(preset.footer)
+    globalVariables.setValue(
+      mergeStarterGlobalVariables(globalVariables.value, preset.globalVariables),
+    )
+    toast.success('Starter footer applied.')
+  }
+
+  return (
+    <div className="site-footer-preset-actions field-type">
+      <Button
+        buttonStyle="secondary"
+        extraButtonProps={{
+          'data-testid': 'site-footer-apply-starter',
+        }}
+        onClick={applyStarterFooter}
+        size="small"
+      >
+        Apply starter footer
+      </Button>
+    </div>
+  )
+}

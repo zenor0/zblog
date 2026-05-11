@@ -744,12 +744,23 @@ const footerLayoutFields: Field[] = [
           className: 'site-settings-preview-grid__controls',
           initCollapsed: false,
         },
-        fields: siteSettingsSectionEditorFields({
-          formFields: footerFields,
-          modeFieldLabel: 'Footer editing mode',
-          modeFieldName: 'footerEditorMode',
-          rawConfigName: 'footerRawConfig',
-        }),
+        fields: [
+          {
+            name: 'footerPresetActions',
+            type: 'ui',
+            admin: {
+              components: {
+                Field: '/components/payload/SiteFooterPresetActions#SiteFooterPresetActions',
+              },
+            },
+          },
+          ...siteSettingsSectionEditorFields({
+            formFields: footerFields,
+            modeFieldLabel: 'Footer editing mode',
+            modeFieldName: 'footerEditorMode',
+            rawConfigName: 'footerRawConfig',
+          }),
+        ],
         label: 'Footer controls',
       },
       {
@@ -952,7 +963,7 @@ export const SiteSettings: GlobalConfig = {
                 type: 'group',
                 admin: {
                   description:
-                    'Shared variables used by other site setting sections. Use {{site.name}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.',
+                    'Shared variables used by other site setting sections. Use {{site.name}}, {{site.currentYear}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.',
                 },
                 label: 'Global variables',
                 fields: globalVariableFields,

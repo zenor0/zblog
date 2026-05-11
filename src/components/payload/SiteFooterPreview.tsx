@@ -2,13 +2,17 @@
 
 import type { UIFieldClientComponent } from 'payload'
 
-import { useFormFields } from '@payloadcms/ui'
-import { useMemo } from 'react'
+import { useFormFields, useLocale } from '@payloadcms/ui'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { SiteFooterLayout } from '@/components/frontend/SiteFooter'
-import { normalizeSiteFooter } from '@/components/frontend/site-footer'
 import type { SiteSettings } from '@/lib/site-settings'
-import { resolveSiteSettingReferences } from '@/lib/site-settings-config'
+import {
+  buildSiteFooterPreviewURL,
+  isSiteFooterPreviewReadyMessage,
+  isSiteFooterPreviewResizeMessage,
+  resolveSiteFooterPreviewLocale,
+  siteFooterPreviewMessageType,
+} from '@/lib/site-footer-preview'
 
 import './site-footer-preview.scss'
 
@@ -327,30 +331,68 @@ function readSiteSettings(fields: SiteFooterPreviewFormState | undefined): SiteS
 
 export const SiteFooterPreview: UIFieldClientComponent = () => {
   const fields = useFormFields(([formFields]) => formFields as SiteFooterPreviewFormState)
+  const locale = useLocale()
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
+  const [iframeHeight, setIframeHeight] = useState(280)
+  const previewLocale = resolveSiteFooterPreviewLocale(locale?.code)
   const settings = useMemo(() => readSiteSettings(fields), [fields])
-  const resolvedSettings = useMemo(() => resolveSiteSettingReferences(settings), [settings])
-  const footer = useMemo(
-    () =>
-      normalizeSiteFooter({
-        locale: 'zh-Hans',
-        settings: resolvedSettings,
-      }),
-    [resolvedSettings],
-  )
+  const previewURL = useMemo(() => buildSiteFooterPreviewURL(previewLocale), [previewLocale])
+
+  const postSettingsToFrame = useCallback(() => {
+    iframeRef.current?.contentWindow?.postMessage(
+      {
+        locale: previewLocale,
+        settings,
+        type: siteFooterPreviewMessageType,
+      },
+      window.location.origin,
+    )
+  }, [previewLocale, settings])
+
+  useEffect(() => {
+    postSettingsToFrame()
+  }, [postSettingsToFrame])
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) {
+        return
+      }
+
+      if (isSiteFooterPreviewReadyMessage(event.data)) {
+        postSettingsToFrame()
+        return
+      }
+
+      if (isSiteFooterPreviewResizeMessage(event.data)) {
+        setIframeHeight(Math.max(240, Math.ceil(event.data.height)))
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [postSettingsToFrame])
 
   return (
     <section className="site-footer-preview" data-testid="site-footer-preview">
       <div className="site-footer-preview__header">
         <span>Footer preview</span>
-        <strong>Production layout</strong>
+        <strong>Production iframe</strong>
       </div>
 
       <div className="site-footer-preview__surface">
-        {footer ? (
-          <SiteFooterLayout className="site-footer-preview__production-footer" footer={footer} />
-        ) : (
-          <div className="site-footer-preview__empty">No usable footer content yet.</div>
-        )}
+        <iframe
+          className="site-footer-preview__iframe"
+          data-testid="site-footer-preview-iframe"
+          onLoad={postSettingsToFrame}
+          ref={iframeRef}
+          src={previewURL}
+          style={{ height: iframeHeight }}
+          title="Production footer preview"
+        />
       </div>
     </section>
   )
