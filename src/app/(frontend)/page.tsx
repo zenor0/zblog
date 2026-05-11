@@ -1,7 +1,12 @@
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { buildLocalePath, localeCookieName, normalizeLocale, resolvePreferredLocale } from '@/lib/locales'
+import {
+  buildLocalePath,
+  localeCookieName,
+  normalizeLocale,
+  resolvePreferredLocale,
+} from '@/shared/i18n/locales'
 
 export default async function HomePage() {
   const cookieStore = await cookies()

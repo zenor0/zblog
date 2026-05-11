@@ -2,14 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-import type { SiteSettings } from '@/lib/site-settings'
+import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 
 import { footerLayoutCandidates } from '@/app/(frontend)/dev/footer-layouts/footerLayoutCandidates'
-import { SiteFooterLayout } from '@/components/frontend/SiteFooter'
+import { SiteFooterLayout } from '@/features/site-settings/ui/SiteFooter'
 import {
   normalizeSiteFooter,
   siteFooterLayoutStyleOptions,
-} from '@/components/frontend/site-footer'
+} from '@/features/site-settings/model/site-footer'
 
 export const metadata: Metadata = {
   title: 'Footer Layouts',

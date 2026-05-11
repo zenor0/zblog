@@ -21,11 +21,53 @@ function readProjectFile(relativePath: string) {
   return readFileSync(path.join(projectRoot, relativePath), 'utf8')
 }
 
+function isLocalCssImport(importPath: string) {
+  return importPath.startsWith('.')
+}
+
+function readFrontendStyles(relativePath = 'src/app/(frontend)/styles.css', seen = new Set<string>()): string {
+  if (seen.has(relativePath)) {
+    return ''
+  }
+
+  seen.add(relativePath)
+
+  const source = readProjectFile(relativePath)
+  const importMatches = [...source.matchAll(/@import ['"]([^'"]+\.css)['"];/g)].map(
+    (match) => match[1] ?? '',
+  )
+  const importedSource = importMatches
+    .filter(isLocalCssImport)
+    .map((importPath) =>
+      readFrontendStyles(
+        path
+          .normalize(path.join(path.dirname(relativePath), importPath))
+          .replaceAll(path.sep, '/'),
+        seen,
+      ),
+    )
+    .join('\n')
+
+  return [source, importedSource].filter(Boolean).join('\n')
+}
+
+function collectFrontendCodeFiles(extensions: Set<string>) {
+  return [
+    ...collectFiles(path.join(projectRoot, 'src/app/(frontend)'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/features/article/ui'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/features/media/ui'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/features/post-views/ui'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/features/posts/ui'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/features/site-settings/ui'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/shared/theme'), extensions),
+    ...collectFiles(path.join(projectRoot, 'src/shared/ui'), extensions),
+  ]
+}
+
 describe('frontend visual restraint', () => {
   it('does not hard-code Tailwind tracking utilities in frontend and shared UI code', () => {
     const scannedFiles = [
-      ...collectFiles(path.join(projectRoot, 'src/app/(frontend)'), new Set(['.css', '.tsx'])),
-      ...collectFiles(path.join(projectRoot, 'src/components/frontend'), new Set(['.tsx'])),
+      ...collectFrontendCodeFiles(new Set(['.css', '.tsx'])),
       ...collectFiles(path.join(projectRoot, 'src/components/ui'), new Set(['.tsx'])),
     ]
     const trackingUtilities: string[] = []
@@ -64,7 +106,7 @@ describe('frontend visual restraint', () => {
   })
 
   it('defines restrained tracking tokens for recurring editorial labels', () => {
-    const styles = readProjectFile('src/app/(frontend)/styles.css')
+    const styles = readFrontendStyles()
 
     expect(styles).toContain('--zblog-tracking-meta: 0;')
     expect(styles).toContain('--zblog-tracking-badge: 0;')
@@ -72,7 +114,7 @@ describe('frontend visual restraint', () => {
   })
 
   it('defines a compact typography scale for dense interface text', () => {
-    const styles = readProjectFile('src/app/(frontend)/styles.css')
+    const styles = readFrontendStyles()
 
     expect(styles).toContain('--zblog-type-body-size: 1rem;')
     expect(styles).toContain('--zblog-type-caption-size: 0.8125rem;')
@@ -82,7 +124,7 @@ describe('frontend visual restraint', () => {
   })
 
   it('defines restrained code font and syntax tokens for article code blocks', () => {
-    const styles = readProjectFile('src/app/(frontend)/styles.css')
+    const styles = readFrontendStyles()
 
     expect(styles).toMatch(/--zblog-code-font-family:\s*var\(--font-code,\s*'JetBrains Mono'\)/)
     expect(styles).toContain('--zblog-codeblock-background: #111318;')
@@ -97,7 +139,7 @@ describe('frontend visual restraint', () => {
 
   it('keeps badges below body scale in shared and editorial UI', () => {
     const badgeComponent = readProjectFile('src/components/ui/badge.tsx')
-    const styles = readProjectFile('src/app/(frontend)/styles.css')
+    const styles = readFrontendStyles()
 
     expect(badgeComponent).toContain('text-[10px]')
     expect(badgeComponent).not.toMatch(/text-(?:xs|sm|base)/)
@@ -145,8 +187,7 @@ describe('frontend visual restraint', () => {
 
   it('keeps display typography below oversized hero steps', () => {
     const scannedFiles = [
-      ...collectFiles(path.join(projectRoot, 'src/app/(frontend)'), new Set(['.css', '.tsx'])),
-      ...collectFiles(path.join(projectRoot, 'src/components/frontend'), new Set(['.tsx'])),
+      ...collectFrontendCodeFiles(new Set(['.css', '.tsx'])),
     ]
     const oversizedSteps: string[] = []
 

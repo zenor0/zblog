@@ -4,7 +4,7 @@ import {
   devReferenceSections,
   getDevReferenceItem,
   getDevReferenceItems,
-} from '@/lib/dev-reference'
+} from '@/features/article/model/dev-reference'
 
 describe('dev reference registry', () => {
   it('exposes design system as the primary reference page', () => {

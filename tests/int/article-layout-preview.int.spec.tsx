@@ -8,7 +8,7 @@ vi.mock('@payloadcms/ui', () => ({
   useFormFields: (selector: any) => selector([mockedFormFields]),
 }))
 
-import { ArticleLayoutPreview } from '@/components/payload/ArticleLayoutPreview'
+import { ArticleLayoutPreview } from '@/features/article/admin/ArticleLayoutPreview'
 
 describe('ArticleLayoutPreview', () => {
   it('renders a live preview using current form values', () => {

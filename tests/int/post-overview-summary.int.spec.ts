@@ -5,7 +5,7 @@ import {
   buildPublishingSnapshot,
   getLocaleCoverage,
   summarizeLocaleCoverage,
-} from '@/components/payload/postOverviewSummary'
+} from '@/features/posts/admin/postOverviewSummary'
 
 describe('post overview summary helpers', () => {
   it('classifies locale coverage and seo readiness using frontend fallbacks', () => {

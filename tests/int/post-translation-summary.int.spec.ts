@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildTranslationLocaleRow,
   countTranslatedFields,
-} from '@/components/payload/postTranslationSummary'
+} from '@/features/posts/admin/postTranslationSummary'
 
 describe('postTranslationSummary', () => {
   it('counts translated title, excerpt, and content fields', () => {

@@ -2,8 +2,8 @@ import configPromise from '@payload-config'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 
-import { normalizeLocale } from '@/lib/locales'
-import { recordPostView } from '@/lib/post-views'
+import { recordPostView } from '@/features/post-views/server/post-views'
+import { normalizeLocale } from '@/shared/i18n/locales'
 
 export const runtime = 'nodejs'
 

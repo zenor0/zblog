@@ -3,13 +3,13 @@ import { draftMode } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
-import { isEditor } from '@/lib/access'
 import {
   buildPostAdminPath,
   buildPostDraftPreviewPath,
   buildPostPath,
   resolvePreviewLocale,
-} from '@/lib/preview'
+} from '@/features/posts/preview'
+import { isEditor } from '@/shared/auth/access'
 
 export const GET = async (request: Request) => {
   const payload = await getPayload({

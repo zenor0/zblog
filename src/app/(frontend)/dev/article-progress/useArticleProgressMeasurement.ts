@@ -2,7 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
-import type { MarkdownHeading } from '@/lib/markdown-headings'
+import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
 
 import {
   buildPathModel,

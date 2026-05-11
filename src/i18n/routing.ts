@@ -7,7 +7,7 @@ import {
   normalizeLocale,
   supportedLocales,
   type AppLocale,
-} from '@/lib/locales'
+} from '@/shared/i18n/locales'
 
 export function requireLocale(locale: string): AppLocale {
   const normalizedLocale = normalizeLocale(locale)

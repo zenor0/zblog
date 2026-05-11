@@ -2,7 +2,7 @@ import 'dotenv/config'
 
 import fs from 'node:fs/promises'
 
-import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/lib/local-state-reset'
+import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/shared/runtime/local-state-reset'
 
 async function main() {
   const plan = getLocalStateResetPlan()

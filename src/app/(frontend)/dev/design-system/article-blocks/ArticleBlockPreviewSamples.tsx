@@ -7,18 +7,18 @@ import {
   TriangleAlertIcon,
 } from 'lucide-react'
 
-import { MediaDetails } from '@/components/frontend/MediaDetails'
-import { MediaSurface } from '@/components/frontend/MediaSurface'
-import { FeatureGrid } from '@/components/frontend/markdown-components/FeatureGrid'
-import { NoticeCard } from '@/components/frontend/markdown-components/NoticeCard'
+import { MediaDetails } from '@/features/media/ui/MediaDetails'
+import { MediaSurface } from '@/features/media/ui/MediaSurface'
+import { FeatureGrid } from '@/features/article/ui/markdown-components/FeatureGrid'
+import { NoticeCard } from '@/features/article/ui/markdown-components/NoticeCard'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type {
   ArticleBlockPreviewCategorySlug,
   ArticleBlockPreviewItem,
-} from '@/lib/article-block-previews'
-import type { ResolvedMediaAsset } from '@/lib/media'
-import { highlightCodeSnippet } from '@/lib/markdown/code-highlighting'
+} from '@/features/article/model/article-block-previews'
+import type { ResolvedMediaAsset } from '@/features/media/model/media'
+import { highlightCodeSnippet } from '@/features/article/markdown/code-highlighting'
 
 type ArticleBlockSampleProps = {
   item: ArticleBlockPreviewItem

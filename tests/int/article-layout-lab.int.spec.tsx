@@ -12,8 +12,8 @@ import {
   articleLayoutPresetTokenNames,
   defaultArticleLayoutPresetID,
 } from '@/app/(frontend)/dev/article-layout/articleLayoutPresets'
-import { buildCitationIndex } from '@/lib/citations'
-import { MarkdownRenderer } from '@/lib/markdown'
+import { buildCitationIndex } from '@/features/article/model/citations'
+import { MarkdownRenderer } from '@/features/article/markdown'
 
 describe('article layout lab', () => {
   it('defines the expected layout comparison presets', () => {

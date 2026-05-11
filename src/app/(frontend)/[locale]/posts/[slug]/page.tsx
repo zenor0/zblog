@@ -3,20 +3,20 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
+import { PostArticle } from '@/features/posts/ui/PostArticle'
+import { getPostBySlug, getRenderablePostLocales } from '@/features/posts/server/queries'
+import { getPreviewUser } from '@/features/posts/server/preview-user'
+import { getPostViewMetric } from '@/features/post-views/server/post-views'
+import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
-import { PostArticle } from '@/components/frontend/PostArticle'
-import { buildLocalePath } from '@/lib/locales'
-import { getPostBySlug, getRenderablePostLocales } from '@/lib/posts'
-import { getPreviewUser } from '@/lib/preview-user'
-import { getPayloadClient } from '@/lib/payload'
-import { getPostViewMetric } from '@/lib/post-views'
+import { getPayloadClient } from '@/shared/payload/client'
+import { buildLocalePath } from '@/shared/i18n/locales'
 import {
   buildArticleStructuredData,
   buildPageMetadata,
   buildSeoDescription,
   serializeStructuredData,
-} from '@/lib/seo'
-import { getResolvedSiteSettings } from '@/lib/site-settings'
+} from '@/shared/content/seo'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string; slug: string }>

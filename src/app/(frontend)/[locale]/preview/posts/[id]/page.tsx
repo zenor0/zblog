@@ -3,15 +3,15 @@ import { draftMode, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
-import { PostLivePreviewRefresh } from '@/components/frontend/PostLivePreviewRefresh'
+import { PostLivePreviewRefresh } from '@/features/posts/ui/PostLivePreviewRefresh'
+import { PostArticle } from '@/features/posts/ui/PostArticle'
+import { getPostByID } from '@/features/posts/server/queries'
+import { getPreviewUser } from '@/features/posts/server/preview-user'
+import { buildPostAdminPath, buildPostDraftPreviewPath } from '@/features/posts/preview'
+import { getSiteSettings } from '@/features/site-settings/model/site-settings'
 import { requireLocale } from '@/i18n/routing'
-import { PostArticle } from '@/components/frontend/PostArticle'
-import { buildLocalePath, supportedLocales } from '@/lib/locales'
-import { getPostByID } from '@/lib/posts'
-import { buildPostAdminPath, buildPostDraftPreviewPath } from '@/lib/preview'
-import { getPreviewUser } from '@/lib/preview-user'
-import { getRequestOrigin } from '@/lib/request-origin'
-import { getSiteSettings } from '@/lib/site-settings'
+import { getRequestOrigin } from '@/shared/runtime/request-origin'
+import { buildLocalePath, supportedLocales } from '@/shared/i18n/locales'
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string; locale: string }>

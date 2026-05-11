@@ -9,7 +9,7 @@ import {
   getArticleBlockPreviewCategory,
   getArticleBlockPreviewItems,
   type ArticleBlockPreviewCategorySlug,
-} from '@/lib/article-block-previews'
+} from '@/features/article/model/article-block-previews'
 
 import { ArticleBlockPreviewSample } from '../ArticleBlockPreviewSamples'
 

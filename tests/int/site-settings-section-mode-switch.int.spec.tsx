@@ -11,7 +11,7 @@ vi.mock('@payloadcms/ui', () => ({
   useField: () => fieldState,
 }))
 
-import { SiteSettingsSectionModeSwitch } from '@/components/payload/SiteSettingsSectionModeSwitch'
+import { SiteSettingsSectionModeSwitch } from '@/features/site-settings/admin/SiteSettingsSectionModeSwitch'
 
 describe('SiteSettingsSectionModeSwitch', () => {
   afterEach(() => {

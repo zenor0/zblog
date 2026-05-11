@@ -1,6 +1,6 @@
 import { getRequestConfig } from 'next-intl/server'
 
-import { defaultLocale, normalizeLocale } from '@/lib/locales'
+import { defaultLocale, normalizeLocale } from '@/shared/i18n/locales'
 import { getMessagesForLocale } from '@/i18n/loadMessages'
 
 export default getRequestConfig(async ({ requestLocale }) => {

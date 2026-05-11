@@ -1,4 +1,4 @@
-import type { SiteFooterLayoutStyle } from '@/components/frontend/site-footer'
+import type { SiteFooterLayoutStyle } from '@/features/site-settings/model/site-footer'
 
 export const footerLayoutCandidates = [
   {

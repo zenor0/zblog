@@ -10,15 +10,15 @@ import {
   defaultArticleDesignPresetID,
   validateArticleDesignLength,
   validateArticleDesignLineHeight,
-} from '@/lib/article-design'
+} from '@/features/article/model/article-design'
 import {
   validateCustomVariableKey,
   validateSiteSettingReferences,
-} from '@/lib/site-settings-config'
+} from '@/features/site-settings/model/site-settings-config'
 import {
   defaultSiteFooterLayoutStyle,
   siteFooterLayoutStyleOptions,
-} from '@/lib/site-footer-layout'
+} from '@/features/site-settings/model/site-footer-layout'
 
 const localizedHeroDefaults = {
   en: {
@@ -163,7 +163,7 @@ function siteSettingsSectionModeSwitchField(args: { label: string; name: string 
     type: 'radio',
     admin: {
       components: {
-        Field: '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+        Field: '/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
       },
     },
     defaultValue: 'form',
@@ -193,7 +193,7 @@ function siteSettingsRawConfigField(args: { modeFieldName?: string; name: string
           }
         : {}),
       components: {
-        Field: '/components/payload/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
+        Field: '/features/site-settings/admin/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
       },
     },
   }
@@ -750,7 +750,7 @@ const footerLayoutFields: Field[] = [
             type: 'ui',
             admin: {
               components: {
-                Field: '/components/payload/SiteFooterPresetActions#SiteFooterPresetActions',
+                Field: '/features/site-settings/admin/SiteFooterPresetActions#SiteFooterPresetActions',
               },
             },
           },
@@ -768,7 +768,7 @@ const footerLayoutFields: Field[] = [
         type: 'ui',
         admin: {
           components: {
-            Field: '/components/payload/SiteFooterPreview#SiteFooterPreview',
+            Field: '/features/site-settings/admin/SiteFooterPreview#SiteFooterPreview',
           },
         },
       },
@@ -784,7 +784,7 @@ function articleDesignAdvancedField(
     type: 'text',
     admin: {
       components: {
-        Field: '/components/payload/ArticleDesignRangeField#ArticleDesignRangeField',
+        Field: '/features/article/admin/ArticleDesignRangeField#ArticleDesignRangeField',
       },
       description: config.description,
       width: '50%',
@@ -898,7 +898,7 @@ const articleLayoutFields: Field[] = [
         type: 'ui',
         admin: {
           components: {
-            Field: '/components/payload/ArticleLayoutPreview#ArticleLayoutPreview',
+            Field: '/features/article/admin/ArticleLayoutPreview#ArticleLayoutPreview',
           },
         },
       },

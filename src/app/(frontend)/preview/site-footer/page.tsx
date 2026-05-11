@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
-import { SiteFooterPreviewFrame } from '@/components/frontend/SiteFooterPreviewFrame'
-import { resolveSiteFooterPreviewLocale } from '@/lib/site-footer-preview'
+import { SiteFooterPreviewFrame } from '@/features/site-settings/ui/SiteFooterPreviewFrame'
+import { resolveSiteFooterPreviewLocale } from '@/features/site-settings/model/site-footer-preview'
 
 export const metadata: Metadata = {
   robots: {

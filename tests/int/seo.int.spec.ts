@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildArticleStructuredData, buildPageMetadata, buildSeoDescription } from '@/lib/seo'
+import { buildArticleStructuredData, buildPageMetadata, buildSeoDescription } from '@/shared/content/seo'
 
 describe('seo utilities', () => {
   it('builds plain text descriptions from markdown content', () => {

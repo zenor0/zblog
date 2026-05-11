@@ -4,7 +4,7 @@ import {
   buildEnMarkdownShowcaseContent,
   buildZhMarkdownShowcaseContent,
   seedMarkdownShowcaseSlug,
-} from '@/lib/seed-blog-content'
+} from '@/features/posts/seed/seed-blog-content'
 
 describe('seed blog content', () => {
   it('builds a markdown showcase article covering the supported syntax features', () => {

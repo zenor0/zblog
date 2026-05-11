@@ -6,7 +6,7 @@ import {
   assertSafeLocalStateReset,
   getLocalStateResetPlan,
   isPathInsideDirectory,
-} from '@/lib/local-state-reset'
+} from '@/shared/runtime/local-state-reset'
 
 describe('local state reset', () => {
   it('resets the configured runtime state directory by default', () => {

@@ -2,7 +2,7 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { MediaDetails } from '@/components/frontend/MediaDetails'
+import { MediaDetails } from '@/features/media/ui/MediaDetails'
 
 describe('MediaDetails', () => {
   it('separates the caption from right-side credit when both are present', () => {

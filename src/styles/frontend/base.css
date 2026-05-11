@@ -1,0 +1,35 @@
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply min-h-screen bg-background text-foreground font-sans;
+    font-family:
+      var(--font-sans-ui), 'Source Sans 3', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB',
+      sans-serif;
+  }
+
+  a {
+    text-underline-offset: 0.28em;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  code,
+  pre {
+    font-family: var(--zblog-code-font-family);
+    letter-spacing: 0;
+  }
+}

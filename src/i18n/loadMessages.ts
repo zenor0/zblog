@@ -1,6 +1,6 @@
 import enMessages from '@/i18n/messages/en.json'
 import zhHansMessages from '@/i18n/messages/zh-Hans.json'
-import type { AppLocale } from '@/lib/locales'
+import type { AppLocale } from '@/shared/i18n/locales'
 
 export type AppMessages = typeof enMessages
 

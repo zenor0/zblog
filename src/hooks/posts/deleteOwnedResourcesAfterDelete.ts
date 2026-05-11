@@ -5,7 +5,7 @@ import {
   deleteOwnedResourcesSnapshot,
   ownedPostResourcesContextKey,
   type OwnedPostResourcesSnapshot,
-} from '@/lib/post-owned-resources'
+} from '@/features/posts/server/post-owned-resources'
 
 export const deleteOwnedResourcesAfterDelete: CollectionAfterDeleteHook = async ({
   context,

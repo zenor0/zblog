@@ -1,4 +1,4 @@
-import type { AppLocale } from '@/lib/locales'
+import type { AppLocale } from '@/shared/i18n/locales'
 
 export function formatLongDate(args: {
   fallback: string

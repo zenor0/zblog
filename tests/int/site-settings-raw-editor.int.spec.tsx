@@ -29,7 +29,7 @@ vi.mock('@payloadcms/ui', () => ({
   useFormFields: (selector: any) => selector([mockedFormFields]),
 }))
 
-import { SiteSettingsRawSectionEditor } from '@/components/payload/SiteSettingsRawSectionEditor'
+import { SiteSettingsRawSectionEditor } from '@/features/site-settings/admin/SiteSettingsRawSectionEditor'
 
 describe('SiteSettingsRawSectionEditor', () => {
   afterEach(() => {

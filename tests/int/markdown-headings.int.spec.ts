@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractMarkdownHeadings } from '@/lib/markdown-headings'
+import { extractMarkdownHeadings } from '@/features/article/model/markdown-headings'
 
 describe('markdown heading extraction', () => {
   it('adds hierarchical display numbers to article body headings', () => {

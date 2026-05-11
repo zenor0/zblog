@@ -5,7 +5,7 @@ import {
   normalizeSiteFooter,
   resolveFooterLink,
   siteFooterLayoutStyleOptions,
-} from '@/components/frontend/site-footer'
+} from '@/features/site-settings/model/site-footer'
 
 describe('site footer model helpers', () => {
   it('defines the selectable footer layout styles', () => {

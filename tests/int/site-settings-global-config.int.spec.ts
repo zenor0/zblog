@@ -77,7 +77,7 @@ describe('site settings global config schema', () => {
       expect(modeField.virtual).toBe(true)
       expect(modeField.defaultValue).toBe('form')
       expect(modeField.admin.components.Field).toBe(
-        '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+        '/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
       )
       expect(modeField.options.map((option: any) => option.value)).toEqual(['form', 'yaml'])
       expect(rawEditor.type).toBe('ui')
@@ -102,7 +102,7 @@ describe('site settings global config schema', () => {
       sectionEditors.every(
         (item: any) =>
           item.rawEditor.admin.components.Field ===
-          '/components/payload/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
+          '/features/site-settings/admin/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
       ),
     ).toBe(true)
   })

@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 
-import type { MarkdownHeading } from '@/lib/markdown-headings'
+import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
 
 import { ArticleProgressControls } from './ArticleProgressControls'
 import {

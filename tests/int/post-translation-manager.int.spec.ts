@@ -28,13 +28,13 @@ vi.mock('@payloadcms/ui', () => ({
     React.createElement('span', { 'data-pill-style': pillStyle || 'light' }, children),
 }))
 
-vi.mock('@/components/payload/TranslatePostLocaleAction', () => ({
+vi.mock('@/features/posts/admin/TranslatePostLocaleAction', () => ({
   TranslatePostLocaleAction: ({ targetLocale }: { targetLocale: string }) => (
     React.createElement('button', { type: 'button' }, `Translate ${targetLocale}`)
   ),
 }))
 
-import { PostTranslationManager } from '@/components/payload/PostTranslationManager'
+import { PostTranslationManager } from '@/features/posts/admin/PostTranslationManager'
 
 describe('PostTranslationManager', () => {
   it('shows a save-first state for unsaved posts', async () => {

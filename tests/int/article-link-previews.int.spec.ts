@@ -4,8 +4,8 @@ import {
   buildBibliographyLinkPreviews,
   buildHeadingLinkPreviews,
   createFallbackLinkPreview,
-} from '@/lib/article-link-previews'
-import { parseBibliography } from '@/lib/bibliography'
+} from '@/features/article/model/article-link-previews'
+import { parseBibliography } from '@/features/article/model/bibliography'
 
 describe('article link previews', () => {
   it('builds concise previews for bibliography references', () => {

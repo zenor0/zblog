@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { editorOnly } from '@/lib/access'
-import { supportedLocales } from '@/lib/locales'
+import { editorOnly } from '@/shared/auth/access'
+import { supportedLocales } from '@/shared/i18n/locales'
 
 const localeOptions = supportedLocales.map(({ code, label }) => ({
   label,

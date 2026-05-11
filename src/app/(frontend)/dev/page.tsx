@@ -4,7 +4,7 @@ import { ArrowUpRight } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { devReferenceSections } from '@/lib/dev-reference'
+import { devReferenceSections } from '@/features/article/model/dev-reference'
 
 export const metadata: Metadata = {
   title: 'Development References',

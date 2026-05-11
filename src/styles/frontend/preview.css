@@ -1,0 +1,7 @@
+[data-zblog-embedded-preview='true'] .frontend-shell {
+  @apply pb-8 pt-3 sm:pt-4;
+}
+
+[data-zblog-embedded-preview='true'] [data-embedded-hidden='true'] {
+  display: none;
+}

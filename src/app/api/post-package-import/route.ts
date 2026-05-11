@@ -1,10 +1,14 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import { isEditor } from '@/lib/access'
-import { normalizeLocale } from '@/lib/locales'
-import { importPostPackage, importPostWorkspace, type ImportPostOverrides } from '@/lib/post-package-import'
+import {
+  importPostPackage,
+  importPostWorkspace,
+  type ImportPostOverrides,
+} from '@/features/posts/import/use-case'
 import type { User } from '@/payload-types'
+import { isEditor } from '@/shared/auth/access'
+import { normalizeLocale } from '@/shared/i18n/locales'
 
 function parseOverrides(formData: FormData): ImportPostOverrides {
   const slug = formData.get('slug')

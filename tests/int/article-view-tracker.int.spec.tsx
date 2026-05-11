@@ -1,7 +1,7 @@
 import { render, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { ArticleViewTracker } from '@/components/frontend/ArticleViewTracker'
+import { ArticleViewTracker } from '@/features/post-views/ui/ArticleViewTracker'
 
 afterEach(() => {
   vi.unstubAllGlobals()

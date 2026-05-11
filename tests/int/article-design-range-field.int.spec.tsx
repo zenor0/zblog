@@ -13,7 +13,7 @@ vi.mock('@payloadcms/ui', () => ({
   useFormFields: (selector: any) => selector([mockedFormFields]),
 }))
 
-import { ArticleDesignRangeField } from '@/components/payload/ArticleDesignRangeField'
+import { ArticleDesignRangeField } from '@/features/article/admin/ArticleDesignRangeField'
 
 describe('ArticleDesignRangeField', () => {
   afterEach(() => {

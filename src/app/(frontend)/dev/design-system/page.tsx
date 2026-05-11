@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { articleBlockPreviewCategories } from '@/lib/article-block-previews'
+import { articleBlockPreviewCategories } from '@/features/article/model/article-block-previews'
 
 export const metadata: Metadata = {
   title: 'Design System Reference',

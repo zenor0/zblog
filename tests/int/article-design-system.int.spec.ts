@@ -6,7 +6,7 @@ import {
   defaultArticleDesignPresetID,
   getArticleBlockDefinition,
   resolveArticleDesignConfig,
-} from '@/lib/article-design'
+} from '@/features/article/model/article-design'
 
 describe('article design system', () => {
   it('resolves the compact editorial preset into typography, rhythm, and block tokens', () => {

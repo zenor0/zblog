@@ -7,10 +7,10 @@ import {
   getReferencedEntries,
   readBibliographySource,
   serializeEditableBibliography,
-} from '@/lib/bibliography'
-import { buildCitationIndex, extractCitationKeys } from '@/lib/citations'
-import { buildTextDiff } from '@/lib/diff'
-import { extractMarkdownMediaSources } from '@/lib/markdown'
+} from '@/features/article/model/bibliography'
+import { buildCitationIndex, extractCitationKeys } from '@/features/article/model/citations'
+import { buildTextDiff } from '@/shared/content/diff'
+import { extractMarkdownMediaSources } from '@/features/article/markdown'
 
 const sampleBibliography = `
 @article{smith2024,

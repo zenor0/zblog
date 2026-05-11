@@ -1,8 +1,8 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-import type { PersistedPDFPreviewFields } from '@/lib/media-previews'
+import type { PersistedPDFPreviewFields } from '@/features/media/server/media-previews'
 
-import { removePersistedPDFPreview, syncPersistedPDFPreview } from '@/lib/media-previews'
+import { removePersistedPDFPreview, syncPersistedPDFPreview } from '@/features/media/server/media-previews'
 
 function getNestedAccessArgs(reqUser: unknown) {
   return reqUser

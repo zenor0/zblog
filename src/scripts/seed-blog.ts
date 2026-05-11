@@ -7,9 +7,9 @@ import path from 'path'
 import type { Payload } from 'payload'
 
 import type { Media, Post, User } from '@/payload-types'
-import { normalizeSiteFooter } from '@/components/frontend/site-footer'
-import { localeCodes } from '@/lib/locales'
-import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/lib/local-state-reset'
+import { normalizeSiteFooter } from '@/features/site-settings/model/site-footer'
+import { localeCodes } from '@/shared/i18n/locales'
+import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/shared/runtime/local-state-reset'
 import {
   buildEnMarkdownShowcaseContent,
   buildZhMarkdownShowcaseContent,
@@ -18,10 +18,10 @@ import {
   seedMarkdownShowcaseEnTitle,
   seedMarkdownShowcaseSlug,
   seedMarkdownShowcaseZhTitle,
-} from '@/lib/seed-blog-content'
-import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/lib/site-footer-preset'
-import { resolveSiteSettingReferences } from '@/lib/site-settings-config'
-import { seedAssetsDir } from '@/lib/runtime-paths'
+} from '@/features/posts/seed/seed-blog-content'
+import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/features/site-settings/model/site-footer-preset'
+import { resolveSiteSettingReferences } from '@/features/site-settings/model/site-settings-config'
+import { seedAssetsDir } from '@/shared/runtime/paths'
 
 const seedDir = seedAssetsDir
 const shouldLogTimings = process.env.ZBLOG_SEED_TIMING === 'true'

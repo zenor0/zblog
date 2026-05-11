@@ -1,6 +1,6 @@
-import { defaultLocale } from '@/lib/locales'
-import type { MarkdownMediaLike } from '@/lib/markdown/types'
-import type { ResolvedPost } from '@/lib/posts'
+import { defaultLocale } from '@/shared/i18n/locales'
+import type { MarkdownMediaLike } from '@/features/article/markdown/types'
+import type { ResolvedPost } from '@/features/posts/server/queries'
 
 export const articleLayoutInlineImageSource =
   'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80'

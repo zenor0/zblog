@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
-import { PostArticle } from '@/components/frontend/PostArticle'
-import { defaultLocale, getLocaleLabel } from '@/lib/locales'
-import type { ResolvedPost } from '@/lib/posts'
+import { PostArticle } from '@/features/posts/ui/PostArticle'
+import { defaultLocale, getLocaleLabel } from '@/shared/i18n/locales'
+import type { ResolvedPost } from '@/features/posts/server/queries'
 
 import { ArticleProgressLab } from './ArticleProgressLab'
 

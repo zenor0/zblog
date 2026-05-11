@@ -10,7 +10,7 @@ import {
   resolveRuntimePath,
   runtimeStateDir,
   seedAssetsDir,
-} from '@/lib/runtime-paths'
+} from '@/shared/runtime/paths'
 
 describe('runtime paths', () => {
   it('keeps generated local state under the .data directory by default', () => {

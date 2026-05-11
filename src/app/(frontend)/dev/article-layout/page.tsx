@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import type { CSSProperties } from 'react'
 
-import { PostArticle } from '@/components/frontend/PostArticle'
-import { defaultLocale, getLocaleLabel } from '@/lib/locales'
-import { resolveArticleLayoutConfig } from '@/lib/article-layout'
+import { PostArticle } from '@/features/posts/ui/PostArticle'
+import { defaultLocale, getLocaleLabel } from '@/shared/i18n/locales'
+import { resolveArticleLayoutConfig } from '@/features/article/model/article-layout'
 
 import { ArticleLayoutLabControls } from './ArticleLayoutLabControls'
 import {

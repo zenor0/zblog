@@ -56,7 +56,7 @@ vi.mock('@payloadcms/ui', () => ({
   }),
 }))
 
-import { TranslatePostLocaleAction } from '@/components/payload/TranslatePostLocaleAction'
+import { TranslatePostLocaleAction } from '@/features/posts/admin/TranslatePostLocaleAction'
 
 describe('TranslatePostLocaleAction', () => {
   beforeEach(() => {

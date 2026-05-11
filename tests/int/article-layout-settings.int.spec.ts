@@ -10,7 +10,7 @@ import {
   articleDesignPresets,
   defaultArticleDesignPresetID,
   resolveArticleDesignConfig,
-} from '@/lib/article-design'
+} from '@/features/article/model/article-design'
 
 function collectFields(fields: any[]): any[] {
   return fields.flatMap((field) => [
@@ -47,7 +47,7 @@ describe('article layout settings', () => {
     expect(controlsField.admin.width).toBeUndefined()
     expect(controlsField.fields[0].name).toBe('articleLayoutEditorMode')
     expect(controlsField.fields[0].admin.components.Field).toBe(
-      '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+      '/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
     )
     expect(controlsField.fields[1].type).toBe('group')
     expect(
@@ -102,7 +102,7 @@ describe('article layout settings', () => {
       advancedField.fields.every(
         (field: any) =>
           field.admin.components.Field ===
-          '/components/payload/ArticleDesignRangeField#ArticleDesignRangeField',
+          '/features/article/admin/ArticleDesignRangeField#ArticleDesignRangeField',
       ),
     ).toBe(true)
     expect(articleDesignAdvancedControlConfigs.map((config) => config.name)).toEqual(
@@ -114,7 +114,7 @@ describe('article layout settings', () => {
     expect(previewField.type).toBe('ui')
     expect(previewField.admin.width).toBeUndefined()
     expect(previewField.admin.components.Field).toBe(
-      '/components/payload/ArticleLayoutPreview#ArticleLayoutPreview',
+      '/features/article/admin/ArticleLayoutPreview#ArticleLayoutPreview',
     )
   })
 

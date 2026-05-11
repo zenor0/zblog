@@ -7,8 +7,8 @@ import type { User } from '@/payload-types'
 
 import { describe, it, beforeAll, expect } from 'vitest'
 
-import { importPostWorkspace } from '@/lib/post-package-import'
-import { mediaPreviewDir, mediaUploadDir, resolveRuntimePath, runtimeStateDir } from '@/lib/runtime-paths'
+import { importPostWorkspace } from '@/features/posts/import/use-case'
+import { mediaPreviewDir, mediaUploadDir, resolveRuntimePath, runtimeStateDir } from '@/shared/runtime/paths'
 import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
 
 let payload: Payload

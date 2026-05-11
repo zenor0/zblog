@@ -2,8 +2,8 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { PostTableOfContents } from '@/components/frontend/PostTableOfContents'
-import type { MarkdownHeading } from '@/lib/markdown-headings'
+import { PostTableOfContents } from '@/features/article/ui/PostTableOfContents'
+import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
 
 describe('PostTableOfContents', () => {
   it('renders plain anchor links without article hover preview metadata', () => {

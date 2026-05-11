@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@/lib/translation', () => ({
+vi.mock('@/shared/i18n/translation', () => ({
   isTranslationConfigured: vi.fn(() => true),
   translateFields: vi.fn(),
 }))

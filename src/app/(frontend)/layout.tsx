@@ -9,15 +9,15 @@ import {
 } from 'next/font/google'
 import React from 'react'
 
-import { ThemeRuntime } from '@/components/frontend/ThemeSwitcher'
-import { frontendThemeInitScript } from '@/components/frontend/theme'
+import { ThemeRuntime } from '@/shared/ui/ThemeSwitcher'
+import { frontendThemeInitScript } from '@/shared/theme/frontend-theme'
 import {
   defaultLocale,
   localeCookieName,
   localeRequestHeaderName,
   normalizeLocale,
-} from '@/lib/locales'
-import { getSiteURL } from '@/lib/seo'
+} from '@/shared/i18n/locales'
+import { getSiteURL } from '@/shared/content/seo'
 
 import './styles.css'
 

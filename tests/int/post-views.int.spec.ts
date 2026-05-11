@@ -4,7 +4,7 @@ import {
   buildPostViewDedupeKey,
   getPostViewMetric,
   recordPostView,
-} from '@/lib/post-views'
+} from '@/features/post-views/server/post-views'
 
 type StoredMetric = {
   id: number

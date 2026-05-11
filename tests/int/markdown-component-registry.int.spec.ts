@@ -6,7 +6,7 @@ import {
   findMarkdownComponentByJsxTag,
   markdownComponentDefinitions,
   markdownComponentRenderers,
-} from '@/lib/markdown/component-registry'
+} from '@/features/article/markdown/component-registry'
 
 describe('markdown component registry', () => {
   it('resolves supported components by JSX tag and directive name', () => {

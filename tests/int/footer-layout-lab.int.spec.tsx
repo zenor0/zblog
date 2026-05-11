@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import { footerLayoutCandidates } from '@/app/(frontend)/dev/footer-layouts/footerLayoutCandidates'
 import FooterLayoutLabPage from '@/app/(frontend)/dev/footer-layouts/page'
-import { siteFooterLayoutStyleOptions } from '@/components/frontend/site-footer'
+import { siteFooterLayoutStyleOptions } from '@/features/site-settings/model/site-footer'
 
 describe('footer layout lab', () => {
   it('offers one preview for every selectable footer layout style', () => {

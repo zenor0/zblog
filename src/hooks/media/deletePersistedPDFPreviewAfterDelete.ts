@@ -1,7 +1,7 @@
 import type { CollectionAfterDeleteHook } from 'payload'
 
-import { buildPDFPreviewFilename } from '@/lib/media'
-import { removePersistedPDFPreview } from '@/lib/media-previews'
+import { buildPDFPreviewFilename } from '@/features/media/model/media'
+import { removePersistedPDFPreview } from '@/features/media/server/media-previews'
 
 export const deletePersistedPDFPreviewAfterDelete: CollectionAfterDeleteHook = async ({ doc }) => {
   const previewFilename =

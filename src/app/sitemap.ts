@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next'
 
-import { buildLocalePath, localeCodes } from '@/lib/locales'
-import { getPayloadClient } from '@/lib/payload'
-import { buildAbsoluteURL } from '@/lib/seo'
-import { isPostIndexable } from '@/lib/posts'
+import { isPostIndexable } from '@/features/posts/server/queries'
+import { buildLocalePath, localeCodes } from '@/shared/i18n/locales'
+import { getPayloadClient } from '@/shared/payload/client'
+import { buildAbsoluteURL } from '@/shared/content/seo'
 import type { Post } from '@/payload-types'
 
 function isSitemapRenderablePost(post: null | Post): post is Post {

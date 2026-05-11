@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import {
   articleBlockPreviewCategories,
   getArticleBlockPreviewItems,
-} from '@/lib/article-block-previews'
+} from '@/features/article/model/article-block-previews'
 
 export const metadata: Metadata = {
   title: 'Article Block Previews',

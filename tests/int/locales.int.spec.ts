@@ -8,7 +8,7 @@ import {
   matchPreferredLocale,
   normalizeLocale,
   parseAcceptLanguageHeader,
-} from '@/lib/locales'
+} from '@/shared/i18n/locales'
 
 describe('locale utilities', () => {
   it('normalizes canonical and legacy locale inputs', () => {

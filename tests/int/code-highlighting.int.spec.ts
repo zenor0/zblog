@@ -4,7 +4,7 @@ import {
   extractCodeLanguageFromClassName,
   highlightCodeSnippet,
   normalizeCodeLanguage,
-} from '@/lib/markdown/code-highlighting'
+} from '@/features/article/markdown/code-highlighting'
 
 describe('code highlighting', () => {
   it('normalizes common fenced-code language aliases', () => {

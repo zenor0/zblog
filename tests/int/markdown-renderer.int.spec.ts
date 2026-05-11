@@ -2,10 +2,10 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { buildCitationIndex } from '@/lib/citations'
-import { MarkdownRenderer } from '@/lib/markdown'
-import { buildBibliographyLinkPreviews } from '@/lib/article-link-previews'
-import { parseBibliography } from '@/lib/bibliography'
+import { buildCitationIndex } from '@/features/article/model/citations'
+import { MarkdownRenderer } from '@/features/article/markdown'
+import { buildBibliographyLinkPreviews } from '@/features/article/model/article-link-previews'
+import { parseBibliography } from '@/features/article/model/bibliography'
 
 function renderMarkdown(
   source: string,

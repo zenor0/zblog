@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseArticleLabel, prepareMarkdownSource } from '@/lib/markdown/article-syntax'
+import { parseArticleLabel, prepareMarkdownSource } from '@/features/article/markdown/article-syntax'
 
 describe('markdown article syntax helpers', () => {
   it('escapes article reference colons outside fenced code blocks', () => {

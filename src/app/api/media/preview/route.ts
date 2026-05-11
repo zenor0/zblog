@@ -2,10 +2,10 @@ import { access, readFile } from 'node:fs/promises'
 
 import type { NextRequest } from 'next/server'
 
-import { getSourceFilenameFromPDFPreviewFilename } from '@/lib/media'
-import { resolveLocalMediaFilePath, resolveLocalMediaPreviewPath } from '@/lib/media-server'
-import { buildPDFPreviewFallbackSVG } from '@/lib/pdf-preview'
-import { persistPDFPreviewSVG } from '@/lib/pdf-preview'
+import { getSourceFilenameFromPDFPreviewFilename } from '@/features/media/model/media'
+import { resolveLocalMediaFilePath, resolveLocalMediaPreviewPath } from '@/features/media/server/media-server'
+import { buildPDFPreviewFallbackSVG } from '@/features/media/server/pdf-preview'
+import { persistPDFPreviewSVG } from '@/features/media/server/pdf-preview'
 
 export const runtime = 'nodejs'
 

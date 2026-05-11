@@ -5,11 +5,14 @@ const payloadMocks = vi.hoisted(() => ({
   getPayloadClient: vi.fn(),
 }))
 
-vi.mock('@/lib/payload', () => ({
+vi.mock('@/shared/payload/client', () => ({
+  getPayloadClient: payloadMocks.getPayloadClient,
+}))
+vi.mock('@/shared/payload/client', () => ({
   getPayloadClient: payloadMocks.getPayloadClient,
 }))
 
-import { getResolvedSiteSettings } from '@/lib/site-settings'
+import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 
 describe('resolved site settings loader', () => {
   beforeEach(() => {

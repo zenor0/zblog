@@ -9,12 +9,12 @@ vi.mock('@payloadcms/ui', () => ({
   useLocale: () => ({ code: 'en' }),
 }))
 
-import { SiteFooterPreview } from '@/components/payload/SiteFooterPreview'
+import { SiteFooterPreview } from '@/features/site-settings/admin/SiteFooterPreview'
 import {
   siteFooterPreviewMessageType,
   siteFooterPreviewReadyMessageType,
   siteFooterPreviewResizeMessageType,
-} from '@/lib/site-footer-preview'
+} from '@/features/site-settings/model/site-footer-preview'
 
 function installIframePostMessage() {
   const iframe = screen.getByTestId('site-footer-preview-iframe') as HTMLIFrameElement

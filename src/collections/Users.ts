@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { ensureUserRolesBeforeLogin } from '@/hooks/users/ensureUserRolesBeforeLogin'
-import { isAdmin } from '@/lib/access'
+import { isAdmin } from '@/shared/auth/access'
 
 export const Users: CollectionConfig = {
   slug: 'users',

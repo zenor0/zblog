@@ -2,14 +2,14 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { buildPDFPreviewFallbackSVG } from '@/lib/pdf-preview'
+import { buildPDFPreviewFallbackSVG } from '@/features/media/server/pdf-preview'
 import {
   inferMediaKind,
   resolveAttachmentDescription,
   resolveMediaAsset,
   resolveMediaCaption,
-} from '@/lib/media'
-import { resolveLocalMediaPath } from '@/lib/media-server'
+} from '@/features/media/model/media'
+import { resolveLocalMediaPath } from '@/features/media/server/media-server'
 
 describe('media utilities', () => {
   it('classifies raster, vector, and pdf assets', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/lib/site-footer-preset'
+import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/features/site-settings/model/site-footer-preset'
 
 describe('site footer starter preset', () => {
   it('builds a generic blog footer from editable shared variables', () => {

@@ -4,7 +4,7 @@ import {
   articleBlockPreviewCategories,
   getArticleBlockPreviewCategory,
   getArticleBlockPreviewItems,
-} from '@/lib/article-block-previews'
+} from '@/features/article/model/article-block-previews'
 
 describe('article block preview registry', () => {
   it('exposes category routes under the design system article block section', () => {

@@ -7,7 +7,7 @@ import {
   serializeSiteSettingsSectionToYAML,
   siteSettingsSectionIDs,
   validateSiteSettingReferences,
-} from '@/lib/site-settings-config'
+} from '@/features/site-settings/model/site-settings-config'
 
 describe('site settings config helpers', () => {
   const settings = {

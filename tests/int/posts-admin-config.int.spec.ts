@@ -15,7 +15,7 @@ describe('Posts collection admin tabs', () => {
     ])
 
     expect(Posts.admin?.components?.edit?.beforeDocumentControls).toEqual([
-      '/components/payload/PostPackageImportAction#PostPackageImportAction',
+      '/features/posts/admin/PostPackageImportAction#PostPackageImportAction',
     ])
 
     expect(tabsField.tabs[1].fields.some((field: any) => field.name === 'ownedMedia')).toBe(true)

@@ -11,9 +11,9 @@ import { Posts } from './collections/Posts'
 import { PostViewDedupe } from './collections/PostViewDedupe'
 import { PostViewMetrics } from './collections/PostViewMetrics'
 import { SiteSettings } from './globals/SiteSettings'
-import { defaultLocale, payloadLocales } from './lib/locales'
-import { ensureRuntimeDirectories } from './lib/runtime-directories'
-import { defaultDatabaseURL } from './lib/runtime-paths'
+import { defaultLocale, payloadLocales } from './shared/i18n/locales'
+import { ensureRuntimeDirectories } from './shared/runtime/directories'
+import { defaultDatabaseURL } from './shared/runtime/paths'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

@@ -2,8 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { deletePersistedPDFPreviewAfterDelete } from '@/hooks/media/deletePersistedPDFPreviewAfterDelete'
 import { syncPDFPreviewAfterChange } from '@/hooks/media/syncPDFPreviewAfterChange'
-import { anyone, editorOnly } from '@/lib/access'
-import { mediaUploadDir } from '@/lib/uploads'
+import { anyone, editorOnly } from '@/shared/auth/access'
+import { mediaUploadDir } from '@/features/media/model/uploads'
 
 export const Media: CollectionConfig = {
   slug: 'media',

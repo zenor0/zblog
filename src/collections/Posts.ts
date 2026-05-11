@@ -3,12 +3,12 @@ import type { CollectionConfig, Where } from 'payload'
 import { autoTranslatePostEndpoint } from '@/endpoints/posts/autoTranslatePost'
 import { captureOwnedResourcesBeforeDelete } from '@/hooks/posts/captureOwnedResourcesBeforeDelete'
 import { deleteOwnedResourcesAfterDelete } from '@/hooks/posts/deleteOwnedResourcesAfterDelete'
-import { editorOnly, publishedOrEditor, publishedVersionsOrEditor } from '@/lib/access'
-import { loadBibliographyEntries } from '@/lib/bibliography'
-import { extractCitationKeys } from '@/lib/citations'
-import { defaultLocale } from '@/lib/locales'
-import { buildPostLivePreviewURL, buildPostPreviewURL } from '@/lib/preview'
-import { slugify } from '@/lib/slugs'
+import { editorOnly, publishedOrEditor, publishedVersionsOrEditor } from '@/shared/auth/access'
+import { loadBibliographyEntries } from '@/features/article/model/bibliography'
+import { extractCitationKeys } from '@/features/article/model/citations'
+import { defaultLocale } from '@/shared/i18n/locales'
+import { buildPostLivePreviewURL, buildPostPreviewURL } from '@/features/posts/preview'
+import { slugify } from '@/shared/content/slugs'
 
 function resolveAdminDocumentID(value: unknown) {
   if (typeof value === 'number' || typeof value === 'string') {
@@ -55,12 +55,12 @@ export const Posts: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        beforeDocumentControls: ['/components/payload/PostPackageImportAction#PostPackageImportAction'],
+        beforeDocumentControls: ['/features/posts/admin/PostPackageImportAction#PostPackageImportAction'],
       },
       views: {
         edit: {
           livePreview: {
-            Component: '/components/payload/PostLivePreviewView#PostLivePreviewView',
+            Component: '/features/posts/admin/PostLivePreviewView#PostLivePreviewView',
           },
         },
       },
@@ -147,7 +147,7 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  Field: '/components/payload/PostInsights#PostInsights',
+                  Field: '/features/posts/admin/PostInsights#PostInsights',
                 },
               },
             },
@@ -210,7 +210,7 @@ export const Posts: CollectionConfig = {
                 description:
                   'Store one BibTeX source directly on this post. Structured editing is available for safe, common entries.',
                 components: {
-                  Field: '/components/payload/BibliographyField#BibliographyField',
+                  Field: '/features/article/admin/BibliographyField#BibliographyField',
                 },
               },
               name: 'bibliography',
@@ -266,7 +266,7 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  Field: '/components/payload/PostTranslationManager#PostTranslationManager',
+                  Field: '/features/posts/admin/PostTranslationManager#PostTranslationManager',
                 },
               },
             },

@@ -10,9 +10,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { formatLongDate } from '@/i18n/format'
 import { requireLocale } from '@/i18n/routing'
-import { buildLocalePath } from '@/lib/locales'
-import { getPostBySlug, getPostVersionDiffs } from '@/lib/posts'
-import { getSiteSettings } from '@/lib/site-settings'
+import { buildLocalePath } from '@/shared/i18n/locales'
+import { getPostBySlug, getPostVersionDiffs } from '@/features/posts/server/queries'
+import { getSiteSettings } from '@/features/site-settings/model/site-settings'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string; slug: string }>

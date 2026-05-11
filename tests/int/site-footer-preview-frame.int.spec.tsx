@@ -2,8 +2,8 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { SiteFooterPreviewFrame } from '@/components/frontend/SiteFooterPreviewFrame'
-import { siteFooterPreviewMessageType } from '@/lib/site-footer-preview'
+import { SiteFooterPreviewFrame } from '@/features/site-settings/ui/SiteFooterPreviewFrame'
+import { siteFooterPreviewMessageType } from '@/features/site-settings/model/site-footer-preview'
 
 describe('SiteFooterPreviewFrame', () => {
   it('renders production footer layout after receiving preview settings', async () => {

@@ -1,8 +1,8 @@
 import { APIError, type Endpoint } from 'payload'
 
-import { isEditor } from '@/lib/access'
-import { defaultLocale, normalizeLocale } from '@/lib/locales'
-import { isTranslationConfigured, translateFields } from '@/lib/translation'
+import { isEditor } from '@/shared/auth/access'
+import { defaultLocale, normalizeLocale } from '@/shared/i18n/locales'
+import { isTranslationConfigured, translateFields } from '@/shared/i18n/translation'
 
 type RequestBody = {
   sourceLocale?: string

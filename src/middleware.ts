@@ -8,7 +8,7 @@ import {
   localeRequestHeaderName,
   normalizeLocale,
   resolvePreferredLocale,
-} from '@/lib/locales'
+} from '@/shared/i18n/locales'
 
 const localeCookieMaxAge = 60 * 60 * 24 * 365
 

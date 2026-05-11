@@ -10,9 +10,11 @@ function readProjectFile(relativePath: string) {
 
 describe('site settings preview layout styles', () => {
   it('keeps sticky previews below the Payload action bar', () => {
-    const footerPreviewStyles = readProjectFile('src/components/payload/site-footer-preview.scss')
+    const footerPreviewStyles = readProjectFile(
+      'src/features/site-settings/admin/site-footer-preview.scss',
+    )
     const articlePreviewStyles = readProjectFile(
-      'src/components/payload/article-layout-preview.scss',
+      'src/features/article/admin/article-layout-preview.scss',
     )
 
     expect(footerPreviewStyles).toContain('--site-settings-preview-sticky-offset')

@@ -1,28 +1,28 @@
-import { PostInsights as PostInsights_e770027bab5f28ea955c6ccf216cedb4 } from '../../../components/payload/PostInsights'
-import { BibliographyField as BibliographyField_717477dca85f9102a6193d977c97f573 } from '../../../components/payload/BibliographyField'
-import { PostTranslationManager as PostTranslationManager_2a8938c2187d10048ec37c73ed12f688 } from '../../../components/payload/PostTranslationManager'
-import { PostPackageImportAction as PostPackageImportAction_991c33c68c79e784af33515d69993235 } from '../../../components/payload/PostPackageImportAction'
-import { PostLivePreviewView as PostLivePreviewView_9222b67ecbb0ab1ba52dfe865b4c4243 } from '../../../components/payload/PostLivePreviewView'
-import { SiteSettingsSectionModeSwitch as SiteSettingsSectionModeSwitch_60975e27947fa123284ba9527575e385 } from '../../../components/payload/SiteSettingsSectionModeSwitch'
-import { SiteSettingsRawSectionEditor as SiteSettingsRawSectionEditor_e257ed39de8837758218970fa7ed2fe0 } from '../../../components/payload/SiteSettingsRawSectionEditor'
-import { ArticleDesignRangeField as ArticleDesignRangeField_ab2a1c366ca907f04cdf55bb3f0326b2 } from '../../../components/payload/ArticleDesignRangeField'
-import { ArticleLayoutPreview as ArticleLayoutPreview_35a30d63e7f0d7b617d81e1657cd795c } from '../../../components/payload/ArticleLayoutPreview'
-import { SiteFooterPresetActions as SiteFooterPresetActions_227ee327d84611370354895c14b67e1e } from '../../../components/payload/SiteFooterPresetActions'
-import { SiteFooterPreview as SiteFooterPreview_82b6ef94fa126d5bb067b08661919ddd } from '../../../components/payload/SiteFooterPreview'
+import { PostInsights as PostInsights_e7857a6f558791797c0e9ffbc55bc6a7 } from '../../../features/posts/admin/PostInsights'
+import { BibliographyField as BibliographyField_e4b55c096eac8067a29439eed44b9195 } from '../../../features/article/admin/BibliographyField'
+import { PostTranslationManager as PostTranslationManager_e34e04e501ccd07329911bfe34c0d3ba } from '../../../features/posts/admin/PostTranslationManager'
+import { PostPackageImportAction as PostPackageImportAction_e9ae03abb7c03268e2670be8b9d8e39e } from '../../../features/posts/admin/PostPackageImportAction'
+import { PostLivePreviewView as PostLivePreviewView_fad8e676b26d6066e9d589d7a39a1674 } from '../../../features/posts/admin/PostLivePreviewView'
+import { SiteSettingsSectionModeSwitch as SiteSettingsSectionModeSwitch_418636acfe8cdf13636876bcb137dcec } from '../../../features/site-settings/admin/SiteSettingsSectionModeSwitch'
+import { SiteSettingsRawSectionEditor as SiteSettingsRawSectionEditor_d60a3e7d29b093b58f278bf619d65c57 } from '../../../features/site-settings/admin/SiteSettingsRawSectionEditor'
+import { ArticleDesignRangeField as ArticleDesignRangeField_ab86120354cc54f9f9870e7ca85efae4 } from '../../../features/article/admin/ArticleDesignRangeField'
+import { ArticleLayoutPreview as ArticleLayoutPreview_7a120c9eaf1fd77e5cebec51d9f327a9 } from '../../../features/article/admin/ArticleLayoutPreview'
+import { SiteFooterPresetActions as SiteFooterPresetActions_46e9413c3d66ea4aea52d5e3d163aecb } from '../../../features/site-settings/admin/SiteFooterPresetActions'
+import { SiteFooterPreview as SiteFooterPreview_faaa1e5f7cb3c6fbb949805c16ac6617 } from '../../../features/site-settings/admin/SiteFooterPreview'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
-  "/components/payload/PostInsights#PostInsights": PostInsights_e770027bab5f28ea955c6ccf216cedb4,
-  "/components/payload/BibliographyField#BibliographyField": BibliographyField_717477dca85f9102a6193d977c97f573,
-  "/components/payload/PostTranslationManager#PostTranslationManager": PostTranslationManager_2a8938c2187d10048ec37c73ed12f688,
-  "/components/payload/PostPackageImportAction#PostPackageImportAction": PostPackageImportAction_991c33c68c79e784af33515d69993235,
-  "/components/payload/PostLivePreviewView#PostLivePreviewView": PostLivePreviewView_9222b67ecbb0ab1ba52dfe865b4c4243,
-  "/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch": SiteSettingsSectionModeSwitch_60975e27947fa123284ba9527575e385,
-  "/components/payload/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor": SiteSettingsRawSectionEditor_e257ed39de8837758218970fa7ed2fe0,
-  "/components/payload/ArticleDesignRangeField#ArticleDesignRangeField": ArticleDesignRangeField_ab2a1c366ca907f04cdf55bb3f0326b2,
-  "/components/payload/ArticleLayoutPreview#ArticleLayoutPreview": ArticleLayoutPreview_35a30d63e7f0d7b617d81e1657cd795c,
-  "/components/payload/SiteFooterPresetActions#SiteFooterPresetActions": SiteFooterPresetActions_227ee327d84611370354895c14b67e1e,
-  "/components/payload/SiteFooterPreview#SiteFooterPreview": SiteFooterPreview_82b6ef94fa126d5bb067b08661919ddd,
+  "/features/posts/admin/PostInsights#PostInsights": PostInsights_e7857a6f558791797c0e9ffbc55bc6a7,
+  "/features/article/admin/BibliographyField#BibliographyField": BibliographyField_e4b55c096eac8067a29439eed44b9195,
+  "/features/posts/admin/PostTranslationManager#PostTranslationManager": PostTranslationManager_e34e04e501ccd07329911bfe34c0d3ba,
+  "/features/posts/admin/PostPackageImportAction#PostPackageImportAction": PostPackageImportAction_e9ae03abb7c03268e2670be8b9d8e39e,
+  "/features/posts/admin/PostLivePreviewView#PostLivePreviewView": PostLivePreviewView_fad8e676b26d6066e9d589d7a39a1674,
+  "/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch": SiteSettingsSectionModeSwitch_418636acfe8cdf13636876bcb137dcec,
+  "/features/site-settings/admin/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor": SiteSettingsRawSectionEditor_d60a3e7d29b093b58f278bf619d65c57,
+  "/features/article/admin/ArticleDesignRangeField#ArticleDesignRangeField": ArticleDesignRangeField_ab86120354cc54f9f9870e7ca85efae4,
+  "/features/article/admin/ArticleLayoutPreview#ArticleLayoutPreview": ArticleLayoutPreview_7a120c9eaf1fd77e5cebec51d9f327a9,
+  "/features/site-settings/admin/SiteFooterPresetActions#SiteFooterPresetActions": SiteFooterPresetActions_46e9413c3d66ea4aea52d5e3d163aecb,
+  "/features/site-settings/admin/SiteFooterPreview#SiteFooterPreview": SiteFooterPreview_faaa1e5f7cb3c6fbb949805c16ac6617,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

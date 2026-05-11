@@ -1,0 +1,410 @@
+@layer components {
+  .dev-reference-shell {
+    @apply flex flex-col gap-12;
+  }
+
+  .dev-reference-hero {
+    @apply flex flex-col gap-6 border-b border-border pb-10;
+  }
+
+  .dev-reference-card {
+    @apply rounded-none border-border bg-background shadow-none;
+  }
+
+  .dev-reference-section {
+    @apply grid gap-5;
+  }
+
+  .dev-reference-section__intro {
+    @apply grid gap-3 border-b border-border pb-5;
+  }
+
+  .dev-reference-section__intro h2 {
+    @apply font-serif text-3xl;
+  }
+
+  .dev-reference-section__intro p:not(.section-kicker) {
+    @apply max-w-2xl text-muted-foreground;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-body-line);
+  }
+
+  .dev-article-block-sample {
+    @apply max-w-none border border-border bg-muted/18 px-5 py-5 sm:px-7 sm:py-6;
+  }
+
+  .dev-article-block-sample > :first-child {
+    margin-top: 0;
+  }
+
+  .dev-article-block-sample > :last-child {
+    margin-bottom: 0;
+  }
+
+  .dev-progress-rail {
+    @apply hidden min-w-0 flex-col gap-4 border-t border-border pt-6 xl:flex xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0;
+    --toc-panel-height: min(58vh, 30rem);
+    --toc-spacing-scale: 0.72;
+  }
+
+  .dev-progress-rail__header {
+    @apply flex items-end justify-between gap-3 border-b border-border pb-3;
+  }
+
+  .dev-progress-map {
+    @apply relative overflow-y-auto overscroll-contain pr-1;
+    --toc-active-stroke: 4;
+    --toc-track-stroke: 2;
+    max-height: var(--toc-panel-height);
+    overflow-anchor: none;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 1.25rem,
+      #000 calc(100% - 1.25rem),
+      transparent 100%
+    );
+    scroll-behavior: auto;
+    scroll-padding-block: 1.5rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 1.25rem,
+      #000 calc(100% - 1.25rem),
+      transparent 100%
+    );
+  }
+
+  .dev-progress-map::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dev-progress-map[data-weight='fine'] {
+    --toc-active-stroke: 3;
+    --toc-track-stroke: 1.5;
+  }
+
+  .dev-progress-map[data-weight='strong'] {
+    --toc-active-stroke: 5.5;
+    --toc-track-stroke: 2.5;
+  }
+
+  .dev-progress-map__content {
+    @apply relative min-w-0;
+  }
+
+  .dev-progress-map__track {
+    @apply pointer-events-none absolute left-0 top-0 overflow-visible;
+    z-index: 0;
+  }
+
+  .dev-progress-map__path {
+    @apply fill-none stroke-border;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: var(--toc-track-stroke);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .dev-progress-map__path--active {
+    stroke: color-mix(in oklab, var(--accent-foreground) 64%, var(--accent));
+    stroke-width: var(--toc-active-stroke);
+    will-change: stroke-dasharray, stroke-dashoffset;
+  }
+
+  .dev-progress-map ol {
+    @apply relative flex list-none flex-col gap-0 pl-0 py-4;
+    z-index: 1;
+  }
+
+  .dev-progress-map__item {
+    --toc-depth: 0;
+    --toc-depth-indent: 0rem;
+  }
+
+  .dev-progress-map__item + .dev-progress-map__item[data-level='2'] {
+    margin-top: calc(0.52rem * var(--toc-spacing-scale));
+  }
+
+  .dev-progress-map__item[data-level='2'] + .dev-progress-map__item[data-level='3'] {
+    margin-top: calc(0.03rem * var(--toc-spacing-scale));
+  }
+
+  .dev-progress-map__item[data-level='3'] + .dev-progress-map__item[data-level='4'] {
+    margin-top: calc(0.01rem * var(--toc-spacing-scale));
+  }
+
+  .dev-progress-map__item[data-level='4'] + .dev-progress-map__item[data-level='4'] {
+    margin-top: 0;
+  }
+
+  .dev-progress-map__item[data-level='4'] + .dev-progress-map__item[data-level='3'],
+  .dev-progress-map__item[data-level='3'] + .dev-progress-map__item[data-level='3'] {
+    margin-top: calc(0.18rem * var(--toc-spacing-scale));
+  }
+
+  .dev-progress-map__link {
+    @apply relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 overflow-hidden pr-1 text-muted-foreground no-underline transition-colors hover:text-foreground;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-caption-line);
+    padding-bottom: calc(0.13rem * var(--toc-spacing-scale));
+    padding-left: calc(2.25rem + var(--toc-depth-indent));
+    padding-top: calc(0.13rem * var(--toc-spacing-scale));
+  }
+
+  .dev-progress-map__title {
+    @apply block min-w-0 overflow-hidden whitespace-nowrap;
+    transition:
+      color 260ms ease,
+      opacity 260ms ease,
+      filter 260ms ease;
+  }
+
+  .dev-progress-map__title-text {
+    @apply inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap align-bottom;
+    transition:
+      color 260ms ease,
+      opacity 260ms ease,
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .dev-progress-map__item[data-title-overflow='true'] .dev-progress-map__title {
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.35rem), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.35rem), transparent);
+  }
+
+  .dev-progress-map__item[data-title-overflow='true'] .dev-progress-map__title-text {
+    max-width: none;
+  }
+
+  .dev-progress-map__item[data-title-overflow='true'][data-state='current']
+    .dev-progress-map__title-text,
+  .dev-progress-map__item[data-title-overflow='true']
+    .dev-progress-map__link:hover
+    .dev-progress-map__title-text,
+  .dev-progress-map__item[data-title-overflow='true']
+    .dev-progress-map__link:focus-visible
+    .dev-progress-map__title-text {
+    animation: dev-progress-title-pan 7s ease-in-out 0.35s infinite;
+  }
+
+  .dev-progress-map__level {
+    @apply font-medium text-muted-foreground/72;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+    transition:
+      color 260ms ease,
+      opacity 260ms ease,
+      filter 260ms ease;
+  }
+
+  .dev-progress-map__item[data-level='2'] .dev-progress-map__title {
+    @apply font-medium text-foreground/88;
+  }
+
+  .dev-progress-map__item[data-level='4'] .dev-progress-map__link {
+    @apply text-xs;
+  }
+
+  .dev-progress-map__item[data-state='read'] .dev-progress-map__title {
+    @apply text-foreground/66;
+  }
+
+  .dev-progress-map__item[data-state='current'] .dev-progress-map__title {
+    @apply text-foreground;
+  }
+
+  .dev-progress-map__item[data-state='current'] .dev-progress-map__level {
+    @apply text-foreground/58;
+  }
+
+  @keyframes dev-progress-title-pan {
+    0%,
+    14% {
+      transform: translateX(0);
+    }
+
+    64%,
+    82% {
+      transform: translateX(calc(var(--title-scroll-distance, 0px) * -1));
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dev-progress-map__item[data-title-overflow='true'][data-state='current']
+      .dev-progress-map__title-text,
+    .dev-progress-map__item[data-title-overflow='true']
+      .dev-progress-map__link:hover
+      .dev-progress-map__title-text,
+    .dev-progress-map__item[data-title-overflow='true']
+      .dev-progress-map__link:focus-visible
+      .dev-progress-map__title-text {
+      animation: none;
+    }
+  }
+
+  .dev-progress-mobile {
+    @apply fixed inset-x-3 bottom-3 z-40 border border-border bg-background/94 px-3 py-2 backdrop-blur-md xl:hidden;
+    --mobile-progress-start: 0%;
+    --mobile-progress-size: 1%;
+  }
+
+  .dev-progress-mobile__track {
+    @apply relative mb-2 h-px overflow-hidden bg-border;
+  }
+
+  .dev-progress-mobile__track span {
+    @apply absolute inset-y-0 bg-foreground;
+    left: var(--mobile-progress-start);
+    width: var(--mobile-progress-size);
+  }
+
+  .dev-progress-mobile[data-weight='fine'] .dev-progress-mobile__track {
+    @apply h-px;
+  }
+
+  .dev-progress-mobile[data-weight='strong'] .dev-progress-mobile__track {
+    @apply h-0.5;
+  }
+
+  .dev-progress-mobile__link {
+    @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-foreground no-underline;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-caption-line);
+  }
+
+  .dev-progress-mobile__level {
+    @apply font-medium text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+  }
+
+  .dev-progress-mobile__title {
+    @apply min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-foreground/82;
+  }
+
+  .dev-progress-mobile__percent {
+    @apply font-medium uppercase text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+  }
+
+  .dev-progress-floating-controls {
+    @apply fixed bottom-3 right-3 z-[60] flex w-[min(18rem,calc(100vw-1.5rem))] flex-col gap-1.5 border border-border bg-background/94 p-2.5 backdrop-blur-md;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-caption-line);
+  }
+
+  @media (max-width: 1279px) {
+    .dev-progress-floating-controls {
+      bottom: auto;
+      max-height: calc(100vh - 5.5rem);
+      overflow-y: auto;
+      top: 0.75rem;
+    }
+  }
+
+  .dev-progress-floating-controls [data-slot='button'] {
+    @apply h-6 rounded-none border-border px-2 shadow-none;
+    font-size: var(--zblog-type-meta-size);
+  }
+
+  .dev-progress-floating-controls__header {
+    @apply font-medium uppercase text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+  }
+
+  .dev-progress-floating-controls__row {
+    @apply grid grid-cols-[1.9rem_minmax(0,1fr)] items-center gap-1.5;
+  }
+
+  .dev-progress-floating-controls__label {
+    @apply font-medium text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+  }
+
+  .dev-progress-floating-controls__buttons {
+    @apply flex flex-wrap gap-1;
+  }
+
+  .dev-progress-floating-controls__range {
+    @apply grid grid-cols-[minmax(0,1fr)_2.4rem] items-center gap-2 text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+  }
+
+  .dev-progress-floating-controls__switch {
+    @apply flex items-center justify-between gap-2 text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+  }
+
+  .dev-progress-floating-controls__range input {
+    @apply h-1 w-full cursor-pointer appearance-none bg-border;
+  }
+
+  .dev-progress-floating-controls__range input:disabled {
+    @apply cursor-not-allowed opacity-45;
+  }
+
+  .dev-progress-floating-controls__range input:disabled + span {
+    @apply opacity-50;
+  }
+
+  .dev-progress-floating-controls__range input::-webkit-slider-thumb {
+    @apply size-3 appearance-none border border-border bg-foreground;
+  }
+
+  .dev-progress-floating-controls__range input::-moz-range-thumb {
+    @apply size-3 rounded-none border border-border bg-foreground;
+  }
+
+  .dev-progress-floating-controls__meta {
+    @apply grid gap-1 border-t border-border pt-1.5 text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+  }
+
+  .dev-progress-floating-controls__meta span:last-child {
+    @apply line-clamp-2;
+  }
+
+  .dev-progress-floating-controls__debug {
+    @apply mt-0.5 self-start;
+  }
+
+  .dev-progress-debug-boundaries {
+    @apply pointer-events-none fixed inset-0 z-50;
+  }
+
+  .dev-progress-debug-boundary {
+    @apply fixed left-0 right-0 border-t border-dashed border-destructive/80;
+  }
+
+  .dev-progress-debug-boundary > span {
+    @apply ml-3 inline-block bg-destructive px-2 py-0.5 font-medium uppercase text-destructive-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-badge);
+    transform: translateY(-50%);
+  }
+
+  .dev-progress-debug-boundary--bottom {
+    @apply border-primary/70;
+  }
+
+  .dev-progress-debug-boundary--bottom > span {
+    @apply bg-primary text-primary-foreground;
+  }
+}

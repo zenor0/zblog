@@ -2,11 +2,11 @@ import type { CSSProperties, ReactNode } from 'react'
 import { NextIntlClientProvider } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 
-import { SiteFooter } from '@/components/frontend/SiteFooter'
+import { SiteFooter } from '@/features/site-settings/ui/SiteFooter'
+import { resolveArticleDesignConfig } from '@/features/article/model/article-design'
+import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import { getMessagesForLocale } from '@/i18n/loadMessages'
 import { requireLocale } from '@/i18n/routing'
-import { resolveArticleDesignConfig } from '@/lib/article-design'
-import { getResolvedSiteSettings } from '@/lib/site-settings'
 
 export default async function LocaleLayout(props: {
   children: ReactNode

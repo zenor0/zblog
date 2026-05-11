@@ -2,9 +2,9 @@ import { access } from 'node:fs/promises'
 
 import type { NextRequest } from 'next/server'
 
-import { getMediaFilename, inferMediaKind } from '@/lib/media'
-import { resolveLocalMediaPath } from '@/lib/media-server'
-import { buildPDFPreviewFallbackSVG, renderPDFPreviewSVG } from '@/lib/pdf-preview'
+import { getMediaFilename, inferMediaKind } from '@/features/media/model/media'
+import { resolveLocalMediaPath } from '@/features/media/server/media-server'
+import { buildPDFPreviewFallbackSVG, renderPDFPreviewSVG } from '@/features/media/server/pdf-preview'
 
 export const runtime = 'nodejs'
 

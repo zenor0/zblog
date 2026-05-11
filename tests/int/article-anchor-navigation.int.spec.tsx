@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { ArticleAnchorNavigation } from '@/components/frontend/ArticleAnchorNavigation'
+import { ArticleAnchorNavigation } from '@/features/article/ui/ArticleAnchorNavigation'
 
 function setScrollY(value: number) {
   Object.defineProperty(window, 'scrollY', {

@@ -2,20 +2,20 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
-import { LocaleSwitcher } from '@/components/frontend/LocaleSwitcher'
-import { MediaSurface } from '@/components/frontend/MediaSurface'
-import { ThemeSwitcher } from '@/components/frontend/ThemeSwitcher'
+import { LocaleSwitcher } from '@/shared/ui/LocaleSwitcher'
+import { MediaSurface } from '@/features/media/ui/MediaSurface'
+import { ThemeSwitcher } from '@/shared/ui/ThemeSwitcher'
+import { getPublishedPosts } from '@/features/posts/server/queries'
+import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import { formatShortDate } from '@/i18n/format'
 import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
-import { buildLocalePath } from '@/lib/locales'
-import { getPublishedPosts } from '@/lib/posts'
+import { buildLocalePath } from '@/shared/i18n/locales'
 import {
   buildHomeStructuredData,
   buildPageMetadata,
   buildSeoDescription,
   serializeStructuredData,
-} from '@/lib/seo'
-import { getResolvedSiteSettings } from '@/lib/site-settings'
+} from '@/shared/content/seo'
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>

@@ -24,7 +24,7 @@ vi.mock('@payloadcms/ui', () => ({
   useLocale: () => ({ code: 'en' }),
 }))
 
-import { SiteFooterPresetActions } from '@/components/payload/SiteFooterPresetActions'
+import { SiteFooterPresetActions } from '@/features/site-settings/admin/SiteFooterPresetActions'
 
 describe('SiteFooterPresetActions', () => {
   afterEach(() => {

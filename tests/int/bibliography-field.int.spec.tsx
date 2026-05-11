@@ -41,7 +41,7 @@ vi.mock('@payloadcms/ui', () => ({
   },
 }))
 
-import { BibliographyField } from '@/components/payload/BibliographyField'
+import { BibliographyField } from '@/features/article/admin/BibliographyField'
 
 describe('BibliographyField', () => {
   afterEach(() => {

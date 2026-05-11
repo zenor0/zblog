@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
-import { PostInsights } from '@/components/payload/PostInsights'
+import { PostInsights } from '@/features/posts/admin/PostInsights'
 
 describe('PostInsights', () => {
   it('renders publishing snapshot, locale coverage, content assets, and owned resource summaries', async () => {

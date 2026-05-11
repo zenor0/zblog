@@ -6,4 +6,4 @@ export {
   type ArticleLayoutPresetID,
   type ArticleLayoutPresetTokenName,
   type ArticleLayoutPresetTokens,
-} from '@/lib/article-layout'
+} from '@/features/article/model/article-layout'

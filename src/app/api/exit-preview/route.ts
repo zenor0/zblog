@@ -1,7 +1,7 @@
 import { draftMode } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { sanitizePreviewPath } from '@/lib/preview'
+import { sanitizePreviewPath } from '@/features/posts/preview'
 
 export const GET = async (request: Request) => {
   const preview = await draftMode()

@@ -30,11 +30,11 @@ describe('Site settings footer config', () => {
     expect(controlsField.admin.className).toContain('site-settings-preview-grid__controls')
     expect(controlsField.fields[0].name).toBe('footerPresetActions')
     expect(controlsField.fields[0].admin.components.Field).toBe(
-      '/components/payload/SiteFooterPresetActions#SiteFooterPresetActions',
+      '/features/site-settings/admin/SiteFooterPresetActions#SiteFooterPresetActions',
     )
     expect(controlsField.fields[1].name).toBe('footerEditorMode')
     expect(controlsField.fields[1].admin.components.Field).toBe(
-      '/components/payload/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+      '/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
     )
     expect(controlsField.fields[2].type).toBe('group')
     expect(
@@ -72,7 +72,7 @@ describe('Site settings footer config', () => {
 
     expect(previewField.type).toBe('ui')
     expect(previewField.admin.components.Field).toBe(
-      '/components/payload/SiteFooterPreview#SiteFooterPreview',
+      '/features/site-settings/admin/SiteFooterPreview#SiteFooterPreview',
     )
 
     const brandField = allFooterFields.find((field: any) => field.name === 'brand') as any
