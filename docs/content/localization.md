@@ -71,3 +71,7 @@ When adding or renaming a locale:
 4. Review localized fields in collections and globals.
 5. Update route, sitemap, SEO alternate-locale behavior, and middleware expectations.
 6. Add or adjust tests for locale normalization, routing, translated content, and SEO alternates.
+
+The project is still pre-launch, so local database contents are treated as disposable during
+locale model changes. Prefer `pnpm run seed:blog:fresh` over compatibility migrations unless
+there is data that must be preserved.

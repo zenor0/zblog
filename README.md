@@ -28,6 +28,8 @@ That's it! Changes made in `./src` will be reflected in your app. Follow the on-
 
 - [Project documentation](./docs/README.md): frontend design system, article layout, Markdown rendering, post editor IA, bibliography, footer, localization, and development labs.
 - Runtime state: `ZBLOG_STATE_DIR` defaults to `.data`; keep `DATABASE_URL=file:.data/zblog.db` unless you intentionally point SQLite at another file.
+- Local reset: this app is still pre-launch, so local data is disposable. Use `pnpm run db:reset` to remove `.data`, or `pnpm run seed:blog:fresh` to reset and recreate the seeded blog content.
+- Seed profiling: set `ZBLOG_SEED_TIMING=true` when running `seed:blog` to print per-step timings. Most cold-start time is Payload config and SQLite schema initialization; the seed writes are intentionally small.
 
 #### Docker (Optional)
 

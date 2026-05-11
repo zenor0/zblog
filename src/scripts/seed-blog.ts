@@ -1,14 +1,15 @@
 import 'dotenv/config'
 
 import fs from 'fs/promises'
+import { performance } from 'node:perf_hooks'
 import path from 'path'
 
-import { getPayload } from 'payload'
+import type { Payload } from 'payload'
 
-import config from '@/payload.config'
 import type { Media, Post, User } from '@/payload-types'
 import { normalizeSiteFooter } from '@/components/frontend/site-footer'
 import { localeCodes } from '@/lib/locales'
+import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/lib/local-state-reset'
 import {
   buildEnMarkdownShowcaseContent,
   buildZhMarkdownShowcaseContent,
@@ -23,6 +24,8 @@ import { resolveSiteSettingReferences } from '@/lib/site-settings-config'
 import { seedAssetsDir } from '@/lib/runtime-paths'
 
 const seedDir = seedAssetsDir
+const shouldLogTimings = process.env.ZBLOG_SEED_TIMING === 'true'
+const shouldResetLocalState = process.argv.includes('--reset')
 
 const heroSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
@@ -84,7 +87,41 @@ async function ensureSeedAssets() {
   }
 }
 
-async function backfillUserRoles(payload: Awaited<ReturnType<typeof getPayload>>) {
+async function getSeedPayload() {
+  const [{ getPayload }, configModule] = await Promise.all([
+    import('payload'),
+    import('@/payload.config'),
+  ])
+
+  return getPayload({
+    config: await configModule.default,
+  })
+}
+
+async function resetLocalState() {
+  const plan = getLocalStateResetPlan()
+
+  assertSafeLocalStateReset(plan)
+
+  await fs.rm(plan.targetPath, {
+    force: true,
+    recursive: true,
+  })
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        reset: plan.label,
+        targetPath: plan.targetPath,
+      },
+      null,
+      2,
+    ),
+  )
+}
+
+async function backfillUserRoles(payload: Payload) {
   const users = await payload.find({
     collection: 'users',
     depth: 0,
@@ -110,7 +147,7 @@ async function backfillUserRoles(payload: Awaited<ReturnType<typeof getPayload>>
   }
 }
 
-async function deleteExistingSeedContent(payload: Awaited<ReturnType<typeof getPayload>>) {
+async function deleteExistingSeedContent(payload: Payload) {
   await Promise.all([
     payload.delete({
       collection: 'posts',
@@ -131,7 +168,7 @@ async function deleteExistingSeedContent(payload: Awaited<ReturnType<typeof getP
   ])
 }
 
-async function seedSiteSettings(payload: Awaited<ReturnType<typeof getPayload>>) {
+async function seedSiteSettings(payload: Payload) {
   for (const locale of localeCodes) {
     const settings = await payload.findGlobal({
       slug: 'site-settings',
@@ -166,7 +203,7 @@ async function seedSiteSettings(payload: Awaited<ReturnType<typeof getPayload>>)
 }
 
 async function createSeedFiles(
-  payload: Awaited<ReturnType<typeof getPayload>>,
+  payload: Payload,
   assetPaths: Awaited<ReturnType<typeof ensureSeedAssets>>,
 ) {
   const hero = (await payload.create({
@@ -256,10 +293,7 @@ This seeded entry covers Markdown rendering, BibTeX references, attachments, ima
 `
 }
 
-async function seedPosts(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-  files: Awaited<ReturnType<typeof createSeedFiles>>,
-) {
+async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof createSeedFiles>>) {
   const citationPost = (await payload.create({
     collection: 'posts',
     data: {
@@ -360,7 +394,7 @@ async function seedPosts(
   })
 }
 
-async function logSummary(payload: Awaited<ReturnType<typeof getPayload>>) {
+async function logSummary(payload: Payload) {
   const posts = await payload.find({
     collection: 'posts',
     depth: 0,
@@ -404,20 +438,45 @@ async function logSummary(payload: Awaited<ReturnType<typeof getPayload>>) {
   )
 }
 
+async function timed<T>(label: string, operation: () => Promise<T>): Promise<T> {
+  const start = performance.now()
+
+  try {
+    return await operation()
+  } finally {
+    if (shouldLogTimings) {
+      console.log(`${label}: ${Math.round(performance.now() - start)}ms`)
+    }
+  }
+}
+
 async function main() {
-  const payload = await getPayload({
-    config: await config,
-  })
+  let payload: Payload | null = null
 
-  await backfillUserRoles(payload)
-  await seedSiteSettings(payload)
-  await deleteExistingSeedContent(payload)
+  try {
+    if (shouldResetLocalState) {
+      await timed('reset local state', resetLocalState)
+    }
 
-  const assetPaths = await ensureSeedAssets()
-  const files = await createSeedFiles(payload, assetPaths)
+    payload = await timed('init payload', getSeedPayload)
+    const initializedPayload = payload
 
-  await seedPosts(payload, files)
-  await logSummary(payload)
+    await timed('backfill user roles', () => backfillUserRoles(initializedPayload))
+    await timed('seed site settings', () => seedSiteSettings(initializedPayload))
+    await timed('delete existing seed content', () => deleteExistingSeedContent(initializedPayload))
+
+    const assetPaths = await timed('ensure seed assets', ensureSeedAssets)
+    const files = await timed('create seed media', () =>
+      createSeedFiles(initializedPayload, assetPaths),
+    )
+
+    await timed('seed posts', () => seedPosts(initializedPayload, files))
+    await timed('log summary', () => logSummary(initializedPayload))
+  } finally {
+    await timed('destroy payload', async () => {
+      await payload?.destroy()
+    })
+  }
 }
 
 main().catch((error) => {
