@@ -8,11 +8,13 @@ import { Switch } from '@/components/ui/switch'
 import {
   headingLevelOptions,
   lineWeightOptions,
+  mobileTocVariantOptions,
   pathStyleOptions,
   railHeightOptions,
   tocTrackOffset,
   type HeadingLevel,
   type LineWeight,
+  type MobileTocVariant,
   type PathStyle,
   type RailHeight,
 } from './articleProgressModel'
@@ -24,6 +26,7 @@ type ArticleProgressControlsProps = {
   isTrackOffsetLocked: boolean
   lineWeight: LineWeight
   lockedTrackOffsetPx: number
+  mobileTocVariant: MobileTocVariant
   pathStyle: PathStyle
   railHeight: RailHeight
   readingRangeLabel: string
@@ -33,6 +36,7 @@ type ArticleProgressControlsProps = {
   setIsTrackOffsetLocked: Dispatch<SetStateAction<boolean>>
   setLineWeight: Dispatch<SetStateAction<LineWeight>>
   setLockedTrackOffsetPx: Dispatch<SetStateAction<number>>
+  setMobileTocVariant: Dispatch<SetStateAction<MobileTocVariant>>
   setPathStyle: Dispatch<SetStateAction<PathStyle>>
   setRailHeight: Dispatch<SetStateAction<RailHeight>>
   setScrollLeadScale: Dispatch<SetStateAction<number>>
@@ -54,6 +58,7 @@ export function ArticleProgressControls(props: ArticleProgressControlsProps) {
     isTrackOffsetLocked,
     lineWeight,
     lockedTrackOffsetPx,
+    mobileTocVariant,
     pathStyle,
     railHeight,
     readingRangeLabel,
@@ -63,6 +68,7 @@ export function ArticleProgressControls(props: ArticleProgressControlsProps) {
     setIsTrackOffsetLocked,
     setLineWeight,
     setLockedTrackOffsetPx,
+    setMobileTocVariant,
     setPathStyle,
     setRailHeight,
     setScrollLeadScale,
@@ -79,6 +85,30 @@ export function ArticleProgressControls(props: ArticleProgressControlsProps) {
   return (
     <div aria-label="进度条配置" className="dev-progress-floating-controls">
       <div className="dev-progress-floating-controls__header">Progress lab</div>
+
+      <div className="dev-progress-floating-controls__row">
+        <span className="dev-progress-floating-controls__label">移动</span>
+        <div
+          className="dev-progress-floating-controls__buttons"
+          role="group"
+          aria-label="移动端目录方案"
+        >
+          {mobileTocVariantOptions.map((option) => (
+            <Button
+              aria-pressed={mobileTocVariant === option.value}
+              key={option.value}
+              onClick={() => {
+                setMobileTocVariant(option.value)
+              }}
+              size="xs"
+              type="button"
+              variant={mobileTocVariant === option.value ? 'secondary' : 'outline'}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       <div className="dev-progress-floating-controls__row">
         <span className="dev-progress-floating-controls__label">层级</span>

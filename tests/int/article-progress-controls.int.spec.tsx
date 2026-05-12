@@ -15,6 +15,7 @@ function renderControls(props?: Partial<ComponentProps<typeof ArticleProgressCon
       isTrackOffsetLocked={true}
       lineWeight="regular"
       lockedTrackOffsetPx={22}
+      mobileTocVariant="right-rail"
       pathStyle="rounded"
       railHeight="regular"
       readingRangeLabel="10%-40%"
@@ -24,6 +25,7 @@ function renderControls(props?: Partial<ComponentProps<typeof ArticleProgressCon
       setIsTrackOffsetLocked={noop}
       setLineWeight={noop}
       setLockedTrackOffsetPx={noop}
+      setMobileTocVariant={noop}
       setPathStyle={noop}
       setRailHeight={noop}
       setScrollLeadScale={noop}

@@ -450,4 +450,36 @@ test.describe('Frontend', () => {
 
     await expect(page.locator('[data-anchor-return-variant="edge-tab"]')).toBeVisible()
   })
+
+  test('shows the mobile article progress right rail prototype without horizontal overflow', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 844, width: 390 })
+    await page.goto('/dev/article-progress')
+
+    const rightRail = page.locator('[data-mobile-toc-variant="right-rail"]')
+
+    await expect(rightRail).toBeVisible()
+    expect(await page.locator('[data-mobile-toc-preview]').count()).toBe(0)
+
+    const hasHorizontalOverflow = await page.evaluate(() => {
+      return document.documentElement.scrollWidth > window.innerWidth
+    })
+
+    expect(hasHorizontalOverflow).toBe(false)
+
+    const box = await rightRail.boundingBox()
+
+    if (!box) {
+      throw new Error('Missing right rail bounding box')
+    }
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.18)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.82)
+    await expect(page.locator('[data-mobile-toc-preview]')).toBeVisible()
+    await page.mouse.up()
+
+    await expect.poll(() => page.evaluate(() => window.location.hash.length > 1)).toBe(true)
+  })
 })

@@ -1,8 +1,11 @@
+import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
+
 export type HeadingLevel = 2 | 3 | 4
 export type PathStyle = 'stepped' | 'rounded' | 'flow' | 'diagonal'
 export type LineWeight = 'fine' | 'regular' | 'strong'
 export type RailHeight = 'compact' | 'regular' | 'tall'
 export type ScrollDirection = -1 | 1
+export type MobileTocVariant = 'right-rail' | 'bottom-strip' | 'sheet-map'
 
 export type TocPoint = {
   documentY: number
@@ -29,6 +32,21 @@ export type ReadingProgress = {
   pathWidth: number
   visibleEndPercent: number
   visibleStartPercent: number
+}
+
+export type MobileTocSegment = {
+  centerPercent: number
+  endPercent: number
+  heading: MarkdownHeading
+  sizePercent: number
+  startPercent: number
+}
+
+export type BuildMobileTocSegmentsArgs = {
+  articleBottom: number
+  articleTop: number
+  headingTops: number[]
+  headings: MarkdownHeading[]
 }
 
 export const readingOffsets = {
@@ -78,6 +96,12 @@ export const railHeightOptions: { label: string; value: RailHeight }[] = [
   { label: '高', value: 'tall' },
 ]
 
+export const mobileTocVariantOptions: { label: string; value: MobileTocVariant }[] = [
+  { label: '右轨', value: 'right-rail' },
+  { label: '底条', value: 'bottom-strip' },
+  { label: '抽屉', value: 'sheet-map' },
+]
+
 export const railHeightValues: Record<RailHeight, string> = {
   compact: 'min(42vh, 22rem)',
   regular: 'min(58vh, 30rem)',
@@ -105,6 +129,71 @@ export function clamp(value: number, min: number, max: number) {
 
 export function formatPercent(value: number) {
   return `${Math.round(value)}%`
+}
+
+export function buildMobileTocSegments(args: BuildMobileTocSegmentsArgs): MobileTocSegment[] {
+  const { articleBottom, articleTop, headingTops, headings } = args
+
+  if (headings.length === 0) {
+    return []
+  }
+
+  const articleHeight = Math.max(articleBottom - articleTop, 1)
+  const fallbackSpan = 100 / headings.length
+
+  return headings.map((heading, index) => {
+    const rawStart = headingTops[index]
+    const rawEnd = headingTops[index + 1] ?? articleBottom
+    const fallbackStartPercent = fallbackSpan * index
+    const fallbackEndPercent = index === headings.length - 1 ? 100 : fallbackSpan * (index + 1)
+    const startPercent =
+      typeof rawStart === 'number' && Number.isFinite(rawStart)
+        ? clamp(((rawStart - articleTop) / articleHeight) * 100, 0, 100)
+        : fallbackStartPercent
+    const endPercent =
+      typeof rawEnd === 'number' && Number.isFinite(rawEnd)
+        ? clamp(((rawEnd - articleTop) / articleHeight) * 100, startPercent, 100)
+        : fallbackEndPercent
+    const sizePercent = Math.max(endPercent - startPercent, 0)
+
+    return {
+      centerPercent: startPercent + sizePercent / 2,
+      endPercent,
+      heading,
+      sizePercent,
+      startPercent,
+    }
+  })
+}
+
+export function buildEqualMobileTocSegments(headings: MarkdownHeading[]): MobileTocSegment[] {
+  return buildMobileTocSegments({
+    articleBottom: headings.length || 1,
+    articleTop: 0,
+    headingTops: headings.map((_, index) => index),
+    headings,
+  })
+}
+
+export function resolveMobileTocSegmentByRatio(
+  segments: MobileTocSegment[],
+  ratio: number,
+): MobileTocSegment | null {
+  if (segments.length === 0) {
+    return null
+  }
+
+  const percent = clamp(ratio * 100, 0, 100)
+
+  return (
+    segments.find((segment) => percent >= segment.startPercent && percent <= segment.endPercent) ??
+    segments.reduce((nearestSegment, segment) => {
+      const nearestDistance = Math.abs(nearestSegment.centerPercent - percent)
+      const segmentDistance = Math.abs(segment.centerPercent - percent)
+
+      return segmentDistance < nearestDistance ? segment : nearestSegment
+    }, segments[0] as MobileTocSegment)
+  )
 }
 
 export function getTocX(level: HeadingLevel, indentScale: number, trackOverlapScale: number) {
