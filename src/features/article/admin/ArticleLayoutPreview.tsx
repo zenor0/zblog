@@ -14,6 +14,7 @@ import {
 } from '@/features/article/model/article-design'
 import { MarkdownRenderer } from '@/features/article/markdown'
 
+import '@/styles/frontend/article-block-surfaces.css'
 import './article-layout-preview.scss'
 
 type FormFieldState = {

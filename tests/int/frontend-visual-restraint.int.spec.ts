@@ -25,7 +25,10 @@ function isLocalCssImport(importPath: string) {
   return importPath.startsWith('.')
 }
 
-function readFrontendStyles(relativePath = 'src/app/(frontend)/styles.css', seen = new Set<string>()): string {
+function readFrontendStyles(
+  relativePath = 'src/app/(frontend)/styles.css',
+  seen = new Set<string>(),
+): string {
   if (seen.has(relativePath)) {
     return ''
   }
@@ -40,9 +43,7 @@ function readFrontendStyles(relativePath = 'src/app/(frontend)/styles.css', seen
     .filter(isLocalCssImport)
     .map((importPath) =>
       readFrontendStyles(
-        path
-          .normalize(path.join(path.dirname(relativePath), importPath))
-          .replaceAll(path.sep, '/'),
+        path.normalize(path.join(path.dirname(relativePath), importPath)).replaceAll(path.sep, '/'),
         seen,
       ),
     )
@@ -137,6 +138,25 @@ describe('frontend visual restraint', () => {
     expect(styles).not.toMatch(/\.markdown-codeblock\s*\{[^}]*shadow-/s)
   })
 
+  it('uses theme-aware surface tokens for semantic article blocks', () => {
+    const styles = readFrontendStyles()
+    const noticeCard = readProjectFile('src/features/article/ui/markdown-components/NoticeCard.tsx')
+    const featureGrid = readProjectFile(
+      'src/features/article/ui/markdown-components/FeatureGrid.tsx',
+    )
+    const lightOnlySemanticUtilities =
+      /\b(?:bg|text|border|border-l)-(?:sky|emerald|fuchsia|amber|red|slate)-(?:50|100|200|300|400|700|800|900|950)(?:\/\d+)?\b/
+
+    expect(styles).toContain("@import '../../styles/frontend/article-block-surfaces.css';")
+    expect(styles).toContain('--zblog-article-surface-info-accent')
+    expect(styles).toContain('.md-callout--note')
+    expect(styles).toContain('.article-notice-card')
+    expect(styles).not.toMatch(lightOnlySemanticUtilities)
+    expect(noticeCard).toContain('article-notice-card article-semantic-surface')
+    expect(noticeCard).not.toMatch(lightOnlySemanticUtilities)
+    expect(featureGrid).toContain('article-feature-grid-card')
+  })
+
   it('keeps badges below body scale in shared and editorial UI', () => {
     const badgeComponent = readProjectFile('src/components/ui/badge.tsx')
     const styles = readFrontendStyles()
@@ -186,9 +206,7 @@ describe('frontend visual restraint', () => {
   })
 
   it('keeps display typography below oversized hero steps', () => {
-    const scannedFiles = [
-      ...collectFrontendCodeFiles(new Set(['.css', '.tsx'])),
-    ]
+    const scannedFiles = [...collectFrontendCodeFiles(new Set(['.css', '.tsx']))]
     const oversizedSteps: string[] = []
 
     for (const absolutePath of scannedFiles) {
