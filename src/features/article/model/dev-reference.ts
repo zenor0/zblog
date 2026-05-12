@@ -54,6 +54,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         tags: ['article', 'toc', 'progress', 'reading'],
       },
       {
+        slug: 'article-anchor-return',
+        title: 'Article Anchor Return Lab',
+        description: '对比页内锚点跳转后的返回阅读位置控件，重点验证移动端低打扰方案。',
+        href: '/dev/article-anchor-return',
+        status: 'experiment',
+        tags: ['article', 'anchors', 'mobile', 'navigation'],
+      },
+      {
         slug: 'article-layout',
         title: 'Article Layout Lab',
         description: '复用真实文章页，对比正文、标题、图片、代码块、表格和提示块的排版节奏。',
