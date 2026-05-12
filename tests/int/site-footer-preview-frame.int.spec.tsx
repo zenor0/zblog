@@ -1,11 +1,15 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SiteFooterPreviewFrame } from '@/features/site-settings/ui/SiteFooterPreviewFrame'
 import { siteFooterPreviewMessageType } from '@/features/site-settings/model/site-footer-preview'
 
 describe('SiteFooterPreviewFrame', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   it('renders production footer layout after receiving preview settings', async () => {
     render(<SiteFooterPreviewFrame initialLocale="en" />)
 
@@ -64,5 +68,125 @@ describe('SiteFooterPreviewFrame', () => {
     expect(preview.innerHTML).toContain('/en/posts')
     expect(screen.getByText('@zenor0')).toBeTruthy()
     expect(screen.getByText(`Copyright ${new Date().getFullYear()} ZBlog.`)).toBeTruthy()
+  })
+
+  it('hydrates a media ID logo before rendering the production footer image', async () => {
+    const fetchMedia = vi.fn().mockResolvedValue({
+      json: async () => ({
+        alt: 'ZBlog logo',
+        id: 42,
+        url: '/media/zblog-logo.png',
+      }),
+      ok: true,
+    })
+
+    vi.stubGlobal('fetch', fetchMedia)
+
+    render(<SiteFooterPreviewFrame initialLocale="en" />)
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          locale: 'en',
+          settings: {
+            siteName: 'ZBlog',
+            footer: {
+              brand: {
+                logo: 42,
+                name: 'ZBlog',
+              },
+              layoutStyle: 'compact',
+            },
+          },
+          type: siteFooterPreviewMessageType,
+        },
+        origin: window.location.origin,
+      }),
+    )
+
+    await waitFor(() => {
+      expect(fetchMedia).toHaveBeenCalledWith('/api/media/42?depth=0', {
+        credentials: 'same-origin',
+      })
+    })
+
+    const logo = await screen.findByRole('img', { name: 'ZBlog logo' })
+
+    expect(logo.getAttribute('src')).toBe('/media/zblog-logo.png')
+  })
+
+  it('renders an already populated logo without fetching media', async () => {
+    const fetchMedia = vi.fn()
+
+    vi.stubGlobal('fetch', fetchMedia)
+
+    render(<SiteFooterPreviewFrame initialLocale="en" />)
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          locale: 'en',
+          settings: {
+            siteName: 'ZBlog',
+            footer: {
+              brand: {
+                logo: {
+                  alt: 'Existing logo',
+                  id: 42,
+                  url: '/media/existing-logo.png',
+                },
+                name: 'ZBlog',
+              },
+              layoutStyle: 'compact',
+            },
+          },
+          type: siteFooterPreviewMessageType,
+        },
+        origin: window.location.origin,
+      }),
+    )
+
+    const logo = await screen.findByRole('img', { name: 'Existing logo' })
+
+    expect(logo.getAttribute('src')).toBe('/media/existing-logo.png')
+    expect(fetchMedia).not.toHaveBeenCalled()
+  })
+
+  it('keeps rendering footer text when media logo hydration fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        json: async () => ({ id: 42 }),
+        ok: true,
+      }),
+    )
+
+    render(<SiteFooterPreviewFrame initialLocale="en" />)
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          locale: 'en',
+          settings: {
+            siteName: 'ZBlog',
+            footer: {
+              brand: {
+                logo: 42,
+                name: 'ZBlog',
+              },
+              layoutStyle: 'compact',
+            },
+          },
+          type: siteFooterPreviewMessageType,
+        },
+        origin: window.location.origin,
+      }),
+    )
+
+    expect(await screen.findByText('ZBlog')).toBeTruthy()
+
+    await waitFor(() => {
+      expect(screen.queryByRole('img')).toBeNull()
+    })
   })
 })

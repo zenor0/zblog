@@ -137,6 +137,14 @@ function readBooleanField(
   return getBooleanValue(fields?.[path]?.value) ?? getBooleanValue(fallback)
 }
 
+function readUnknownField(
+  fields: SiteFooterPreviewFormState | undefined,
+  path: string,
+  fallback: unknown,
+) {
+  return fields?.[path]?.value ?? fallback
+}
+
 function readFooterLink(
   fields: SiteFooterPreviewFormState | undefined,
   path: string,
@@ -164,6 +172,7 @@ function readFooterBrand(
     ...brand,
     description: readStringField(fields, `${path}.description`, brand.description),
     link: readFooterLink(fields, `${path}.link`, brand.link),
+    logo: readUnknownField(fields, `${path}.logo`, brand.logo),
     name: readStringField(fields, `${path}.name`, brand.name),
     supportingText: readStringField(fields, `${path}.supportingText`, brand.supportingText),
   }

@@ -142,6 +142,7 @@ describe('SiteFooterPreview', () => {
       footer: {
         value: {
           brand: {
+            logo: 7,
             name: 'Old brand',
           },
           socialLinks: [
@@ -156,6 +157,9 @@ describe('SiteFooterPreview', () => {
       },
       'footer.brand.name': {
         value: 'Live brand',
+      },
+      'footer.brand.logo': {
+        value: 42,
       },
       'footer.socialLinks.0.label': {
         value: '@live',
@@ -176,6 +180,7 @@ describe('SiteFooterPreview', () => {
         settings: expect.objectContaining({
           footer: expect.objectContaining({
             brand: expect.objectContaining({
+              logo: 42,
               name: 'Live brand',
             }),
             socialLinks: [
