@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from 'react'
 import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
 
 import { ArticleProgressControls } from './ArticleProgressControls'
+import { MobileArticleTocPrototypes } from './MobileArticleTocPrototypes'
 import {
   formatPercent,
   getHeadingState,
@@ -15,6 +16,7 @@ import {
   tocTrackOffset,
   type HeadingLevel,
   type LineWeight,
+  type MobileTocVariant,
   type PathStyle,
   type RailHeight,
 } from './articleProgressModel'
@@ -31,6 +33,7 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
   const [pathStyle, setPathStyle] = useState<PathStyle>('rounded')
   const [lineWeight, setLineWeight] = useState<LineWeight>('regular')
   const [railHeight, setRailHeight] = useState<RailHeight>('regular')
+  const [mobileTocVariant, setMobileTocVariant] = useState<MobileTocVariant>('right-rail')
   const [bendScale, setBendScale] = useState(0.48)
   const [indentScale, setIndentScale] = useState(1)
   const [isTrackOffsetLocked, setIsTrackOffsetLocked] = useState(true)
@@ -52,8 +55,6 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
 
   const {
     activePathRef,
-    mobileProgressRef,
-    mobileVisibleEndPercentRef,
     progress,
     progressSvgRef,
     scrollViewportRef,
@@ -138,6 +139,7 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
         isTrackOffsetLocked={isTrackOffsetLocked}
         lineWeight={lineWeight}
         lockedTrackOffsetPx={lockedTrackOffsetPx}
+        mobileTocVariant={mobileTocVariant}
         pathStyle={pathStyle}
         railHeight={railHeight}
         readingRangeLabel={readingRangeLabel}
@@ -147,6 +149,7 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
         setIsTrackOffsetLocked={setIsTrackOffsetLocked}
         setLineWeight={setLineWeight}
         setLockedTrackOffsetPx={setLockedTrackOffsetPx}
+        setMobileTocVariant={setMobileTocVariant}
         setPathStyle={setPathStyle}
         setRailHeight={setRailHeight}
         setScrollLeadScale={setScrollLeadScale}
@@ -160,20 +163,14 @@ export function ArticleProgressLab(props: ArticleProgressLabProps) {
         visibleHeadingLevels={visibleHeadingLevels}
       />
 
-      <div className="dev-progress-mobile" data-weight={lineWeight}>
-        <div aria-hidden="true" className="dev-progress-mobile__track" ref={mobileProgressRef}>
-          <span />
-        </div>
-        {mobileHeading ? (
-          <a className="dev-progress-mobile__link" href={`#${mobileHeading.id}`}>
-            <span className="dev-progress-mobile__level">H{mobileHeading.depth}</span>
-            <span className="dev-progress-mobile__title">{mobileHeading.text}</span>
-            <span className="dev-progress-mobile__percent" ref={mobileVisibleEndPercentRef}>
-              {formatPercent(progress.visibleEndPercent)}
-            </span>
-          </a>
-        ) : null}
-      </div>
+      <MobileArticleTocPrototypes
+        activeHeadingID={mobileHeading?.id ?? ''}
+        headings={displayedHeadings}
+        label={label}
+        progress={progress}
+        progressLabel={progressLabel}
+        variant={mobileTocVariant}
+      />
 
       <section
         className="dev-progress-rail"
