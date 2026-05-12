@@ -81,6 +81,7 @@ export async function PostArticle(props: {
   localeLinks: LocaleLink[]
   markdownMediaBySource?: Record<string, MarkdownMediaLike>
   previewExitPath: string
+  renderAnchorNavigation?: (args: { returnLabel: string }) => ReactNode
   renderTableOfContents?: (args: {
     headings: MarkdownHeading[]
     label: string
@@ -99,6 +100,7 @@ export async function PostArticle(props: {
     localeLinks,
     markdownMediaBySource: markdownMediaBySourceOverrides = {},
     previewExitPath,
+    renderAnchorNavigation,
     renderTableOfContents,
     resolved,
     shouldTrackView = false,
@@ -152,9 +154,15 @@ export async function PostArticle(props: {
     referenceUntitled: common('referenceUntitled'),
     references: common('references'),
   })
+  const returnLabel = article('returnToReadingPosition')
+
   return (
     <div className="page-frame frontend-shell">
-      <ArticleAnchorNavigation returnLabel={article('returnToReadingPosition')} />
+      {renderAnchorNavigation ? (
+        renderAnchorNavigation({ returnLabel })
+      ) : (
+        <ArticleAnchorNavigation returnLabel={returnLabel} />
+      )}
       {shouldTrackView ? (
         <ArticleViewTracker locale={resolved.resolvedLocale} postId={post.id} />
       ) : null}

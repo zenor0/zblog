@@ -415,4 +415,39 @@ test.describe('Frontend', () => {
     await returnButton.click()
     await expect(returnButton).toBeHidden()
   })
+
+  test('can compare compact anchor return controls in the dev lab', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/dev/article-anchor-return', { waitUntil: 'domcontentloaded' })
+
+    await expect(page.getByRole('heading', { name: '锚点返回控件实验' })).toBeVisible()
+    await page.getByRole('button', { name: '靠边标签' }).click()
+
+    await page
+      .locator('[data-post-reading-root] a[href="#ref-fig-return-control-target"]')
+      .first()
+      .click()
+
+    const returnControl = page.locator('[data-anchor-return-variant="edge-tab"]')
+
+    await expect(returnControl).toBeVisible()
+
+    const fitsViewport = await returnControl.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+
+      return rect.left >= 0 && rect.right <= window.innerWidth
+    })
+
+    expect(fitsViewport).toBe(true)
+
+    await page.getByRole('button', { name: '隐藏返回提示' }).click()
+    await expect(returnControl).toHaveCount(0)
+
+    await page
+      .locator('[data-post-reading-root] a[href="#ref-fig-return-control-target"]')
+      .first()
+      .click()
+
+    await expect(page.locator('[data-anchor-return-variant="edge-tab"]')).toBeVisible()
+  })
 })
