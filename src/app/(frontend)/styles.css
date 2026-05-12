@@ -6,5 +6,6 @@
 @import '../../styles/frontend/base.css';
 @import '../../styles/frontend/editorial.css';
 @import '../../styles/frontend/article.css';
+@import '../../styles/frontend/article-progress.css';
 @import '../../styles/frontend/dev.css';
 @import '../../styles/frontend/preview.css';

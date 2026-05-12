@@ -8,14 +8,18 @@ import { ArticleViewTracker } from '@/features/post-views/ui/ArticleViewTracker'
 import { MediaDetails } from '@/features/media/ui/MediaDetails'
 import { LocaleSwitcher } from '@/shared/ui/LocaleSwitcher'
 import { MediaSurface } from '@/features/media/ui/MediaSurface'
+import { ArticleTableOfContents } from '@/features/article/ui/ArticleTableOfContents'
 import { PostArticleNotices } from '@/features/posts/ui/PostArticleNotices'
 import { PostArticleSupplementary } from '@/features/posts/ui/PostArticleSupplementary'
-import { PostTableOfContents } from '@/features/article/ui/PostTableOfContents'
 import { ThemeSwitcher } from '@/shared/ui/ThemeSwitcher'
 import { buildBibliographyLinkPreviews } from '@/features/article/model/article-link-previews'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/features/article/markdown'
 import type { MarkdownMediaLike } from '@/features/article/markdown/types'
-import { extractMarkdownHeadings, type MarkdownHeading } from '@/features/article/model/markdown-headings'
+import {
+  extractMarkdownHeadings,
+  type MarkdownHeading,
+} from '@/features/article/model/markdown-headings'
+import type { ArticleTocVariantID } from '@/features/frontend-variants/model/frontend-variants'
 import { resolveMediaCaption } from '@/features/media/model/media'
 import { getPayloadClient } from '@/shared/payload/client'
 import type { ResolvedPost } from '@/features/posts/server/queries'
@@ -69,6 +73,7 @@ async function loadMarkdownMediaBySource(
 }
 
 export async function PostArticle(props: {
+  articleTocVariant?: ArticleTocVariantID
   backHref: string
   backLabel: string
   historyHref?: null | string
@@ -86,6 +91,7 @@ export async function PostArticle(props: {
   viewCount?: number
 }) {
   const {
+    articleTocVariant = 'standard',
     backHref,
     backLabel,
     historyHref,
@@ -330,10 +336,11 @@ export async function PostArticle(props: {
                 progressLabel: article('readingProgress'),
               })
             ) : (
-              <PostTableOfContents
+              <ArticleTableOfContents
                 headings={tocHeadings}
                 label={article('tableOfContents')}
                 progressLabel={article('readingProgress')}
+                variant={articleTocVariant}
               />
             )}
           </aside>

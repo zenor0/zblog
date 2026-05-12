@@ -101,9 +101,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('zh-Hans' | 'en') | ('zh-Hans' | 'en')[];
   globals: {
     'site-settings': SiteSetting;
+    'frontend-variants': FrontendVariant;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'frontend-variants': FrontendVariantsSelect<false> | FrontendVariantsSelect<true>;
   };
   locale: 'zh-Hans' | 'en';
   widgets: {
@@ -980,6 +982,27 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * Select code-owned frontend component variants without changing site content.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "frontend-variants".
+ */
+export interface FrontendVariant {
+  id: number;
+  /**
+   * Each surface can appear once. Variants must already exist in the deployed code.
+   */
+  selections?:
+    | {
+        surface: 'article.toc';
+        variant: 'standard' | 'progress-map';
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -1175,6 +1198,22 @@ export interface SiteSettingsSelect<T extends boolean = true> {
           | {
               note?: T;
             };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "frontend-variants_select".
+ */
+export interface FrontendVariantsSelect<T extends boolean = true> {
+  selections?:
+    | T
+    | {
+        surface?: T;
+        variant?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
