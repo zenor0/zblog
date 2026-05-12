@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '../../styles/frontend/tokens.css';
+@import '../../styles/frontend/article-block-surfaces.css';
 @import '../../styles/frontend/base.css';
 @import '../../styles/frontend/editorial.css';
 @import '../../styles/frontend/article.css';

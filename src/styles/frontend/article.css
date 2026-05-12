@@ -1,6 +1,6 @@
 @layer components {
   .md-callout {
-    @apply my-8 border border-border bg-muted/42 px-5 py-4 text-foreground/84;
+    @apply my-8 border px-5 py-4;
     border-left-width: 0.22rem;
     font-size: var(--zblog-type-caption-size);
     line-height: var(--zblog-type-body-line);
@@ -27,54 +27,6 @@
 
   .md-callout__content > * + * {
     margin-top: 0.75rem;
-  }
-
-  .md-callout--note {
-    @apply border-sky-200 border-l-sky-400 bg-sky-50/48 text-sky-950;
-  }
-
-  .md-callout--note .md-callout__title {
-    @apply text-sky-800;
-  }
-
-  .md-callout--tip {
-    @apply border-emerald-200 border-l-emerald-400 bg-emerald-50/45 text-emerald-950;
-  }
-
-  .md-callout--tip .md-callout__title {
-    @apply text-emerald-800;
-  }
-
-  .md-callout--important {
-    @apply border-fuchsia-200 border-l-fuchsia-400 bg-fuchsia-50/40 text-fuchsia-950;
-  }
-
-  .md-callout--important .md-callout__title {
-    @apply text-fuchsia-800;
-  }
-
-  .md-callout--warning {
-    @apply border-amber-200 border-l-amber-400 bg-amber-50/45 text-amber-950;
-  }
-
-  .md-callout--warning .md-callout__title {
-    @apply text-amber-800;
-  }
-
-  .md-callout--caution {
-    @apply border-red-200 border-l-red-400 bg-red-50/42 text-red-950;
-  }
-
-  .md-callout--caution .md-callout__title {
-    @apply text-red-800;
-  }
-
-  .md-callout--custom {
-    @apply border-slate-200 border-l-slate-300 bg-slate-50/72 text-slate-900;
-  }
-
-  .md-callout--custom .md-callout__title {
-    @apply text-slate-700;
   }
 
   .citation-link {
@@ -512,7 +464,6 @@
   .markdown-media__details {
     @apply mt-2;
   }
-}
 }
 
 @layer components {

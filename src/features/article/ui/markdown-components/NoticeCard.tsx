@@ -7,10 +7,10 @@ import { cn } from '@/shared/utils/cn'
 type NoticeTone = 'default' | 'info' | 'success' | 'warning'
 
 const toneClasses: Record<NoticeTone, string> = {
-  default: 'border-border bg-card/80',
-  info: 'border-sky-200 bg-sky-50/80',
-  success: 'border-emerald-200 bg-emerald-50/80',
-  warning: 'border-amber-200 bg-amber-50/80',
+  default: 'article-semantic-surface--default',
+  info: 'article-semantic-surface--info',
+  success: 'article-semantic-surface--success',
+  warning: 'article-semantic-surface--warning',
 }
 
 function resolveTone(value: unknown): NoticeTone {
@@ -26,12 +26,15 @@ export function NoticeCard(props: {
 
   return (
     <Card
-      className={cn('my-6 gap-0 overflow-hidden shadow-none', toneClasses[tone])}
+      className={cn(
+        'article-notice-card article-semantic-surface my-6 gap-0 overflow-hidden shadow-none',
+        toneClasses[tone],
+      )}
       data-article-block="notice-card"
       data-markdown-component="notice-card"
       data-tone={tone}
     >
-      <CardHeader className="gap-3 border-b border-black/5 pb-5">
+      <CardHeader className="gap-3 border-b pb-5">
         <Badge variant="outline">{tone}</Badge>
         {props.title ? <CardTitle className="text-lg">{props.title}</CardTitle> : null}
       </CardHeader>

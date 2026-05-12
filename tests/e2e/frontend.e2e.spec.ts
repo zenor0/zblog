@@ -1,5 +1,197 @@
 import { test, expect, Page } from '@playwright/test'
 
+type ContrastTarget = {
+  label: string
+  selector: string
+}
+
+async function readContrastReports(page: Page, targets: ContrastTarget[]) {
+  return page.evaluate((contrastTargets) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+
+    const context = canvas.getContext('2d')
+
+    if (!context) {
+      throw new Error('Unable to create canvas context for color normalization')
+    }
+
+    const colorContext = context
+
+    function parseChannels(channels: string[]) {
+      const [r, g, b] = channels.slice(0, 3).map((value) => Number.parseFloat(value))
+
+      if (
+        typeof r !== 'number' ||
+        typeof g !== 'number' ||
+        typeof b !== 'number' ||
+        Number.isNaN(r) ||
+        Number.isNaN(g) ||
+        Number.isNaN(b)
+      ) {
+        throw new Error(`Unable to parse color channels: ${channels.join(' ')}`)
+      }
+
+      return { b, g, r }
+    }
+
+    function parseOKLCH(color: string) {
+      const match = color.match(
+        /^oklch\(\s*([^\s]+)\s+([^\s]+)\s+([^\s/)]+)(?:\s*\/\s*[^\s)]+)?\s*\)$/i,
+      )
+
+      if (!match?.[1] || !match[2] || !match[3]) {
+        return null
+      }
+
+      const lightness = match[1].endsWith('%')
+        ? Number.parseFloat(match[1]) / 100
+        : Number.parseFloat(match[1])
+      const chroma = Number.parseFloat(match[2])
+      const hue = Number.parseFloat(match[3])
+
+      if (Number.isNaN(lightness) || Number.isNaN(chroma) || Number.isNaN(hue)) {
+        return null
+      }
+
+      const hueRadians = (hue * Math.PI) / 180
+      const a = chroma * Math.cos(hueRadians)
+      const b = chroma * Math.sin(hueRadians)
+      const lPrime = lightness + 0.3963377774 * a + 0.2158037573 * b
+      const mPrime = lightness - 0.1055613458 * a - 0.0638541728 * b
+      const sPrime = lightness - 0.0894841775 * a - 1.291485548 * b
+      const l = lPrime * lPrime * lPrime
+      const m = mPrime * mPrime * mPrime
+      const s = sPrime * sPrime * sPrime
+
+      function toSRGB(value: number) {
+        const gamma = value <= 0.0031308 ? 12.92 * value : 1.055 * Math.pow(value, 1 / 2.4) - 0.055
+
+        return Math.min(255, Math.max(0, gamma * 255))
+      }
+
+      return {
+        b: toSRGB(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+        g: toSRGB(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+        r: toSRGB(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+      }
+    }
+
+    function normalizeColor(color: string): { b: number; g: number; r: number } {
+      const oklch = parseOKLCH(color)
+
+      if (oklch) {
+        return oklch
+      }
+
+      colorContext.fillStyle = '#000000'
+      colorContext.fillStyle = color
+
+      const normalized = colorContext.fillStyle
+      const hex = normalized.match(/^#([0-9a-f]{6})$/i)
+
+      if (hex?.[1]) {
+        return {
+          b: Number.parseInt(hex[1].slice(4, 6), 16),
+          g: Number.parseInt(hex[1].slice(2, 4), 16),
+          r: Number.parseInt(hex[1].slice(0, 2), 16),
+        }
+      }
+
+      const rgb = normalized.match(/^rgba?\(([^)]+)\)$/i)
+
+      if (rgb?.[1]) {
+        return parseChannels(rgb[1].split(/[,\s/]+/).filter(Boolean))
+      }
+
+      const srgb = normalized.match(/^color\(srgb\s+([^)]+)\)$/i)
+
+      if (srgb?.[1]) {
+        const channels = srgb[1]
+          .split(/[,\s/]+/)
+          .filter(Boolean)
+          .slice(0, 3)
+          .map((value) => String(Number.parseFloat(value) * 255))
+
+        return parseChannels(channels)
+      }
+
+      throw new Error(`Unsupported normalized color: ${color} -> ${normalized}`)
+    }
+
+    function isTransparent(color: string) {
+      return (
+        color === 'transparent' ||
+        color === 'rgba(0, 0, 0, 0)' ||
+        /\/\s*0\)?$/.test(color) ||
+        /,\s*0\)$/.test(color)
+      )
+    }
+
+    function readEffectiveBackground(element: Element) {
+      let current: Element | null = element
+
+      while (current) {
+        const background = getComputedStyle(current).backgroundColor
+
+        if (!isTransparent(background)) {
+          return background
+        }
+
+        current = current.parentElement
+      }
+
+      return getComputedStyle(document.documentElement).backgroundColor
+    }
+
+    function luminance(channel: number) {
+      const normalized = channel / 255
+
+      return normalized <= 0.03928
+        ? normalized / 12.92
+        : Math.pow((normalized + 0.055) / 1.055, 2.4)
+    }
+
+    function contrastRatio(
+      foreground: ReturnType<typeof normalizeColor>,
+      background: ReturnType<typeof normalizeColor>,
+    ) {
+      const foregroundLuminance =
+        0.2126 * luminance(foreground.r) +
+        0.7152 * luminance(foreground.g) +
+        0.0722 * luminance(foreground.b)
+      const backgroundLuminance =
+        0.2126 * luminance(background.r) +
+        0.7152 * luminance(background.g) +
+        0.0722 * luminance(background.b)
+      const lighter = Math.max(foregroundLuminance, backgroundLuminance)
+      const darker = Math.min(foregroundLuminance, backgroundLuminance)
+
+      return (lighter + 0.05) / (darker + 0.05)
+    }
+
+    return contrastTargets.map((target) => {
+      const element = document.querySelector(target.selector)
+
+      if (!element) {
+        throw new Error(`Missing contrast target: ${target.selector}`)
+      }
+
+      const foreground = getComputedStyle(element).color
+      const background = readEffectiveBackground(element)
+
+      return {
+        background,
+        foreground,
+        label: target.label,
+        ratio: contrastRatio(normalizeColor(foreground), normalizeColor(background)),
+        selector: target.selector,
+      }
+    })
+  }, targets)
+}
+
 test.describe('Frontend', () => {
   let page: Page
 
@@ -115,6 +307,50 @@ test.describe('Frontend', () => {
     ).toBeVisible()
     await expect(page.locator('pre[data-language="tsx"]')).toBeVisible()
     await expect(page.locator('summary')).toContainText('参考文献')
+  })
+
+  test('keeps semantic article blocks readable in dark mode', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('zblog-frontend-theme', 'dark')
+    })
+
+    await page.goto('/dev/design-system/article-blocks/callouts')
+    await page.evaluate(() => {
+      document.documentElement.dataset.zblogTheme = 'dark'
+      document.documentElement.classList.add('dark')
+    })
+    await expect(page.locator('.md-callout').first()).toBeVisible()
+
+    const calloutReports = await readContrastReports(page, [
+      { label: 'note callout', selector: '#callout-note .md-callout' },
+      { label: 'tip callout', selector: '#callout-tip .md-callout' },
+      { label: 'important callout', selector: '#callout-important .md-callout' },
+      { label: 'warning callout', selector: '#callout-warning .md-callout' },
+      { label: 'caution callout', selector: '#callout-caution .md-callout' },
+      { label: 'custom callout', selector: '#callout-custom .md-callout' },
+    ])
+
+    await page.goto('/dev/design-system/article-blocks/components')
+    await page.evaluate(() => {
+      document.documentElement.dataset.zblogTheme = 'dark'
+      document.documentElement.classList.add('dark')
+    })
+    await expect(page.locator('[data-markdown-component="notice-card"]')).toBeVisible()
+
+    const componentReports = await readContrastReports(page, [
+      { label: 'notice card', selector: '#notice-card [data-markdown-component="notice-card"]' },
+      {
+        label: 'feature grid card',
+        selector: '#feature-grid [data-markdown-component="feature-grid"] [data-slot="card"]',
+      },
+    ])
+
+    for (const report of [...calloutReports, ...componentReports]) {
+      expect(
+        report.ratio,
+        `${report.label} contrast was ${report.ratio.toFixed(2)} for ${report.foreground} on ${report.background}`,
+      ).toBeGreaterThanOrEqual(4.5)
+    }
   })
 
   test('shows article link previews and a return control for in-page jumps', async ({ page }) => {

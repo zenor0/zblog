@@ -63,7 +63,7 @@ export function FeatureGrid(props: { items?: unknown }) {
     >
       {items.map((item) => (
         <Card
-          className="gap-0 border-border/80 shadow-none"
+          className="article-feature-grid-card gap-0 shadow-none"
           key={`${item.title}-${item.status ?? 'item'}`}
         >
           <CardHeader className="gap-3 pb-4">
