@@ -1,0 +1,257 @@
+@layer components {
+  .article-progress-rail {
+    @apply hidden min-w-0 flex-col gap-4 border-t border-border pt-6 xl:flex xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0;
+    --toc-panel-height: min(58vh, 30rem);
+    --toc-spacing-scale: 0.72;
+  }
+
+  .article-progress-rail__header {
+    @apply flex items-end justify-between gap-3 border-b border-border pb-3;
+  }
+
+  .article-progress-map {
+    @apply relative overflow-y-auto overscroll-contain pr-1;
+    --toc-active-stroke: 4;
+    --toc-track-stroke: 2;
+    max-height: var(--toc-panel-height);
+    overflow-anchor: none;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 1.25rem,
+      #000 calc(100% - 1.25rem),
+      transparent 100%
+    );
+    scroll-behavior: auto;
+    scroll-padding-block: 1.5rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 1.25rem,
+      #000 calc(100% - 1.25rem),
+      transparent 100%
+    );
+  }
+
+  .article-progress-map::-webkit-scrollbar {
+    display: none;
+  }
+
+  .article-progress-map[data-weight='fine'] {
+    --toc-active-stroke: 3;
+    --toc-track-stroke: 1.5;
+  }
+
+  .article-progress-map[data-weight='strong'] {
+    --toc-active-stroke: 5.5;
+    --toc-track-stroke: 2.5;
+  }
+
+  .article-progress-map__content {
+    @apply relative min-w-0;
+  }
+
+  .article-progress-map__track {
+    @apply pointer-events-none absolute left-0 top-0 overflow-visible;
+    z-index: 0;
+  }
+
+  .article-progress-map__path {
+    @apply fill-none stroke-border;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: var(--toc-track-stroke);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .article-progress-map__path--active {
+    stroke: color-mix(in oklab, var(--accent-foreground) 64%, var(--accent));
+    stroke-width: var(--toc-active-stroke);
+    will-change: stroke-dasharray, stroke-dashoffset;
+  }
+
+  .article-progress-map ol {
+    @apply relative flex list-none flex-col gap-0 py-4 pl-0;
+    z-index: 1;
+  }
+
+  .article-progress-map__item {
+    --toc-depth: 0;
+    --toc-depth-indent: 0rem;
+  }
+
+  .article-progress-map__item + .article-progress-map__item[data-level='2'] {
+    margin-top: calc(0.52rem * var(--toc-spacing-scale));
+  }
+
+  .article-progress-map__item[data-level='2'] + .article-progress-map__item[data-level='3'] {
+    margin-top: calc(0.03rem * var(--toc-spacing-scale));
+  }
+
+  .article-progress-map__item[data-level='3'] + .article-progress-map__item[data-level='4'] {
+    margin-top: calc(0.01rem * var(--toc-spacing-scale));
+  }
+
+  .article-progress-map__item[data-level='4'] + .article-progress-map__item[data-level='4'] {
+    margin-top: 0;
+  }
+
+  .article-progress-map__item[data-level='4'] + .article-progress-map__item[data-level='3'],
+  .article-progress-map__item[data-level='3'] + .article-progress-map__item[data-level='3'] {
+    margin-top: calc(0.18rem * var(--toc-spacing-scale));
+  }
+
+  .article-progress-map__link {
+    @apply relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 overflow-hidden pr-1 text-muted-foreground no-underline transition-colors hover:text-foreground;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-caption-line);
+    padding-bottom: calc(0.13rem * var(--toc-spacing-scale));
+    padding-left: calc(2.25rem + var(--toc-depth-indent));
+    padding-top: calc(0.13rem * var(--toc-spacing-scale));
+  }
+
+  .article-progress-map__title {
+    @apply block min-w-0 overflow-hidden whitespace-nowrap;
+    transition:
+      color 260ms ease,
+      opacity 260ms ease,
+      filter 260ms ease;
+  }
+
+  .article-progress-map__title-text {
+    @apply inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap align-bottom;
+    transition:
+      color 260ms ease,
+      opacity 260ms ease,
+      transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .article-progress-map__item[data-title-overflow='true'] .article-progress-map__title {
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.35rem), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.35rem), transparent);
+  }
+
+  .article-progress-map__item[data-title-overflow='true'] .article-progress-map__title-text {
+    max-width: none;
+  }
+
+  .article-progress-map__item[data-title-overflow='true'][data-state='current']
+    .article-progress-map__title-text,
+  .article-progress-map__item[data-title-overflow='true']
+    .article-progress-map__link:hover
+    .article-progress-map__title-text,
+  .article-progress-map__item[data-title-overflow='true']
+    .article-progress-map__link:focus-visible
+    .article-progress-map__title-text {
+    animation: article-progress-title-pan 7s ease-in-out 0.35s infinite;
+  }
+
+  .article-progress-map__level {
+    @apply font-medium text-muted-foreground/72;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+    transition:
+      color 260ms ease,
+      opacity 260ms ease,
+      filter 260ms ease;
+  }
+
+  .article-progress-map__item[data-level='2'] .article-progress-map__title {
+    @apply font-medium text-foreground/88;
+  }
+
+  .article-progress-map__item[data-level='4'] .article-progress-map__link {
+    @apply text-xs;
+  }
+
+  .article-progress-map__item[data-state='read'] .article-progress-map__title {
+    @apply text-foreground/66;
+  }
+
+  .article-progress-map__item[data-state='current'] .article-progress-map__title {
+    @apply text-foreground;
+  }
+
+  .article-progress-map__item[data-state='current'] .article-progress-map__level {
+    @apply text-foreground/58;
+  }
+
+  @keyframes article-progress-title-pan {
+    0%,
+    14% {
+      transform: translateX(0);
+    }
+
+    64%,
+    82% {
+      transform: translateX(calc(var(--title-scroll-distance, 0px) * -1));
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .article-progress-map__item[data-title-overflow='true'][data-state='current']
+      .article-progress-map__title-text,
+    .article-progress-map__item[data-title-overflow='true']
+      .article-progress-map__link:hover
+      .article-progress-map__title-text,
+    .article-progress-map__item[data-title-overflow='true']
+      .article-progress-map__link:focus-visible
+      .article-progress-map__title-text {
+      animation: none;
+    }
+  }
+
+  .article-progress-mobile {
+    @apply fixed inset-x-3 bottom-3 z-40 border border-border bg-background/94 px-3 py-2 backdrop-blur-md xl:hidden;
+    --mobile-progress-start: 0%;
+    --mobile-progress-size: 1%;
+  }
+
+  .article-progress-mobile__track {
+    @apply relative mb-2 h-px overflow-hidden bg-border;
+  }
+
+  .article-progress-mobile__track span {
+    @apply absolute inset-y-0 bg-foreground;
+    left: var(--mobile-progress-start);
+    width: var(--mobile-progress-size);
+  }
+
+  .article-progress-mobile[data-weight='fine'] .article-progress-mobile__track {
+    @apply h-px;
+  }
+
+  .article-progress-mobile[data-weight='strong'] .article-progress-mobile__track {
+    @apply h-0.5;
+  }
+
+  .article-progress-mobile__link {
+    @apply grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-foreground no-underline;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-caption-line);
+  }
+
+  .article-progress-mobile__level {
+    @apply font-medium text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+  }
+
+  .article-progress-mobile__title {
+    @apply min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-foreground/82;
+  }
+
+  .article-progress-mobile__percent {
+    @apply font-medium uppercase text-muted-foreground;
+    font-size: var(--zblog-type-badge-size);
+    line-height: var(--zblog-type-badge-line);
+    letter-spacing: var(--zblog-tracking-label);
+  }
+}

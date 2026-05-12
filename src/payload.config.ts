@@ -10,6 +10,7 @@ import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
 import { PostViewDedupe } from './collections/PostViewDedupe'
 import { PostViewMetrics } from './collections/PostViewMetrics'
+import { FrontendVariants } from './globals/FrontendVariants'
 import { SiteSettings } from './globals/SiteSettings'
 import { defaultLocale, payloadLocales } from './shared/i18n/locales'
 import { ensureRuntimeDirectories } from './shared/runtime/directories'
@@ -28,7 +29,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Posts, PostViewMetrics, PostViewDedupe],
-  globals: [SiteSettings],
+  globals: [SiteSettings, FrontendVariants],
   editor: lexicalEditor(),
   localization: {
     defaultLocale,

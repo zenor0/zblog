@@ -8,6 +8,7 @@ import { PostArticle } from '@/features/posts/ui/PostArticle'
 import { getPostByID } from '@/features/posts/server/queries'
 import { getPreviewUser } from '@/features/posts/server/preview-user'
 import { buildPostAdminPath, buildPostDraftPreviewPath } from '@/features/posts/preview'
+import { getFrontendVariant } from '@/features/frontend-variants/server/frontend-variants'
 import { getSiteSettings } from '@/features/site-settings/model/site-settings'
 import { requireLocale } from '@/i18n/routing'
 import { getRequestOrigin } from '@/shared/runtime/request-origin'
@@ -32,8 +33,10 @@ export async function generateMetadata(props: {
 
 export default async function PostPreviewPage(props: {
   params: Promise<{ id: string; locale: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { id: idParam, locale: localeParam } = await props.params
+  const searchParams = await props.searchParams
   const locale = requireLocale(localeParam)
   const article = await getTranslations({ locale, namespace: 'Article' })
   const preview = await draftMode()
@@ -66,11 +69,13 @@ export default async function PostPreviewPage(props: {
   }
 
   const serverURL = getRequestOrigin(await headers())
+  const articleTocVariant = await getFrontendVariant('article.toc', searchParams)
 
   return (
     <>
       <PostLivePreviewRefresh serverURL={serverURL} />
       <PostArticle
+        articleTocVariant={articleTocVariant}
         backHref={buildPostAdminPath(id)}
         backLabel={article('backToEditor')}
         historyHref={
