@@ -41,6 +41,28 @@
     margin-bottom: 0;
   }
 
+  .dev-article-title-candidates {
+    @apply grid gap-6;
+  }
+
+  .dev-article-title-candidate {
+    @apply grid gap-0 border border-border bg-background;
+  }
+
+  .dev-article-title-candidate__intro {
+    @apply grid gap-2 border-b border-border bg-muted/20 px-5 py-4 sm:px-7;
+  }
+
+  .dev-article-title-candidate__intro p:not(.section-kicker) {
+    @apply max-w-2xl text-muted-foreground;
+    font-size: var(--zblog-type-caption-size);
+    line-height: var(--zblog-type-body-line);
+  }
+
+  .dev-article-title-candidate__preview {
+    @apply px-5 py-6 sm:px-7 sm:py-7;
+  }
+
   .dev-progress-rail {
     @apply hidden min-w-0 flex-col gap-4 border-t border-border pt-6 xl:flex xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0;
     --toc-panel-height: min(58vh, 30rem);

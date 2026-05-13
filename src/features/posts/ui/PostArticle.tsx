@@ -11,6 +11,7 @@ import { MediaSurface } from '@/features/media/ui/MediaSurface'
 import { ArticleTableOfContents } from '@/features/article/ui/ArticleTableOfContents'
 import { PostArticleNotices } from '@/features/posts/ui/PostArticleNotices'
 import { PostArticleSupplementary } from '@/features/posts/ui/PostArticleSupplementary'
+import { PostArticleTitleBlock } from '@/features/posts/ui/PostArticleTitleBlock'
 import { ThemeSwitcher } from '@/shared/ui/ThemeSwitcher'
 import { buildBibliographyLinkPreviews } from '@/features/article/model/article-link-previews'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/features/article/markdown'
@@ -203,44 +204,32 @@ export async function PostArticle(props: {
         data-article-layout=""
       >
         <div className="flex min-w-0 flex-col gap-8" data-article-reading-column="">
-          <header
-            className="flex flex-col gap-6 border-b border-border pb-10"
-            data-article-frontmatter=""
-          >
-            <div className="editorial-meta flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span>
-                {formatLongDate({
-                  fallback: common('unscheduled'),
-                  locale: resolved.resolvedLocale,
-                  value: post.publishedAt ?? post.updatedAt,
-                })}
-              </span>
-              <span>
-                {article('readingTime', { minutes: estimateReadingMinutes(post.content) })}
-              </span>
-              <span>{article('viewCount', { count: viewCount })}</span>
-              <span>{getLocaleLabel(resolved.resolvedLocale)}</span>
-              {historyHref ? (
-                <Link className="editorial-link no-underline" href={historyHref}>
-                  {article('versionHistory')}
-                </Link>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <p className="section-kicker">
-                {usedDraftAccess ? article('previewTitle') : common('publishedLabel')}
-              </p>
-              <h1 className="max-w-4xl font-serif text-3xl leading-tight sm:text-4xl lg:text-5xl">
-                {displayTitle}
-              </h1>
-              {post.excerpt ? (
-                <p className="max-w-3xl text-base leading-8 text-foreground/72 sm:text-lg">
-                  {post.excerpt}
-                </p>
-              ) : null}
-            </div>
-          </header>
+          <PostArticleTitleBlock
+            excerpt={post.excerpt}
+            label={usedDraftAccess ? article('previewTitle') : null}
+            meta={
+              <>
+                <span>
+                  {formatLongDate({
+                    fallback: common('unscheduled'),
+                    locale: resolved.resolvedLocale,
+                    value: post.publishedAt ?? post.updatedAt,
+                  })}
+                </span>
+                <span>
+                  {article('readingTime', { minutes: estimateReadingMinutes(post.content) })}
+                </span>
+                <span>{article('viewCount', { count: viewCount })}</span>
+                <span>{getLocaleLabel(resolved.resolvedLocale)}</span>
+                {historyHref ? (
+                  <Link className="editorial-link no-underline" href={historyHref}>
+                    {article('versionHistory')}
+                  </Link>
+                ) : null}
+              </>
+            }
+            title={displayTitle}
+          />
 
           <PostArticleNotices
             bibliographyMismatch={

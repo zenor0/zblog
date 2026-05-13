@@ -69,6 +69,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         status: 'experiment',
         tags: ['article', 'typography', 'layout', 'rich-text'],
       },
+      {
+        slug: 'article-title-layouts',
+        title: 'Article Title Layouts',
+        description: '对比正式文章页标题、摘要和元信息的紧凑排版候选。',
+        href: '/dev/article-title-layouts',
+        status: 'experiment',
+        tags: ['article', 'title', 'excerpt', 'frontmatter'],
+      },
     ],
   },
 ]
