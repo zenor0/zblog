@@ -4,7 +4,7 @@
 
 The footer is Payload-backed, localized, and structured for a mature content site without adding enterprise-only modules. It should render valid configured sections consistently while remaining visually aligned with the editorial frontend.
 
-The schema is defined in `SiteSettings.footer`; normalization lives in `src/components/frontend/site-footer.ts`; rendering lives in `src/components/frontend/SiteFooter.tsx`.
+The schema is defined in `SiteSettings.footer`; normalization lives in `src/features/site-settings/model/site-footer.ts`; rendering lives in `src/features/site-settings/ui/SiteFooter.tsx`.
 
 The admin preview uses `/preview/site-footer` in an iframe so it runs inside the real frontend shell. The Payload field sends the current unsaved form values to that iframe with a same-origin `postMessage`, and the iframe renders the same normalized `SiteFooterLayout` used by production pages.
 
@@ -66,7 +66,7 @@ The footer layout lab under `/dev/footer-layouts` exists to compare these styles
 
 ## Starter Preset
 
-Footer controls include **Apply starter footer**. It replaces the current footer with a generic blog footer and fills in missing shared variables without overwriting existing owner, contact, or social data.
+Footer controls include **Apply starter footer**. It replaces the current footer with a generic blog footer and fills in missing shared variables without overwriting existing editor data.
 
 The preset uses editable references:
 
@@ -74,11 +74,8 @@ The preset uses editable references:
 - `{{site.description}}`
 - `{{site.currentYear}}`
 - `{{custom.tagline}}`
-- `{{social.github.label}}` / `{{social.github.url}}`
-- `{{social.rss.label}}` / `{{social.rss.url}}`
-- `{{contact.email.label}}` / `{{contact.email.value}}` / `{{contact.email.url}}`
 
-After applying it, editors usually only need to change the site name, site description, owner name, email, GitHub URL, RSS URL, and tagline in General settings.
+After applying it, editors usually only need to change the site name, site description, and tagline in General settings. Social and contact links are intentionally left for editors to add explicitly.
 
 ## Rendering Rules
 

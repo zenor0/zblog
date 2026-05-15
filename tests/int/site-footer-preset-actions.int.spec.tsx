@@ -76,21 +76,16 @@ describe('SiteFooterPresetActions', () => {
       expect.objectContaining({
         owner: expect.objectContaining({
           name: 'Real Owner',
-          handle: '@your-id',
         }),
       }),
     )
     expect(mocks.fieldStates.globalVariables.setValue.mock.calls[0]?.[0].socialLinks).toEqual(
-      expect.arrayContaining([
+      [
         expect.objectContaining({
           platform: 'github',
           url: 'https://github.com/real',
         }),
-        expect.objectContaining({
-          platform: 'rss',
-          url: 'https://example.com/rss.xml',
-        }),
-      ]),
+      ],
     )
     expect(mocks.toastSuccess).toHaveBeenCalledWith('Starter footer applied.')
   })

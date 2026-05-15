@@ -69,7 +69,7 @@ describe('SiteFooterPreview', () => {
             filings: [],
           },
           bottomBar: {
-            note: 'Powered by Payload CMS and Next.js.',
+            note: 'Updated weekly.',
           },
         },
       },

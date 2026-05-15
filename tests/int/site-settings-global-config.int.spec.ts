@@ -17,6 +17,16 @@ function collectFields(fields: any[]): any[] {
 }
 
 describe('site settings global config schema', () => {
+  it('allows public reads but restricts updates to editors', () => {
+    expect(SiteSettings.access?.read?.({ req: { user: null } } as any)).toBe(true)
+    expect(
+      SiteSettings.access?.update?.({
+        req: { user: { roles: ['editor'] } },
+      } as any),
+    ).toBe(true)
+    expect(SiteSettings.access?.update?.({ req: { user: null } } as any)).toBe(false)
+  })
+
   it('defines wizard-ready global variables in General', () => {
     const tabsField = getTabsField()
     const generalTab = tabsField.tabs.find((tab: any) => tab.id === 'general') as any

@@ -18,27 +18,21 @@ const starterCopy = {
   en: {
     about: 'About',
     archive: 'Archive',
-    contactEmailLabel: 'Email',
     copyright: 'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
-    githubLabel: '@your-id',
     posts: 'Posts',
     privacy: 'Privacy',
     projects: 'Projects',
     read: 'Read',
-    rss: 'RSS',
     tagline: 'Notes about technology, products, and everyday work.',
   },
   'zh-Hans': {
     about: '关于',
     archive: '归档',
-    contactEmailLabel: '邮箱',
     copyright: 'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
-    githubLabel: '@your-id',
     posts: '文章',
     privacy: '隐私政策',
     projects: '项目',
     read: '阅读',
-    rss: 'RSS',
     tagline: '持续记录技术、产品与日常工作。',
   },
 } as const satisfies Record<AppLocale, Record<string, string>>
@@ -154,14 +148,6 @@ export function getStarterSiteFooterPreset(
                 openInNewTab: false,
               },
             },
-            {
-              label: copy.rss,
-              link: {
-                type: 'external',
-                externalUrl: '{{social.rss.url}}',
-                openInNewTab: true,
-              },
-            },
           ],
         },
         {
@@ -186,31 +172,8 @@ export function getStarterSiteFooterPreset(
           ],
         },
       ],
-      socialLinks: [
-        {
-          platform: 'github',
-          label: '{{social.github.label}}',
-          url: '{{social.github.url}}',
-          openInNewTab: true,
-        },
-        {
-          platform: 'rss',
-          label: '{{social.rss.label}}',
-          url: '{{social.rss.url}}',
-          openInNewTab: true,
-        },
-      ],
-      contactItems: [
-        {
-          label: '{{contact.email.label}}',
-          value: '{{contact.email.value}}',
-          link: {
-            type: 'external',
-            externalUrl: '{{contact.email.url}}',
-            openInNewTab: false,
-          },
-        },
-      ],
+      socialLinks: [],
+      contactItems: [],
       legalLinks: [
         {
           label: copy.privacy,
@@ -225,40 +188,11 @@ export function getStarterSiteFooterPreset(
         copyright: copy.copyright,
         filings: [],
       },
-      bottomBar: {
-        note: 'Powered by Payload CMS and Next.js.',
-      },
+      bottomBar: {},
     },
     globalVariables: {
-      owner: {
-        name: 'Your Name',
-        handle: '@your-id',
-        email: 'hello@example.com',
-        websiteUrl: 'https://example.com',
-        bio: copy.tagline,
-      },
-      socialLinks: [
-        {
-          platform: 'github',
-          label: copy.githubLabel,
-          url: 'https://github.com/your-id',
-          openInNewTab: true,
-        },
-        {
-          platform: 'rss',
-          label: copy.rss,
-          url: 'https://example.com/rss.xml',
-          openInNewTab: true,
-        },
-      ],
-      contactItems: [
-        {
-          key: 'email',
-          label: copy.contactEmailLabel,
-          value: 'hello@example.com',
-          url: 'mailto:hello@example.com',
-        },
-      ],
+      socialLinks: [],
+      contactItems: [],
       customVariables: [
         {
           key: 'tagline',

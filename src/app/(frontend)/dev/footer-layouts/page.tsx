@@ -10,6 +10,7 @@ import {
   normalizeSiteFooter,
   siteFooterLayoutStyleOptions,
 } from '@/features/site-settings/model/site-footer'
+import { defaultSiteName } from '@/shared/site/defaults'
 
 export const metadata: Metadata = {
   title: 'Footer Layouts',
@@ -17,11 +18,15 @@ export const metadata: Metadata = {
 }
 
 const footerLayoutPreviewSettings = {
-  siteName: 'ZBlog',
+  id: 0,
+  siteName: defaultSiteName,
+  articleLayout: {
+    preset: 'current',
+  },
   footer: {
     layoutStyle: 'compact',
     brand: {
-      name: 'ZBlog',
+      name: defaultSiteName,
       description: '技术、产品与日常工作的长期记录。',
       supportingText: 'Independent writing practice.',
       link: { type: 'internal', internalPath: '/', openInNewTab: false },
@@ -37,14 +42,6 @@ const footerLayoutPreviewSettings = {
           {
             label: '归档',
             link: { type: 'internal', internalPath: '/archive', openInNewTab: false },
-          },
-          {
-            label: 'RSS',
-            link: {
-              type: 'external',
-              externalUrl: 'https://example.com/rss.xml',
-              openInNewTab: true,
-            },
           },
         ],
       },
@@ -65,18 +62,12 @@ const footerLayoutPreviewSettings = {
     socialLinks: [
       {
         platform: 'github',
-        label: '@your-github-id',
+        label: 'Project updates',
         openInNewTab: true,
-        url: 'https://github.com/zenor0',
+        url: 'https://github.com/payloadcms/payload',
       },
     ],
-    contactItems: [
-      {
-        label: 'Email',
-        value: 'hi@example.com',
-        link: { type: 'external', externalUrl: 'mailto:hi@example.com', openInNewTab: false },
-      },
-    ],
+    contactItems: [],
     legalLinks: [
       {
         label: '隐私政策',
@@ -88,7 +79,7 @@ const footerLayoutPreviewSettings = {
       },
     ],
     compliance: {
-      copyright: 'Copyright 2026 ZBlog. All rights reserved.',
+      copyright: `Copyright 2026 ${defaultSiteName}. All rights reserved.`,
       filings: [
         {
           href: 'https://beian.miit.gov.cn/',
@@ -103,7 +94,7 @@ const footerLayoutPreviewSettings = {
       ],
     },
     bottomBar: {
-      note: 'Powered by Payload CMS and Next.js.',
+      note: 'Maintained by the site editor.',
     },
   },
 } as SiteSettings

@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og'
 import type { NextRequest } from 'next/server'
 
+import { defaultSiteName } from '@/shared/site/defaults'
+
 export const runtime = 'edge'
 
 const imageSize = {
@@ -28,8 +30,8 @@ function normalizeParam(value: null | string, maxLength: number) {
 
 export function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const eyebrow = normalizeParam(searchParams.get('eyebrow'), 48) ?? 'ZBlog'
-  const title = normalizeParam(searchParams.get('title'), 96) ?? 'ZBlog'
+  const eyebrow = normalizeParam(searchParams.get('eyebrow'), 48) ?? defaultSiteName
+  const title = normalizeParam(searchParams.get('title'), 96) ?? defaultSiteName
   const description = normalizeParam(searchParams.get('description'), 180)
 
   return new ImageResponse(
@@ -120,8 +122,8 @@ export function GET(request: NextRequest) {
             width: '100%',
           }}
         >
-          <div style={{ display: 'flex' }}>zblog</div>
-          <div style={{ display: 'flex' }}>payload cms · next.js</div>
+          <div style={{ display: 'flex' }}>{eyebrow}</div>
+          <div style={{ display: 'flex' }}>{title}</div>
         </div>
       </div>
     ),

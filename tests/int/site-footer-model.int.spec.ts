@@ -76,7 +76,7 @@ describe('site footer model helpers', () => {
           socialLinks: [
             {
               platform: 'github',
-              label: '@your-github-id',
+              label: '@editorial-team',
               openInNewTab: true,
               url: 'https://github.com/zenor0',
             },
@@ -92,7 +92,7 @@ describe('site footer model helpers', () => {
     expect(footer?.brand.name).toBe('ZBlog')
     expect(footer?.layoutStyle).toBe('directory')
     expect(footer?.navigationSections).toHaveLength(1)
-    expect(footer?.socialLinks[0]?.label).toBe('@your-github-id')
+    expect(footer?.socialLinks[0]?.label).toBe('@editorial-team')
     expect(footer?.socialLinks[0]?.href).toBe('https://github.com/zenor0')
     expect(footer?.contactItems[0]?.value).toBe('hi@example.com')
     expect(footer?.legalLinks).toHaveLength(0)

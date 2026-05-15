@@ -55,7 +55,7 @@ describe('SiteFooter', () => {
                   platform: 'rss',
                   label: 'RSS',
                   openInNewTab: true,
-                  url: 'https://example.com/rss.xml',
+                  url: 'https://personal-blog.test/rss.xml',
                 },
               ],
               contactItems: [
@@ -85,7 +85,7 @@ describe('SiteFooter', () => {
                   },
                 ],
               },
-              bottomBar: { note: 'Powered by Payload CMS and Next.js.' },
+              bottomBar: { note: 'Updated weekly.' },
             },
           } as any
         }
@@ -108,7 +108,7 @@ describe('SiteFooter', () => {
     expect(markup).toContain('hi@example.com')
     expect(markup).toContain('沪ICP备00000000号')
     expect(markup).toContain('Copyright 2026 ZBlog. All rights reserved.')
-    expect(markup).toContain('Powered by Payload CMS and Next.js.')
+    expect(markup).toContain('Updated weekly.')
   })
 
   it('renders a balanced layout with directory, profile, and metadata layers', () => {
@@ -161,7 +161,7 @@ describe('SiteFooter', () => {
                   platform: 'rss',
                   label: 'RSS',
                   openInNewTab: true,
-                  url: 'https://example.com/rss.xml',
+                  url: 'https://personal-blog.test/rss.xml',
                 },
               ],
               contactItems: [
@@ -191,7 +191,7 @@ describe('SiteFooter', () => {
                   },
                 ],
               },
-              bottomBar: { note: 'Powered by Payload CMS and Next.js.' },
+              bottomBar: { note: 'Updated weekly.' },
             },
           } as any
         }
@@ -212,7 +212,7 @@ describe('SiteFooter', () => {
     expect(markup).toContain('hi@example.com')
     expect(markup).toContain('沪ICP备00000000号')
     expect(markup).toContain('Copyright 2026 ZBlog. All rights reserved.')
-    expect(markup).toContain('Powered by Payload CMS and Next.js.')
+    expect(markup).toContain('Updated weekly.')
   })
 
   it('renders nothing when the normalized footer has no usable content', () => {

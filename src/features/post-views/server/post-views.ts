@@ -2,6 +2,7 @@ import { createHash } from 'crypto'
 import type { Payload } from 'payload'
 
 import type { AppLocale } from '@/shared/i18n/locales'
+import { getPayloadSecret } from '@/shared/runtime/env'
 
 export const defaultPostViewDedupeWindowMs = 24 * 60 * 60 * 1000
 
@@ -88,7 +89,7 @@ export function buildPostViewDedupeKey(args: {
   const windowMs = args.windowMs ?? defaultPostViewDedupeWindowMs
   const windowIndex = getWindowIndex(args.now, windowMs)
   const digest = createHash('sha256')
-    .update(args.secret || process.env.PAYLOAD_SECRET || 'zblog-post-views')
+    .update(args.secret?.trim() || getPayloadSecret())
     .update('\n')
     .update(String(args.postId))
     .update('\n')
