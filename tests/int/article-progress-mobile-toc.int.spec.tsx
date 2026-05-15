@@ -10,7 +10,7 @@ const headings: MarkdownHeading[] = [
 ]
 
 describe('MobileArticleTocPrototypes', () => {
-  it('renders the right rail candidate by default with plain heading anchors', () => {
+  it('renders the right rail candidate as section-length ticks with plain heading anchors', () => {
     const { container } = render(
       <MobileArticleTocPrototypes
         activeHeadingID="overview"
@@ -24,8 +24,30 @@ describe('MobileArticleTocPrototypes', () => {
     expect(container.querySelector('[data-mobile-toc-variant="right-rail"]')).toBeTruthy()
     expect(container.querySelector('a[href="#overview"]')).toBeTruthy()
     expect(container.querySelector('a[href="#details"]')).toBeTruthy()
+    expect(container.querySelector('[data-mobile-toc-track]')).toBeTruthy()
+    expect(container.querySelectorAll('[data-mobile-toc-tick]')).toHaveLength(headings.length)
+    expect(container.querySelector('[style*="--mobile-toc-tick-size"]')).toBeTruthy()
     expect(container.innerHTML).not.toContain('data-link-preview-kind')
     expect(container.innerHTML).not.toContain('data-slot="hover-card"')
+  })
+
+  it('renders the bottom strip as centered section-length ticks', () => {
+    const { container } = render(
+      <MobileArticleTocPrototypes
+        activeHeadingID="details"
+        headings={headings}
+        label="Contents"
+        progressLabel="Progress"
+        variant="bottom-strip"
+      />,
+    )
+
+    const track = container.querySelector('[data-mobile-toc-track]')
+
+    expect(container.querySelector('[data-mobile-toc-variant="bottom-strip"]')).toBeTruthy()
+    expect(track?.getAttribute('data-orientation')).toBe('horizontal')
+    expect(container.querySelectorAll('[data-mobile-toc-tick]')).toHaveLength(headings.length)
+    expect(container.querySelector('[style*="--mobile-toc-tick-size"]')).toBeTruthy()
   })
 
   it('renders a compact sheet candidate trigger for narrow screens', () => {
@@ -41,5 +63,6 @@ describe('MobileArticleTocPrototypes', () => {
 
     expect(container.querySelector('[data-mobile-toc-variant="sheet-map"]')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Open mobile contents' })).toBeTruthy()
+    expect(container.querySelector('[data-mobile-toc-track]')).toBeNull()
   })
 })

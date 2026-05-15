@@ -451,7 +451,7 @@ test.describe('Frontend', () => {
     await expect(page.locator('[data-anchor-return-variant="edge-tab"]')).toBeVisible()
   })
 
-  test('shows the mobile article progress right rail prototype without horizontal overflow', async ({
+  test('shows the mobile article progress tick prototypes without horizontal overflow', async ({
     page,
   }) => {
     await page.setViewportSize({ height: 844, width: 390 })
@@ -481,5 +481,31 @@ test.describe('Frontend', () => {
     await page.mouse.up()
 
     await expect.poll(() => page.evaluate(() => window.location.hash.length > 1)).toBe(true)
+
+    await page.getByRole('button', { name: '底条' }).click()
+
+    const bottomStrip = page.locator('[data-mobile-toc-variant="bottom-strip"]')
+    const bottomTrack = bottomStrip.locator('[data-mobile-toc-track]')
+
+    await expect(bottomStrip).toBeVisible()
+    await expect(bottomTrack).toHaveAttribute('data-orientation', 'horizontal')
+
+    const bottomStripHasHorizontalOverflow = await page.evaluate(() => {
+      return document.documentElement.scrollWidth > window.innerWidth
+    })
+
+    expect(bottomStripHasHorizontalOverflow).toBe(false)
+
+    const bottomBox = await bottomTrack.boundingBox()
+
+    if (!bottomBox) {
+      throw new Error('Missing bottom strip track bounding box')
+    }
+
+    await page.mouse.move(bottomBox.x + bottomBox.width * 0.2, bottomBox.y + bottomBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(bottomBox.x + bottomBox.width * 0.82, bottomBox.y + bottomBox.height / 2)
+    await expect(page.locator('[data-mobile-toc-preview]')).toBeVisible()
+    await page.mouse.up()
   })
 })
