@@ -1,0 +1,188 @@
+.site-data-transfer {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 1.25);
+  margin: 0 auto;
+  max-width: 76rem;
+  padding: var(--base);
+}
+
+.site-data-transfer__header,
+.site-data-transfer__section-header,
+.site-data-transfer__file,
+.site-data-transfer__preview-header {
+  align-items: center;
+  display: flex;
+  gap: var(--base);
+  justify-content: space-between;
+}
+
+.site-data-transfer__header h1,
+.site-data-transfer__section h2 {
+  margin: 0;
+}
+
+.site-data-transfer__eyebrow,
+.site-data-transfer__section-header p,
+.site-data-transfer__file span,
+.site-data-transfer__preview-header span,
+.site-data-transfer__diff-card small {
+  color: var(--theme-elevation-650);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.site-data-transfer__eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.site-data-transfer__section {
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--border-radius-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--base);
+  padding: var(--base);
+}
+
+.site-data-transfer__grid {
+  display: grid;
+  gap: var(--base);
+  grid-template-columns: minmax(14rem, 0.4fr) minmax(0, 1fr);
+}
+
+.site-data-transfer__field,
+.site-data-transfer__checks,
+.site-data-transfer__preview,
+.site-data-transfer__file-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.5);
+}
+
+.site-data-transfer__field span {
+  color: var(--theme-elevation-700);
+  font-size: 0.85rem;
+}
+
+.site-data-transfer__field select {
+  background: var(--theme-input-bg);
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: var(--border-radius-s);
+  color: var(--theme-text);
+  min-height: 2.25rem;
+  padding: 0 0.65rem;
+}
+
+.site-data-transfer__checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.site-data-transfer__checks label,
+.site-data-transfer__diff-card {
+  align-items: flex-start;
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.site-data-transfer__file {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--border-radius-s);
+  padding: 0.75rem;
+}
+
+.site-data-transfer__file div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.site-data-transfer__file strong {
+  overflow-wrap: anywhere;
+}
+
+.site-data-transfer__file-actions,
+.site-data-transfer__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.site-data-transfer__file-actions a,
+.site-data-transfer__file-actions button {
+  background: transparent;
+  border: 0;
+  color: var(--theme-text);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.site-data-transfer__empty {
+  color: var(--theme-elevation-650);
+  margin: 0;
+}
+
+.site-data-transfer__native-input {
+  display: none;
+}
+
+.site-data-transfer__preview {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--border-radius-s);
+  padding: var(--base);
+}
+
+.site-data-transfer__preview-header {
+  align-items: flex-start;
+}
+
+.site-data-transfer__diff-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.site-data-transfer__diff-card span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.site-data-transfer-nav-link {
+  color: var(--theme-text);
+  display: block;
+  padding: 0.45rem var(--base);
+  text-decoration: none;
+}
+
+.site-data-transfer-nav-link:hover {
+  background: var(--theme-elevation-100);
+}
+
+@media (max-width: 56rem) {
+  .site-data-transfer__header,
+  .site-data-transfer__section-header,
+  .site-data-transfer__file,
+  .site-data-transfer__preview-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .site-data-transfer__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -10,6 +10,8 @@ import {
   resolveRuntimePath,
   runtimeStateDir,
   seedAssetsDir,
+  siteDataExportDir,
+  siteDataImportDir,
 } from '@/shared/runtime/paths'
 
 describe('runtime paths', () => {
@@ -20,6 +22,8 @@ describe('runtime paths', () => {
     expect(mediaUploadDir).toBe(path.resolve(process.cwd(), '.data', 'media'))
     expect(mediaPreviewDir).toBe(path.resolve(process.cwd(), '.data', 'media-previews'))
     expect(seedAssetsDir).toBe(path.resolve(process.cwd(), '.data', 'seed-assets'))
+    expect(siteDataExportDir).toBe(path.resolve(process.cwd(), '.data', 'exports'))
+    expect(siteDataImportDir).toBe(path.resolve(process.cwd(), '.data', 'imports'))
   })
 
   it('resolves runtime subpaths from the central state directory', () => {

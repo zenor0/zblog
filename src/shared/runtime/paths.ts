@@ -21,3 +21,5 @@ export const defaultDatabaseURL = `file:${defaultDatabasePath}`
 export const mediaUploadDir = resolveRuntimePath('media')
 export const mediaPreviewDir = resolveRuntimePath('media-previews')
 export const seedAssetsDir = resolveRuntimePath('seed-assets')
+export const siteDataExportDir = resolveRuntimePath('exports')
+export const siteDataImportDir = resolveRuntimePath('imports')

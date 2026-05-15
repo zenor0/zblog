@@ -28,6 +28,17 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      beforeNavLinks: [
+        '/features/site-data-transfer/admin/DataTransferNavLink#DataTransferNavLink',
+      ],
+      views: {
+        dataTransfer: {
+          Component: '/features/site-data-transfer/admin/DataTransferView#DataTransferView',
+          path: '/data-transfer',
+        },
+      },
+    },
   },
   collections: [Users, Media, Posts, PostViewMetrics, PostViewDedupe],
   globals: [SiteSettings, FrontendVariants],
