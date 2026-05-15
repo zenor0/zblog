@@ -261,6 +261,7 @@ const globalVariableFields: Field[] = [
         name: 'name',
         type: 'text',
         label: 'Name',
+        localized: true,
       },
       {
         name: 'handle',
@@ -953,6 +954,7 @@ export const SiteSettings: GlobalConfig = {
                 type: 'text',
                 defaultValue: 'ZBlog',
                 label: 'Site name',
+                localized: true,
                 required: true,
               },
               {

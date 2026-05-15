@@ -7,20 +7,25 @@ import path from 'path'
 import type { Payload } from 'payload'
 
 import type { Media, Post, User } from '@/payload-types'
-import { normalizeSiteFooter } from '@/features/site-settings/model/site-footer'
-import { localeCodes } from '@/shared/i18n/locales'
 import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/shared/runtime/local-state-reset'
 import {
+  buildEnCitationDemoContent,
   buildEnMarkdownShowcaseContent,
+  buildZhCitationDemoContent,
+  buildZhCitationDemoContentV2,
+  buildZhFallbackDemoContent,
   buildZhMarkdownShowcaseContent,
+  seedCitationDemoCopy,
   seedCitationDemoSlug,
+  seedCitationDemoRevisionCopy,
+  seedFallbackDemoCopy,
   seedFallbackDemoSlug,
+  seedMarkdownShowcaseCopy,
   seedMarkdownShowcaseEnTitle,
   seedMarkdownShowcaseSlug,
   seedMarkdownShowcaseZhTitle,
 } from '@/features/posts/seed/seed-blog-content'
-import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/features/site-settings/model/site-footer-preset'
-import { resolveSiteSettingReferences } from '@/features/site-settings/model/site-settings-config'
+import { seedSiteSettings } from '@/features/site-settings/seed/seed-site-settings'
 import { seedAssetsDir } from '@/shared/runtime/paths'
 
 const seedDir = seedAssetsDir
@@ -168,40 +173,6 @@ async function deleteExistingSeedContent(payload: Payload) {
   ])
 }
 
-async function seedSiteSettings(payload: Payload) {
-  for (const locale of localeCodes) {
-    const settings = await payload.findGlobal({
-      slug: 'site-settings',
-      depth: 1,
-      fallbackLocale: 'zh-Hans',
-      locale,
-    })
-    const resolvedSettings = resolveSiteSettingReferences(settings)
-    const hasUsableFooter = normalizeSiteFooter({
-      locale,
-      settings: resolvedSettings,
-    })
-
-    if (hasUsableFooter) {
-      continue
-    }
-
-    const starter = getStarterSiteFooterPreset(locale)
-
-    await payload.updateGlobal({
-      slug: 'site-settings',
-      locale,
-      data: {
-        footer: starter.footer,
-        globalVariables: mergeStarterGlobalVariables(
-          settings.globalVariables,
-          starter.globalVariables,
-        ),
-      },
-    })
-  }
-}
-
 async function createSeedFiles(
   payload: Payload,
   assetPaths: Awaited<ReturnType<typeof ensureSeedAssets>>,
@@ -236,63 +207,6 @@ async function createSeedFiles(
   }
 }
 
-function buildZhContent(heroURL: string) {
-  return `# 为什么博客需要显式引用
-
-一个长期维护的技术博客，最终会遇到同一类问题：信息来源是否清晰、翻译版本是否可信、以及历史修改是否能被追踪。这里我们用 [@smith2024] 和 [@chen2023] 作为最小示例。
-
-> 如果文章包含研究结论或者实践数据，引用本身就是内容的一部分，而不是附录。
-
-:::note
-这个 seed post 同时覆盖了 Markdown、BibTeX、附件、图片和版本历史。
-:::
-
-![Seed hero](${heroURL})
-
-## 一个极简但够用的结构
-
-- 正文仍然用 Markdown 编写，便于 diff。
-- 引用键直接写在内容里，例如 [@smith2024]。
-- BibTeX 文本跟随文章一起存储，由系统负责校验。
-- 附件放在侧边栏区域，而不是塞进正文里。
-
-## 版本记录为什么重要
-
-发布之后再改动内容时，应该能清楚看到标题、摘要和正文到底改了什么，而不是只看到“更新于某日”。
-`
-}
-
-function buildZhContentV2(heroURL: string) {
-  return `${buildZhContent(heroURL)}
-
-## 第二次修订
-
-这一版额外补充了一个段落，用来生成可读的版本 diff，并验证历史页面确实能看到新增内容。
-`
-}
-
-function buildEnContent(heroURL: string) {
-  return `# Why a blog should keep explicit citations
-
-A long-lived technical blog eventually faces the same questions: where the claims come from, whether translated pages can be trusted, and how revisions can be inspected over time. This seeded article references [@smith2024] and [@chen2023].
-
-> For research-heavy writing, citations are part of the reading experience rather than an appendix.
-
-:::note
-This seeded entry covers Markdown rendering, BibTeX references, attachments, images, and version history.
-:::
-
-![Seed hero](${heroURL})
-
-## A deliberately small structure
-
-- Keep the main body in Markdown for readable diffs.
-- Insert citation keys inline, such as [@smith2024].
-- Store one BibTeX source directly on the post and validate against it.
-- Keep downloadable assets in a dedicated attachments section.
-`
-}
-
 async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof createSeedFiles>>) {
   const citationPost = (await payload.create({
     collection: 'posts',
@@ -306,21 +220,21 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
         },
       ],
       bibliography: files.bibliography,
-      content: buildZhContent(files.hero.url ?? ''),
-      excerpt: 'Seeded article covering Markdown, citations, translations, and versions.',
+      content: buildZhCitationDemoContent(files.hero.url ?? ''),
+      excerpt: seedCitationDemoCopy['zh-Hans'].excerpt,
       heroImage: files.hero.id,
       slug: seedCitationDemoSlug,
       tags: [{ value: 'payload' }, { value: 'citations' }, { value: 'seed' }],
-      title: '带引用与版本历史的示例文章',
+      title: seedCitationDemoCopy['zh-Hans'].title,
     },
   })) as Post
 
   await payload.update({
     collection: 'posts',
     data: {
-      content: buildZhContentV2(files.hero.url ?? ''),
-      excerpt: '第二版内容，额外增加一段文字用于验证 diff。',
-      title: '带引用与版本历史的示例文章（修订）',
+      content: buildZhCitationDemoContentV2(files.hero.url ?? ''),
+      excerpt: seedCitationDemoRevisionCopy['zh-Hans'].excerpt,
+      title: seedCitationDemoRevisionCopy['zh-Hans'].title,
     },
     id: citationPost.id,
     locale: 'zh-Hans',
@@ -330,9 +244,9 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
     collection: 'posts',
     data: {
       _status: 'published',
-      content: buildEnContent(files.hero.url ?? ''),
-      excerpt: 'Machine-translated seeded content for locale switching.',
-      title: 'Seed Post with Citations and Version History',
+      content: buildEnCitationDemoContent(files.hero.url ?? ''),
+      excerpt: seedCitationDemoCopy.en.excerpt,
+      title: seedCitationDemoCopy.en.title,
       translatedAt: new Date().toISOString(),
       translatedFromLocale: 'zh-Hans',
       translationProvider: 'seed-script',
@@ -346,20 +260,11 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
     collection: 'posts',
     data: {
       _status: 'published',
-      content: `# 只有中文的回退示例
-
-这篇文章只有中文版本，用来验证英文路由下是否会正确显示 fallback 提示。
-
-## 这篇文章覆盖什么
-
-- locale fallback
-- 极简正文阅读
-- 版本列表入口
-`,
-      excerpt: 'Seeded post for testing locale fallback behavior.',
+      content: buildZhFallbackDemoContent(),
+      excerpt: seedFallbackDemoCopy['zh-Hans'].excerpt,
       slug: seedFallbackDemoSlug,
       tags: [{ value: 'fallback' }, { value: 'locales' }],
-      title: '语言回退示例文章',
+      title: seedFallbackDemoCopy['zh-Hans'].title,
     },
   })
 
@@ -369,7 +274,7 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
       _status: 'published',
       bibliography: files.bibliography,
       content: buildZhMarkdownShowcaseContent(files.hero.url ?? ''),
-      excerpt: 'Seeded article covering the current Markdown rendering capabilities end to end.',
+      excerpt: seedMarkdownShowcaseCopy['zh-Hans'].excerpt,
       heroImage: files.hero.id,
       slug: seedMarkdownShowcaseSlug,
       tags: [{ value: 'markdown' }, { value: 'showcase' }, { value: 'seed' }],
@@ -382,7 +287,7 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
     data: {
       _status: 'published',
       content: buildEnMarkdownShowcaseContent(files.hero.url ?? ''),
-      excerpt: 'Seeded showcase article for the frontend Markdown feature set.',
+      excerpt: seedMarkdownShowcaseCopy.en.excerpt,
       title: seedMarkdownShowcaseEnTitle,
       translatedAt: new Date().toISOString(),
       translatedFromLocale: 'zh-Hans',

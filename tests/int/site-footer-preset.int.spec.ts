@@ -24,6 +24,7 @@ describe('site footer starter preset', () => {
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
     )
+    expect(preset.footer?.bottomBar?.note).toBe('Powered by Payload CMS and Next.js.')
     expect(preset.globalVariables?.owner?.name).toBe('Your Name')
     expect(preset.globalVariables?.socialLinks?.[0]?.url).toBe('https://github.com/your-id')
   })
@@ -34,8 +35,55 @@ describe('site footer starter preset', () => {
     expect(preset.footer?.navigationSections?.[0]?.title).toBe('阅读')
     expect(preset.footer?.navigationSections?.[0]?.links?.[0]?.label).toBe('文章')
     expect(preset.footer?.legalLinks?.[0]?.label).toBe('隐私政策')
+    expect(preset.footer?.compliance?.copyright).toBe(
+      'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
+    )
+    expect(preset.footer?.bottomBar?.note).toBe('由 Payload CMS 和 Next.js 驱动。')
+    expect(preset.globalVariables?.owner?.name).toBe('你的名字')
     expect(preset.globalVariables?.customVariables?.[0]?.value).toBe(
       '持续记录技术、产品与日常工作。',
+    )
+  })
+
+  it('fills missing localized values inside existing keyed variable rows', () => {
+    const preset = getStarterSiteFooterPreset('en')
+    const merged = mergeStarterGlobalVariables(
+      {
+        contactItems: [
+          {
+            key: 'email',
+            url: 'mailto:real@example.com',
+          },
+        ],
+        customVariables: [
+          {
+            description: 'Existing description',
+            key: 'tagline',
+          },
+        ],
+        socialLinks: [
+          {
+            platform: 'github',
+            url: 'https://github.com/real',
+          },
+        ],
+      },
+      preset.globalVariables,
+    )
+
+    expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.label).toBe('@your-id')
+    expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.url).toBe(
+      'https://github.com/real',
+    )
+    expect(merged?.contactItems?.find((item) => item.key === 'email')?.label).toBe('Email')
+    expect(merged?.contactItems?.find((item) => item.key === 'email')?.url).toBe(
+      'mailto:real@example.com',
+    )
+    expect(merged?.customVariables?.find((item) => item.key === 'tagline')?.value).toBe(
+      'Notes about technology, products, and everyday work.',
+    )
+    expect(merged?.customVariables?.find((item) => item.key === 'tagline')?.description).toBe(
+      'Existing description',
     )
   })
 

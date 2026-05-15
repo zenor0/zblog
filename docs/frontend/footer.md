@@ -22,6 +22,7 @@ The footer group contains:
 - `bottomBar`
 
 Human-facing copy is localized where practical. Logo media, external URLs, social URLs, and internal path definitions are shared across locales.
+The site name and owner display name are localized in General settings so footer references such as `{{site.name}}` and `{{owner.name}}` resolve to the active locale.
 
 ## Link Model
 
@@ -79,6 +80,8 @@ The preset uses editable references:
 - `{{contact.email.label}}` / `{{contact.email.value}}` / `{{contact.email.url}}`
 
 After applying it, editors usually only need to change the site name, site description, owner name, email, GitHub URL, RSS URL, and tagline in General settings.
+
+The blog seed applies starter footer data per locale without using Payload fallback reads, so `zh-Hans` and `en` both receive their own footer copy instead of inheriting the default locale.
 
 ## Rendering Rules
 

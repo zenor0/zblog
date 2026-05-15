@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  buildEnCitationDemoContent,
   buildEnMarkdownShowcaseContent,
+  buildZhCitationDemoContent,
+  seedCitationDemoCopy,
+  seedFallbackDemoCopy,
   buildZhMarkdownShowcaseContent,
+  seedMarkdownShowcaseCopy,
   seedMarkdownShowcaseSlug,
 } from '@/features/posts/seed/seed-blog-content'
 
@@ -32,5 +37,25 @@ describe('seed blog content', () => {
       expect(content).toContain('| Feature | Status |')
       expect(content).toContain('---')
     }
+  })
+
+  it('defines complete localized seed copy except for the dedicated fallback demo', () => {
+    expect(seedCitationDemoCopy['zh-Hans'].title).toBe('带引用与版本历史的示例文章')
+    expect(seedCitationDemoCopy['zh-Hans'].excerpt).toContain('引用')
+    expect(seedCitationDemoCopy.en.title).toBe('Seed Post with Citations and Version History')
+    expect(seedCitationDemoCopy.en.excerpt).toContain('locale switching')
+
+    expect(seedMarkdownShowcaseCopy['zh-Hans'].title).toBe('Markdown 能力展示文章')
+    expect(seedMarkdownShowcaseCopy.en.title).toBe('Markdown Feature Showcase')
+
+    expect(Object.keys(seedFallbackDemoCopy)).toEqual(['zh-Hans'])
+    expect(seedFallbackDemoCopy['zh-Hans'].excerpt).toContain('语言回退')
+
+    expect(buildZhCitationDemoContent('/media/seed-hero.svg')).toContain(
+      '为什么博客需要显式引用',
+    )
+    expect(buildEnCitationDemoContent('/media/seed-hero.svg')).toContain(
+      'Why a blog should keep explicit citations',
+    )
   })
 })
