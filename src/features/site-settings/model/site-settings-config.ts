@@ -32,12 +32,19 @@ export const siteSettingsSectionLabels: Record<SiteSettingsSectionID, string> = 
 const sectionRootKeys = {
   articleLayout: ['articleLayout'],
   footer: ['footer'],
-  general: ['siteName', 'siteDescription', 'globalVariables'],
+  general: ['siteName', 'siteDescription', 'globalVariables', 'appearance'],
   homepage: ['homeHero'],
   seo: ['seo'],
 } as const satisfies Record<SiteSettingsSectionID, readonly string[]>
 
-const objectRootKeys = new Set(['articleLayout', 'footer', 'globalVariables', 'homeHero', 'seo'])
+const objectRootKeys = new Set([
+  'appearance',
+  'articleLayout',
+  'footer',
+  'globalVariables',
+  'homeHero',
+  'seo',
+])
 const referencePattern = /{{\s*([^{}]+?)\s*}}/g
 const referencePathPattern = /^[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)+$/
 const customVariableKeyPattern = /^[A-Za-z][A-Za-z0-9_-]*$/

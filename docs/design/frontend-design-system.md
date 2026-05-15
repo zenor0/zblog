@@ -34,8 +34,11 @@ The system favors:
 - light borders for structure
 - muted backgrounds for secondary panels
 - desaturated semantic colors for notices and callouts
+- a CMS-configured brand accent for small details such as link underlines, progress indicators, media chrome, and footer hierarchy
 
 Avoid product-dashboard visual language in public reading surfaces: heavy cards, glossy gradients, decorative shadows, oversized pill badges, and saturated section backgrounds.
+
+The brand accent is exposed as `SiteSettings.appearance.accentColor` and resolved into `--zblog-accent`. It should not replace shadcn's neutral `--accent` surface token; keep it to low-area emphasis so long-form reading remains calm.
 
 ## Homepage
 

@@ -114,6 +114,17 @@ describe('frontend visual restraint', () => {
     expect(styles).toContain('--zblog-tracking-label: 0;')
   })
 
+  it('defines and consumes CMS-controlled frontend accent tokens', () => {
+    const styles = readFrontendStyles()
+
+    expect(styles).toContain('--zblog-accent: oklch(0.62 0.14 190);')
+    expect(styles).toContain('--color-zblog-accent: var(--zblog-accent);')
+    expect(styles).toContain('--zblog-accent-line')
+    expect(styles).toContain('color: var(--zblog-accent-text);')
+    expect(styles).toContain('stroke: var(--zblog-accent-line);')
+    expect(styles).toContain('background: var(--zblog-accent-line);')
+  })
+
   it('defines a compact typography scale for dense interface text', () => {
     const styles = readFrontendStyles()
 

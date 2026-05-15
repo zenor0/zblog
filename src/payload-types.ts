@@ -755,6 +755,15 @@ export interface SiteSetting {
         }[]
       | null;
   };
+  /**
+   * Frontend visual accents used for links, progress indicators, media chrome, and small brand details.
+   */
+  appearance?: {
+    /**
+     * Use a safe CSS color such as #14b8a6 or oklch(0.62 0.14 190). The frontend falls back to the default teal accent if omitted.
+     */
+    accentColor?: string | null;
+  };
   homepageEditorMode?: ('form' | 'yaml') | null;
   homeHero?: {
     eyebrow?: string | null;
@@ -1057,6 +1066,11 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               description?: T;
               id?: T;
             };
+      };
+  appearance?:
+    | T
+    | {
+        accentColor?: T;
       };
   homepageEditorMode?: T;
   homeHero?:

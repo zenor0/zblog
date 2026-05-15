@@ -10,11 +10,19 @@
 
   .section-kicker,
   .editorial-meta {
-    @apply uppercase text-muted-foreground;
+    @apply uppercase;
     font-size: var(--zblog-type-meta-size);
     font-weight: 400;
     line-height: var(--zblog-type-meta-line);
     letter-spacing: var(--zblog-tracking-meta);
+  }
+
+  .section-kicker {
+    color: var(--zblog-accent-text);
+  }
+
+  .editorial-meta {
+    @apply text-muted-foreground;
   }
 
   .editorial-tag-list {
@@ -25,6 +33,11 @@
 
   .editorial-link {
     @apply text-foreground underline decoration-border/90 underline-offset-[0.22em] transition-colors hover:text-foreground/72;
+    text-decoration-color: var(--zblog-accent-border);
+  }
+
+  .editorial-link:hover {
+    text-decoration-color: var(--zblog-accent-line);
   }
 
   .editorial-frame {
@@ -33,6 +46,28 @@
 
   [data-home-featured-post] .media-surface--card {
     @apply aspect-[4/5];
+  }
+
+  [data-editorial-shell='true'] [data-home-hero] {
+    position: relative;
+  }
+
+  [data-editorial-shell='true'] [data-home-hero]::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: min(14rem, 42vw);
+    height: 1px;
+    background: var(--zblog-accent-line);
+  }
+
+  [data-editorial-shell='true'] [data-home-featured-post] {
+    border-bottom-color: var(--zblog-accent-border);
+  }
+
+  [data-editorial-shell='true'] [data-home-post-list] article {
+    border-bottom-color: color-mix(in oklch, var(--zblog-accent-border) 42%, var(--border));
   }
 
   [data-home-post-list] article:last-child {
@@ -106,17 +141,31 @@
 
   [data-site-footer] a {
     @apply text-foreground underline decoration-border/90 underline-offset-[0.22em] transition-colors hover:text-foreground/72;
+    text-decoration-color: var(--zblog-accent-border);
   }
 
   [data-site-footer] dd a {
     @apply text-foreground/82 hover:text-foreground;
   }
 
+  [data-site-footer] {
+    border-top-color: var(--zblog-accent-border);
+  }
+
   [data-site-footer] [data-footer-heading] {
     @apply mb-1;
+    color: var(--zblog-accent-text);
   }
 
   [data-site-footer] [data-footer-grid] {
     @apply items-start;
+  }
+
+  [data-site-footer] [data-footer-layer] {
+    border-color: color-mix(in oklch, var(--zblog-accent-border) 46%, var(--border));
+  }
+
+  [data-site-footer] [data-footer-icon] {
+    color: var(--zblog-accent-text);
   }
 }

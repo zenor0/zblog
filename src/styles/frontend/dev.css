@@ -130,7 +130,7 @@
   }
 
   .dev-progress-map__path--active {
-    stroke: color-mix(in oklab, var(--accent-foreground) 64%, var(--accent));
+    stroke: var(--zblog-accent-line);
     stroke-width: var(--toc-active-stroke);
     will-change: stroke-dasharray, stroke-dashoffset;
   }
@@ -282,7 +282,8 @@
   }
 
   .dev-progress-mobile__track span {
-    @apply absolute inset-y-0 bg-foreground;
+    @apply absolute inset-y-0;
+    background: var(--zblog-accent-line);
     left: var(--mobile-progress-start);
     width: var(--mobile-progress-size);
   }
@@ -498,7 +499,7 @@
   .dev-mobile-toc-track::before {
     content: '';
     position: absolute;
-    background: color-mix(in oklab, var(--foreground) 76%, var(--accent));
+    background: var(--zblog-accent-line);
     pointer-events: none;
   }
 
