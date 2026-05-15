@@ -52,6 +52,7 @@ type MonacoLike = {
 }
 
 const allRootKeys = [
+  'appearance',
   'siteName',
   'siteDescription',
   'globalVariables',
@@ -200,11 +201,13 @@ export const SiteSettingsRawSectionEditor: UIFieldClientComponent = ({ field, pa
   const siteName = useField<unknown>({ path: 'siteName' })
   const siteDescription = useField<unknown>({ path: 'siteDescription' })
   const globalVariables = useField<unknown>({ path: 'globalVariables' })
+  const appearance = useField<unknown>({ path: 'appearance' })
   const homeHero = useField<unknown>({ path: 'homeHero' })
   const seo = useField<unknown>({ path: 'seo' })
   const articleLayout = useField<unknown>({ path: 'articleLayout' })
   const footer = useField<unknown>({ path: 'footer' })
   const setters: Record<string, FieldSetter> = {
+    appearance,
     articleLayout,
     footer,
     globalVariables,

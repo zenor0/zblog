@@ -22,6 +22,7 @@ describe('site settings global config schema', () => {
     const generalTab = tabsField.tabs.find((tab: any) => tab.id === 'general') as any
     const fields = collectFields(generalTab.fields)
     const globalVariables = fields.find((field: any) => field.name === 'globalVariables') as any
+    const appearance = fields.find((field: any) => field.name === 'appearance') as any
 
     expect(globalVariables.type).toBe('group')
     expect(globalVariables.fields.map((field: any) => field.name)).toEqual([
@@ -53,6 +54,11 @@ describe('site settings global config schema', () => {
     expect(typeof customVariables.fields.find((field: any) => field.name === 'key').validate).toBe(
       'function',
     )
+
+    expect(appearance.type).toBe('group')
+    expect(appearance.fields.map((field: any) => field.name)).toEqual(['accentColor'])
+    expect(appearance.fields[0].defaultValue).toBe('oklch(0.62 0.14 190)')
+    expect(typeof appearance.fields[0].validate).toBe('function')
   })
 
   it('exposes local Form/YAML switches without replacing preview layouts', () => {

@@ -31,6 +31,7 @@
 
   .citation-link {
     @apply text-foreground underline decoration-border underline-offset-[0.22em] transition-colors hover:text-foreground/72;
+    text-decoration-color: var(--zblog-accent-border);
   }
 
   .citation-link--missing {
@@ -65,23 +66,23 @@
 
   [data-article-anchor-highlight='true'] {
     animation: article-anchor-highlight 1800ms ease-out;
-    background-color: color-mix(in oklch, var(--accent) 34%, transparent);
-    box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--accent) 13%, transparent);
-    outline: 1px solid color-mix(in oklch, var(--foreground) 24%, transparent);
+    background-color: color-mix(in oklch, var(--zblog-accent) 18%, transparent);
+    box-shadow: 0 0 0 0.45rem color-mix(in oklch, var(--zblog-accent) 10%, transparent);
+    outline: 1px solid var(--zblog-accent-border);
     outline-offset: 0.42rem;
   }
 
   @keyframes article-anchor-highlight {
     0% {
-      background-color: color-mix(in oklch, var(--accent) 42%, transparent);
-      box-shadow: 0 0 0 0.55rem color-mix(in oklch, var(--accent) 18%, transparent);
-      outline-color: color-mix(in oklch, var(--foreground) 32%, transparent);
+      background-color: color-mix(in oklch, var(--zblog-accent) 24%, transparent);
+      box-shadow: 0 0 0 0.55rem color-mix(in oklch, var(--zblog-accent) 14%, transparent);
+      outline-color: var(--zblog-accent-line);
     }
 
     72% {
-      background-color: color-mix(in oklch, var(--accent) 24%, transparent);
-      box-shadow: 0 0 0 0.42rem color-mix(in oklch, var(--accent) 10%, transparent);
-      outline-color: color-mix(in oklch, var(--foreground) 18%, transparent);
+      background-color: color-mix(in oklch, var(--zblog-accent) 14%, transparent);
+      box-shadow: 0 0 0 0.42rem color-mix(in oklch, var(--zblog-accent) 8%, transparent);
+      outline-color: var(--zblog-accent-border);
     }
 
     100% {
@@ -163,7 +164,7 @@
       right: calc(100% + 0.72rem);
       width: 1px;
       min-height: 1em;
-      background: var(--border);
+      background: var(--zblog-accent-border);
       transform: scaleY(0.72);
       transform-origin: center;
     }
@@ -177,6 +178,7 @@
     .article-copy [data-article-heading]:hover::after,
     .article-copy [data-article-heading]:focus-within::after {
       opacity: 0.82;
+      background: var(--zblog-accent-line);
       transform: scaleY(1);
     }
   }
@@ -217,6 +219,7 @@
 
   .article-copy a:not(.citation-link):not(.markdown-media-link) {
     @apply text-foreground underline decoration-border/90 underline-offset-[0.22em] transition-colors hover:text-foreground/72;
+    text-decoration-color: var(--zblog-accent-border);
   }
 
   .article-copy ul,
@@ -238,6 +241,7 @@
 
   .article-copy blockquote {
     @apply border-l border-border pl-5 text-foreground/74 italic;
+    border-left-color: var(--zblog-accent-border);
   }
 
   .article-copy hr {
@@ -360,6 +364,7 @@
 
   .media-surface {
     @apply relative flex w-full items-center justify-center overflow-hidden border border-border bg-muted/32;
+    border-color: color-mix(in oklch, var(--zblog-accent-border) 38%, var(--border));
   }
 
   .media-surface__image {
@@ -382,6 +387,8 @@
 
   .media-surface__extension {
     @apply border border-border/80 bg-background/80 px-2 py-0.5 font-medium uppercase text-muted-foreground;
+    border-color: var(--zblog-accent-border);
+    color: var(--zblog-accent-text);
     font-size: var(--zblog-type-badge-size);
     line-height: var(--zblog-type-badge-line);
     letter-spacing: var(--zblog-tracking-label);
@@ -395,6 +402,8 @@
 
   .media-surface__badge {
     @apply absolute left-3 top-3 border border-border bg-background/92 px-2 py-0.5 font-medium uppercase text-foreground;
+    border-color: var(--zblog-accent-border);
+    color: var(--zblog-accent-text);
     font-size: var(--zblog-type-badge-size);
     line-height: var(--zblog-type-badge-line);
     letter-spacing: var(--zblog-tracking-badge);
@@ -402,6 +411,7 @@
 
   .media-surface--hero {
     @apply px-2 py-2 sm:px-3 sm:py-3;
+    background: var(--zblog-accent-muted);
   }
 
   .media-surface--hero .media-surface__image {

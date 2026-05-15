@@ -1,7 +1,65 @@
+import type { CSSProperties } from 'react'
+
 export type FrontendTheme = 'auto' | 'dark' | 'light'
 
 export const themeStorageKey = 'zblog-frontend-theme'
 export const systemThemeQuery = '(prefers-color-scheme: dark)'
+export const defaultFrontendAccentColor = 'oklch(0.62 0.14 190)'
+
+const cssNumber = String.raw`[-+]?(?:\d+|\d*\.\d+)`
+const cssPercentage = String.raw`${cssNumber}%`
+const cssNumberOrPercentage = String.raw`(?:${cssNumber}|${cssPercentage})`
+const safeHexColorPattern = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
+const safeOklchColorPattern = new RegExp(
+  String.raw`^oklch\(\s*${cssNumberOrPercentage}\s+${cssNumber}\s+${cssNumber}(?:deg|rad|turn)?(?:\s*/\s*${cssNumberOrPercentage})?\s*\)$`,
+  'i',
+)
+const unsafeCssColorPattern = /[;"'{}<>\\]|\b(?:url|var|calc|env|attr|expression|import)\s*\(/i
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+export function validateFrontendAccentColor(value: unknown): true | string {
+  if (value == null || value === '') {
+    return true
+  }
+
+  if (typeof value !== 'string') {
+    return 'Accent color must be a CSS color string.'
+  }
+
+  const color = value.trim()
+
+  if (color.length === 0) {
+    return true
+  }
+
+  if (unsafeCssColorPattern.test(color)) {
+    return 'Accent color cannot contain CSS functions, URLs, or declaration syntax.'
+  }
+
+  if (safeHexColorPattern.test(color) || safeOklchColorPattern.test(color)) {
+    return true
+  }
+
+  return 'Use a hex color like #14b8a6 or an oklch() color like oklch(0.62 0.14 190).'
+}
+
+export function resolveFrontendAccentColor(settings: unknown): string {
+  const appearance = isRecord(settings) && isRecord(settings.appearance) ? settings.appearance : {}
+  const value = appearance.accentColor
+
+  return validateFrontendAccentColor(value) === true && typeof value === 'string' && value.trim()
+    ? value.trim()
+    : defaultFrontendAccentColor
+}
+
+export function resolveFrontendAccentStyle(settings: unknown): CSSProperties {
+  return {
+    '--zblog-accent': resolveFrontendAccentColor(settings),
+  } as CSSProperties
+}
 
 function getBrowserStorage(): Storage | null {
   if (typeof window === 'undefined') {

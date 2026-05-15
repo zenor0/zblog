@@ -19,6 +19,7 @@ const colorTokens = [
   ['Foreground', 'bg-foreground', '正文、主标题和高强调信息。'],
   ['Muted', 'bg-muted', '次级区域、静态底板和轻量分隔。'],
   ['Accent', 'bg-accent', '悬停、局部强调和可交互区域反馈。'],
+  ['Brand Accent', 'bg-zblog-accent', '由 CMS 控制的品牌强调色，用于细线、链接和阅读状态。'],
   ['Border', 'bg-border', '结构线、卡片边界和文章节奏切分。'],
 ] as const
 
@@ -76,7 +77,7 @@ export default function DesignSystemReferencePage() {
             所有页面优先使用语义色，避免组件内直接绑定具体颜色，使明暗主题和未来品牌调整更安全。
           </p>
         </div>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-6">
           {colorTokens.map(([label, className, description]) => (
             <Card className="dev-reference-card" key={label}>
               <CardContent className="flex flex-col gap-4 pt-6">
@@ -89,6 +90,26 @@ export default function DesignSystemReferencePage() {
             </Card>
           ))}
         </div>
+        <Card className="dev-reference-card border-zblog-accent-border bg-zblog-accent-muted">
+          <CardContent className="grid gap-4 pt-6 md:grid-cols-[minmax(0,1fr)_16rem] md:items-center">
+            <div className="grid gap-2">
+              <p className="section-kicker">Accent Usage</p>
+              <h3 className="font-serif text-2xl">小面积、高识别度</h3>
+              <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
+                Accent 用在链接下划线、章节进度、媒体边框和页脚层级上，保留阅读界面的安静底色。
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <div className="h-px bg-zblog-accent-line" />
+              <Link className="editorial-link w-fit no-underline" href="/dev/design-system">
+                文章里的可点击引用
+              </Link>
+              <div className="h-2 w-full bg-border">
+                <div className="h-full w-2/5 bg-zblog-accent-line" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       <section className="dev-reference-section">

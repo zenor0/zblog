@@ -19,6 +19,10 @@ import {
   defaultSiteFooterLayoutStyle,
   siteFooterLayoutStyleOptions,
 } from '@/features/site-settings/model/site-footer-layout'
+import {
+  defaultFrontendAccentColor,
+  validateFrontendAccentColor,
+} from '@/shared/theme/frontend-theme'
 
 const localizedHeroDefaults = {
   en: {
@@ -967,6 +971,28 @@ export const SiteSettings: GlobalConfig = {
                 },
                 label: 'Global variables',
                 fields: globalVariableFields,
+              },
+              {
+                name: 'appearance',
+                type: 'group',
+                admin: {
+                  description:
+                    'Frontend visual accents used for links, progress indicators, media chrome, and small brand details.',
+                },
+                label: 'Appearance',
+                fields: [
+                  {
+                    name: 'accentColor',
+                    type: 'text',
+                    admin: {
+                      description:
+                        'Use a safe CSS color such as #14b8a6 or oklch(0.62 0.14 190). The frontend falls back to the default teal accent if omitted.',
+                    },
+                    defaultValue: defaultFrontendAccentColor,
+                    label: 'Accent color',
+                    validate: validateFrontendAccentColor,
+                  },
+                ],
               },
             ],
           }),

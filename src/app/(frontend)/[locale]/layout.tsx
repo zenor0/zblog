@@ -7,6 +7,7 @@ import { resolveArticleDesignConfig } from '@/features/article/model/article-des
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import { getMessagesForLocale } from '@/i18n/loadMessages'
 import { requireLocale } from '@/i18n/routing'
+import { resolveFrontendAccentStyle } from '@/shared/theme/frontend-theme'
 
 export default async function LocaleLayout(props: {
   children: ReactNode
@@ -23,18 +24,21 @@ export default async function LocaleLayout(props: {
   const articleLayout = resolveArticleDesignConfig(siteSettings.articleLayout)
   const articleLayoutStyle =
     articleLayout.presetID === 'current' ? undefined : (articleLayout.style as CSSProperties)
+  const frontendAccentStyle = resolveFrontendAccentStyle(siteSettings)
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <div
-        data-article-design-preset={articleLayout.presetID}
-        data-article-layout-preset={articleLayout.presetID}
-        data-site-article-layout=""
-        style={articleLayoutStyle}
-      >
-        {children}
+      <div data-frontend-accent="" style={frontendAccentStyle}>
+        <div
+          data-article-design-preset={articleLayout.presetID}
+          data-article-layout-preset={articleLayout.presetID}
+          data-site-article-layout=""
+          style={articleLayoutStyle}
+        >
+          {children}
+        </div>
+        <SiteFooter locale={locale} settings={siteSettings} />
       </div>
-      <SiteFooter locale={locale} settings={siteSettings} />
     </NextIntlClientProvider>
   )
 }

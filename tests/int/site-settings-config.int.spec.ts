@@ -51,6 +51,9 @@ describe('site settings config helpers', () => {
       eyebrow: '{{custom.tagline}}',
       title: '{{site.name}} by {{owner.name}}',
     },
+    appearance: {
+      accentColor: '#14b8a6',
+    },
     seo: {
       defaultSocialImage: '{{assets.defaultSocialImage}}',
       homeDescription: '{{site.description}}',
@@ -146,6 +149,23 @@ describe('site settings config helpers', () => {
         defaultSocialImage: 77,
         homeTitle: '{{site.name}}',
       },
+    })
+
+    const generalYaml = serializeSiteSettingsSectionToYAML('general', settings)
+
+    expect(generalYaml).toContain('appearance:')
+    expect(generalYaml).toContain('accentColor: "#14b8a6"')
+
+    const parsedGeneral = parseSiteSettingsSectionYAML(
+      'general',
+      ['siteName: ZBlog', 'appearance:', '  accentColor: "#0f766e"'].join('\n'),
+    )
+
+    expect(parsedGeneral).toEqual({
+      appearance: {
+        accentColor: '#0f766e',
+      },
+      siteName: 'ZBlog',
     })
   })
 

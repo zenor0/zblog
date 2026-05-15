@@ -16,6 +16,11 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-zblog-accent: var(--zblog-accent);
+  --color-zblog-accent-muted: var(--zblog-accent-muted);
+  --color-zblog-accent-border: var(--zblog-accent-border);
+  --color-zblog-accent-line: var(--zblog-accent-line);
+  --color-zblog-accent-text: var(--zblog-accent-text);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -50,6 +55,12 @@
   --zblog-tracking-meta: 0;
   --zblog-tracking-badge: 0;
   --zblog-tracking-label: 0;
+  --zblog-accent: oklch(0.62 0.14 190);
+  --zblog-accent-foreground: color-mix(in oklch, var(--background) 92%, var(--zblog-accent));
+  --zblog-accent-muted: color-mix(in oklch, var(--zblog-accent) 8%, var(--background));
+  --zblog-accent-border: color-mix(in oklch, var(--zblog-accent) 30%, var(--border));
+  --zblog-accent-line: color-mix(in oklch, var(--zblog-accent) 72%, var(--foreground));
+  --zblog-accent-text: color-mix(in oklch, var(--zblog-accent) 56%, var(--foreground));
   --zblog-code-font-family:
     var(--font-code, 'JetBrains Mono'), 'JetBrains Mono', 'SFMono-Regular', Consolas,
     'Liberation Mono', ui-monospace, monospace;
