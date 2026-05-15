@@ -1,6 +1,12 @@
 import type { Metadata } from 'next'
 
-import { buildLocalePath, defaultLocale, getLocaleLabel, supportedLocales, type AppLocale } from '@/shared/i18n/locales'
+import {
+  buildLocalePath,
+  defaultLocale,
+  getLocaleLabel,
+  supportedLocales,
+  type AppLocale,
+} from '@/shared/i18n/locales'
 
 const fallbackSiteURL = 'http://localhost:3000'
 const defaultDescriptionLength = 160
@@ -67,7 +73,9 @@ function getOpenGraphLocale(locale: AppLocale) {
   return openGraphLocales[locale]
 }
 
-function resolveSourceImage(image: MetadataImageSource | null | undefined): ResolvedMetadataImage | null {
+function resolveSourceImage(
+  image: MetadataImageSource | null | undefined,
+): ResolvedMetadataImage | null {
   if (!image?.url || typeof image.url !== 'string') {
     return null
   }
@@ -90,7 +98,8 @@ function buildOpenGraphImageObject(image: ResolvedMetadataImage) {
 }
 
 export function getSiteURL(): URL {
-  const siteURL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.SITE_URL?.trim() || fallbackSiteURL
+  const siteURL =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.SITE_URL?.trim() || fallbackSiteURL
 
   return new URL(siteURL.endsWith('/') ? siteURL : `${siteURL}/`)
 }
@@ -119,13 +128,13 @@ export function buildLocaleAlternates(args: {
       ...languages,
       'x-default': buildAbsoluteURL(args.xDefaultPath ?? buildLocalePath(defaultLocale, pathname)),
     },
+    types: {
+      'application/rss+xml': buildAbsoluteURL(buildLocalePath(args.canonicalLocale, '/rss.xml')),
+    },
   }
 }
 
-export function buildPageTitle(args: {
-  pageTitle?: null | string
-  siteName: string
-}) {
+export function buildPageTitle(args: { pageTitle?: null | string; siteName: string }) {
   const siteName = normalizeText(args.siteName) ?? 'ZBlog'
   const pageTitle = normalizeText(args.pageTitle)
 
@@ -260,7 +269,8 @@ export function buildPageMetadata(args: {
       description,
       images: [buildOpenGraphImageObject(metadataImage)],
       locale: getOpenGraphLocale(args.canonicalLocale),
-      publishedTime: args.openGraphType === 'article' ? args.publishedTime ?? undefined : undefined,
+      publishedTime:
+        args.openGraphType === 'article' ? (args.publishedTime ?? undefined) : undefined,
       siteName: args.siteName,
       title: pageTitle,
       type: args.openGraphType ?? 'website',

@@ -247,7 +247,7 @@ export function getStarterSiteFooterPreset(
         {
           platform: 'rss',
           label: copy.rss,
-          url: 'https://example.com/rss.xml',
+          url: '/rss.xml',
           openInNewTab: true,
         },
       ],

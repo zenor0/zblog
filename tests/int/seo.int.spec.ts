@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildArticleStructuredData, buildPageMetadata, buildSeoDescription } from '@/shared/content/seo'
+import {
+  buildArticleStructuredData,
+  buildPageMetadata,
+  buildSeoDescription,
+} from '@/shared/content/seo'
 
 describe('seo utilities', () => {
   it('builds plain text descriptions from markdown content', () => {
@@ -34,6 +38,9 @@ describe('seo utilities', () => {
 
     expect(metadata.title).toBe('SEO in Payload | ZBlog')
     expect(metadata.alternates?.canonical).toBe('http://localhost:3000/en/posts/seo-in-payload')
+    expect(metadata.alternates?.types?.['application/rss+xml']).toBe(
+      'http://localhost:3000/en/rss.xml',
+    )
     expect(metadata.twitter?.card).toBe('summary_large_image')
     expect(metadata.openGraph?.type).toBe('article')
 
