@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/features/site-settings/model/site-footer-preset'
+import {
+  getStarterSiteFooterPreset,
+  mergeStarterGlobalVariables,
+} from '@/features/site-settings/model/site-footer-preset'
 
 describe('site footer starter preset', () => {
   it('builds a generic blog footer from editable shared variables', () => {
@@ -61,9 +64,7 @@ describe('site footer starter preset', () => {
     expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.url).toBe(
       'https://github.com/real',
     )
-    expect(merged?.socialLinks?.find((link) => link.platform === 'rss')?.url).toBe(
-      'https://example.com/rss.xml',
-    )
+    expect(merged?.socialLinks?.find((link) => link.platform === 'rss')?.url).toBe('/rss.xml')
     expect(merged?.contactItems?.find((item) => item.key === 'email')?.value).toBe(
       'hello@example.com',
     )

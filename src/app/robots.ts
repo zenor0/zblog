@@ -7,7 +7,16 @@ export default function robots(): MetadataRoute.Robots {
     host: getSiteURL().origin,
     rules: [
       {
-        allow: '/',
+        allow: ['/', '/api/og'],
+        disallow: [
+          '/admin/',
+          '/api/',
+          '/preview/',
+          '/*/preview/',
+          '/dev/',
+          '/*/dev/',
+          '/*/posts/*/history',
+        ],
         userAgent: '*',
       },
     ],
