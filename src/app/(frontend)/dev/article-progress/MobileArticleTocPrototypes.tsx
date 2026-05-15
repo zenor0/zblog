@@ -45,6 +45,12 @@ type ScrubPreview = {
   y: number
 }
 
+type MobileTocSegmentStyle = CSSProperties & {
+  '--mobile-toc-depth': number
+  '--mobile-toc-segment-size': string
+  '--mobile-toc-tick-size': string
+}
+
 const fallbackProgress = {
   visibleEndPercent: 0,
   visibleStartPercent: 0,
@@ -160,6 +166,11 @@ function getPointerRatio(
 function getSegmentStyle(segment: MobileTocSegment, orientation: ScrubOrientation): CSSProperties {
   const minSize = orientation === 'horizontal' ? 1.8 : 1.2
   const sizePercent = Math.max(segment.sizePercent, minSize)
+  const depth = segment.heading.depth - 2
+  const tickBaseSize = orientation === 'horizontal' ? 0.58 : 0.72
+  const tickScale = orientation === 'horizontal' ? 0.034 : 0.041
+  const tickMaxSize = orientation === 'horizontal' ? 2.35 : 2.7
+  const tickSize = clamp(tickBaseSize + sizePercent * tickScale - depth * 0.08, 0.54, tickMaxSize)
   const axisStyle =
     orientation === 'horizontal'
       ? {
@@ -171,9 +182,11 @@ function getSegmentStyle(segment: MobileTocSegment, orientation: ScrubOrientatio
           top: `${segment.startPercent}%`,
         }
 
-  const style: CSSProperties & { '--mobile-toc-depth': number } = {
+  const style: MobileTocSegmentStyle = {
     ...axisStyle,
-    '--mobile-toc-depth': segment.heading.depth - 2,
+    '--mobile-toc-depth': depth,
+    '--mobile-toc-segment-size': `${sizePercent}%`,
+    '--mobile-toc-tick-size': `${tickSize.toFixed(2)}rem`,
   }
 
   return style
@@ -231,6 +244,7 @@ function MobileTocTrack(props: {
   label: string
   onScrub: (segment: MobileTocSegment) => void
   orientation: ScrubOrientation
+  previewHeadingID?: null | string
   progress: Pick<ReadingProgress, 'visibleEndPercent' | 'visibleStartPercent'>
   rootRef: RefObject<HTMLDivElement | null>
   segments: MobileTocSegment[]
@@ -243,6 +257,7 @@ function MobileTocTrack(props: {
     label,
     onScrub,
     orientation,
+    previewHeadingID,
     progress,
     rootRef,
     segments,
@@ -277,6 +292,7 @@ function MobileTocTrack(props: {
     <nav
       aria-label={`${label} mobile ${variant}`}
       className={className}
+      data-mobile-toc-track=""
       data-orientation={orientation}
       onPointerCancel={(event) => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -330,11 +346,13 @@ function MobileTocTrack(props: {
       <ol>
         {segments.map((segment) => {
           const isActive = segment.heading.id === activeHeadingID
+          const isPreviewed = segment.heading.id === previewHeadingID
 
           return (
             <li
               data-current={isActive ? 'true' : undefined}
               data-level={segment.heading.depth}
+              data-preview={isPreviewed ? 'true' : undefined}
               key={segment.heading.id}
               style={getSegmentStyle(segment, orientation)}
             >
@@ -348,7 +366,7 @@ function MobileTocTrack(props: {
                 }}
                 title={segment.heading.text}
               >
-                <span />
+                <span data-mobile-toc-tick="" />
               </a>
             </li>
           )
@@ -450,18 +468,6 @@ export function MobileArticleTocPrototypes(props: MobileArticleTocPrototypesProp
               </SheetDescription>
             </SheetHeader>
             <div className="dev-mobile-toc-sheet__body">
-              <MobileTocTrack
-                activeHeadingID={activeHeading?.id ?? ''}
-                className="dev-mobile-toc-track dev-mobile-toc-track--sheet"
-                label={label}
-                onScrub={handleScrub}
-                orientation="vertical"
-                progress={progress}
-                rootRef={rootRef}
-                segments={segments}
-                setPreview={setPreview}
-                variant={variant}
-              />
               <SheetHeadingList
                 activeHeadingID={activeHeading?.id ?? ''}
                 headings={headings}
@@ -470,7 +476,6 @@ export function MobileArticleTocPrototypes(props: MobileArticleTocPrototypesProp
             </div>
           </SheetContent>
         </Sheet>
-        {preview ? <MobileTocPreview preview={preview} variant={variant} /> : null}
       </div>
     )
   }
@@ -489,6 +494,7 @@ export function MobileArticleTocPrototypes(props: MobileArticleTocPrototypesProp
         label={label}
         onScrub={handleScrub}
         orientation={orientation}
+        previewHeadingID={preview?.heading.id ?? null}
         progress={progress}
         rootRef={rootRef}
         segments={segments}
