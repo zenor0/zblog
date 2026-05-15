@@ -88,7 +88,7 @@ describe('SiteFooterPresetActions', () => {
         }),
         expect.objectContaining({
           platform: 'rss',
-          url: 'https://example.com/rss.xml',
+          url: '/rss.xml',
         }),
       ]),
     )
