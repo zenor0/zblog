@@ -1,7 +1,7 @@
 import type { AppLocale } from '@/shared/i18n/locales'
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 
-import { buildLocalePath } from '@/shared/i18n/locales'
+import { buildLocalePath, defaultLocale, normalizeLocale } from '@/shared/i18n/locales'
 import {
   defaultSiteFooterLayoutStyle,
   resolveSiteFooterLayoutStyle,
@@ -77,6 +77,58 @@ export type NormalizedSiteFooter = {
     rel?: string
     target?: string
   }[]
+}
+
+export type SiteFooterLabels = {
+  applyStarterFooter: string
+  contactInformation: string
+  footerLinks: string
+  localeNavigation: string
+  ownerProfileLinks: string
+  previewFrameTitle: string
+  previewNoContent: string
+  previewSurface: string
+  previewTitle: string
+  previewWaiting: string
+  starterFooterApplied: string
+  utilityLinks: string
+}
+
+const siteFooterLabelsByLocale = {
+  en: {
+    applyStarterFooter: 'Apply starter footer',
+    contactInformation: 'Footer contact information',
+    footerLinks: 'Footer links',
+    localeNavigation: 'Locales',
+    ownerProfileLinks: 'Owner profile links',
+    previewFrameTitle: 'Production footer preview',
+    previewNoContent: 'No usable footer content yet.',
+    previewSurface: 'Production iframe',
+    previewTitle: 'Footer preview',
+    previewWaiting: 'Waiting for footer data.',
+    starterFooterApplied: 'Starter footer applied.',
+    utilityLinks: 'Footer utility links',
+  },
+  'zh-Hans': {
+    applyStarterFooter: '应用起始页脚',
+    contactInformation: '页脚联系信息',
+    footerLinks: '页脚链接',
+    localeNavigation: '语言',
+    ownerProfileLinks: '站点资料链接',
+    previewFrameTitle: '生产页脚预览',
+    previewNoContent: '还没有可用的页脚内容。',
+    previewSurface: '生产 iframe',
+    previewTitle: '页脚预览',
+    previewWaiting: '等待页脚数据。',
+    starterFooterApplied: '已应用起始页脚。',
+    utilityLinks: '页脚辅助链接',
+  },
+} as const satisfies Record<AppLocale, SiteFooterLabels>
+
+export function getSiteFooterLabels(
+  locale: AppLocale | null | string | undefined = defaultLocale,
+): SiteFooterLabels {
+  return siteFooterLabelsByLocale[normalizeLocale(locale) ?? defaultLocale]
 }
 
 export function hasText(value: null | string | undefined): value is string {

@@ -52,6 +52,12 @@ describe('SiteFooter', () => {
                   url: 'https://github.com/zenor0',
                 },
                 {
+                  platform: 'x',
+                  label: '@zblog',
+                  openInNewTab: true,
+                  url: 'https://x.com/zblog',
+                },
+                {
                   platform: 'rss',
                   label: 'RSS',
                   openInNewTab: true,
@@ -99,11 +105,14 @@ describe('SiteFooter', () => {
     expect(markup).toContain('data-footer-adaptive-grid="directory"')
     expect(markup).toContain('data-footer-adaptive-grid="profile"')
     expect(markup).toContain('data-footer-icon="github"')
+    expect(markup).toContain('data-footer-icon="x"')
+    expect(markup).toContain('lucide-twitter')
     expect(markup).toContain('data-footer-meta-align="left"')
     expect(markup).toContain('data-footer-meta-align="right"')
     expect(markup).toContain('/zh-hans/posts')
     expect(markup).toContain('@zenor0')
-    expect(markup).not.toContain('>github<')
+    expect(markup).toContain('>GitHub<')
+    expect(markup).toContain('>X<')
     expect(markup).toContain('RSS')
     expect(markup).toContain('hi@example.com')
     expect(markup).toContain('沪ICP备00000000号')
@@ -158,6 +167,12 @@ describe('SiteFooter', () => {
                   url: 'https://github.com/zenor0',
                 },
                 {
+                  platform: 'x',
+                  label: '@zblog',
+                  openInNewTab: true,
+                  url: 'https://x.com/zblog',
+                },
+                {
                   platform: 'rss',
                   label: 'RSS',
                   openInNewTab: true,
@@ -205,9 +220,13 @@ describe('SiteFooter', () => {
     expect(markup).toContain('data-footer-adaptive-grid="directory"')
     expect(markup).toContain('data-footer-adaptive-grid="profile"')
     expect(markup).toContain('data-footer-icon="github"')
+    expect(markup).toContain('data-footer-icon="x"')
+    expect(markup).toContain('lucide-twitter')
     expect(markup).toContain('data-footer-meta-align="left"')
     expect(markup).toContain('data-footer-meta-align="right"')
     expect(markup).toContain('@zenor0')
+    expect(markup).toContain('>GitHub<')
+    expect(markup).toContain('>X<')
     expect(markup).toContain('RSS')
     expect(markup).toContain('hi@example.com')
     expect(markup).toContain('沪ICP备00000000号')
@@ -221,5 +240,54 @@ describe('SiteFooter', () => {
     )
 
     expect(markup).toBe('')
+  })
+
+  it('renders localized footer chrome and locale navigation links', () => {
+    const markup = renderToStaticMarkup(
+      <SiteFooter
+        locale="zh-Hans"
+        settings={
+          {
+            siteName: 'ZBlog',
+            footer: {
+              layoutStyle: 'compact',
+              brand: {
+                name: 'ZBlog',
+                description: '技术、产品与日常工作的记录。',
+                link: { type: 'internal', internalPath: '/', openInNewTab: false },
+              },
+              navigationSections: [
+                {
+                  title: '阅读',
+                  links: [
+                    {
+                      label: '文章',
+                      link: { type: 'internal', internalPath: '/posts', openInNewTab: false },
+                    },
+                  ],
+                },
+              ],
+              legalLinks: [
+                {
+                  label: '隐私政策',
+                  link: { type: 'internal', internalPath: '/privacy', openInNewTab: false },
+                },
+              ],
+              compliance: {
+                copyright: 'Copyright 2026 ZBlog. All rights reserved.',
+                filings: [],
+              },
+            },
+          } as any
+        }
+      />,
+    )
+
+    expect(markup).toContain('aria-label="页脚链接"')
+    expect(markup).toContain('aria-label="语言"')
+    expect(markup).toContain('data-footer-locale-nav=""')
+    expect(markup).toContain('aria-current="page"')
+    expect(markup).toContain('href="/zh-hans"')
+    expect(markup).toContain('href="/en"')
   })
 })

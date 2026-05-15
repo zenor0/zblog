@@ -6,6 +6,7 @@ import { useFormFields, useLocale } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
+import { getSiteFooterLabels } from '@/features/site-settings/model/site-footer'
 import {
   buildSiteFooterPreviewURL,
   isSiteFooterPreviewReadyMessage,
@@ -344,6 +345,7 @@ export const SiteFooterPreview: UIFieldClientComponent = () => {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const [iframeHeight, setIframeHeight] = useState(280)
   const previewLocale = resolveSiteFooterPreviewLocale(locale?.code)
+  const labels = useMemo(() => getSiteFooterLabels(previewLocale), [previewLocale])
   const settings = useMemo(() => readSiteSettings(fields), [fields])
   const previewURL = useMemo(() => buildSiteFooterPreviewURL(previewLocale), [previewLocale])
 
@@ -388,8 +390,8 @@ export const SiteFooterPreview: UIFieldClientComponent = () => {
   return (
     <section className="site-footer-preview" data-testid="site-footer-preview">
       <div className="site-footer-preview__header">
-        <span>Footer preview</span>
-        <strong>Production iframe</strong>
+        <span>{labels.previewTitle}</span>
+        <strong>{labels.previewSurface}</strong>
       </div>
 
       <div className="site-footer-preview__surface">
@@ -400,7 +402,7 @@ export const SiteFooterPreview: UIFieldClientComponent = () => {
           ref={iframeRef}
           src={previewURL}
           style={{ height: iframeHeight }}
-          title="Production footer preview"
+          title={labels.previewFrameTitle}
         />
       </div>
     </section>

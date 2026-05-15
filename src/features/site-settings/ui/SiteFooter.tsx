@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import {
-  AtSign,
   ExternalLink,
   Github,
   Instagram,
@@ -8,16 +7,26 @@ import {
   Mail,
   MessageCircle,
   Rss,
+  Twitter,
   UserRound,
   Youtube,
   type LucideIcon,
 } from 'lucide-react'
 
-import type { NormalizedSiteFooter, SiteFooterLayoutStyle } from '@/features/site-settings/model/site-footer'
+import type {
+  NormalizedSiteFooter,
+  SiteFooterLabels,
+  SiteFooterLayoutStyle,
+} from '@/features/site-settings/model/site-footer'
 import type { AppLocale } from '@/shared/i18n/locales'
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 
-import { normalizeSiteFooter, resolveSiteFooterLayoutStyle } from '@/features/site-settings/model/site-footer'
+import {
+  getSiteFooterLabels,
+  normalizeSiteFooter,
+  resolveSiteFooterLayoutStyle,
+} from '@/features/site-settings/model/site-footer'
+import { buildLocalePath, getLocaleLabel, supportedLocales } from '@/shared/i18n/locales'
 import { cn } from '@/shared/utils/cn'
 
 type FooterInlineItem = {
@@ -33,6 +42,11 @@ type FooterProfileItem = FooterInlineItem & {
   meta: null | string
 }
 
+type FooterRenderContext = {
+  labels: SiteFooterLabels
+  locale?: AppLocale
+}
+
 const socialPlatformIcons: Record<string, LucideIcon> = {
   discord: MessageCircle,
   email: Mail,
@@ -41,8 +55,20 @@ const socialPlatformIcons: Record<string, LucideIcon> = {
   linkedin: Linkedin,
   other: ExternalLink,
   rss: Rss,
-  x: AtSign,
+  x: Twitter,
   youtube: Youtube,
+}
+
+const socialPlatformLabels: Record<string, string> = {
+  discord: 'Discord',
+  email: 'Email',
+  github: 'GitHub',
+  instagram: 'Instagram',
+  linkedin: 'LinkedIn',
+  other: 'Other',
+  rss: 'RSS',
+  x: 'X',
+  youtube: 'YouTube',
 }
 
 function FooterTextLink(props: FooterInlineItem & { className?: string }) {
@@ -113,11 +139,38 @@ function getProfileItems(footer: NormalizedSiteFooter): FooterProfileItem[] {
       icon: socialPlatformIcons[String(item.platform)] ?? ExternalLink,
       iconKey: String(item.platform),
       label: item.label,
-      meta: null,
+      meta: socialPlatformLabels[String(item.platform)] ?? String(item.platform),
       rel: item.rel,
       target: item.target,
     })),
   ]
+}
+
+function FooterLocaleNav(props: FooterRenderContext) {
+  if (!props.locale) {
+    return null
+  }
+
+  return (
+    <nav
+      aria-label={props.labels.localeNavigation}
+      className="flex flex-wrap gap-x-4 gap-y-1"
+      data-footer-locale-nav=""
+    >
+      {supportedLocales.map((locale) => (
+        <Link
+          aria-current={locale.code === props.locale ? 'page' : undefined}
+          className="editorial-link no-underline"
+          href={buildLocalePath(locale.code)}
+          hrefLang={locale.code}
+          key={locale.code}
+          lang={locale.code}
+        >
+          {getLocaleLabel(locale.code)}
+        </Link>
+      ))}
+    </nav>
+  )
 }
 
 function FooterIdentity(props: { footer: NormalizedSiteFooter; showSupportingText?: boolean }) {
@@ -160,7 +213,11 @@ function FooterIdentity(props: { footer: NormalizedSiteFooter; showSupportingTex
   )
 }
 
-function FooterInlineItems(props: { className?: string; items: FooterInlineItem[] }) {
+function FooterInlineItems(props: {
+  ariaLabel: string
+  className?: string
+  items: FooterInlineItem[]
+}) {
   if (props.items.length === 0) {
     return null
   }
@@ -172,7 +229,7 @@ function FooterInlineItems(props: { className?: string; items: FooterInlineItem[
 
   if (props.items.every((item) => item.href)) {
     return (
-      <nav aria-label="Footer links" className={className}>
+      <nav aria-label={props.ariaLabel} className={className}>
         {content}
       </nav>
     )
@@ -238,7 +295,7 @@ function FooterContactRecords(props: { footer: NormalizedSiteFooter }) {
   )
 }
 
-function FooterProfileItems(props: { footer: NormalizedSiteFooter }) {
+function FooterProfileItems(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   const items = getProfileItems(props.footer)
 
   if (items.length === 0) {
@@ -247,7 +304,7 @@ function FooterProfileItems(props: { footer: NormalizedSiteFooter }) {
 
   return (
     <section
-      aria-label="Owner profile links"
+      aria-label={props.labels.ownerProfileLinks}
       className="grid gap-4 border-t border-border py-5 sm:grid-cols-[repeat(auto-fit,minmax(13rem,1fr))]"
       data-footer-adaptive-grid="profile"
       data-footer-layer="profile"
@@ -292,9 +349,10 @@ function FooterProfileItems(props: { footer: NormalizedSiteFooter }) {
   )
 }
 
-function BalancedFooterMetadata(props: { footer: NormalizedSiteFooter }) {
+function BalancedFooterMetadata(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   const { compliance, legalLinks } = props.footer
-  const hasLeftContent = legalLinks.length > 0 || compliance.filings.length > 0
+  const hasLeftContent =
+    legalLinks.length > 0 || compliance.filings.length > 0 || Boolean(props.locale)
   const hasRightContent = Boolean(compliance.copyright) || Boolean(compliance.note)
 
   if (!hasLeftContent && !hasRightContent) {
@@ -308,7 +366,7 @@ function BalancedFooterMetadata(props: { footer: NormalizedSiteFooter }) {
     >
       {hasLeftContent ? (
         <div className="flex flex-col gap-2" data-footer-meta-align="left">
-          <FooterInlineItems items={legalLinks} />
+          <FooterInlineItems ariaLabel={props.labels.footerLinks} items={legalLinks} />
 
           {compliance.filings.length ? (
             <dl className="flex flex-wrap gap-x-5 gap-y-1">
@@ -320,6 +378,8 @@ function BalancedFooterMetadata(props: { footer: NormalizedSiteFooter }) {
               ))}
             </dl>
           ) : null}
+
+          <FooterLocaleNav labels={props.labels} locale={props.locale} />
         </div>
       ) : null}
 
@@ -336,7 +396,7 @@ function BalancedFooterMetadata(props: { footer: NormalizedSiteFooter }) {
   )
 }
 
-function DirectoryFooter(props: { footer: NormalizedSiteFooter }) {
+function DirectoryFooter(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   const secondaryLinks: FooterInlineItem[] = [
     ...props.footer.socialLinks.map((item) => ({
       href: item.href,
@@ -361,23 +421,32 @@ function DirectoryFooter(props: { footer: NormalizedSiteFooter }) {
           <FooterNavSections footer={props.footer} />
 
           {secondaryLinks.length ? (
-            <section aria-label="Footer utility links" className="flex flex-col gap-2">
-              <FooterInlineItems className="flex-col items-start gap-x-0" items={secondaryLinks} />
+            <section aria-label={props.labels.utilityLinks} className="flex flex-col gap-2">
+              <FooterInlineItems
+                ariaLabel={props.labels.utilityLinks}
+                className="flex-col items-start gap-x-0"
+                items={secondaryLinks}
+              />
             </section>
           ) : null}
 
-          <section aria-label="Footer contact information">
+          <section aria-label={props.labels.contactInformation}>
             <FooterContactRecords footer={props.footer} />
           </section>
         </div>
       </div>
 
-      <FooterMetadata className="mt-8 border-t border-border pt-5" footer={props.footer} />
+      <FooterMetadata
+        className="mt-8 border-t border-border pt-5"
+        footer={props.footer}
+        labels={props.labels}
+        locale={props.locale}
+      />
     </div>
   )
 }
 
-function BalancedFooter(props: { footer: NormalizedSiteFooter }) {
+function BalancedFooter(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   return (
     <div className="page-frame py-7 sm:py-9">
       <div className="grid gap-5">
@@ -396,29 +465,38 @@ function BalancedFooter(props: { footer: NormalizedSiteFooter }) {
           </div>
         </div>
 
-        <FooterProfileItems footer={props.footer} />
-        <BalancedFooterMetadata footer={props.footer} />
+        <FooterProfileItems footer={props.footer} labels={props.labels} locale={props.locale} />
+        <BalancedFooterMetadata footer={props.footer} labels={props.labels} locale={props.locale} />
       </div>
     </div>
   )
 }
 
-function CompactFooter(props: { footer: NormalizedSiteFooter }) {
+function CompactFooter(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   return (
     <div className="page-frame py-6 sm:py-8">
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <FooterIdentity footer={props.footer} />
-          <FooterInlineItems className="lg:justify-end" items={getUtilityItems(props.footer)} />
+          <FooterInlineItems
+            ariaLabel={props.labels.footerLinks}
+            className="lg:justify-end"
+            items={getUtilityItems(props.footer)}
+          />
         </div>
 
-        <FooterMetadata className="border-t border-border pt-4" footer={props.footer} />
+        <FooterMetadata
+          className="border-t border-border pt-4"
+          footer={props.footer}
+          labels={props.labels}
+          locale={props.locale}
+        />
       </div>
     </div>
   )
 }
 
-function LedgerFooter(props: { footer: NormalizedSiteFooter }) {
+function LedgerFooter(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   const ledgerLinks = [
     ...props.footer.legalLinks,
     ...getNavigationLinks(props.footer),
@@ -435,7 +513,11 @@ function LedgerFooter(props: { footer: NormalizedSiteFooter }) {
       <div className="grid gap-5">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
           <FooterIdentity footer={props.footer} />
-          <FooterInlineItems className="lg:justify-end" items={ledgerLinks} />
+          <FooterInlineItems
+            ariaLabel={props.labels.footerLinks}
+            className="lg:justify-end"
+            items={ledgerLinks}
+          />
         </div>
 
         {props.footer.contactItems.length ? (
@@ -444,16 +526,26 @@ function LedgerFooter(props: { footer: NormalizedSiteFooter }) {
           </div>
         ) : null}
 
-        <FooterMetadata className="border-t border-border pt-4" footer={props.footer} />
+        <FooterMetadata
+          className="border-t border-border pt-4"
+          footer={props.footer}
+          labels={props.labels}
+          locale={props.locale}
+        />
       </div>
     </div>
   )
 }
 
-function FooterMetadata(props: { className?: string; footer: NormalizedSiteFooter }) {
+function FooterMetadata(
+  props: FooterRenderContext & { className?: string; footer: NormalizedSiteFooter },
+) {
   const { compliance } = props.footer
   const hasMetadata =
-    compliance.filings.length > 0 || Boolean(compliance.copyright) || Boolean(compliance.note)
+    compliance.filings.length > 0 ||
+    Boolean(compliance.copyright) ||
+    Boolean(compliance.note) ||
+    Boolean(props.locale)
 
   if (!hasMetadata) {
     return null
@@ -481,6 +573,8 @@ function FooterMetadata(props: { className?: string; footer: NormalizedSiteFoote
           {compliance.note ? <p>{compliance.note}</p> : null}
         </div>
       ) : null}
+
+      <FooterLocaleNav labels={props.labels} locale={props.locale} />
     </div>
   )
 }
@@ -488,9 +582,16 @@ function FooterMetadata(props: { className?: string; footer: NormalizedSiteFoote
 export function SiteFooterLayout(props: {
   className?: string
   footer: NormalizedSiteFooter
+  labels?: SiteFooterLabels
   layoutStyle?: SiteFooterLayoutStyle
+  locale?: AppLocale
 }) {
   const layoutStyle = resolveSiteFooterLayoutStyle(props.layoutStyle ?? props.footer.layoutStyle)
+  const labels = props.labels ?? getSiteFooterLabels(props.locale)
+  const renderContext: FooterRenderContext = {
+    labels,
+    locale: props.locale,
+  }
 
   return (
     <footer
@@ -498,10 +599,16 @@ export function SiteFooterLayout(props: {
       data-footer-layout={layoutStyle}
       data-site-footer=""
     >
-      {layoutStyle === 'directory' ? <DirectoryFooter footer={props.footer} /> : null}
-      {layoutStyle === 'ledger' ? <LedgerFooter footer={props.footer} /> : null}
-      {layoutStyle === 'balanced' ? <BalancedFooter footer={props.footer} /> : null}
-      {layoutStyle === 'compact' ? <CompactFooter footer={props.footer} /> : null}
+      {layoutStyle === 'directory' ? (
+        <DirectoryFooter footer={props.footer} {...renderContext} />
+      ) : null}
+      {layoutStyle === 'ledger' ? <LedgerFooter footer={props.footer} {...renderContext} /> : null}
+      {layoutStyle === 'balanced' ? (
+        <BalancedFooter footer={props.footer} {...renderContext} />
+      ) : null}
+      {layoutStyle === 'compact' ? (
+        <CompactFooter footer={props.footer} {...renderContext} />
+      ) : null}
     </footer>
   )
 }
@@ -513,5 +620,11 @@ export function SiteFooter(props: { locale: AppLocale; settings: SiteSettings })
     return null
   }
 
-  return <SiteFooterLayout footer={footer} />
+  return (
+    <SiteFooterLayout
+      footer={footer}
+      labels={getSiteFooterLabels(props.locale)}
+      locale={props.locale}
+    />
+  )
 }

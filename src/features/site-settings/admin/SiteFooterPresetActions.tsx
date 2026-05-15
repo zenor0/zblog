@@ -6,10 +6,15 @@ import { Button, toast, useField, useLocale } from '@payloadcms/ui'
 
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 
-import { getStarterSiteFooterPreset, mergeStarterGlobalVariables } from '@/features/site-settings/model/site-footer-preset'
+import { getSiteFooterLabels } from '@/features/site-settings/model/site-footer'
+import {
+  getStarterSiteFooterPreset,
+  mergeStarterGlobalVariables,
+} from '@/features/site-settings/model/site-footer-preset'
 
 export const SiteFooterPresetActions: UIFieldClientComponent = () => {
   const locale = useLocale()
+  const labels = getSiteFooterLabels(locale?.code)
   const footer = useField<SiteSettings['footer']>({ path: 'footer' })
   const globalVariables = useField<SiteSettings['globalVariables']>({ path: 'globalVariables' })
 
@@ -20,7 +25,7 @@ export const SiteFooterPresetActions: UIFieldClientComponent = () => {
     globalVariables.setValue(
       mergeStarterGlobalVariables(globalVariables.value, preset.globalVariables),
     )
-    toast.success('Starter footer applied.')
+    toast.success(labels.starterFooterApplied)
   }
 
   return (
@@ -33,7 +38,7 @@ export const SiteFooterPresetActions: UIFieldClientComponent = () => {
         onClick={applyStarterFooter}
         size="small"
       >
-        Apply starter footer
+        {labels.applyStarterFooter}
       </Button>
     </div>
   )

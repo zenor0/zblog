@@ -70,6 +70,28 @@ describe('SiteFooterPreviewFrame', () => {
     expect(screen.getByText(`Copyright ${new Date().getFullYear()} ZBlog.`)).toBeTruthy()
   })
 
+  it('localizes empty preview frame states from the active locale', async () => {
+    render(<SiteFooterPreviewFrame initialLocale="zh-Hans" />)
+
+    expect(screen.getByText('等待页脚数据。')).toBeTruthy()
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: {
+          locale: 'zh-Hans',
+          settings: {
+            footer: null,
+            siteName: 'ZBlog',
+          },
+          type: siteFooterPreviewMessageType,
+        },
+        origin: window.location.origin,
+      }),
+    )
+
+    expect(await screen.findByText('还没有可用的页脚内容。')).toBeTruthy()
+  })
+
   it('hydrates a media ID logo before rendering the production footer image', async () => {
     const fetchMedia = vi.fn().mockResolvedValue({
       json: async () => ({

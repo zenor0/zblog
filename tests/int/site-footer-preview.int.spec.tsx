@@ -1,12 +1,13 @@
 import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 let mockedFormFields: Record<string, any>
+let mockedLocale = 'en'
 
 vi.mock('@payloadcms/ui', () => ({
   useFormFields: (selector: any) => selector([mockedFormFields]),
-  useLocale: () => ({ code: 'en' }),
+  useLocale: () => ({ code: mockedLocale }),
 }))
 
 import { SiteFooterPreview } from '@/features/site-settings/admin/SiteFooterPreview'
@@ -34,6 +35,10 @@ function installIframePostMessage() {
 }
 
 describe('SiteFooterPreview', () => {
+  beforeEach(() => {
+    mockedLocale = 'en'
+  })
+
   it('renders a production iframe and posts current site settings values to it', () => {
     mockedFormFields = {
       footer: {
@@ -228,5 +233,26 @@ describe('SiteFooterPreview', () => {
       }),
       window.location.origin,
     )
+  })
+
+  it('localizes preview chrome for the active admin locale', () => {
+    mockedLocale = 'zh-Hans'
+    mockedFormFields = {
+      footer: {
+        value: null,
+      },
+      siteName: {
+        value: 'ZBlog',
+      },
+    }
+
+    render(<SiteFooterPreview field={{ name: 'footerPreview', type: 'ui' } as any} path="footer" />)
+
+    const iframe = screen.getByTestId('site-footer-preview-iframe')
+
+    expect(screen.getByText('页脚预览')).toBeTruthy()
+    expect(screen.getByText('生产 iframe')).toBeTruthy()
+    expect(iframe.getAttribute('title')).toBe('生产页脚预览')
+    expect(iframe.getAttribute('src')).toBe('/preview/site-footer?locale=zh-Hans')
   })
 })

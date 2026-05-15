@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { SiteFooterLayout } from '@/features/site-settings/ui/SiteFooter'
-import { normalizeSiteFooter } from '@/features/site-settings/model/site-footer'
+import {
+  getSiteFooterLabels,
+  normalizeSiteFooter,
+} from '@/features/site-settings/model/site-footer'
 import type { AppLocale } from '@/shared/i18n/locales'
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 import {
@@ -97,6 +100,7 @@ export function SiteFooterPreviewFrame(props: { initialLocale: AppLocale }) {
     settings: SiteSettings
   }>(null)
   const mediaCacheRef = useRef(new Map<string, Promise<null | PreviewMedia>>())
+  const labels = useMemo(() => getSiteFooterLabels(locale), [locale])
   const resolvedSettings = useMemo(
     () => (settings ? resolveSiteSettingReferences(settings) : null),
     [settings],
@@ -213,10 +217,10 @@ export function SiteFooterPreviewFrame(props: { initialLocale: AppLocale }) {
   return (
     <div className="min-h-56 bg-background text-foreground" data-testid="site-footer-preview-frame">
       {footer ? (
-        <SiteFooterLayout className="mt-0" footer={footer} />
+        <SiteFooterLayout className="mt-0" footer={footer} labels={labels} locale={locale} />
       ) : (
         <div className="page-frame flex min-h-56 items-center justify-center py-10 text-sm text-muted-foreground">
-          {settings ? 'No usable footer content yet.' : 'Waiting for footer data.'}
+          {settings ? labels.previewNoContent : labels.previewWaiting}
         </div>
       )}
     </div>
