@@ -77,7 +77,7 @@ async function readWorkspaceFiles(rootDir: string, currentDir = rootDir): Promis
 describe('API', () => {
   beforeAll(async () => {
     process.env.DATABASE_URL = `file:${testDatabasePath}`
-    process.env.PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || 'test-payload-secret'
+    process.env.PAYLOAD_SECRET ??= 'test-payload-secret'
 
     await fs.mkdir(runtimeStateDir, {
       recursive: true,

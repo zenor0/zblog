@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 import { getSiteFooterLabels } from '@/features/site-settings/model/site-footer'
+import { defaultSiteName } from '@/shared/site/defaults'
 import {
   buildSiteFooterPreviewURL,
   isSiteFooterPreviewReadyMessage,
@@ -322,7 +323,7 @@ function readFooterData(fields: SiteFooterPreviewFormState | undefined) {
 }
 
 function readSiteSettings(fields: SiteFooterPreviewFormState | undefined): SiteSettings {
-  const siteName = getStringValue(fields?.siteName?.value) ?? 'ZBlog'
+  const siteName = getStringValue(fields?.siteName?.value) ?? defaultSiteName
   const siteDescription = getStringValue(fields?.siteDescription?.value)
   const globalVariables = readObjectWithNestedFields(
     fields,

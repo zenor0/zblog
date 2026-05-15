@@ -1,6 +1,7 @@
 import type { CollectionBeforeLoginHook } from 'payload'
 
 import type { User } from '@/payload-types'
+import { adminRole, editorRole } from '@/shared/auth/access'
 
 export const ensureUserRolesBeforeLogin: CollectionBeforeLoginHook<User> = async ({
   req,
@@ -13,9 +14,10 @@ export const ensureUserRolesBeforeLogin: CollectionBeforeLoginHook<User> = async
   const usersCount = await req.payload.count({
     collection: 'users',
     overrideAccess: true,
+    req,
   })
 
-  const roles: User['roles'] = usersCount.totalDocs <= 1 ? ['admin'] : ['editor']
+  const roles: User['roles'] = usersCount.totalDocs <= 1 ? [adminRole] : [editorRole]
 
   await req.payload.update({
     collection: 'users',

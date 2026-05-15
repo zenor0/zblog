@@ -16,17 +16,14 @@ describe('site footer starter preset', () => {
     expect(preset.footer?.navigationSections?.[0]?.links?.map((link) => link.label)).toEqual([
       'Posts',
       'Archive',
-      'RSS',
     ])
-    expect(preset.footer?.socialLinks?.map((link) => link.platform)).toEqual(['github', 'rss'])
-    expect(preset.footer?.contactItems?.[0]?.value).toBe('{{contact.email.value}}')
+    expect(preset.footer?.socialLinks).toEqual([])
+    expect(preset.footer?.contactItems).toEqual([])
     expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual(['Privacy'])
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
     )
-    expect(preset.footer?.bottomBar?.note).toBe('Powered by Payload CMS and Next.js.')
-    expect(preset.globalVariables?.owner?.name).toBe('Your Name')
-    expect(preset.globalVariables?.socialLinks?.[0]?.url).toBe('https://github.com/your-id')
+    expect(JSON.stringify(preset)).not.toMatch(/your-id|hello@example\.com|example\.com/)
   })
 
   it('localizes starter labels for the active admin locale', () => {
@@ -38,8 +35,6 @@ describe('site footer starter preset', () => {
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
     )
-    expect(preset.footer?.bottomBar?.note).toBe('由 Payload CMS 和 Next.js 驱动。')
-    expect(preset.globalVariables?.owner?.name).toBe('你的名字')
     expect(preset.globalVariables?.customVariables?.[0]?.value).toBe(
       '持续记录技术、产品与日常工作。',
     )
@@ -71,11 +66,11 @@ describe('site footer starter preset', () => {
       preset.globalVariables,
     )
 
-    expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.label).toBe('@your-id')
+    expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.label).toBeUndefined()
     expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.url).toBe(
       'https://github.com/real',
     )
-    expect(merged?.contactItems?.find((item) => item.key === 'email')?.label).toBe('Email')
+    expect(merged?.contactItems?.find((item) => item.key === 'email')?.label).toBeUndefined()
     expect(merged?.contactItems?.find((item) => item.key === 'email')?.url).toBe(
       'mailto:real@example.com',
     )
@@ -108,13 +103,11 @@ describe('site footer starter preset', () => {
 
     expect(merged?.owner?.name).toBe('Existing Owner')
     expect(merged?.owner?.email).toBe('real@example.com')
-    expect(merged?.owner?.handle).toBe('@your-id')
+    expect(merged?.owner?.handle).toBeUndefined()
     expect(merged?.socialLinks?.find((link) => link.platform === 'github')?.url).toBe(
       'https://github.com/real',
     )
-    expect(merged?.socialLinks?.find((link) => link.platform === 'rss')?.url).toBe('/rss.xml')
-    expect(merged?.contactItems?.find((item) => item.key === 'email')?.value).toBe(
-      'hello@example.com',
-    )
+    expect(merged?.socialLinks?.find((link) => link.platform === 'rss')).toBeUndefined()
+    expect(merged?.contactItems?.find((item) => item.key === 'email')).toBeUndefined()
   })
 })

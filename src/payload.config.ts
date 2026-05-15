@@ -14,6 +14,7 @@ import { FrontendVariants } from './globals/FrontendVariants'
 import { SiteSettings } from './globals/SiteSettings'
 import { defaultLocale, payloadLocales } from './shared/i18n/locales'
 import { ensureRuntimeDirectories } from './shared/runtime/directories'
+import { getPayloadSecret } from './shared/runtime/env'
 import { defaultDatabaseURL } from './shared/runtime/paths'
 
 const filename = fileURLToPath(import.meta.url)
@@ -36,7 +37,7 @@ export default buildConfig({
     fallback: true,
     locales: payloadLocales,
   },
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: getPayloadSecret(),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

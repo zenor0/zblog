@@ -26,18 +26,21 @@ describe('seed site settings', () => {
     expect(en.siteDescription).toBe('A bilingual blog about tech, products, and everyday work.')
     expect(en.homeHero?.title).toBe('Notes on tech, products, and everyday work')
     expect(en.seo?.homeTitle).toBe('ZBlog | Notes on tech, products, and everyday work')
-    expect(en.footer?.bottomBar?.note).toBe('Powered by Payload CMS and Next.js.')
-    expect(en.globalVariables?.owner?.name).toBe('Your Name')
+    expect(en.footer?.bottomBar?.note).toBeNull()
+    expect(en.globalVariables?.owner?.name).toBeUndefined()
+    expect(en.globalVariables?.socialLinks).toEqual([])
+    expect(en.globalVariables?.contactItems).toEqual([])
     expect(en.globalVariables?.customVariables?.[0]?.value).toBe(
       'Notes about technology, products, and everyday work.',
     )
+    expect(JSON.stringify(en)).not.toMatch(/your-id|hello@example\.com|example\.com/)
 
     expect(zh.siteName).toBe('ZBlog')
     expect(zh.siteDescription).toBe('一个持续记录技术、产品与日常工作的双语博客。')
     expect(zh.homeHero?.title).toBe('记录技术、产品与日常思考')
     expect(zh.seo?.homeTitle).toBe('ZBlog | 记录技术、产品与日常思考')
-    expect(zh.footer?.bottomBar?.note).toBe('由 Payload CMS 和 Next.js 驱动。')
-    expect(zh.globalVariables?.owner?.name).toBe('你的名字')
+    expect(zh.footer?.bottomBar?.note).toBeNull()
+    expect(zh.globalVariables?.owner?.name).toBeUndefined()
     expect(zh.globalVariables?.customVariables?.[0]?.value).toBe(
       '持续记录技术、产品与日常工作。',
     )
@@ -79,7 +82,7 @@ describe('seed site settings', () => {
     expect(data.footer?.bottomBar?.note).toBe('Existing footer note.')
     expect(data.globalVariables?.owner?.name).toBe('Existing Owner')
     expect(data.globalVariables?.owner?.email).toBe('real@example.com')
-    expect(data.globalVariables?.socialLinks?.[0]?.label).toBe('@your-id')
+    expect(data.globalVariables?.socialLinks?.[0]?.label).toBeUndefined()
     expect(data.globalVariables?.socialLinks?.[0]?.url).toBe('https://github.com/real')
   })
 
@@ -113,6 +116,7 @@ describe('seed site settings', () => {
     )?.[0] as any
 
     expect(enUpdate?.data.homeHero.title).toBe('Notes on tech, products, and everyday work')
-    expect(enUpdate?.data.footer.bottomBar.note).toBe('Powered by Payload CMS and Next.js.')
+    expect(enUpdate?.data.footer.bottomBar.note).toBeNull()
+    expect(enUpdate?.data.globalVariables.socialLinks).toEqual([])
   })
 })

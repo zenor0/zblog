@@ -696,7 +696,7 @@ export interface SiteSetting {
     owner?: {
       name?: string | null;
       /**
-       * Public handle, such as @your-id.
+       * Public handle or account name.
        */
       handle?: string | null;
       email?: string | null;
@@ -915,13 +915,13 @@ export interface SiteSetting {
         }[]
       | null;
     /**
-     * Middle profile layer. Platform controls the icon; label should be the visible account or handle, such as @your-github-id.
+     * Middle profile layer. Platform controls the icon; label should be the visible account or handle.
      */
     socialLinks?:
       | {
           platform: 'github' | 'x' | 'linkedin' | 'youtube' | 'instagram' | 'discord' | 'rss' | 'email' | 'other';
           /**
-           * Visible account label or handle. Use values like @your-github-id instead of repeating the platform name.
+           * Visible account label or handle instead of repeating the platform name.
            */
           label: string;
           url: string;

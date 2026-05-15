@@ -1,10 +1,10 @@
-# Payload Blank Template
+# ZBlog
 
-This template comes configured with the bare minimum to get started on anything you need.
+ZBlog is a Payload-backed bilingual blog built with Next.js.
 
 ## Quick start
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+This project is configured for local SQLite-backed development by default, with runtime state stored under `.data/`.
 
 ## Quick Start - local setup
 
@@ -42,7 +42,7 @@ To do so, follow these steps:
 
 ## How it works
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+The Payload config is tailored for a bilingual editorial blog. It is pre-configured in the following ways:
 
 ### Collections
 

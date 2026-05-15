@@ -7,8 +7,9 @@ import {
   supportedLocales,
   type AppLocale,
 } from '@/shared/i18n/locales'
+import { getCanonicalSiteURLInput } from '@/shared/runtime/env'
+import { defaultSiteName } from '@/shared/site/defaults'
 
-const fallbackSiteURL = 'http://localhost:3000'
 const defaultDescriptionLength = 160
 const openGraphLocales: Record<AppLocale, string> = {
   en: 'en_US',
@@ -98,8 +99,7 @@ function buildOpenGraphImageObject(image: ResolvedMetadataImage) {
 }
 
 export function getSiteURL(): URL {
-  const siteURL =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.SITE_URL?.trim() || fallbackSiteURL
+  const siteURL = getCanonicalSiteURLInput()
 
   return new URL(siteURL.endsWith('/') ? siteURL : `${siteURL}/`)
 }
@@ -134,8 +134,11 @@ export function buildLocaleAlternates(args: {
   }
 }
 
-export function buildPageTitle(args: { pageTitle?: null | string; siteName: string }) {
-  const siteName = normalizeText(args.siteName) ?? 'ZBlog'
+export function buildPageTitle(args: {
+  pageTitle?: null | string
+  siteName: string
+}) {
+  const siteName = normalizeText(args.siteName) ?? defaultSiteName
   const pageTitle = normalizeText(args.pageTitle)
 
   if (!pageTitle || pageTitle === siteName) {
@@ -183,7 +186,7 @@ export function buildDefaultSocialImageURL(args: {
     }),
   })
   const description = normalizeText(args.description)
-  const eyebrow = normalizeText(args.eyebrow) ?? `${getLocaleLabel(args.locale)} · ZBlog`
+  const eyebrow = normalizeText(args.eyebrow) ?? `${getLocaleLabel(args.locale)} · ${defaultSiteName}`
 
   searchParams.set('eyebrow', eyebrow)
 

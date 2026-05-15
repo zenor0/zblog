@@ -19,6 +19,8 @@ import {
   defaultSiteFooterLayoutStyle,
   siteFooterLayoutStyleOptions,
 } from '@/features/site-settings/model/site-footer-layout'
+import { anyone, editorOnly } from '@/shared/auth/access'
+import { defaultSiteName } from '@/shared/site/defaults'
 import {
   defaultFrontendAccentColor,
   validateFrontendAccentColor,
@@ -267,7 +269,7 @@ const globalVariableFields: Field[] = [
         name: 'handle',
         type: 'text',
         admin: {
-          description: 'Public handle, such as @your-id.',
+          description: 'Public handle or account name.',
         },
         label: 'Handle',
       },
@@ -569,7 +571,7 @@ const footerFields: Field[] = [
     type: 'array',
     admin: {
       description:
-        'Middle profile layer. Platform controls the icon; label should be the visible account or handle, such as @your-github-id.',
+        'Middle profile layer. Platform controls the icon; label should be the visible account or handle.',
     },
     label: 'Social links',
     labels: {
@@ -591,8 +593,7 @@ const footerFields: Field[] = [
         name: 'label',
         type: 'text',
         admin: {
-          description:
-            'Visible account label or handle. Use values like @your-github-id instead of repeating the platform name.',
+          description: 'Visible account label or handle instead of repeating the platform name.',
         },
         label: 'Label',
         localized: true,
@@ -914,6 +915,10 @@ const articleLayoutFields: Field[] = [
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site settings',
+  access: {
+    read: anyone,
+    update: editorOnly,
+  },
   admin: {
     description:
       'Configure the homepage hero copy and the structured footer content shown on the frontend.',
@@ -952,7 +957,7 @@ export const SiteSettings: GlobalConfig = {
               {
                 name: 'siteName',
                 type: 'text',
-                defaultValue: 'ZBlog',
+                defaultValue: defaultSiteName,
                 label: 'Site name',
                 localized: true,
                 required: true,

@@ -207,6 +207,38 @@ describe('post view tracking', () => {
     )
   })
 
+  it('uses the configured Payload secret when no explicit dedupe secret is provided', () => {
+    const previousSecret = process.env.PAYLOAD_SECRET
+
+    process.env.PAYLOAD_SECRET = 'first-runtime-secret'
+    const first = buildPostViewDedupeKey({
+      clientAddress: '203.0.113.10',
+      locale: 'en',
+      now: new Date('2026-05-09T00:10:00.000Z'),
+      postId: 10,
+      userAgent: 'Test browser',
+      windowMs: 60 * 60 * 1000,
+    })
+
+    process.env.PAYLOAD_SECRET = 'second-runtime-secret'
+    const second = buildPostViewDedupeKey({
+      clientAddress: '203.0.113.10',
+      locale: 'en',
+      now: new Date('2026-05-09T00:10:00.000Z'),
+      postId: 10,
+      userAgent: 'Test browser',
+      windowMs: 60 * 60 * 1000,
+    })
+
+    if (previousSecret === undefined) {
+      delete process.env.PAYLOAD_SECRET
+    } else {
+      process.env.PAYLOAD_SECRET = previousSecret
+    }
+
+    expect(first).not.toBe(second)
+  })
+
   it('records raw hits while deduping public views within the same window', async () => {
     const { metrics, payload } = createMemoryPayload()
     const headers = new Headers({
