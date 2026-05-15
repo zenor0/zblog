@@ -18,9 +18,11 @@ const starterCopy = {
   en: {
     about: 'About',
     archive: 'Archive',
+    bottomBarNote: 'Powered by Payload CMS and Next.js.',
     contactEmailLabel: 'Email',
     copyright: 'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
     githubLabel: '@your-id',
+    ownerName: 'Your Name',
     posts: 'Posts',
     privacy: 'Privacy',
     projects: 'Projects',
@@ -31,9 +33,11 @@ const starterCopy = {
   'zh-Hans': {
     about: '关于',
     archive: '归档',
+    bottomBarNote: '由 Payload CMS 和 Next.js 驱动。',
     contactEmailLabel: '邮箱',
-    copyright: 'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
+    copyright: 'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
     githubLabel: '@your-id',
+    ownerName: '你的名字',
     posts: '文章',
     privacy: '隐私政策',
     projects: '项目',
@@ -103,6 +107,19 @@ function mergeObjectVariables(
   }
 }
 
+function mergeRecordByUsefulValues<T extends Record<string, unknown>>(existing: T, starter: T): T {
+  return {
+    ...starter,
+    ...Object.fromEntries(
+      Object.entries(existing).map(([key, existingValue]) => {
+        const starterValue = starter[key]
+
+        return [key, hasUsefulValue(existingValue) ? existingValue : starterValue]
+      }),
+    ),
+  } as T
+}
+
 function mergeArrayByKey<T extends Record<string, unknown>>(
   existing: null | T[] | undefined,
   starter: null | T[] | undefined,
@@ -110,10 +127,20 @@ function mergeArrayByKey<T extends Record<string, unknown>>(
 ) {
   const existingItems = Array.isArray(existing) ? existing : []
   const starterItems = Array.isArray(starter) ? starter : []
-  const existingKeys = new Set(existingItems.map(getKey).filter(Boolean))
-  const missingStarterItems = starterItems.filter((item) => !existingKeys.has(getKey(item)))
+  const existingByKey = new Map(
+    existingItems
+      .map((item) => [getKey(item), item] as const)
+      .filter(([key]) => Boolean(key)),
+  )
+  const starterKeys = new Set(starterItems.map(getKey).filter(Boolean))
+  const mergedStarterItems = starterItems.map((starterItem) => {
+    const existingItem = existingByKey.get(getKey(starterItem))
 
-  return [...existingItems, ...missingStarterItems]
+    return existingItem ? mergeRecordByUsefulValues(existingItem, starterItem) : starterItem
+  })
+  const extraExistingItems = existingItems.filter((item) => !starterKeys.has(getKey(item)))
+
+  return [...mergedStarterItems, ...extraExistingItems]
 }
 
 export function getStarterSiteFooterPreset(
@@ -226,12 +253,12 @@ export function getStarterSiteFooterPreset(
         filings: [],
       },
       bottomBar: {
-        note: 'Powered by Payload CMS and Next.js.',
+        note: copy.bottomBarNote,
       },
     },
     globalVariables: {
       owner: {
-        name: 'Your Name',
+        name: copy.ownerName,
         handle: '@your-id',
         email: 'hello@example.com',
         websiteUrl: 'https://example.com',

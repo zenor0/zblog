@@ -45,15 +45,19 @@ Localized content includes:
 - post `title`, `excerpt`, `content`
 - post translation metadata fields
 - post SEO fields
-- site settings descriptions and homepage hero copy
-- footer display copy
+- site settings `siteName`, descriptions, owner display name/bio, homepage hero copy, and homepage SEO copy
+- footer display copy, including starter preset labels, copyright text, and bottom notes
 
 Non-localized content includes:
 
 - post bibliography source
 - post slug
+- post tags and attachment labels/descriptions
 - media relationships unless a field explicitly opts into localization
 - footer external URLs and internal path definitions
+
+Seed data writes complete `zh-Hans` and `en` values for site settings and normal seeded posts.
+`seed-fallback-demo` intentionally remains `zh-Hans`-only so fallback behavior stays testable.
 
 ## Fallback Behavior
 

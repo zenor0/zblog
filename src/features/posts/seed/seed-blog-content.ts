@@ -1,3 +1,5 @@
+import type { AppLocale } from '@/shared/i18n/locales'
+
 const tsxShowcaseSnippet = [
   '```tsx',
   "export function NoticeCard({ title }: { title: string }) {",
@@ -15,8 +17,119 @@ export const seedCitationDemoSlug = 'seed-citation-demo'
 export const seedFallbackDemoSlug = 'seed-fallback-demo'
 export const seedMarkdownShowcaseSlug = 'seed-markdown-showcase'
 
-export const seedMarkdownShowcaseZhTitle = 'Markdown 能力展示文章'
-export const seedMarkdownShowcaseEnTitle = 'Markdown Feature Showcase'
+type SeedPostLocaleCopy = {
+  excerpt: string
+  title: string
+}
+
+export const seedCitationDemoCopy = {
+  en: {
+    excerpt: 'Machine-translated seeded content for locale switching.',
+    title: 'Seed Post with Citations and Version History',
+  },
+  'zh-Hans': {
+    excerpt: '覆盖 Markdown、引用、翻译和版本历史的 seed 示例文章。',
+    title: '带引用与版本历史的示例文章',
+  },
+} as const satisfies Record<AppLocale, SeedPostLocaleCopy>
+
+export const seedCitationDemoRevisionCopy = {
+  'zh-Hans': {
+    excerpt: '第二版内容，额外增加一段文字用于验证 diff。',
+    title: '带引用与版本历史的示例文章（修订）',
+  },
+} as const satisfies Partial<Record<AppLocale, SeedPostLocaleCopy>>
+
+export const seedFallbackDemoCopy = {
+  'zh-Hans': {
+    excerpt: '用于验证语言回退行为的中文-only seed 示例文章。',
+    title: '语言回退示例文章',
+  },
+} as const satisfies Partial<Record<AppLocale, SeedPostLocaleCopy>>
+
+export const seedMarkdownShowcaseCopy = {
+  en: {
+    excerpt: 'Seeded showcase article for the frontend Markdown feature set.',
+    title: 'Markdown Feature Showcase',
+  },
+  'zh-Hans': {
+    excerpt: '端到端覆盖当前 Markdown 渲染能力的 seed 示例文章。',
+    title: 'Markdown 能力展示文章',
+  },
+} as const satisfies Record<AppLocale, SeedPostLocaleCopy>
+
+export const seedMarkdownShowcaseZhTitle = seedMarkdownShowcaseCopy['zh-Hans'].title
+export const seedMarkdownShowcaseEnTitle = seedMarkdownShowcaseCopy.en.title
+
+export function buildZhCitationDemoContent(heroURL: string) {
+  return `# 为什么博客需要显式引用
+
+一个长期维护的技术博客，最终会遇到同一类问题：信息来源是否清晰、翻译版本是否可信、以及历史修改是否能被追踪。这里我们用 [@smith2024] 和 [@chen2023] 作为最小示例。
+
+> 如果文章包含研究结论或者实践数据，引用本身就是内容的一部分，而不是附录。
+
+:::note
+这个 seed post 同时覆盖了 Markdown、BibTeX、附件、图片和版本历史。
+:::
+
+![Seed hero](${heroURL})
+
+## 一个极简但够用的结构
+
+- 正文仍然用 Markdown 编写，便于 diff。
+- 引用键直接写在内容里，例如 [@smith2024]。
+- BibTeX 文本跟随文章一起存储，由系统负责校验。
+- 附件放在侧边栏区域，而不是塞进正文里。
+
+## 版本记录为什么重要
+
+发布之后再改动内容时，应该能清楚看到标题、摘要和正文到底改了什么，而不是只看到“更新于某日”。
+`
+}
+
+export function buildZhCitationDemoContentV2(heroURL: string) {
+  return `${buildZhCitationDemoContent(heroURL)}
+
+## 第二次修订
+
+这一版额外补充了一个段落，用来生成可读的版本 diff，并验证历史页面确实能看到新增内容。
+`
+}
+
+export function buildEnCitationDemoContent(heroURL: string) {
+  return `# Why a blog should keep explicit citations
+
+A long-lived technical blog eventually faces the same questions: where the claims come from, whether translated pages can be trusted, and how revisions can be inspected over time. This seeded article references [@smith2024] and [@chen2023].
+
+> For research-heavy writing, citations are part of the reading experience rather than an appendix.
+
+:::note
+This seeded entry covers Markdown rendering, BibTeX references, attachments, images, and version history.
+:::
+
+![Seed hero](${heroURL})
+
+## A deliberately small structure
+
+- Keep the main body in Markdown for readable diffs.
+- Insert citation keys inline, such as [@smith2024].
+- Store one BibTeX source directly on the post and validate against it.
+- Keep downloadable assets in a dedicated attachments section.
+`
+}
+
+export function buildZhFallbackDemoContent() {
+  return `# 只有中文的回退示例
+
+这篇文章只有中文版本，用来验证英文路由下是否会正确显示 fallback 提示。
+
+## 这篇文章覆盖什么
+
+- locale fallback
+- 极简正文阅读
+- 版本列表入口
+`
+}
 
 export function buildZhMarkdownShowcaseContent(figureURL: string) {
   return `# Markdown 能力展示

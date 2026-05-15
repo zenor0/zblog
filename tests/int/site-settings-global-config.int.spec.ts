@@ -23,7 +23,9 @@ describe('site settings global config schema', () => {
     const fields = collectFields(generalTab.fields)
     const globalVariables = fields.find((field: any) => field.name === 'globalVariables') as any
     const appearance = fields.find((field: any) => field.name === 'appearance') as any
+    const siteName = fields.find((field: any) => field.name === 'siteName') as any
 
+    expect(siteName.localized).toBe(true)
     expect(globalVariables.type).toBe('group')
     expect(globalVariables.fields.map((field: any) => field.name)).toEqual([
       'owner',
@@ -42,6 +44,8 @@ describe('site settings global config schema', () => {
       'websiteUrl',
       'avatar',
     ])
+    expect(owner.fields.find((field: any) => field.name === 'name').localized).toBe(true)
+    expect(owner.fields.find((field: any) => field.name === 'bio').localized).toBe(true)
 
     const customVariables = globalVariables.fields.find(
       (field: any) => field.name === 'customVariables',
