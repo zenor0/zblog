@@ -58,8 +58,28 @@
     "emptyExcerpt": "这篇文章暂时还没有摘要。",
     "heroDescription": "这里会持续发布文章、笔记和项目更新。",
     "heroTitle": "记录技术、产品与日常思考",
+    "navAbout": "关于",
+    "navLabel": "站点导航",
+    "navPosts": "文章",
+    "navProjects": "项目",
     "noPublishedPosts": "还没有已发布文章。可以先在 Payload Admin 中创建并发布一篇。",
     "postsHeading": "文章",
+    "projectsDescription": "精选项目、实验和持续工作的稳定入口。",
+    "projectsEmpty": "项目条目准备好后，会展示在这里。",
+    "projectsHeading": "项目",
     "publishedEntries": "已发布 {count, number} 篇"
+  },
+  "Project": {
+    "backToProjects": "返回项目",
+    "detailHeading": "项目记录",
+    "emptyDetails": "这个项目的详细记录会在整理完成后补充。",
+    "featuredLabel": "精选",
+    "linksHeading": "相关链接",
+    "statusActive": "进行中",
+    "statusArchived": "已归档",
+    "statusPaused": "暂停",
+    "statusShipped": "已发布",
+    "timelineLabel": "周期",
+    "updatedLabel": "更新于"
   }
 }

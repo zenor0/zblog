@@ -58,8 +58,28 @@
     "emptyExcerpt": "No excerpt provided yet.",
     "heroDescription": "A simple blog for articles, notes, and project updates.",
     "heroTitle": "Notes on tech, products, and everyday work",
+    "navAbout": "About",
+    "navLabel": "Site navigation",
+    "navPosts": "Posts",
+    "navProjects": "Projects",
     "noPublishedPosts": "No published posts yet. Create one in Payload admin and publish it.",
     "postsHeading": "Posts",
+    "projectsDescription": "Selected project notes, experiments, and ongoing work.",
+    "projectsEmpty": "Project entries will appear here when they are ready.",
+    "projectsHeading": "Projects",
     "publishedEntries": "{count, number} published entries"
+  },
+  "Project": {
+    "backToProjects": "Back to projects",
+    "detailHeading": "Project notes",
+    "emptyDetails": "More project notes will be added when they are ready.",
+    "featuredLabel": "Featured",
+    "linksHeading": "Links",
+    "statusActive": "Active",
+    "statusArchived": "Archived",
+    "statusPaused": "Paused",
+    "statusShipped": "Shipped",
+    "timelineLabel": "Timeline",
+    "updatedLabel": "Updated"
   }
 }

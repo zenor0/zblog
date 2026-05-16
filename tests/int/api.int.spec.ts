@@ -8,7 +8,12 @@ import type { User } from '@/payload-types'
 import { describe, it, beforeAll, expect } from 'vitest'
 
 import { importPostWorkspace } from '@/features/posts/import/use-case'
-import { mediaPreviewDir, mediaUploadDir, resolveRuntimePath, runtimeStateDir } from '@/shared/runtime/paths'
+import {
+  mediaPreviewDir,
+  mediaUploadDir,
+  resolveRuntimePath,
+  runtimeStateDir,
+} from '@/shared/runtime/paths'
 import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
 
 let payload: Payload
@@ -40,10 +45,15 @@ async function createTemporaryPDFFile() {
   }
 }
 
-async function readWorkspaceFiles(rootDir: string, currentDir = rootDir): Promise<Array<{
-  file: File
-  path: string
-}>> {
+async function readWorkspaceFiles(
+  rootDir: string,
+  currentDir = rootDir,
+): Promise<
+  Array<{
+    file: File
+    path: string
+  }>
+> {
   const entries = await fs.readdir(currentDir, {
     withFileTypes: true,
   })
@@ -107,8 +117,13 @@ describe('API', () => {
       collection: 'posts',
       overrideAccess: false,
     })
+    const projects = await payload.find({
+      collection: 'projects',
+      overrideAccess: false,
+    })
 
     expect(posts.docs).toEqual([])
+    expect(projects.docs).toEqual([])
     expect('bibliography-files' in payload.collections).toBe(false)
   })
 

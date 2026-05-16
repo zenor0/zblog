@@ -49,7 +49,7 @@ async function readContrastReports(page: Page, targets: ContrastTarget[]) {
         ? Number.parseFloat(match[1]) / 100
         : Number.parseFloat(match[1])
       const chroma = Number.parseFloat(match[2])
-      const hue = Number.parseFloat(match[3])
+      const hue = match[3].toLowerCase() === 'none' ? 0 : Number.parseFloat(match[3])
 
       if (Number.isNaN(lightness) || Number.isNaN(chroma) || Number.isNaN(hue)) {
         return null
@@ -207,7 +207,9 @@ test.describe('Frontend', () => {
     await expect(page).toHaveTitle(/ZBlog/)
     await expect(page.locator('[data-editorial-shell="true"]')).toBeVisible()
     await expect(page.locator('[data-home-hero]')).toBeVisible()
+    await expect(page.locator('[data-home-nav]')).toBeVisible()
     await expect(page.locator('[data-home-featured-post]')).toBeVisible()
+    await expect(page.locator('[data-home-projects]')).toBeVisible()
     await expect(page.locator('[data-home-post-list]')).toBeVisible()
     await expect(page.locator('[data-home-post-list] article').first()).toBeVisible()
 
@@ -220,6 +222,15 @@ test.describe('Frontend', () => {
     await expect(heading).toBeVisible()
     await expect(seededPost).toBeVisible()
     await expect(showcasePost).toBeVisible()
+    await expect(
+      page.locator('[data-home-nav]').getByRole('link', { name: /文章|Posts/ }),
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-home-nav]').getByRole('link', { name: /项目|Projects/ }),
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-home-nav]').getByRole('link', { name: /关于|About/ }),
+    ).toBeVisible()
 
     await page.getByRole('button', { name: /语言|Locales/ }).click()
     await expect(page.getByRole('menuitem', { name: '简体中文' })).toBeVisible()
@@ -250,6 +261,26 @@ test.describe('Frontend', () => {
       await expect(page.locator('[data-utility-page]')).toBeVisible()
       await expect(page.locator('h1').first()).toHaveText(heading)
     }
+  })
+
+  test('can browse project index and detail pages', async ({ page }) => {
+    await page.goto('/en/projects')
+
+    await expect(page.locator('[data-utility-page]')).toBeVisible()
+    await expect(page.locator('[data-projects-index]')).toBeVisible()
+
+    const projectLink = page
+      .locator('[data-projects-index]')
+      .getByRole('link', { name: 'ZBlog Project System' })
+      .first()
+
+    await expect(projectLink).toHaveAttribute('href', '/en/projects/zblog-project-system')
+
+    await page.goto('/en/projects/zblog-project-system')
+
+    await expect(page.locator('[data-project-detail]')).toBeVisible()
+    await expect(page.locator('[data-project-frontmatter]')).toBeVisible()
+    await expect(page.locator('[data-project-notes]')).toBeVisible()
   })
 
   test('can render a seeded article with references and history link', async ({ page }) => {
