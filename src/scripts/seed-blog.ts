@@ -6,8 +6,11 @@ import path from 'path'
 
 import type { Payload } from 'payload'
 
-import type { Media, Post, User } from '@/payload-types'
-import { assertSafeLocalStateReset, getLocalStateResetPlan } from '@/shared/runtime/local-state-reset'
+import type { Media, Post, Project, User } from '@/payload-types'
+import {
+  assertSafeLocalStateReset,
+  getLocalStateResetPlan,
+} from '@/shared/runtime/local-state-reset'
 import {
   buildEnCitationDemoContent,
   buildEnMarkdownShowcaseContent,
@@ -72,6 +75,41 @@ const bibliographyText = `@article{smith2024,
   pages = {88--96}
 }
 `
+
+const seedProjectSlugs = ['zblog-project-system', 'payload-publishing-workbench'] as const
+
+const seedProjectCopy = {
+  'payload-publishing-workbench': {
+    en: {
+      details:
+        'A publishing workbench that keeps editorial content, media ownership, citations, and preview states close to the Payload data model.\n\nThe project is intentionally small, but it exercises the same patterns used by production content teams: localized drafts, stable preview routes, and careful access control.',
+      summary:
+        'A Payload-backed publishing workflow for articles, media, citations, and localized previews.',
+      title: 'Payload Publishing Workbench',
+    },
+    'zh-Hans': {
+      details:
+        '这是一个基于 Payload 的发布工作台，把文章内容、媒体归属、引用文献和预览状态都放在清晰的数据模型附近。\n\n项目保持轻量，但覆盖了内容团队常见的关键链路：多语言草稿、稳定预览路由，以及严格的访问控制。',
+      summary: '围绕 Payload 构建的文章、媒体、引用和多语言预览发布流程。',
+      title: 'Payload 发布工作台',
+    },
+  },
+  'zblog-project-system': {
+    en: {
+      details:
+        'ZBlog collects the frontend, article rendering, footer configuration, and admin tools into a compact bilingual publishing system.\n\nThe current project surface highlights the site architecture without forcing long-form project updates into the article stream.',
+      summary:
+        'The bilingual blog system behind this site, including editorial UI and Payload-backed configuration.',
+      title: 'ZBlog Project System',
+    },
+    'zh-Hans': {
+      details:
+        'ZBlog 把前台体验、文章渲染、页脚配置和后台工具组织成一个紧凑的双语发布系统。\n\n当前项目入口用于展示站点架构和持续工作，不必把所有项目更新都放进文章流里。',
+      summary: '支撑本站的双语博客系统，包含编辑型前台体验和 Payload 配置能力。',
+      title: 'ZBlog 项目系统',
+    },
+  },
+} as const
 
 async function ensureSeedAssets() {
   await fs.mkdir(seedDir, {
@@ -159,6 +197,14 @@ async function deleteExistingSeedContent(payload: Payload) {
       where: {
         slug: {
           in: [seedCitationDemoSlug, seedFallbackDemoSlug, seedMarkdownShowcaseSlug],
+        },
+      },
+    }),
+    payload.delete({
+      collection: 'projects',
+      where: {
+        slug: {
+          in: [...seedProjectSlugs],
         },
       },
     }),
@@ -299,6 +345,76 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
   })
 }
 
+async function seedProjects(payload: Payload, files: Awaited<ReturnType<typeof createSeedFiles>>) {
+  const projectSystem = (await payload.create({
+    collection: 'projects',
+    data: {
+      _status: 'published',
+      coverImage: files.hero.id,
+      details: seedProjectCopy['zblog-project-system']['zh-Hans'].details,
+      featured: true,
+      links: [
+        {
+          label: 'Repository',
+          url: 'https://github.com/zenor0/zblog',
+        },
+      ],
+      slug: 'zblog-project-system',
+      sortOrder: 10,
+      status: 'active',
+      summary: seedProjectCopy['zblog-project-system']['zh-Hans'].summary,
+      tags: [{ value: 'payload' }, { value: 'nextjs' }, { value: 'zblog' }],
+      timeframe: '2026',
+      title: seedProjectCopy['zblog-project-system']['zh-Hans'].title,
+    },
+  })) as Project
+
+  await payload.update({
+    collection: 'projects',
+    data: {
+      details: seedProjectCopy['zblog-project-system'].en.details,
+      summary: seedProjectCopy['zblog-project-system'].en.summary,
+      title: seedProjectCopy['zblog-project-system'].en.title,
+    },
+    id: projectSystem.id,
+    locale: 'en',
+  })
+
+  const publishingWorkbench = (await payload.create({
+    collection: 'projects',
+    data: {
+      _status: 'published',
+      coverImage: files.hero.id,
+      details: seedProjectCopy['payload-publishing-workbench']['zh-Hans'].details,
+      featured: true,
+      links: [
+        {
+          label: 'Payload CMS',
+          url: 'https://payloadcms.com/',
+        },
+      ],
+      slug: 'payload-publishing-workbench',
+      sortOrder: 20,
+      status: 'shipped',
+      summary: seedProjectCopy['payload-publishing-workbench']['zh-Hans'].summary,
+      tags: [{ value: 'cms' }, { value: 'editorial' }],
+      timeframe: '2026',
+      title: seedProjectCopy['payload-publishing-workbench']['zh-Hans'].title,
+    },
+  })) as Project
+
+  await payload.update({
+    collection: 'projects',
+    data: {
+      details: seedProjectCopy['payload-publishing-workbench'].en.details,
+      summary: seedProjectCopy['payload-publishing-workbench'].en.summary,
+      title: seedProjectCopy['payload-publishing-workbench'].en.title,
+    },
+    id: publishingWorkbench.id,
+    locale: 'en',
+  })
+}
+
 async function logSummary(payload: Payload) {
   const posts = await payload.find({
     collection: 'posts',
@@ -310,6 +426,19 @@ async function logSummary(payload: Payload) {
     where: {
       slug: {
         in: [seedCitationDemoSlug, seedFallbackDemoSlug, seedMarkdownShowcaseSlug],
+      },
+    },
+  })
+  const projects = await payload.find({
+    collection: 'projects',
+    depth: 0,
+    limit: 20,
+    locale: 'zh-Hans',
+    overrideAccess: false,
+    sort: 'slug',
+    where: {
+      slug: {
+        in: [...seedProjectSlugs],
       },
     },
   })
@@ -334,6 +463,12 @@ async function logSummary(payload: Payload) {
           slug: post.slug,
           status: post._status,
           title: post.title,
+        })),
+        projects: projects.docs.map((project) => ({
+          id: project.id,
+          slug: project.slug,
+          status: project._status,
+          title: project.title,
         })),
         zhVersionCountForCitationPost: versions.totalDocs,
       },
@@ -376,6 +511,7 @@ async function main() {
     )
 
     await timed('seed posts', () => seedPosts(initializedPayload, files))
+    await timed('seed projects', () => seedProjects(initializedPayload, files))
     await timed('log summary', () => logSummary(initializedPayload))
   } finally {
     await timed('destroy payload', async () => {

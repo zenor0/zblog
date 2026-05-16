@@ -13,6 +13,19 @@ function HeaderControlSkeletons() {
   )
 }
 
+function HomeHeaderControlSkeletons() {
+  return (
+    <div className="flex flex-col items-end gap-3">
+      <HeaderControlSkeletons />
+      <div className="flex gap-1 border border-border p-1">
+        <Skeleton className="h-7 w-14 rounded-none" />
+        <Skeleton className="h-7 w-14 rounded-none" />
+        <Skeleton className="h-7 w-14 rounded-none" />
+      </div>
+    </div>
+  )
+}
+
 export function HomePageSkeleton() {
   return (
     <div
@@ -35,7 +48,7 @@ export function HomePageSkeleton() {
         </div>
 
         <div className="flex flex-col gap-5 lg:items-end">
-          <HeaderControlSkeletons />
+          <HomeHeaderControlSkeletons />
           <div className="flex flex-col items-end gap-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-4 w-32" />
@@ -63,6 +76,31 @@ export function HomePageSkeleton() {
         </div>
         <Skeleton className="aspect-[4/3] w-full rounded-none" />
       </article>
+
+      <section className="grid gap-7 border-b border-border py-10">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-7 w-32" />
+            <Skeleton className="h-4 w-72 max-w-full" />
+          </div>
+          <Skeleton className="h-4 w-20" />
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)]">
+          <div className="grid gap-4 border-l border-border pl-5">
+            <Skeleton className="h-3 w-40" />
+            <Skeleton className="h-8 w-full max-w-xl" />
+            <Skeleton className="h-4 w-full max-w-2xl" />
+            <Skeleton className="h-4 w-4/5 max-w-xl" />
+          </div>
+          <div className="grid gap-4">
+            <Skeleton className="aspect-[4/3] w-full rounded-none" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </div>
+      </section>
 
       <section className="flex flex-col gap-4 pt-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

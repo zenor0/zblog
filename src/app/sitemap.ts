@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 import { isPostIndexable } from '@/features/posts/server/queries'
+import { getProjectTimestamp, isProjectIndexable } from '@/features/projects/server/queries'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import {
   buildUtilityPagePath,
@@ -9,7 +10,7 @@ import {
 import { buildLocalePath, defaultLocale, localeCodes, type AppLocale } from '@/shared/i18n/locales'
 import { getPayloadClient } from '@/shared/payload/client'
 import { buildAbsoluteURL } from '@/shared/content/seo'
-import type { Post } from '@/payload-types'
+import type { Post, Project } from '@/payload-types'
 
 type SitemapEntry = MetadataRoute.Sitemap[number]
 
@@ -23,6 +24,19 @@ function isSitemapRenderablePost(post: null | Post): post is Post {
     typeof post.content === 'string' &&
     post.content.trim().length > 0 &&
     isPostIndexable(post),
+  )
+}
+
+function isSitemapRenderableProject(project: null | Project): project is Project {
+  return Boolean(
+    project &&
+    typeof project.slug === 'string' &&
+    project.slug.trim().length > 0 &&
+    typeof project.title === 'string' &&
+    project.title.trim().length > 0 &&
+    typeof project.summary === 'string' &&
+    project.summary.trim().length > 0 &&
+    isProjectIndexable(project),
   )
 }
 
@@ -52,9 +66,13 @@ function buildPostPath(slug: string) {
   return `/posts/${encodeURIComponent(slug.trim())}`
 }
 
+function buildProjectPath(slug: string) {
+  return `/projects/${encodeURIComponent(slug.trim())}`
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayloadClient()
-  const [localizedSiteSettings, localizedPostGroups] = await Promise.all([
+  const [localizedSiteSettings, localizedPostGroups, localizedProjectGroups] = await Promise.all([
     Promise.all(
       localeCodes.map(async (locale) => {
         const settings = await getResolvedSiteSettings(locale)
@@ -85,6 +103,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         return {
           locale,
           posts: result.docs.filter(isSitemapRenderablePost),
+        }
+      }),
+    ),
+    Promise.all(
+      localeCodes.map(async (locale) => {
+        const result = await payload.find({
+          collection: 'projects',
+          depth: 0,
+          fallbackLocale: false,
+          limit: 1000,
+          locale,
+          overrideAccess: false,
+          sort: 'sortOrder',
+          where: {
+            _status: {
+              equals: 'published',
+            },
+          },
+        })
+
+        return {
+          locale,
+          projects: result.docs.filter(isSitemapRenderableProject),
         }
       }),
     ),
@@ -126,6 +167,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       localesBySlug.set(slug, locales)
     })
   })
+  const projectLocalesBySlug = new Map<string, AppLocale[]>()
+
+  localizedProjectGroups.forEach(({ locale, projects }) => {
+    projects.forEach((project) => {
+      const slug = project.slug.trim()
+      const locales = projectLocalesBySlug.get(slug) ?? []
+
+      locales.push(locale)
+      projectLocalesBySlug.set(slug, locales)
+    })
+  })
   const localizedPostEntries = localizedPostGroups.flatMap(({ locale, posts }) =>
     posts.map((post) => {
       const slug = post.slug.trim()
@@ -143,6 +195,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }),
   )
+  const localizedProjectEntries = localizedProjectGroups.flatMap(({ locale, projects }) =>
+    projects.map((project) => {
+      const slug = project.slug.trim()
+      const pathname = buildProjectPath(slug)
 
-  return [...localizedHomeEntries, ...localizedUtilityPageEntries, ...localizedPostEntries]
+      return {
+        alternates: buildSitemapAlternates({
+          locales: projectLocalesBySlug.get(slug) ?? [locale],
+          pathname,
+        }),
+        changeFrequency: 'monthly' as const,
+        lastModified: getProjectTimestamp(project) ?? new Date().toISOString(),
+        priority: 0.6,
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+      }
+    }),
+  )
+
+  return [
+    ...localizedHomeEntries,
+    ...localizedUtilityPageEntries,
+    ...localizedPostEntries,
+    ...localizedProjectEntries,
+  ]
 }

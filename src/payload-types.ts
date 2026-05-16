@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    projects: Project;
     'post-view-metrics': PostViewMetric;
     'post-view-dedupe': PostViewDedupe;
     'payload-kv': PayloadKv;
@@ -87,6 +88,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
     'post-view-metrics': PostViewMetricsSelect<false> | PostViewMetricsSelect<true>;
     'post-view-dedupe': PostViewDedupeSelect<false> | PostViewDedupeSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -270,6 +272,67 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  summary: string;
+  /**
+   * Short project notes rendered on the project detail page. Keep this lighter than a full article.
+   */
+  details?: string | null;
+  coverImage?: (number | null) | Media;
+  status: 'active' | 'shipped' | 'paused' | 'archived';
+  /**
+   * Concise timeline label, for example "2026" or "2025 - ongoing".
+   */
+  timeframe?: string | null;
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first. Featured projects still sort before non-featured projects.
+   */
+  sortOrder?: number | null;
+  links?:
+    | {
+        label: string;
+        url: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * Optional SEO title override for the current locale. Leave blank to reuse the project title.
+     */
+    metaTitle?: string | null;
+    /**
+     * Optional SEO description override for the current locale. Leave blank to reuse the project summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * Optional social sharing image override. Leave blank to reuse the cover image, then the site default image.
+     */
+    metaImage?: (number | null) | Media;
+    /**
+     * Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published projects.
+     */
+    noindex?: boolean | null;
+  };
+  slug: string;
+  tags?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "post-view-metrics".
  */
 export interface PostViewMetric {
@@ -428,6 +491,10 @@ export interface PayloadLockedDocument {
         value: number | Post;
       } | null)
     | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
         relationTo: 'post-view-metrics';
         value: number | PostViewMetric;
       } | null)
@@ -555,6 +622,47 @@ export interface PostsSelect<T extends boolean = true> {
   translatedFromLocale?: T;
   translatedAt?: T;
   translationProvider?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        metaImage?: T;
+        noindex?: T;
+      };
+  slug?: T;
+  tags?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  details?: T;
+  coverImage?: T;
+  status?: T;
+  timeframe?: T;
+  featured?: T;
+  sortOrder?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        description?: T;
+        id?: T;
+      };
   seo?:
     | T
     | {
@@ -1247,10 +1355,15 @@ export interface TaskSchedulePublish {
   input: {
     type?: ('publish' | 'unpublish') | null;
     locale?: string | null;
-    doc?: {
-      relationTo: 'posts';
-      value: number | Post;
-    } | null;
+    doc?:
+      | ({
+          relationTo: 'posts';
+          value: number | Post;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: number | Project;
+        } | null);
     global?: string | null;
     user?: (number | null) | User;
   };

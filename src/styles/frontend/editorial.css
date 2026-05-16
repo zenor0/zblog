@@ -1,5 +1,4 @@
 @layer components {
-
   .page-frame {
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-12;
   }
@@ -44,8 +43,20 @@
     @apply border border-border bg-background;
   }
 
+  .home-nav-tabs {
+    @apply flex max-w-full flex-wrap items-center gap-1 border border-border bg-background p-1;
+  }
+
+  .home-nav-tabs__link {
+    @apply px-3 py-1.5 text-sm text-foreground/76 no-underline transition-colors hover:bg-muted/60 hover:text-foreground;
+  }
+
   [data-home-featured-post] .media-surface--card {
     @apply aspect-[4/5];
+  }
+
+  [data-home-projects] .media-surface--card {
+    @apply aspect-[4/3];
   }
 
   [data-editorial-shell='true'] [data-home-hero] {
