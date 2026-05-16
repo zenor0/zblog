@@ -2,9 +2,47 @@ import type { CSSProperties } from 'react'
 
 export type FrontendTheme = 'auto' | 'dark' | 'light'
 
+export type FrontendAccentColorPreset = {
+  label: string
+  preview: `#${string}`
+  value: string
+}
+
 export const themeStorageKey = 'zblog-frontend-theme'
 export const systemThemeQuery = '(prefers-color-scheme: dark)'
 export const defaultFrontendAccentColor = 'oklch(0.62 0.14 190)'
+export const frontendAccentColorPresets = [
+  {
+    label: 'Teal',
+    preview: '#14b8a6',
+    value: defaultFrontendAccentColor,
+  },
+  {
+    label: 'Cyan',
+    preview: '#0ea5e9',
+    value: 'oklch(0.64 0.14 220)',
+  },
+  {
+    label: 'Indigo',
+    preview: '#6366f1',
+    value: 'oklch(0.58 0.16 275)',
+  },
+  {
+    label: 'Rose',
+    preview: '#e11d48',
+    value: 'oklch(0.62 0.17 15)',
+  },
+  {
+    label: 'Amber',
+    preview: '#d97706',
+    value: 'oklch(0.72 0.15 75)',
+  },
+  {
+    label: 'Moss',
+    preview: '#16a34a',
+    value: 'oklch(0.6 0.12 145)',
+  },
+] as const satisfies readonly FrontendAccentColorPreset[]
 
 const cssNumber = String.raw`[-+]?(?:\d+|\d*\.\d+)`
 const cssPercentage = String.raw`${cssNumber}%`

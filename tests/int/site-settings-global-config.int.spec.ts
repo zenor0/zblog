@@ -73,6 +73,9 @@ describe('site settings global config schema', () => {
     expect(appearance.fields.map((field: any) => field.name)).toEqual(['accentColor'])
     expect(appearance.fields[0].defaultValue).toBe('oklch(0.62 0.14 190)')
     expect(typeof appearance.fields[0].validate).toBe('function')
+    expect(appearance.fields[0].admin.components.Field).toBe(
+      '/features/site-settings/admin/SiteAccentColorPicker#SiteAccentColorPicker',
+    )
   })
 
   it('exposes local Form/YAML switches without replacing preview layouts', () => {

@@ -4,6 +4,7 @@ import { PostTranslationManager as PostTranslationManager_e34e04e501ccd07329911b
 import { PostPackageImportAction as PostPackageImportAction_e9ae03abb7c03268e2670be8b9d8e39e } from '../../../features/posts/admin/PostPackageImportAction'
 import { PostLivePreviewView as PostLivePreviewView_fad8e676b26d6066e9d589d7a39a1674 } from '../../../features/posts/admin/PostLivePreviewView'
 import { SiteSettingsSectionModeSwitch as SiteSettingsSectionModeSwitch_418636acfe8cdf13636876bcb137dcec } from '../../../features/site-settings/admin/SiteSettingsSectionModeSwitch'
+import { SiteAccentColorPicker as SiteAccentColorPicker_58a1aba96d5c0d0553d23b129be0908e } from '../../../features/site-settings/admin/SiteAccentColorPicker'
 import { SiteSettingsRawSectionEditor as SiteSettingsRawSectionEditor_d60a3e7d29b093b58f278bf619d65c57 } from '../../../features/site-settings/admin/SiteSettingsRawSectionEditor'
 import { ArticleDesignRangeField as ArticleDesignRangeField_ab86120354cc54f9f9870e7ca85efae4 } from '../../../features/article/admin/ArticleDesignRangeField'
 import { ArticleLayoutPreview as ArticleLayoutPreview_7a120c9eaf1fd77e5cebec51d9f327a9 } from '../../../features/article/admin/ArticleLayoutPreview'
@@ -21,6 +22,7 @@ export const importMap = {
   "/features/posts/admin/PostPackageImportAction#PostPackageImportAction": PostPackageImportAction_e9ae03abb7c03268e2670be8b9d8e39e,
   "/features/posts/admin/PostLivePreviewView#PostLivePreviewView": PostLivePreviewView_fad8e676b26d6066e9d589d7a39a1674,
   "/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch": SiteSettingsSectionModeSwitch_418636acfe8cdf13636876bcb137dcec,
+  "/features/site-settings/admin/SiteAccentColorPicker#SiteAccentColorPicker": SiteAccentColorPicker_58a1aba96d5c0d0553d23b129be0908e,
   "/features/site-settings/admin/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor": SiteSettingsRawSectionEditor_d60a3e7d29b093b58f278bf619d65c57,
   "/features/article/admin/ArticleDesignRangeField#ArticleDesignRangeField": ArticleDesignRangeField_ab86120354cc54f9f9870e7ca85efae4,
   "/features/article/admin/ArticleLayoutPreview#ArticleLayoutPreview": ArticleLayoutPreview_7a120c9eaf1fd77e5cebec51d9f327a9,

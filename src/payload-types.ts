@@ -760,7 +760,7 @@ export interface SiteSetting {
    */
   appearance?: {
     /**
-     * Use a safe CSS color such as #14b8a6 or oklch(0.62 0.14 190). The frontend falls back to the default teal accent if omitted.
+     * Pick a visual accent preset, choose a hex color, or enter a safe oklch() value. The frontend falls back to the default teal accent if omitted.
      */
     accentColor?: string | null;
   };

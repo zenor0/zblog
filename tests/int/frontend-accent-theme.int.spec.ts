@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   defaultFrontendAccentColor,
+  frontendAccentColorPresets,
   resolveFrontendAccentColor,
   resolveFrontendAccentStyle,
   validateFrontendAccentColor,
@@ -52,5 +53,16 @@ describe('frontend accent theme helpers', () => {
     ).toEqual({
       '--zblog-accent': '#14b8a6',
     })
+  })
+
+  it('ships visual accent color presets that reuse the same validation path', () => {
+    expect(frontendAccentColorPresets.length).toBeGreaterThanOrEqual(6)
+    expect(frontendAccentColorPresets[0].value).toBe(defaultFrontendAccentColor)
+
+    for (const preset of frontendAccentColorPresets) {
+      expect(preset.label.length).toBeGreaterThan(0)
+      expect(validateFrontendAccentColor(preset.value)).toBe(true)
+      expect(validateFrontendAccentColor(preset.preview)).toBe(true)
+    }
   })
 })

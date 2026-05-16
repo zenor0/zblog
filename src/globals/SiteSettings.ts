@@ -169,7 +169,8 @@ function siteSettingsSectionModeSwitchField(args: { label: string; name: string 
     type: 'radio',
     admin: {
       components: {
-        Field: '/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
+        Field:
+          '/features/site-settings/admin/SiteSettingsSectionModeSwitch#SiteSettingsSectionModeSwitch',
       },
     },
     defaultValue: 'form',
@@ -199,7 +200,8 @@ function siteSettingsRawConfigField(args: { modeFieldName?: string; name: string
           }
         : {}),
       components: {
-        Field: '/features/site-settings/admin/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
+        Field:
+          '/features/site-settings/admin/SiteSettingsRawSectionEditor#SiteSettingsRawSectionEditor',
       },
     },
   }
@@ -756,7 +758,8 @@ const footerLayoutFields: Field[] = [
             type: 'ui',
             admin: {
               components: {
-                Field: '/features/site-settings/admin/SiteFooterPresetActions#SiteFooterPresetActions',
+                Field:
+                  '/features/site-settings/admin/SiteFooterPresetActions#SiteFooterPresetActions',
               },
             },
           },
@@ -992,8 +995,12 @@ export const SiteSettings: GlobalConfig = {
                     name: 'accentColor',
                     type: 'text',
                     admin: {
+                      components: {
+                        Field:
+                          '/features/site-settings/admin/SiteAccentColorPicker#SiteAccentColorPicker',
+                      },
                       description:
-                        'Use a safe CSS color such as #14b8a6 or oklch(0.62 0.14 190). The frontend falls back to the default teal accent if omitted.',
+                        'Pick a visual accent preset, choose a hex color, or enter a safe oklch() value. The frontend falls back to the default teal accent if omitted.',
                     },
                     defaultValue: defaultFrontendAccentColor,
                     label: 'Accent color',
