@@ -37,7 +37,7 @@
   }
 
   .site-header__nav {
-    @apply flex min-w-0 flex-wrap items-center gap-1;
+    @apply flex min-w-0 flex-wrap items-center justify-end gap-1;
   }
 
   .site-header__link {
