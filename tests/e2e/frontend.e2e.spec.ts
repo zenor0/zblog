@@ -226,6 +226,32 @@ test.describe('Frontend', () => {
     await expect(page.getByRole('menuitem', { name: 'English' })).toBeVisible()
   })
 
+  test('renders localized footer utility routes instead of 404 pages', async ({ page }) => {
+    test.setTimeout(90_000)
+
+    const routes = [
+      ['/zh-hans/posts', '文章'],
+      ['/zh-hans/archive', '归档'],
+      ['/zh-hans/about', '关于'],
+      ['/zh-hans/projects', '项目'],
+      ['/zh-hans/privacy', '隐私政策'],
+      ['/zh-hans/terms', '用户协议'],
+      ['/en/posts', 'Posts'],
+      ['/en/archive', 'Archive'],
+      ['/en/about', 'About'],
+      ['/en/projects', 'Projects'],
+      ['/en/privacy', 'Privacy Policy'],
+      ['/en/terms', 'Terms of Use'],
+    ] as const
+
+    for (const [path, heading] of routes) {
+      await page.goto(path, { waitUntil: 'domcontentloaded' })
+
+      await expect(page.locator('[data-utility-page]')).toBeVisible()
+      await expect(page.locator('h1').first()).toHaveText(heading)
+    }
+  })
+
   test('can render a seeded article with references and history link', async ({ page }) => {
     await page.goto('/zh-hans/posts/seed-citation-demo')
 

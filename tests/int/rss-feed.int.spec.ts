@@ -203,6 +203,9 @@ describe('RSS feed and discovery routes', () => {
 
     const entries = await sitemap()
     const zhHome = entries.find((entry) => entry.url === 'https://zblog.example/zh-hans')
+    const zhPrivacy = entries.find((entry) => entry.url === 'https://zblog.example/zh-hans/privacy')
+    const enTerms = entries.find((entry) => entry.url === 'https://zblog.example/en/terms')
+    const enPosts = entries.find((entry) => entry.url === 'https://zblog.example/en/posts')
     const enPost = entries.find(
       (entry) => entry.url === 'https://zblog.example/en/posts/visible-post',
     )
@@ -216,6 +219,24 @@ describe('RSS feed and discovery routes', () => {
       en: 'https://zblog.example/en',
       'x-default': 'https://zblog.example/zh-hans',
       'zh-Hans': 'https://zblog.example/zh-hans',
+    })
+    expect(zhPrivacy).toMatchObject({
+      changeFrequency: 'monthly',
+      priority: 0.2,
+      lastModified: '2026-03-25T12:00:00.000Z',
+    })
+    expect(zhPrivacy?.alternates?.languages).toMatchObject({
+      en: 'https://zblog.example/en/privacy',
+      'x-default': 'https://zblog.example/zh-hans/privacy',
+      'zh-Hans': 'https://zblog.example/zh-hans/privacy',
+    })
+    expect(enTerms).toMatchObject({
+      changeFrequency: 'monthly',
+      priority: 0.2,
+    })
+    expect(enPosts).toMatchObject({
+      changeFrequency: 'daily',
+      priority: 0.8,
     })
     expect(enPost).toMatchObject({
       changeFrequency: 'weekly',

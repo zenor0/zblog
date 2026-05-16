@@ -82,7 +82,9 @@ export type NormalizedSiteFooter = {
 export type SiteFooterLabels = {
   applyStarterFooter: string
   contactInformation: string
+  fillFooterFromGeneral: string
   footerLinks: string
+  footerFilledFromGeneral: string
   localeNavigation: string
   ownerProfileLinks: string
   previewFrameTitle: string
@@ -98,6 +100,8 @@ const siteFooterLabelsByLocale = {
   en: {
     applyStarterFooter: 'Apply starter footer',
     contactInformation: 'Footer contact information',
+    fillFooterFromGeneral: 'Fill from General',
+    footerFilledFromGeneral: 'Footer filled from General settings.',
     footerLinks: 'Footer links',
     localeNavigation: 'Locales',
     ownerProfileLinks: 'Owner profile links',
@@ -112,6 +116,8 @@ const siteFooterLabelsByLocale = {
   'zh-Hans': {
     applyStarterFooter: '应用起始页脚',
     contactInformation: '页脚联系信息',
+    fillFooterFromGeneral: '从 General 填充',
+    footerFilledFromGeneral: '已从 General 设置填充页脚。',
     footerLinks: '页脚链接',
     localeNavigation: '语言',
     ownerProfileLinks: '站点资料链接',

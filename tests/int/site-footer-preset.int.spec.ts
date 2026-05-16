@@ -19,7 +19,11 @@ describe('site footer starter preset', () => {
     ])
     expect(preset.footer?.socialLinks).toEqual([])
     expect(preset.footer?.contactItems).toEqual([])
-    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual(['Privacy'])
+    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual(['Privacy', 'Terms'])
+    expect(preset.footer?.legalLinks?.map((link) => link.link.internalPath)).toEqual([
+      '/privacy',
+      '/terms',
+    ])
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
     )
@@ -31,7 +35,7 @@ describe('site footer starter preset', () => {
 
     expect(preset.footer?.navigationSections?.[0]?.title).toBe('阅读')
     expect(preset.footer?.navigationSections?.[0]?.links?.[0]?.label).toBe('文章')
-    expect(preset.footer?.legalLinks?.[0]?.label).toBe('隐私政策')
+    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual(['隐私政策', '用户协议'])
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
     )

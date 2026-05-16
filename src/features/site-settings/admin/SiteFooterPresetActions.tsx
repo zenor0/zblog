@@ -9,6 +9,7 @@ import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 import { getSiteFooterLabels } from '@/features/site-settings/model/site-footer'
 import {
   getStarterSiteFooterPreset,
+  mergeFooterFromGeneralSettings,
   mergeStarterGlobalVariables,
 } from '@/features/site-settings/model/site-footer-preset'
 
@@ -28,8 +29,28 @@ export const SiteFooterPresetActions: UIFieldClientComponent = () => {
     toast.success(labels.starterFooterApplied)
   }
 
+  function fillFooterFromGeneral() {
+    footer.setValue(
+      mergeFooterFromGeneralSettings({
+        footer: footer.value,
+        globalVariables: globalVariables.value,
+      }),
+    )
+    toast.success(labels.footerFilledFromGeneral)
+  }
+
   return (
     <div className="site-footer-preset-actions field-type">
+      <Button
+        buttonStyle="secondary"
+        extraButtonProps={{
+          'data-testid': 'site-footer-sync-general',
+        }}
+        onClick={fillFooterFromGeneral}
+        size="small"
+      >
+        {labels.fillFooterFromGeneral}
+      </Button>
       <Button
         buttonStyle="secondary"
         extraButtonProps={{

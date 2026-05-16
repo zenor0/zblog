@@ -2,6 +2,10 @@ import type { MetadataRoute } from 'next'
 
 import { isPostIndexable } from '@/features/posts/server/queries'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
+import {
+  buildUtilityPagePath,
+  utilityPageSitemapConfigs,
+} from '@/features/utility-pages/model/utility-pages'
 import { buildLocalePath, defaultLocale, localeCodes, type AppLocale } from '@/shared/i18n/locales'
 import { getPayloadClient } from '@/shared/payload/client'
 import { buildAbsoluteURL } from '@/shared/content/seo'
@@ -50,20 +54,14 @@ function buildPostPath(slug: string) {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayloadClient()
-  const [localizedHomeEntries, localizedPostGroups] = await Promise.all([
+  const [localizedSiteSettings, localizedPostGroups] = await Promise.all([
     Promise.all(
       localeCodes.map(async (locale) => {
         const settings = await getResolvedSiteSettings(locale)
 
         return {
-          alternates: buildSitemapAlternates({
-            locales: localeCodes,
-            pathname: '',
-          }),
-          changeFrequency: 'daily' as const,
-          lastModified: settings.updatedAt ?? new Date().toISOString(),
-          priority: 1,
-          url: buildAbsoluteURL(buildLocalePath(locale)),
+          locale,
+          settings,
         }
       }),
     ),
@@ -91,6 +89,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     ),
   ])
+  const localizedHomeEntries = localizedSiteSettings.map(({ locale, settings }) => ({
+    alternates: buildSitemapAlternates({
+      locales: localeCodes,
+      pathname: '',
+    }),
+    changeFrequency: 'daily' as const,
+    lastModified: settings.updatedAt ?? new Date().toISOString(),
+    priority: 1,
+    url: buildAbsoluteURL(buildLocalePath(locale)),
+  }))
+  const localizedUtilityPageEntries = localizedSiteSettings.flatMap(({ locale, settings }) =>
+    utilityPageSitemapConfigs.map((config) => {
+      const pathname = buildUtilityPagePath(config.slug)
+
+      return {
+        alternates: buildSitemapAlternates({
+          locales: localeCodes,
+          pathname,
+        }),
+        changeFrequency: config.changeFrequency,
+        lastModified: settings.updatedAt ?? new Date().toISOString(),
+        priority: config.priority,
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+      }
+    }),
+  )
   const localesBySlug = new Map<string, AppLocale[]>()
 
   localizedPostGroups.forEach(({ locale, posts }) => {
@@ -120,5 +144,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   )
 
-  return [...localizedHomeEntries, ...localizedPostEntries]
+  return [...localizedHomeEntries, ...localizedUtilityPageEntries, ...localizedPostEntries]
 }
