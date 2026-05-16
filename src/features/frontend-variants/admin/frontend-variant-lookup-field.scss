@@ -106,3 +106,107 @@
   cursor: default;
   opacity: 0.55;
 }
+
+.frontend-variant-lookup__configure-button {
+  display: block;
+  width: fit-content;
+  min-height: calc(var(--base) * 1.35);
+  margin-top: calc(var(--base) * 0.45);
+  padding: 0 calc(var(--base) * 0.45);
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.frontend-variant-lookup__configure-button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.frontend-variant-lookup__config-row td {
+  background: var(--theme-elevation-50);
+}
+
+.frontend-variant-lookup__config-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.9fr);
+  gap: var(--base);
+}
+
+.frontend-variant-lookup__config-panel h3 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 1rem;
+}
+
+.frontend-variant-lookup__config-controls,
+.frontend-variant-lookup__raw-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.65);
+}
+
+.frontend-variant-lookup__control {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: calc(var(--base) * 0.25);
+}
+
+.frontend-variant-lookup__control > span {
+  color: var(--theme-text);
+  font-weight: 600;
+}
+
+.frontend-variant-lookup__control small {
+  color: var(--theme-elevation-500);
+  line-height: 1.4;
+}
+
+.frontend-variant-lookup__control select,
+.frontend-variant-lookup__control input[type='range'] {
+  width: 100%;
+}
+
+.frontend-variant-lookup__check-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--base) * 0.35);
+}
+
+.frontend-variant-lookup__check-list label {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--base) * 0.25);
+}
+
+.frontend-variant-lookup__raw-panel textarea {
+  min-height: 16rem;
+}
+
+.frontend-variant-lookup__raw-panel button {
+  width: fit-content;
+  min-height: calc(var(--base) * 1.45);
+  padding: 0 calc(var(--base) * 0.55);
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  cursor: pointer;
+}
+
+.frontend-variant-lookup__error {
+  margin: 0;
+  color: var(--theme-error-500);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .frontend-variant-lookup__config-panel {
+    grid-template-columns: 1fr;
+  }
+}

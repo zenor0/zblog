@@ -8,7 +8,7 @@ import { getPostBySlug, getRenderablePostLocales } from '@/features/posts/server
 import { getPreviewUser } from '@/features/posts/server/preview-user'
 import { getPostViewMetric } from '@/features/post-views/server/post-views'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
-import { getFrontendVariant } from '@/features/frontend-variants/server/frontend-variants'
+import { getFrontendVariantSelection } from '@/features/frontend-variants/server/frontend-variants'
 import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
 import { getPayloadClient } from '@/shared/payload/client'
 import { buildLocalePath } from '@/shared/i18n/locales'
@@ -108,7 +108,7 @@ export default async function PostPage(props: {
     payload,
     postId: resolved.post.id,
   })
-  const articleTocVariant = await getFrontendVariant('article.toc', searchParams)
+  const articleTocSelection = await getFrontendVariantSelection('article.toc', searchParams)
   const shouldRenderStructuredData = !resolved.usedFallback && !resolved.post.seo?.noindex
   const structuredData = shouldRenderStructuredData
     ? buildArticleStructuredData({
@@ -150,7 +150,8 @@ export default async function PostPage(props: {
         />
       ) : null}
       <PostArticle
-        articleTocVariant={articleTocVariant}
+        articleTocConfig={articleTocSelection.config}
+        articleTocVariant={articleTocSelection.variant}
         backHref={buildLocalePath(locale)}
         backLabel={article('backToIndex')}
         historyHref={buildLocalePath(locale, `/posts/${slug}/history`)}

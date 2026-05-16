@@ -19,6 +19,12 @@ const headings: MarkdownHeading[] = [
     id: 'details',
     text: 'Details',
   },
+  {
+    depth: 4,
+    displayNumber: '1.1.1',
+    id: 'deep-dive',
+    text: 'Deep dive',
+  },
 ]
 
 describe('article table-of-contents variants', () => {
@@ -59,5 +65,37 @@ describe('article table-of-contents variants', () => {
 
     expect(standardHTML).toContain('data-article-toc-variant="standard"')
     expect(progressHTML).toContain('data-article-toc-variant="progress-map"')
+  })
+
+  it('applies progress-map config to rendering and heading filtering', () => {
+    const html = renderToStaticMarkup(
+      <ArticleProgressTableOfContents
+        config={{
+          bendScale: 0.72,
+          indentScale: 1.35,
+          isTrackOffsetLocked: false,
+          lineWeight: 'strong',
+          lockedTrackOffsetPx: 18,
+          pathStyle: 'flow',
+          railHeight: 'compact',
+          scrollLeadScale: 0.3,
+          spacingScale: 1.1,
+          trackOverlapScale: 0.2,
+          visibleHeadingLevels: [2],
+        }}
+        headings={headings}
+        label="Contents"
+        progressLabel="Progress"
+      />,
+    )
+
+    expect(html).toContain('data-path-style="flow"')
+    expect(html).toContain('data-weight="strong"')
+    expect(html).toContain('--toc-panel-height:min(42vh, 22rem)')
+    expect(html).toContain('--toc-spacing-scale:1.1')
+    expect(html).toContain('--toc-depth-indent:0rem')
+    expect(html).toContain('href="#overview"')
+    expect(html).not.toContain('href="#details"')
+    expect(html).not.toContain('href="#deep-dive"')
   })
 })

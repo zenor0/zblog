@@ -8,11 +8,18 @@ import {
 } from '@/features/frontend-variants/ui/FrontendVariantSlot'
 
 type TocSlotProps = {
+  config?: {
+    pathStyle?: string
+  }
   label: string
 }
 
 const tocRenderers = {
-  'progress-map': ({ label }: TocSlotProps) => <div data-slot-variant="progress-map">{label}</div>,
+  'progress-map': ({ config, label }: TocSlotProps) => (
+    <div data-path-style={config?.pathStyle} data-slot-variant="progress-map">
+      {label}
+    </div>
+  ),
   standard: ({ label }: TocSlotProps) => <div data-slot-variant="standard">{label}</div>,
 } satisfies FrontendVariantRendererMap<'article.toc', TocSlotProps>
 
@@ -21,6 +28,7 @@ describe('frontend variant slot', () => {
     const html = renderToStaticMarkup(
       <FrontendVariantSlot
         renderers={tocRenderers}
+        config={{ pathStyle: 'flow' }}
         slotProps={{ label: 'Contents' }}
         surface="article.toc"
         variant="progress-map"
@@ -28,6 +36,7 @@ describe('frontend variant slot', () => {
     )
 
     expect(html).toContain('data-slot-variant="progress-map"')
+    expect(html).toContain('data-path-style="flow"')
     expect(html).toContain('Contents')
   })
 

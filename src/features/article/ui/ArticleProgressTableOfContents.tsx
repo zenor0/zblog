@@ -7,29 +7,43 @@ import {
   formatPercent,
   getHeadingState,
   railHeightValues,
-  tocTrackOffset,
   type HeadingLevel,
 } from '@/features/article/ui/article-progress/articleProgressModel'
 import { useArticleProgressMeasurement } from '@/features/article/ui/article-progress/useArticleProgressMeasurement'
+import {
+  defaultArticleProgressMapConfig,
+  type ArticleProgressMapConfig,
+} from '@/features/frontend-variants/model/frontend-variants'
 import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
 
 type ArticleProgressTableOfContentsProps = {
+  config?: Partial<ArticleProgressMapConfig>
   headings: MarkdownHeading[]
   label: string
   progressLabel: string
 }
 
-const visibleHeadingLevels: Record<HeadingLevel, boolean> = {
-  2: true,
-  3: true,
-  4: true,
+function resolveProgressMapConfig(config: Partial<ArticleProgressMapConfig> | undefined) {
+  return {
+    ...defaultArticleProgressMapConfig,
+    ...config,
+    visibleHeadingLevels:
+      Array.isArray(config?.visibleHeadingLevels) && config.visibleHeadingLevels.length > 0
+        ? config.visibleHeadingLevels
+        : defaultArticleProgressMapConfig.visibleHeadingLevels,
+  }
 }
 
 export function ArticleProgressTableOfContents(props: ArticleProgressTableOfContentsProps) {
   const { headings, label, progressLabel } = props
+  const config = resolveProgressMapConfig(props.config)
+  const visibleHeadingLevelSet = useMemo(
+    () => new Set<HeadingLevel>(config.visibleHeadingLevels),
+    [config.visibleHeadingLevels],
+  )
   const displayedHeadings = useMemo(
-    () => headings.filter((heading) => visibleHeadingLevels[heading.depth as HeadingLevel]),
-    [headings],
+    () => headings.filter((heading) => visibleHeadingLevelSet.has(heading.depth as HeadingLevel)),
+    [headings, visibleHeadingLevelSet],
   )
   const {
     activePathRef,
@@ -43,16 +57,16 @@ export function ArticleProgressTableOfContents(props: ArticleProgressTableOfCont
     trackPathRef,
     visibleEndPercentRef,
   } = useArticleProgressMeasurement({
-    bendScale: 0.48,
+    bendScale: config.bendScale,
     classNamePrefix: 'article-progress',
     displayedHeadings,
-    indentScale: 1,
-    isTrackOffsetLocked: true,
-    lockedTrackOffsetPx: tocTrackOffset.defaultLockedPx,
-    pathStyle: 'rounded',
-    scrollLeadScale: 0.46,
+    indentScale: config.indentScale,
+    isTrackOffsetLocked: config.isTrackOffsetLocked,
+    lockedTrackOffsetPx: config.lockedTrackOffsetPx,
+    pathStyle: config.pathStyle,
+    scrollLeadScale: config.scrollLeadScale,
     showDebugBoundaries: false,
-    trackOverlapScale: 0.46,
+    trackOverlapScale: config.trackOverlapScale,
   })
   const mobileHeading = displayedHeadings[progress.activeStartIndex] ?? displayedHeadings[0]
 
@@ -65,7 +79,7 @@ export function ArticleProgressTableOfContents(props: ArticleProgressTableOfCont
       <div
         className="article-progress-mobile"
         data-article-toc-variant="progress-map"
-        data-weight="regular"
+        data-weight={config.lineWeight}
       >
         <div aria-hidden="true" className="article-progress-mobile__track" ref={mobileProgressRef}>
           <span />
@@ -87,8 +101,8 @@ export function ArticleProgressTableOfContents(props: ArticleProgressTableOfCont
         data-toc-rail=""
         style={
           {
-            '--toc-panel-height': railHeightValues.regular,
-            '--toc-spacing-scale': 0.72,
+            '--toc-panel-height': railHeightValues[config.railHeight],
+            '--toc-spacing-scale': config.spacingScale,
           } as CSSProperties
         }
       >
@@ -105,8 +119,8 @@ export function ArticleProgressTableOfContents(props: ArticleProgressTableOfCont
         <nav
           aria-label={label}
           className="article-progress-map"
-          data-path-style="rounded"
-          data-weight="regular"
+          data-path-style={config.pathStyle}
+          data-weight={config.lineWeight}
           ref={scrollViewportRef}
         >
           <div className="article-progress-map__content">
@@ -145,7 +159,7 @@ export function ArticleProgressTableOfContents(props: ArticleProgressTableOfCont
                     style={
                       {
                         '--toc-depth': heading.depth - 2,
-                        '--toc-depth-indent': `${(heading.depth - 2) * 0.82}rem`,
+                        '--toc-depth-indent': `${(heading.depth - 2) * 0.82 * config.indentScale}rem`,
                       } as CSSProperties
                     }
                   >
