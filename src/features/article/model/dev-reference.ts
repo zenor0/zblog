@@ -77,6 +77,14 @@ export const devReferenceSections: DevReferenceSection[] = [
         status: 'experiment',
         tags: ['article', 'title', 'excerpt', 'frontmatter'],
       },
+      {
+        slug: 'site-shell-candidates',
+        title: 'Site Shell Candidates',
+        description: '收敛全站顶部导航与首页项目索引的候选排版，用于确认下一版生产实现。',
+        href: '/dev/site-shell-candidates',
+        status: 'experiment',
+        tags: ['navigation', 'homepage', 'projects', 'layout'],
+      },
     ],
   },
 ]

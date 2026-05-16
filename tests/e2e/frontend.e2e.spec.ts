@@ -206,10 +206,12 @@ test.describe('Frontend', () => {
     await expect(page).toHaveURL(/\/(en|zh-hans)$/)
     await expect(page).toHaveTitle(/ZBlog/)
     await expect(page.locator('[data-editorial-shell="true"]')).toBeVisible()
+    await expect(page.locator('[data-site-header]')).toBeVisible()
+    await expect(page.locator('[data-site-header-nav]')).toBeVisible()
     await expect(page.locator('[data-home-hero]')).toBeVisible()
-    await expect(page.locator('[data-home-nav]')).toBeVisible()
     await expect(page.locator('[data-home-featured-post]')).toBeVisible()
     await expect(page.locator('[data-home-projects]')).toBeVisible()
+    await expect(page.locator('[data-home-project-index]')).toBeVisible()
     await expect(page.locator('[data-home-post-list]')).toBeVisible()
     await expect(page.locator('[data-home-post-list] article').first()).toBeVisible()
 
@@ -223,13 +225,13 @@ test.describe('Frontend', () => {
     await expect(seededPost).toBeVisible()
     await expect(showcasePost).toBeVisible()
     await expect(
-      page.locator('[data-home-nav]').getByRole('link', { name: /文章|Posts/ }),
+      page.locator('[data-site-header-nav]').getByRole('link', { name: /文章|Posts/ }),
     ).toBeVisible()
     await expect(
-      page.locator('[data-home-nav]').getByRole('link', { name: /项目|Projects/ }),
+      page.locator('[data-site-header-nav]').getByRole('link', { name: /项目|Projects/ }),
     ).toBeVisible()
     await expect(
-      page.locator('[data-home-nav]').getByRole('link', { name: /关于|About/ }),
+      page.locator('[data-site-header-nav]').getByRole('link', { name: /关于|About/ }),
     ).toBeVisible()
 
     await page.getByRole('button', { name: /语言|Locales/ }).click()

@@ -2,14 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
-import { LocaleSwitcher } from '@/shared/ui/LocaleSwitcher'
 import { MediaSurface } from '@/features/media/ui/MediaSurface'
-import { ThemeSwitcher } from '@/shared/ui/ThemeSwitcher'
 import { getPublishedPosts } from '@/features/posts/server/queries'
 import { getHomepageProjects } from '@/features/projects/server/queries'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import { formatShortDate } from '@/i18n/format'
-import { buildLocaleLinks, requireLocale } from '@/i18n/routing'
+import { requireLocale } from '@/i18n/routing'
 import { buildLocalePath } from '@/shared/i18n/locales'
 import {
   buildHomeStructuredData,
@@ -61,22 +59,6 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
   const heroDescription = siteSettings.homeHero?.description || home('heroDescription')
   const featuredPost = posts[0] ?? null
   const remainingPosts = posts.slice(1)
-  const featuredProject = projects[0] ?? null
-  const supportingProjects = projects.slice(1)
-  const homeNavItems = [
-    {
-      href: buildLocalePath(locale, '/posts'),
-      label: home('navPosts'),
-    },
-    {
-      href: buildLocalePath(locale, '/projects'),
-      label: home('navProjects'),
-    },
-    {
-      href: buildLocalePath(locale, '/about'),
-      label: home('navAbout'),
-    },
-  ]
   const getProjectStatusLabel = (status: unknown) => {
     switch (status) {
       case 'archived':
@@ -112,10 +94,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
         type="application/ld+json"
       />
       <div className="page-frame frontend-shell">
-        <header
-          className="grid gap-8 border-b border-border pb-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start"
-          data-home-hero=""
-        >
+        <header className="grid gap-4 border-b border-border pb-12" data-home-hero="">
           <div className="flex max-w-4xl flex-col gap-4">
             <p className="section-kicker">{heroEyebrow}</p>
             <h1 className="max-w-4xl font-serif text-4xl leading-tight sm:text-5xl lg:text-6xl">
@@ -124,39 +103,6 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
             <p className="max-w-2xl text-base leading-8 text-foreground/72 sm:text-lg">
               {heroDescription}
             </p>
-          </div>
-
-          <div className="flex flex-col gap-5 lg:items-end">
-            <div className="flex items-center justify-end gap-2">
-              <ThemeSwitcher
-                label={common('themeNavigation')}
-                labels={{
-                  auto: common('themeAuto'),
-                  dark: common('themeDark'),
-                  light: common('themeLight'),
-                }}
-              />
-              <LocaleSwitcher
-                activeLocale={locale}
-                items={buildLocaleLinks('')}
-                label={common('localeNavigation')}
-              />
-            </div>
-
-            <nav aria-label={home('navLabel')} className="home-nav-tabs" data-home-nav="">
-              {homeNavItems.map((item) => (
-                <Link className="home-nav-tabs__link" href={item.href} key={item.href}>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="flex flex-col gap-1 text-right">
-              <p className="editorial-meta">{siteSettings.siteName}</p>
-              <p className="text-sm text-muted-foreground">
-                {home('publishedEntries', { count: posts.length })}
-              </p>
-            </div>
           </div>
         </header>
 
@@ -239,76 +185,11 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
             </Link>
           </div>
 
-          {featuredProject ? (
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)]">
-              <article className="grid gap-5 border-l border-border pl-5" data-home-project-lead="">
-                <div className="editorial-meta flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span>{getProjectStatusLabel(featuredProject.status)}</span>
-                  {featuredProject.timeframe ? (
-                    <>
-                      <span className="text-border">/</span>
-                      <span>{featuredProject.timeframe}</span>
-                    </>
-                  ) : null}
-                  {featuredProject.featured ? (
-                    <>
-                      <span className="text-border">/</span>
-                      <span>{projectCopy('featuredLabel')}</span>
-                    </>
-                  ) : null}
-                </div>
-
-                <div className="grid gap-3">
-                  <h3 className="font-serif text-3xl leading-tight">
-                    <Link
-                      className="editorial-link no-underline"
-                      href={buildLocalePath(locale, `/projects/${featuredProject.slug}`)}
-                    >
-                      {featuredProject.title}
-                    </Link>
-                  </h3>
-                  <p className="max-w-2xl text-base leading-8 text-foreground/72">
-                    {featuredProject.summary}
-                  </p>
-                </div>
-
-                {featuredProject.tags?.length ? (
-                  <div className="editorial-tag-list">
-                    {featuredProject.tags.map((tag, index) => (
-                      <span key={tag.id ?? tag.value}>
-                        {index > 0 ? <span className="pr-3 text-border">/</span> : null}
-                        {tag.value}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </article>
-
-              <div className="grid gap-4">
-                {featuredProject.coverImage &&
-                typeof featuredProject.coverImage === 'object' &&
-                typeof featuredProject.coverImage.url === 'string' ? (
-                  <Link href={buildLocalePath(locale, `/projects/${featuredProject.slug}`)}>
-                    <MediaSurface
-                      alt={featuredProject.coverImage.alt || featuredProject.title}
-                      loading="lazy"
-                      media={featuredProject.coverImage}
-                      variant="card"
-                    />
-                  </Link>
-                ) : null}
-
-                {supportingProjects.map((project) => (
-                  <article className="grid gap-2 border-t border-border pt-4" key={project.id}>
-                    <div className="editorial-meta flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span>{getProjectStatusLabel(project.status)}</span>
-                      {project.timeframe ? (
-                        <>
-                          <span className="text-border">/</span>
-                          <span>{project.timeframe}</span>
-                        </>
-                      ) : null}
-                    </div>
+          {projects.length > 0 ? (
+            <div className="home-project-index" data-home-project-index="">
+              {projects.map((project) => (
+                <article className="home-project-index__item" key={project.id}>
+                  <div className="grid gap-2">
                     <h3 className="font-serif text-xl leading-tight">
                       <Link
                         className="editorial-link no-underline"
@@ -317,10 +198,17 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                         {project.title}
                       </Link>
                     </h3>
-                    <p className="text-sm leading-7 text-foreground/68">{project.summary}</p>
-                  </article>
-                ))}
-              </div>
+                    <p className="max-w-2xl text-sm leading-7 text-foreground/68">
+                      {project.summary}
+                    </p>
+                  </div>
+                  <div className="home-project-index__aside">
+                    <span>{getProjectStatusLabel(project.status)}</span>
+                    {project.timeframe ? <span>{project.timeframe}</span> : null}
+                    {project.featured ? <span>{projectCopy('featuredLabel')}</span> : null}
+                  </div>
+                </article>
+              ))}
             </div>
           ) : (
             <p className="max-w-2xl text-base leading-8 text-foreground/68">

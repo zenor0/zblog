@@ -4,28 +4,6 @@ const postRows = [0, 1, 2]
 const paragraphRows = [0, 1, 2, 3]
 const tocRows = [0, 1, 2, 3, 4]
 
-function HeaderControlSkeletons() {
-  return (
-    <div className="flex items-center justify-end gap-2">
-      <Skeleton className="size-9 rounded-full" />
-      <Skeleton className="size-9 rounded-full" />
-    </div>
-  )
-}
-
-function HomeHeaderControlSkeletons() {
-  return (
-    <div className="flex flex-col items-end gap-3">
-      <HeaderControlSkeletons />
-      <div className="flex gap-1 border border-border p-1">
-        <Skeleton className="h-7 w-14 rounded-none" />
-        <Skeleton className="h-7 w-14 rounded-none" />
-        <Skeleton className="h-7 w-14 rounded-none" />
-      </div>
-    </div>
-  )
-}
-
 export function HomePageSkeleton() {
   return (
     <div
@@ -34,7 +12,7 @@ export function HomePageSkeleton() {
       className="page-frame frontend-shell"
       data-frontend-loading="home"
     >
-      <header className="grid gap-8 border-b border-border pb-12 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+      <header className="grid gap-4 border-b border-border pb-12">
         <div className="flex max-w-4xl flex-col gap-4">
           <Skeleton className="h-3 w-28" />
           <div className="flex max-w-4xl flex-col gap-3">
@@ -44,14 +22,6 @@ export function HomePageSkeleton() {
           <div className="flex max-w-2xl flex-col gap-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-5 lg:items-end">
-          <HomeHeaderControlSkeletons />
-          <div className="flex flex-col items-end gap-2">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-4 w-32" />
           </div>
         </div>
       </header>
@@ -87,18 +57,23 @@ export function HomePageSkeleton() {
           <Skeleton className="h-4 w-20" />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)]">
-          <div className="grid gap-4 border-l border-border pl-5">
-            <Skeleton className="h-3 w-40" />
-            <Skeleton className="h-8 w-full max-w-xl" />
-            <Skeleton className="h-4 w-full max-w-2xl" />
-            <Skeleton className="h-4 w-4/5 max-w-xl" />
-          </div>
-          <div className="grid gap-4">
-            <Skeleton className="aspect-[4/3] w-full rounded-none" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
+        <div className="grid gap-0">
+          {[0, 1].map((row) => (
+            <article
+              className="grid gap-3 border-b border-border py-5 md:grid-cols-[minmax(0,1fr)_11rem]"
+              key={row}
+            >
+              <div className="grid gap-2">
+                <Skeleton className="h-6 w-full max-w-md" />
+                <Skeleton className="h-4 w-full max-w-2xl" />
+                <Skeleton className="h-4 w-4/5 max-w-xl" />
+              </div>
+              <div className="grid gap-2 md:justify-items-end">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -146,12 +121,8 @@ export function PostArticleSkeleton() {
       className="page-frame frontend-shell"
       data-frontend-loading="article"
     >
-      <div
-        className="mb-8 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between"
-        data-embedded-hidden="true"
-      >
+      <div className="mb-8 border-b border-border pb-5" data-embedded-hidden="true">
         <Skeleton className="h-4 w-28" />
-        <HeaderControlSkeletons />
       </div>
 
       <article

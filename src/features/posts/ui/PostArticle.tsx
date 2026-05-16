@@ -6,13 +6,11 @@ import { getTranslations } from 'next-intl/server'
 import { ArticleAnchorNavigation } from '@/features/article/ui/ArticleAnchorNavigation'
 import { ArticleViewTracker } from '@/features/post-views/ui/ArticleViewTracker'
 import { MediaDetails } from '@/features/media/ui/MediaDetails'
-import { LocaleSwitcher } from '@/shared/ui/LocaleSwitcher'
 import { MediaSurface } from '@/features/media/ui/MediaSurface'
 import { ArticleTableOfContents } from '@/features/article/ui/ArticleTableOfContents'
 import { PostArticleNotices } from '@/features/posts/ui/PostArticleNotices'
 import { PostArticleSupplementary } from '@/features/posts/ui/PostArticleSupplementary'
 import { PostArticleTitleBlock } from '@/features/posts/ui/PostArticleTitleBlock'
-import { ThemeSwitcher } from '@/shared/ui/ThemeSwitcher'
 import { buildBibliographyLinkPreviews } from '@/features/article/model/article-link-previews'
 import { extractMarkdownMediaSources, MarkdownRenderer } from '@/features/article/markdown'
 import type { MarkdownMediaLike } from '@/features/article/markdown/types'
@@ -103,7 +101,6 @@ export async function PostArticle(props: {
     backLabel,
     historyHref,
     locale,
-    localeLinks,
     markdownMediaBySource: markdownMediaBySourceOverrides = {},
     previewExitPath,
     renderAnchorNavigation,
@@ -172,10 +169,7 @@ export async function PostArticle(props: {
       {shouldTrackView ? (
         <ArticleViewTracker locale={resolved.resolvedLocale} postId={post.id} />
       ) : null}
-      <div
-        className="mb-8 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between"
-        data-embedded-hidden="true"
-      >
+      <div className="mb-8 border-b border-border pb-5" data-embedded-hidden="true">
         <Link
           className="editorial-meta inline-flex w-fit items-center gap-2 transition-colors hover:text-foreground"
           href={backHref}
@@ -183,22 +177,6 @@ export async function PostArticle(props: {
           <ArrowLeftIcon className="size-4" />
           {backLabel}
         </Link>
-
-        <div className="flex items-center justify-end gap-2">
-          <ThemeSwitcher
-            label={common('themeNavigation')}
-            labels={{
-              auto: common('themeAuto'),
-              dark: common('themeDark'),
-              light: common('themeLight'),
-            }}
-          />
-          <LocaleSwitcher
-            activeLocale={locale}
-            items={localeLinks}
-            label={common('localeNavigation')}
-          />
-        </div>
       </div>
 
       <article

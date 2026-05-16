@@ -236,6 +236,11 @@ export function getStarterSiteFooterPreset(
           value: copy.tagline,
           description: 'Short supporting line used by the starter footer.',
         },
+        {
+          key: 'headerTaglineMode',
+          value: 'hidden',
+          description: 'Controls the site header tagline: hidden, inline, or stacked.',
+        },
       ],
     },
   }
