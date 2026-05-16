@@ -2,6 +2,7 @@ import { cache } from 'react'
 
 import {
   resolveFrontendVariant,
+  type FrontendVariantIDBySurface,
   type FrontendVariantOverrideInput,
   type FrontendVariantSettingsInput,
   type FrontendVariantSurfaceID,
@@ -18,10 +19,10 @@ const getCachedFrontendVariantSettings = cache(async (): Promise<FrontendVariant
   })
 })
 
-export async function getFrontendVariant(
-  surface: FrontendVariantSurfaceID,
+export async function getFrontendVariant<Surface extends FrontendVariantSurfaceID>(
+  surface: Surface,
   overrides?: FrontendVariantOverrideInput,
-) {
+): Promise<FrontendVariantIDBySurface[Surface]> {
   const settings = await getCachedFrontendVariantSettings()
 
   return resolveFrontendVariant(surface, settings, overrides)

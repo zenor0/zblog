@@ -1,26 +1,23 @@
 import { ArticleProgressTableOfContents } from '@/features/article/ui/ArticleProgressTableOfContents'
 import { PostTableOfContents } from '@/features/article/ui/PostTableOfContents'
 import type { ArticleTocVariantID } from '@/features/frontend-variants/model/frontend-variants'
+import {
+  FrontendVariantSlot,
+  type FrontendVariantRendererMap,
+} from '@/features/frontend-variants/ui/FrontendVariantSlot'
 import type { MarkdownHeading } from '@/features/article/model/markdown-headings'
 
-type ArticleTableOfContentsProps = {
+type ArticleTableOfContentsSlotProps = {
   headings: MarkdownHeading[]
   label: string
   progressLabel: string
+}
+
+type ArticleTableOfContentsProps = ArticleTableOfContentsSlotProps & {
   variant: ArticleTocVariantID
 }
 
-export function ArticleTableOfContents(props: ArticleTableOfContentsProps) {
-  if (props.variant === 'progress-map') {
-    return (
-      <ArticleProgressTableOfContents
-        headings={props.headings}
-        label={props.label}
-        progressLabel={props.progressLabel}
-      />
-    )
-  }
-
+function StandardArticleTableOfContents(props: ArticleTableOfContentsSlotProps) {
   return (
     <div data-article-toc-variant="standard">
       <PostTableOfContents
@@ -29,5 +26,23 @@ export function ArticleTableOfContents(props: ArticleTableOfContentsProps) {
         progressLabel={props.progressLabel}
       />
     </div>
+  )
+}
+
+const articleTocRenderers = {
+  'progress-map': ArticleProgressTableOfContents,
+  standard: StandardArticleTableOfContents,
+} satisfies FrontendVariantRendererMap<'article.toc', ArticleTableOfContentsSlotProps>
+
+export function ArticleTableOfContents(props: ArticleTableOfContentsProps) {
+  const { variant, ...slotProps } = props
+
+  return (
+    <FrontendVariantSlot
+      renderers={articleTocRenderers}
+      slotProps={slotProps}
+      surface="article.toc"
+      variant={variant}
+    />
   )
 }
