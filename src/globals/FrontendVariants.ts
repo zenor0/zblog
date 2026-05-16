@@ -1,9 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
 import {
-  frontendVariantSurfaceOptions,
-  frontendVariantVariantOptions,
-  validateFrontendVariantSettings,
+  getDefaultFrontendVariantLookup,
+  normalizeFrontendVariantSettings,
 } from '@/features/frontend-variants/model/frontend-variants'
 import { anyone, editorOnly } from '@/shared/auth/access'
 
@@ -21,41 +20,28 @@ export const FrontendVariants: GlobalConfig = {
   hooks: {
     beforeChange: [
       async ({ data }) => {
-        validateFrontendVariantSettings(data)
-
-        return data
+        return {
+          ...data,
+          ...normalizeFrontendVariantSettings(data),
+        }
       },
     ],
   },
   fields: [
     {
-      name: 'selections',
-      type: 'array',
+      name: 'values',
+      type: 'json',
+      defaultValue: getDefaultFrontendVariantLookup,
+      label: 'Variant lookup',
       admin: {
         description:
-          'Each surface can appear once. Variants must already exist in the deployed code.',
-      },
-      fields: [
-        {
-          name: 'surface',
-          type: 'select',
-          label: 'Surface',
-          options: frontendVariantSurfaceOptions,
-          required: true,
+          'Code-owned frontend surfaces and their active variants. Variants must already exist in the deployed code.',
+        components: {
+          Field:
+            '/features/frontend-variants/admin/FrontendVariantLookupField#FrontendVariantLookupField',
         },
-        {
-          name: 'variant',
-          type: 'select',
-          label: 'Variant',
-          options: frontendVariantVariantOptions,
-          required: true,
-        },
-      ],
-      label: 'Selections',
-      labels: {
-        plural: 'Selections',
-        singular: 'Selection',
       },
+      required: true,
     },
   ],
 }

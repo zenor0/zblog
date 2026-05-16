@@ -17,6 +17,7 @@ This directory is the maintained documentation set for ZBlog. It records the cur
 
 ## Development References
 
+- [Frontend variants](./development/frontend-variants.md): lookup-backed frontend component variants, registry rules, configurable slot rendering, and verification steps.
 - [Design labs](./development/design-labs.md): `/dev` reference pages for design-system review, article block previews, article layout, article progress, and footer layout experiments.
 
 ## Maintenance Rules

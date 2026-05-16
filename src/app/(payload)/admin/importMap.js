@@ -10,6 +10,7 @@ import { ArticleDesignRangeField as ArticleDesignRangeField_ab86120354cc54f9f987
 import { ArticleLayoutPreview as ArticleLayoutPreview_7a120c9eaf1fd77e5cebec51d9f327a9 } from '../../../features/article/admin/ArticleLayoutPreview'
 import { SiteFooterPresetActions as SiteFooterPresetActions_46e9413c3d66ea4aea52d5e3d163aecb } from '../../../features/site-settings/admin/SiteFooterPresetActions'
 import { SiteFooterPreview as SiteFooterPreview_faaa1e5f7cb3c6fbb949805c16ac6617 } from '../../../features/site-settings/admin/SiteFooterPreview'
+import { FrontendVariantLookupField as FrontendVariantLookupField_1c6b6d81524bab9b306687c8afa6a5c8 } from '../../../features/frontend-variants/admin/FrontendVariantLookupField'
 import { DataTransferNavLink as DataTransferNavLink_224bd5c219204b40e3874257821d153b } from '../../../features/site-data-transfer/admin/DataTransferNavLink'
 import { DataTransferView as DataTransferView_68049504b2d676d88567f34de0135b80 } from '../../../features/site-data-transfer/admin/DataTransferView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -28,6 +29,7 @@ export const importMap = {
   "/features/article/admin/ArticleLayoutPreview#ArticleLayoutPreview": ArticleLayoutPreview_7a120c9eaf1fd77e5cebec51d9f327a9,
   "/features/site-settings/admin/SiteFooterPresetActions#SiteFooterPresetActions": SiteFooterPresetActions_46e9413c3d66ea4aea52d5e3d163aecb,
   "/features/site-settings/admin/SiteFooterPreview#SiteFooterPreview": SiteFooterPreview_faaa1e5f7cb3c6fbb949805c16ac6617,
+  "/features/frontend-variants/admin/FrontendVariantLookupField#FrontendVariantLookupField": FrontendVariantLookupField_1c6b6d81524bab9b306687c8afa6a5c8,
   "/features/site-data-transfer/admin/DataTransferNavLink#DataTransferNavLink": DataTransferNavLink_224bd5c219204b40e3874257821d153b,
   "/features/site-data-transfer/admin/DataTransferView#DataTransferView": DataTransferView_68049504b2d676d88567f34de0135b80,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

@@ -13,18 +13,21 @@ function collectFields(fields: any[]): any[] {
 }
 
 describe('frontend variants global config', () => {
-  it('exposes a non-localized variant selection global', () => {
+  it('exposes a non-localized frontend variant lookup global', () => {
     expect(FrontendVariants.slug).toBe('frontend-variants')
     expect(FrontendVariants.admin?.group).toBe('Frontend')
 
     const fields = collectFields(FrontendVariants.fields)
-    const selections = fields.find((field) => field.name === 'selections')
-    const surface = fields.find((field) => field.name === 'surface')
-    const variant = fields.find((field) => field.name === 'variant')
+    const values = fields.find((field) => field.name === 'values')
 
-    expect(selections.type).toBe('array')
-    expect(surface.options.map((option: any) => option.value)).toEqual(['article.toc'])
-    expect(variant.options.map((option: any) => option.value)).toEqual(['standard', 'progress-map'])
+    expect(values.type).toBe('json')
+    expect(values.defaultValue()).toEqual({
+      'article.toc': 'standard',
+    })
+    expect(values.admin?.components?.Field).toBe(
+      '/features/frontend-variants/admin/FrontendVariantLookupField#FrontendVariantLookupField',
+    )
+    expect(fields.find((field) => field.name === 'selections')).toBeUndefined()
   })
 
   it('allows public reads but restricts updates to editors', () => {
@@ -37,19 +40,35 @@ describe('frontend variants global config', () => {
     expect(FrontendVariants.access?.update?.({ req: { user: null } } as any)).toBe(false)
   })
 
-  it('rejects duplicate surface selections before saving', async () => {
+  it('normalizes lookup values before saving', async () => {
     const hook = FrontendVariants.hooks?.beforeChange?.[0]
 
     await expect(
       hook?.({
         data: {
-          selections: [
-            { surface: 'article.toc', variant: 'standard' },
-            { surface: 'article.toc', variant: 'progress-map' },
-          ],
+          values: { 'article.toc': 'progress-map' },
         },
         req: {},
       } as any),
-    ).rejects.toThrow(/Duplicate frontend variant surface/)
+    ).resolves.toMatchObject({
+      values: {
+        'article.toc': 'progress-map',
+      },
+    })
+  })
+
+  it('rejects unknown lookup entries before saving', async () => {
+    const hook = FrontendVariants.hooks?.beforeChange?.[0]
+
+    await expect(
+      hook?.({
+        data: {
+          values: {
+            'article.toc': 'not-real',
+          },
+        },
+        req: {},
+      } as any),
+    ).rejects.toThrow(/Unknown frontend variant/)
   })
 })

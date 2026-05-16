@@ -999,14 +999,16 @@ export interface SiteSetting {
 export interface FrontendVariant {
   id: number;
   /**
-   * Each surface can appear once. Variants must already exist in the deployed code.
+   * Code-owned frontend surfaces and their active variants. Variants must already exist in the deployed code.
    */
-  selections?:
+  values:
     | {
-        surface: 'article.toc';
-        variant: 'standard' | 'progress-map';
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1222,13 +1224,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
  * via the `definition` "frontend-variants_select".
  */
 export interface FrontendVariantsSelect<T extends boolean = true> {
-  selections?:
-    | T
-    | {
-        surface?: T;
-        variant?: T;
-        id?: T;
-      };
+  values?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
