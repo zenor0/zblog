@@ -56,11 +56,6 @@
   --zblog-tracking-badge: 0;
   --zblog-tracking-label: 0;
   --zblog-accent: oklch(0.62 0.14 190);
-  --zblog-accent-foreground: color-mix(in oklch, var(--background) 92%, var(--zblog-accent));
-  --zblog-accent-muted: color-mix(in oklch, var(--zblog-accent) 8%, var(--background));
-  --zblog-accent-border: color-mix(in oklch, var(--zblog-accent) 30%, var(--border));
-  --zblog-accent-line: color-mix(in oklch, var(--zblog-accent) 72%, var(--foreground));
-  --zblog-accent-text: color-mix(in oklch, var(--zblog-accent) 56%, var(--foreground));
   --zblog-code-font-family:
     var(--font-code, 'JetBrains Mono'), 'JetBrains Mono', 'SFMono-Regular', Consolas,
     'Liberation Mono', ui-monospace, monospace;
@@ -106,6 +101,15 @@
   --sidebar-border: oklch(0.9 0.003 95);
   --sidebar-ring: oklch(0.68 0.01 50);
   color-scheme: light;
+}
+
+:root,
+[data-frontend-accent] {
+  --zblog-accent-foreground: color-mix(in oklch, var(--background) 92%, var(--zblog-accent));
+  --zblog-accent-muted: color-mix(in oklch, var(--zblog-accent) 8%, var(--background));
+  --zblog-accent-border: color-mix(in oklch, var(--zblog-accent) 30%, var(--border));
+  --zblog-accent-line: color-mix(in oklch, var(--zblog-accent) 72%, var(--foreground));
+  --zblog-accent-text: color-mix(in oklch, var(--zblog-accent) 56%, var(--foreground));
 }
 
 html[data-zblog-theme='dark'] {

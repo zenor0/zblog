@@ -118,6 +118,9 @@ describe('frontend visual restraint', () => {
     const styles = readFrontendStyles()
 
     expect(styles).toContain('--zblog-accent: oklch(0.62 0.14 190);')
+    expect(styles).toMatch(
+      /\[data-frontend-accent\]\s*\{[^}]*--zblog-accent-text:\s*color-mix\(in oklch,\s*var\(--zblog-accent\)/s,
+    )
     expect(styles).toContain('--color-zblog-accent: var(--zblog-accent);')
     expect(styles).toContain('--zblog-accent-line')
     expect(styles).toContain('color: var(--zblog-accent-text);')
