@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { defaultArticleProgressMapConfig } from '@/features/frontend-variants/model/frontend-variants'
 import { FrontendVariants } from '@/globals/FrontendVariants'
 
 function collectFields(fields: any[]): any[] {
@@ -22,7 +23,13 @@ describe('frontend variants global config', () => {
 
     expect(values.type).toBe('json')
     expect(values.defaultValue()).toEqual({
-      'article.toc': 'standard',
+      'article.toc': {
+        configs: {
+          'progress-map': defaultArticleProgressMapConfig,
+          standard: {},
+        },
+        variant: 'standard',
+      },
     })
     expect(values.admin?.components?.Field).toBe(
       '/features/frontend-variants/admin/FrontendVariantLookupField#FrontendVariantLookupField',
@@ -46,13 +53,29 @@ describe('frontend variants global config', () => {
     await expect(
       hook?.({
         data: {
-          values: { 'article.toc': 'progress-map' },
+          values: {
+            'article.toc': {
+              configs: {
+                'progress-map': {
+                  pathStyle: 'flow',
+                },
+              },
+              variant: 'progress-map',
+            },
+          },
         },
         req: {},
       } as any),
     ).resolves.toMatchObject({
       values: {
-        'article.toc': 'progress-map',
+        'article.toc': {
+          configs: {
+            'progress-map': {
+              pathStyle: 'flow',
+            },
+          },
+          variant: 'progress-map',
+        },
       },
     })
   })

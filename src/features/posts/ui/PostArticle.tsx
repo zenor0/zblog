@@ -20,7 +20,10 @@ import {
   extractMarkdownHeadings,
   type MarkdownHeading,
 } from '@/features/article/model/markdown-headings'
-import type { ArticleTocVariantID } from '@/features/frontend-variants/model/frontend-variants'
+import type {
+  ArticleTocVariantID,
+  FrontendVariantConfigBySurface,
+} from '@/features/frontend-variants/model/frontend-variants'
 import { resolveMediaCaption } from '@/features/media/model/media'
 import { getPayloadClient } from '@/shared/payload/client'
 import type { ResolvedPost } from '@/features/posts/server/queries'
@@ -74,6 +77,7 @@ async function loadMarkdownMediaBySource(
 }
 
 export async function PostArticle(props: {
+  articleTocConfig?: FrontendVariantConfigBySurface['article.toc']
   articleTocVariant?: ArticleTocVariantID
   backHref: string
   backLabel: string
@@ -93,6 +97,7 @@ export async function PostArticle(props: {
   viewCount?: number
 }) {
   const {
+    articleTocConfig,
     articleTocVariant = 'standard',
     backHref,
     backLabel,
@@ -334,6 +339,7 @@ export async function PostArticle(props: {
               })
             ) : (
               <ArticleTableOfContents
+                config={articleTocConfig}
                 headings={tocHeadings}
                 label={article('tableOfContents')}
                 progressLabel={article('readingProgress')}
