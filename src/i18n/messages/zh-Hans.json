@@ -26,11 +26,9 @@
   "Common": {
     "attachments": "附件",
     "draftLabel": "草稿",
-    "editorialStatus": "编辑整理",
     "figureLabel": "图",
     "latestSnapshot": "最新快照",
     "localeNavigation": "语言",
-    "machineStatus": "机器翻译",
     "mediaCredit": "署名：",
     "publishedLabel": "已发布",
     "referenceAccessed": "访问于 {date}",

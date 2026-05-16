@@ -142,12 +142,6 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                         value: featuredPost.publishedAt ?? featuredPost.updatedAt,
                       })}
                     </span>
-                    <span className="text-border">/</span>
-                    <span>
-                      {featuredPost.translationStatus === 'machine'
-                        ? common('machineStatus')
-                        : common('editorialStatus')}
-                    </span>
                   </div>
 
                   <div className="flex flex-col gap-3">
@@ -226,12 +220,6 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
                             locale,
                             value: post.publishedAt ?? post.updatedAt,
                           })}
-                        </span>
-                        <span className="text-border">/</span>
-                        <span>
-                          {post.translationStatus === 'machine'
-                            ? common('machineStatus')
-                            : common('editorialStatus')}
                         </span>
                       </div>
 
