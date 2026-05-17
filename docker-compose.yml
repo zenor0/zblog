@@ -1,43 +1,28 @@
-version: '3'
-
 services:
-  payload:
-    image: node:18-alpine
+  zblog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zblog:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      ZBLOG_STATE_DIR: /app/.data
+      DATABASE_URL: file:/app/.data/zblog.db
+      ZBLOG_PDF_PREVIEW_COMMAND: pdftocairo
+      ZBLOG_PDF_RENDER_CONCURRENCY: '4'
     ports:
       - '3000:3000'
     volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
-    depends_on:
-      - mongo
-      # - postgres
-    env_file:
-      - .env
-
-  # Optional: use this service only if DATABASE_URL points to MongoDB.
-  mongo:
-    image: mongo:latest
-    ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
-    volumes:
-      - data:/data/db
-    logging:
-      driver: none
-
-  # Uncomment the following to use postgres
-  # postgres:
-  #   restart: always
-  #   image: postgres:latest
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
+      - zblog-data:/app/.data
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/admin').then((response) => process.exit(response.status < 500 ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
-  data:
-  # pgdata:
-  node_modules:
+  zblog-data:

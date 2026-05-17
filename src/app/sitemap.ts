@@ -12,6 +12,8 @@ import { getPayloadClient } from '@/shared/payload/client'
 import { buildAbsoluteURL } from '@/shared/content/seo'
 import type { Post, Project } from '@/payload-types'
 
+export const dynamic = 'force-dynamic'
+
 type SitemapEntry = MetadataRoute.Sitemap[number]
 
 function isSitemapRenderablePost(post: null | Post): post is Post {
