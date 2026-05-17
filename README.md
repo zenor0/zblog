@@ -2,10 +2,6 @@
 
 ZBlog is a Payload-backed bilingual blog built with Next.js.
 
-## Quick start
-
-This project is configured for local SQLite-backed development by default, with runtime state stored under `.data/`.
-
 ## Quick Start - local setup
 
 To spin up this template locally, follow these steps:
@@ -17,28 +13,55 @@ After you click the `Deploy` button above, you'll want to have standalone copy o
 ### Development
 
 1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. By default, local runtime state uses SQLite and stores the database, uploads, generated previews, and seed assets under `.data/`.
+2. `cd my-project && cp .env.example .env` to copy the example environment variables.
+3. If you are running without Docker, set `DATABASE_URL=file:.data/zblog.db` and `ZBLOG_STATE_DIR=.data` in `.env`.
+4. `pnpm install && pnpm dev` to install dependencies and start the dev server
+5. open `http://localhost:3000` to open the app in your browser
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user.
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+## Production Docker
+
+The production Docker setup is self-contained and does not require managed cloud services. It runs one Next.js/Payload app container, uses SQLite for the database, stores uploads on the local filesystem, and exposes port `3000` for your own reverse proxy or server panel.
+
+Required host dependencies:
+
+- Docker Engine
+- Docker Compose
+
+Required runtime configuration:
+
+- `PAYLOAD_SECRET`: set this to a long random string before first production use.
+- `NEXT_PUBLIC_SITE_URL`: set this to the public origin, for example `https://blog.example.com`.
+- `DATABASE_URL`: keep `file:/app/.data/zblog.db` for the bundled SQLite deployment.
+- `ZBLOG_STATE_DIR`: keep `/app/.data` so the database, uploads, previews, and import/export files are stored in the persistent Docker volume.
+
+Run the production app:
+
+```bash
+cp .env.example .env
+# edit PAYLOAD_SECRET and NEXT_PUBLIC_SITE_URL
+docker compose up -d --build
+```
+
+Then open `http://localhost:3000/admin` or point your reverse proxy at `http://127.0.0.1:3000`.
+
+The persistent state lives in the `zblog-data` Docker volume mounted at `/app/.data`. Back up that volume to preserve:
+
+- SQLite database: `zblog.db`
+- media uploads: `media/`
+- generated PDF previews: `media-previews/`
+- site data imports and exports: `imports/`, `exports/`
+- seed assets: `seed-assets/`
+
+PDF preview rendering is local. The Docker image installs `poppler-utils` and uses `pdftocairo` by default. Automatic translation is optional and disabled unless `TRANSLATION_API_URL` is configured.
 
 ## Project docs
 
 - [Project documentation](./docs/README.md): frontend design system, article layout, Markdown rendering, post editor IA, bibliography, footer, localization, and development labs.
-- Runtime state: `ZBLOG_STATE_DIR` defaults to `.data`; keep `DATABASE_URL=file:.data/zblog.db` unless you intentionally point SQLite at another file.
+- Runtime state: Docker production stores state under `/app/.data`; host-local development should use `.data`.
 - Local reset: this app is still pre-launch, so local data is disposable. Use `pnpm run db:reset` to remove `.data`, or `pnpm run seed:blog:fresh` to reset and recreate the seeded blog content.
 - Seed profiling: set `ZBLOG_SEED_TIMING=true` when running `seed:blog` to print per-step timings. Most cold-start time is Payload config and SQLite schema initialization; the seed writes are intentionally small.
-
-#### Docker (Optional)
-
-If you prefer to use Docker for local development, the provided docker-compose.yml file can be used.
-
-To do so, follow these steps:
-
-- Copy `.env.example` to `.env`; the default SQLite database and generated files will be stored under `.data/`.
-- Run `docker-compose up` to start the app, optionally pass `-d` to run in the background.
 
 ## How it works
 
@@ -57,16 +80,6 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 - #### Media
 
   This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
 
 ## Questions
 
