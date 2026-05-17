@@ -153,6 +153,7 @@ describe('API', () => {
           content: 'An embedded bibliography should validate [@doe2025].',
           slug,
           title: 'Embedded bibliography post',
+          visibility: 'listed',
         },
         overrideAccess: false,
         req: request,

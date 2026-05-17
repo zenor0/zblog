@@ -27,12 +27,15 @@ type StoredDedupe = {
   post: number
 }
 
-function createMemoryPayload(args: { postStatus?: 'draft' | 'published' } = {}) {
+function createMemoryPayload(
+  args: { postStatus?: 'draft' | 'published'; postVisibility?: 'listed' | 'private' | 'unlisted' } = {},
+) {
   const metrics: StoredMetric[] = []
   const dedupeEntries: StoredDedupe[] = []
   let nextMetricID = 1
   let nextDedupeID = 1
   const postStatus = args.postStatus ?? 'published'
+  const postVisibility = args.postVisibility ?? 'listed'
 
   const payload = {
     create: vi.fn(async (operation: any) => {
@@ -122,6 +125,7 @@ function createMemoryPayload(args: { postStatus?: 'draft' | 'published' } = {}) 
         content: 'Published body',
         id: 10,
         title: 'Published post',
+        visibility: postVisibility,
       }
     }),
     update: vi.fn(async (operation: any) => {
@@ -307,5 +311,32 @@ describe('post view tracking', () => {
 
     expect(result.status).toBe('not-found')
     expect(metrics).toEqual([])
+  })
+
+  it('records unlisted direct views but ignores private posts', async () => {
+    const unlistedPayload = createMemoryPayload({ postVisibility: 'unlisted' })
+    const privatePayload = createMemoryPayload({ postVisibility: 'private' })
+
+    const unlistedResult = await recordPostView({
+      headers: new Headers(),
+      locale: 'en',
+      now: new Date('2026-05-09T00:10:00.000Z'),
+      payload: unlistedPayload.payload as any,
+      postId: 10,
+      secret: 'test-secret',
+    })
+    const privateResult = await recordPostView({
+      headers: new Headers(),
+      locale: 'en',
+      now: new Date('2026-05-09T00:10:00.000Z'),
+      payload: privatePayload.payload as any,
+      postId: 10,
+      secret: 'test-secret',
+    })
+
+    expect(unlistedResult.status).toBe('recorded')
+    expect(privateResult.status).toBe('not-found')
+    expect(unlistedPayload.metrics).toHaveLength(1)
+    expect(privatePayload.metrics).toEqual([])
   })
 })

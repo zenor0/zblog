@@ -3,11 +3,16 @@ import type { CollectionConfig, Where } from 'payload'
 import { autoTranslatePostEndpoint } from '@/endpoints/posts/autoTranslatePost'
 import { captureOwnedResourcesBeforeDelete } from '@/hooks/posts/captureOwnedResourcesBeforeDelete'
 import { deleteOwnedResourcesAfterDelete } from '@/hooks/posts/deleteOwnedResourcesAfterDelete'
-import { editorOnly, publishedOrEditor, publishedVersionsOrEditor } from '@/shared/auth/access'
+import {
+  editorOnly,
+  publishedPublicPostOrEditor,
+  publishedPublicPostVersionsOrEditor,
+} from '@/shared/auth/access'
 import { loadBibliographyEntries } from '@/features/article/model/bibliography'
 import { extractCitationKeys } from '@/features/article/model/citations'
 import { defaultLocale } from '@/shared/i18n/locales'
 import { buildPostLivePreviewURL, buildPostPreviewURL } from '@/features/posts/preview'
+import { postVisibilityOptions } from '@/features/posts/model/post-visibility'
 import { slugify } from '@/shared/content/slugs'
 
 function resolveAdminDocumentID(value: unknown) {
@@ -48,8 +53,8 @@ export const Posts: CollectionConfig = {
   access: {
     create: editorOnly,
     delete: editorOnly,
-    read: publishedOrEditor,
-    readVersions: publishedVersionsOrEditor,
+    read: publishedPublicPostOrEditor,
+    readVersions: publishedPublicPostVersionsOrEditor,
     update: editorOnly,
   },
   admin: {
@@ -65,7 +70,7 @@ export const Posts: CollectionConfig = {
         },
       },
     },
-    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'visibility', '_status', 'updatedAt'],
     group: 'Content',
     livePreview: {
       breakpoints: [
@@ -382,6 +387,19 @@ export const Posts: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      admin: {
+        description:
+          'Listed posts appear in public indexes. Unlisted posts are public by direct URL only. Private posts are visible to editors only.',
+        position: 'sidebar',
+      },
+      defaultValue: 'listed',
+      index: true,
+      name: 'visibility',
+      options: [...postVisibilityOptions],
+      required: true,
+      type: 'select',
     },
     {
       admin: {

@@ -1,5 +1,6 @@
 import { buildAbsoluteURL, buildSeoDescription } from '@/shared/content/seo'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
+import { isPostListed, publishedListedPostWhere } from '@/features/posts/model/post-visibility'
 import { buildLocalePath, type AppLocale } from '@/shared/i18n/locales'
 import { getPayloadClient } from '@/shared/payload/client'
 import type { Post } from '@/payload-types'
@@ -94,6 +95,7 @@ export function isRSSFeedPost(post: null | Post): post is Post {
     hasText(post.slug) &&
     hasText(post.title) &&
     hasText(post.content) &&
+    isPostListed(post) &&
     !post.seo?.noindex,
   )
 }
@@ -108,11 +110,7 @@ export async function getRSSFeedPosts(locale: AppLocale, limit = defaultRSSLimit
     locale,
     overrideAccess: false,
     sort: '-publishedAt',
-    where: {
-      _status: {
-        equals: 'published',
-      },
-    },
+    where: publishedListedPostWhere,
   })
 
   return result.docs.filter(isRSSFeedPost)

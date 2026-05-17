@@ -7,6 +7,7 @@ import {
   type ImportPostOverrides,
 } from '@/features/posts/import/use-case'
 import type { User } from '@/payload-types'
+import { isPostVisibility } from '@/features/posts/model/post-visibility'
 import { isEditor } from '@/shared/auth/access'
 import { normalizeLocale } from '@/shared/i18n/locales'
 
@@ -16,6 +17,7 @@ function parseOverrides(formData: FormData): ImportPostOverrides {
   const title = formData.get('title')
   const excerpt = formData.get('excerpt')
   const status = formData.get('status')
+  const visibility = formData.get('visibility')
   const overrides: ImportPostOverrides = {}
 
   if (typeof slug === 'string' && slug.trim()) {
@@ -38,6 +40,10 @@ function parseOverrides(formData: FormData): ImportPostOverrides {
 
   if (status === 'draft' || status === 'published') {
     overrides.status = status
+  }
+
+  if (isPostVisibility(visibility)) {
+    overrides.visibility = visibility
   }
 
   return overrides

@@ -130,6 +130,7 @@ export const articleAnchorReturnDemoResolvedPost: ResolvedPost = {
     updatedAt: '2026-05-01T00:00:00.000Z',
     createdAt: '2026-05-01T00:00:00.000Z',
     _status: 'published',
+    visibility: 'listed',
   },
   requestedLocale: defaultLocale,
   resolvedLocale: defaultLocale,

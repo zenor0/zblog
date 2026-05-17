@@ -25,6 +25,7 @@ import {
   type SiteDataTransferGroupID,
 } from '@/features/site-data-transfer/model/site-data-transfer'
 import { getPostViewMetricKey } from '@/features/post-views/server/post-views'
+import { normalizePostVisibility } from '@/features/posts/model/post-visibility'
 import { resolveLocalMediaFilePath } from '@/features/media/server/media-server'
 import { defaultLocale, localeCodes, type AppLocale } from '@/shared/i18n/locales'
 import { siteDataExportDir, siteDataImportDir } from '@/shared/runtime/paths'
@@ -534,6 +535,7 @@ function buildSharedPostData(post: ExportedPostRecord, maps: RelationshipMaps): 
       : undefined,
     slug: rewritten.slug,
     tags: rewritten.tags,
+    visibility: normalizePostVisibility(rewritten.visibility),
   })
 }
 

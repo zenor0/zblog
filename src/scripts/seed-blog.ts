@@ -238,6 +238,7 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
       slug: seedCitationDemoSlug,
       tags: [{ value: 'payload' }, { value: 'citations' }, { value: 'seed' }],
       title: seedCitationDemoCopy['zh-Hans'].title,
+      visibility: 'listed',
     },
   })) as Post
 
@@ -277,6 +278,7 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
       slug: seedFallbackDemoSlug,
       tags: [{ value: 'fallback' }, { value: 'locales' }],
       title: seedFallbackDemoCopy['zh-Hans'].title,
+      visibility: 'listed',
     },
   })
 
@@ -291,6 +293,7 @@ async function seedPosts(payload: Payload, files: Awaited<ReturnType<typeof crea
       slug: seedMarkdownShowcaseSlug,
       tags: [{ value: 'markdown' }, { value: 'showcase' }, { value: 'seed' }],
       title: seedMarkdownShowcaseZhTitle,
+      visibility: 'listed',
     },
   })) as Post
 

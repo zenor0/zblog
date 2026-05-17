@@ -7,6 +7,10 @@ import matter from 'gray-matter'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { getBibliographySource, type BibliographySource } from '@/features/article/model/bibliography'
+import {
+  normalizePostVisibility,
+  type PostVisibility,
+} from '@/features/posts/model/post-visibility'
 import { defaultLocale, normalizeLocale, type AppLocale } from '@/shared/i18n/locales'
 import { slugify } from '@/shared/content/slugs'
 import { extractCitationKeys } from '@/features/article/model/citations'
@@ -36,6 +40,7 @@ export type ImportPostOverrides = {
   status?: 'draft' | 'published'
   tags?: string[]
   title?: string
+  visibility?: PostVisibility
 }
 
 type AttachmentInput = {
@@ -57,6 +62,7 @@ type ParsedMarkdownDocument = {
   hasHeroImageField: boolean
   hasLocaleField: boolean
   hasTagsField: boolean
+  hasVisibilityField: boolean
   heroImagePath?: string | null
   locale: AppLocale
   path: string
@@ -68,6 +74,7 @@ type ParsedMarkdownDocument = {
   translatedFromLocale?: string
   translationProvider?: string
   translationStatus?: 'machine' | 'original' | 'reviewed'
+  visibility: PostVisibility
 }
 
 type ParsedBibliographySource = {
@@ -396,6 +403,7 @@ function parseMarkdownDocument(entry: ArchiveEntry): ParsedMarkdownDocument {
   }
 
   const rawStatus = frontmatter._status ?? frontmatter.status
+  const rawVisibility = frontmatter.visibility
   const directory = path.posix.dirname(entry.path)
 
   return {
@@ -417,6 +425,7 @@ function parseMarkdownDocument(entry: ArchiveEntry): ParsedMarkdownDocument {
     hasHeroImageField: Object.prototype.hasOwnProperty.call(frontmatter, 'heroImage'),
     hasLocaleField: Object.prototype.hasOwnProperty.call(frontmatter, 'locale'),
     hasTagsField: Object.prototype.hasOwnProperty.call(frontmatter, 'tags'),
+    hasVisibilityField: Object.prototype.hasOwnProperty.call(frontmatter, 'visibility'),
     heroImagePath:
       typeof frontmatter.heroImage === 'string'
         ? frontmatter.heroImage.trim()
@@ -442,6 +451,7 @@ function parseMarkdownDocument(entry: ArchiveEntry): ParsedMarkdownDocument {
         ? frontmatter.translationProvider.trim()
         : undefined,
     translationStatus: parseTranslationStatus(frontmatter.translationStatus),
+    visibility: normalizePostVisibility(rawVisibility),
   }
 }
 
@@ -554,6 +564,8 @@ function applyMDshipOverrides(args: {
     status: overrides.status ?? document.status,
     tags: overrides.tags && overrides.tags.length > 0 ? overrides.tags : document.tags,
     title: overrides.title?.trim() || document.title,
+    visibility: overrides.visibility ?? document.visibility,
+    hasVisibilityField: Boolean(overrides.visibility) || document.hasVisibilityField,
   }
 }
 
@@ -1108,6 +1120,10 @@ async function importPostEntries(args: {
     const sharedData: Record<string, unknown> = {
       _status: sharedDocument.status,
       slug: parsedPackage.slug,
+    }
+
+    if (sharedDocument.hasVisibilityField) {
+      sharedData.visibility = sharedDocument.visibility
     }
 
     if (sharedDocument.hasTagsField) {
