@@ -1,6 +1,7 @@
 import { createHash } from 'crypto'
 import type { Payload } from 'payload'
 
+import { isPostPubliclyReadable } from '@/features/posts/model/post-visibility'
 import type { AppLocale } from '@/shared/i18n/locales'
 import { getPayloadSecret } from '@/shared/runtime/env'
 
@@ -123,13 +124,14 @@ async function loadPublishedRenderablePost(args: {
         _status: true,
         content: true,
         title: true,
+        visibility: true,
       },
     })
 
     const title = typeof post?.title === 'string' ? post.title.trim() : ''
     const content = typeof post?.content === 'string' ? post.content.trim() : ''
 
-    if (post?._status !== 'published' || !title || !content) {
+    if (!isPostPubliclyReadable(post) || !title || !content) {
       return null
     }
 

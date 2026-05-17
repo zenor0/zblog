@@ -1,5 +1,10 @@
 import type { Access } from 'payload'
 
+import {
+  publishedPublicPostVersionWhere,
+  publishedPublicPostWhere,
+} from '@/shared/content/post-visibility'
+
 export const adminRole = 'admin'
 export const editorRole = 'editor'
 export const userRoles = [adminRole, editorRole] as const
@@ -71,4 +76,20 @@ export const publishedVersionsOrEditor: Access = ({ req: { user } }) => {
       equals: 'published',
     },
   }
+}
+
+export const publishedPublicPostOrEditor: Access = ({ req: { user } }) => {
+  if (isEditor(user)) {
+    return true
+  }
+
+  return publishedPublicPostWhere
+}
+
+export const publishedPublicPostVersionsOrEditor: Access = ({ req: { user } }) => {
+  if (isEditor(user)) {
+    return true
+  }
+
+  return publishedPublicPostVersionWhere
 }

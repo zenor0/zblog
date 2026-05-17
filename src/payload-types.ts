@@ -258,6 +258,10 @@ export interface Post {
      */
     noindex?: boolean | null;
   };
+  /**
+   * Listed posts appear in public indexes. Unlisted posts are public by direct URL only. Private posts are visible to editors only.
+   */
+  visibility: 'listed' | 'unlisted' | 'private';
   slug: string;
   tags?:
     | {
@@ -630,6 +634,7 @@ export interface PostsSelect<T extends boolean = true> {
         metaImage?: T;
         noindex?: T;
       };
+  visibility?: T;
   slug?: T;
   tags?:
     | T

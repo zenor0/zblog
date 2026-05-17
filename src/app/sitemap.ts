@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 import { isPostIndexable } from '@/features/posts/server/queries'
+import { isPostListed, publishedListedPostWhere } from '@/features/posts/model/post-visibility'
 import { getProjectTimestamp, isProjectIndexable } from '@/features/projects/server/queries'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import {
@@ -23,6 +24,7 @@ function isSitemapRenderablePost(post: null | Post): post is Post {
     post.title.trim().length > 0 &&
     typeof post.content === 'string' &&
     post.content.trim().length > 0 &&
+    isPostListed(post) &&
     isPostIndexable(post),
   )
 }
@@ -93,11 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           locale,
           overrideAccess: false,
           sort: '-updatedAt',
-          where: {
-            _status: {
-              equals: 'published',
-            },
-          },
+          where: publishedListedPostWhere,
         })
 
         return {

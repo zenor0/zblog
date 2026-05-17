@@ -21,6 +21,7 @@ import { GET as getLocalizedRSS } from '@/app/(frontend)/[locale]/rss.xml/route'
 import { GET as getRootRSS } from '@/app/rss.xml/route'
 import sitemap from '@/app/sitemap'
 import robots from '@/app/robots'
+import { publishedListedPostWhere } from '@/features/posts/model/post-visibility'
 import { buildRSSFeed, getRSSFeedPosts } from '@/features/rss/server/rss-feed'
 
 const originalSiteURL = process.env.NEXT_PUBLIC_SITE_URL
@@ -42,6 +43,7 @@ function postFixture(overrides: Partial<Post> = {}): Post {
     updatedAt: '2026-03-24T12:00:00.000Z',
     createdAt: '2026-03-22T12:00:00.000Z',
     _status: 'published',
+    visibility: 'listed',
     ...overrides,
   } as Post
 }
@@ -124,6 +126,16 @@ describe('RSS feed and discovery routes', () => {
           content: '',
           slug: 'empty-post',
         }),
+        postFixture({
+          id: 4,
+          slug: 'unlisted-post',
+          visibility: 'unlisted',
+        }),
+        postFixture({
+          id: 5,
+          slug: 'private-post',
+          visibility: 'private',
+        }),
       ],
     })
 
@@ -138,11 +150,7 @@ describe('RSS feed and discovery routes', () => {
       locale: 'en',
       overrideAccess: false,
       sort: '-publishedAt',
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
+      where: publishedListedPostWhere,
     })
   })
 
@@ -188,10 +196,20 @@ describe('RSS feed and discovery routes', () => {
             seo: {
               noindex: true,
             },
-            slug: 'hidden-post',
-          }),
-        ],
-      }),
+          slug: 'hidden-post',
+        }),
+        postFixture({
+          id: 3,
+          slug: 'unlisted-post',
+          visibility: 'unlisted',
+        }),
+        postFixture({
+          id: 4,
+          slug: 'private-post',
+          visibility: 'private',
+        }),
+      ],
+    }),
     )
     siteSettingsMocks.getResolvedSiteSettings.mockImplementation((locale: string) =>
       Promise.resolve(
@@ -249,6 +267,8 @@ describe('RSS feed and discovery routes', () => {
       'zh-Hans': 'https://zblog.example/zh-hans/posts/visible-post',
     })
     expect(entries.some((entry) => entry.url.includes('hidden-post'))).toBe(false)
+    expect(entries.some((entry) => entry.url.includes('unlisted-post'))).toBe(false)
+    expect(entries.some((entry) => entry.url.includes('private-post'))).toBe(false)
   })
 
   it('keeps robots pointed at the sitemap while blocking private surfaces', () => {

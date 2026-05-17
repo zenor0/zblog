@@ -5,6 +5,11 @@ import { getBibliographySource, loadBibliographyEntries, getReferencedEntries } 
 import { buildCitationIndex } from '@/features/article/model/citations'
 import { buildVersionDiff } from '@/shared/content/diff'
 import { defaultLocale, localeCodes, type AppLocale } from '@/shared/i18n/locales'
+import {
+  isPostListed,
+  publishedListedPostWhere,
+  publishedPublicPostWhere,
+} from '@/features/posts/model/post-visibility'
 import { getPayloadClient } from '@/shared/payload/client'
 import type { Post, User } from '@/payload-types'
 
@@ -48,14 +53,10 @@ export async function getPublishedPosts(locale: AppLocale): Promise<Post[]> {
     locale,
     overrideAccess: false,
     sort: '-publishedAt',
-    where: {
-      _status: {
-        equals: 'published',
-      },
-    },
+    where: publishedListedPostWhere,
   })
 
-  return result.docs
+  return result.docs.filter(isPostListed)
 }
 
 export async function getPostBySlug(args: {
@@ -73,16 +74,14 @@ export async function getPostBySlug(args: {
       }
     : {}
   const where = {
-    ...(usedDraftAccess
-      ? {}
-      : {
-          _status: {
-            equals: 'published' as const,
-          },
-        }),
-    slug: {
-      equals: slug,
-    },
+    and: [
+      ...(usedDraftAccess ? [] : [publishedPublicPostWhere]),
+      {
+        slug: {
+          equals: slug,
+        },
+      },
+    ],
   }
 
   const localizedResult = await payload.find({
@@ -160,9 +159,14 @@ export async function getPostByID(args: {
       }
     : {}
   const where = {
-    id: {
-      equals: id,
-    },
+    and: [
+      ...(usedDraftAccess ? [] : [publishedPublicPostWhere]),
+      {
+        id: {
+          equals: id,
+        },
+      },
+    ],
   }
 
   const localizedResult = await payload.find({
@@ -279,16 +283,14 @@ export async function getRenderablePostLocales(args: {
       }
     : {}
   const where = {
-    ...(usedDraftAccess
-      ? {}
-      : {
-          _status: {
-            equals: 'published' as const,
-          },
-        }),
-    slug: {
-      equals: args.slug,
-    },
+    and: [
+      ...(usedDraftAccess ? [] : [publishedPublicPostWhere]),
+      {
+        slug: {
+          equals: args.slug,
+        },
+      },
+    ],
   }
 
   const locales = await Promise.all(
