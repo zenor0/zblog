@@ -112,5 +112,16 @@ describe('Site settings footer config', () => {
 
     const legalLinksField = allFooterFields.find((field: any) => field.name === 'legalLinks') as any
     expect(legalLinksField.admin.description).toContain('Bottom-left metadata layer')
+
+    const complianceField = allFooterFields.find((field: any) => field.name === 'compliance') as any
+    const filingsField = complianceField.fields.find(
+      (field: any) => field.name === 'filings',
+    ) as any
+    expect(
+      filingsField.fields.find((field: any) => field.name === 'label').required,
+    ).toBeUndefined()
+    expect(
+      filingsField.fields.find((field: any) => field.name === 'value').required,
+    ).toBeUndefined()
   })
 })

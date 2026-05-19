@@ -702,14 +702,12 @@ const footerFields: Field[] = [
             type: 'text',
             label: 'Label',
             localized: true,
-            required: true,
           },
           {
             name: 'value',
             type: 'text',
             label: 'Value',
             localized: true,
-            required: true,
           },
           {
             name: 'href',

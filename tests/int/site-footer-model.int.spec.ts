@@ -112,4 +112,58 @@ describe('site footer model helpers', () => {
 
     expect(footer?.layoutStyle).toBe('compact')
   })
+
+  it('keeps compliance filings when either label or value is present', () => {
+    const footer = normalizeSiteFooter({
+      locale: 'zh-Hans',
+      settings: {
+        siteName: 'ZBlog',
+        footer: {
+          compliance: {
+            copyright: '',
+            filings: [
+              {
+                href: 'https://label-only.example',
+                label: 'ICP备案',
+                value: '',
+              },
+              {
+                href: 'https://beian.miit.gov.cn/',
+                label: '',
+                value: '沪ICP备00000000号',
+              },
+              {
+                href: 'https://beian.mps.gov.cn/',
+                label: '公安备案',
+                value: '沪公网安备 00000000000000号',
+              },
+              {
+                href: 'https://empty.example',
+                label: ' ',
+                value: '',
+              },
+            ],
+          },
+        },
+      } as any,
+    })
+
+    expect(footer?.compliance.filings).toEqual([
+      {
+        href: null,
+        label: 'ICP备案',
+        value: null,
+      },
+      {
+        href: 'https://beian.miit.gov.cn/',
+        label: null,
+        value: '沪ICP备00000000号',
+      },
+      {
+        href: 'https://beian.mps.gov.cn/',
+        label: '公安备案',
+        value: '沪公网安备 00000000000000号',
+      },
+    ])
+  })
 })

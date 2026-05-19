@@ -41,6 +41,8 @@ type FooterProfileItem = FooterInlineItem & {
   meta: null | string
 }
 
+type FooterComplianceFiling = NormalizedSiteFooter['compliance']['filings'][number]
+
 type FooterRenderContext = {
   labels: SiteFooterLabels
 }
@@ -213,6 +215,40 @@ function FooterInlineItems(props: {
   )
 }
 
+function FooterComplianceFilingValue(props: { filing: FooterComplianceFiling }) {
+  const { filing } = props
+
+  if (!filing.value) {
+    return null
+  }
+
+  return filing.href ? <Link href={filing.href}>{filing.value}</Link> : filing.value
+}
+
+function FooterComplianceFilings(props: { filings: FooterComplianceFiling[] }) {
+  if (props.filings.length === 0) {
+    return null
+  }
+
+  return (
+    <dl className="flex flex-wrap gap-x-5 gap-y-1">
+      {props.filings.map((filing, index) => (
+        <div
+          className="flex flex-wrap gap-x-1.5"
+          key={`${filing.label ?? 'plain'}-${filing.value ?? 'empty'}-${index}`}
+        >
+          {filing.label ? <dt>{filing.label}</dt> : null}
+          {filing.value ? (
+            <dd>
+              <FooterComplianceFilingValue filing={filing} />
+            </dd>
+          ) : null}
+        </div>
+      ))}
+    </dl>
+  )
+}
+
 function FooterNavSections(props: { footer: NormalizedSiteFooter }) {
   if (props.footer.navigationSections.length === 0) {
     return null
@@ -338,17 +374,7 @@ function BalancedFooterMetadata(props: FooterRenderContext & { footer: Normalize
         <div className="flex flex-col gap-2" data-footer-meta-align="left">
           <FooterInlineItems ariaLabel={props.labels.footerLinks} items={legalLinks} />
 
-          {compliance.filings.length ? (
-            <dl className="flex flex-wrap gap-x-5 gap-y-1">
-              {compliance.filings.map((item) => (
-                <div className="flex flex-wrap gap-x-1.5" key={`${item.label}-${item.value}`}>
-                  <dt>{item.label}</dt>
-                  <dd>{item.href ? <Link href={item.href}>{item.value}</Link> : item.value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-
+          <FooterComplianceFilings filings={compliance.filings} />
         </div>
       ) : null}
 
@@ -508,9 +534,7 @@ function FooterMetadata(
 ) {
   const { compliance } = props.footer
   const hasMetadata =
-    compliance.filings.length > 0 ||
-    Boolean(compliance.copyright) ||
-    Boolean(compliance.note)
+    compliance.filings.length > 0 || Boolean(compliance.copyright) || Boolean(compliance.note)
 
   if (!hasMetadata) {
     return null
@@ -521,16 +545,7 @@ function FooterMetadata(
       className={cn('flex flex-col gap-2 text-sm leading-6 text-muted-foreground', props.className)}
       data-footer-meta=""
     >
-      {compliance.filings.length ? (
-        <dl className="flex flex-wrap gap-x-5 gap-y-1">
-          {compliance.filings.map((item) => (
-            <div className="flex flex-wrap gap-x-1.5" key={`${item.label}-${item.value}`}>
-              <dt>{item.label}</dt>
-              <dd>{item.href ? <Link href={item.href}>{item.value}</Link> : item.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
+      <FooterComplianceFilings filings={compliance.filings} />
 
       {compliance.copyright || compliance.note ? (
         <div className="flex flex-wrap gap-x-5 gap-y-1">

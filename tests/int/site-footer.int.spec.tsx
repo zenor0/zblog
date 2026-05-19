@@ -242,6 +242,49 @@ describe('SiteFooter', () => {
     expect(markup).toBe('')
   })
 
+  it('renders compliance filing label-only, value-only, and label-value modes', () => {
+    const markup = renderToStaticMarkup(
+      <SiteFooter
+        locale="zh-Hans"
+        settings={
+          {
+            siteName: 'ZBlog',
+            footer: {
+              layoutStyle: 'compact',
+              compliance: {
+                filings: [
+                  {
+                    href: 'https://label-only.example',
+                    label: 'ICP备案',
+                    value: '',
+                  },
+                  {
+                    href: 'https://beian.miit.gov.cn/',
+                    label: '',
+                    value: '沪ICP备00000000号',
+                  },
+                  {
+                    href: 'https://beian.mps.gov.cn/',
+                    label: '公安备案',
+                    value: '沪公网安备 00000000000000号',
+                  },
+                ],
+              },
+            },
+          } as any
+        }
+      />,
+    )
+
+    expect(markup).toContain('ICP备案')
+    expect(markup).toContain('沪ICP备00000000号')
+    expect(markup).toContain('公安备案')
+    expect(markup).toContain('沪公网安备 00000000000000号')
+    expect(markup).toContain('href="https://beian.miit.gov.cn/"')
+    expect(markup).toContain('href="https://beian.mps.gov.cn/"')
+    expect(markup).not.toContain('href="https://label-only.example"')
+  })
+
   it('renders localized footer chrome without locale navigation links', () => {
     const markup = renderToStaticMarkup(
       <SiteFooter

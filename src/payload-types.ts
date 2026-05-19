@@ -1086,8 +1086,8 @@ export interface SiteSetting {
       copyright?: string | null;
       filings?:
         | {
-            label: string;
-            value: string;
+            label?: string | null;
+            value?: string | null;
             href?: string | null;
             id?: string | null;
           }[]

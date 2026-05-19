@@ -37,8 +37,8 @@ export type NormalizedSiteFooter = {
     copyright: null | string
     filings: {
       href: null | string
-      label: string
-      value: string
+      label: null | string
+      value: null | string
     }[]
     note: null | string
   }
@@ -276,15 +276,18 @@ export function normalizeSiteFooter(args: {
 
   const filings =
     footer.compliance?.filings?.flatMap((item) => {
-      if (!hasText(item?.label) || !hasText(item?.value)) {
+      const label = hasText(item?.label) ? item.label : null
+      const value = hasText(item?.value) ? item.value : null
+
+      if (!label && !value) {
         return []
       }
 
       return [
         {
-          href: hasText(item.href) ? item.href : null,
-          label: item.label,
-          value: item.value,
+          href: value && hasText(item.href) ? item.href : null,
+          label,
+          value,
         },
       ]
     }) ?? []

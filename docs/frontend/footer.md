@@ -89,7 +89,8 @@ The blog seed applies starter footer data per locale without using Payload fallb
 - Drop social links without URLs.
 - Drop contact items without both label and value.
 - Drop legal links without valid destinations.
-- Drop compliance filings without both label and value.
+- Drop compliance filings without either label or value. Filings may render as label-only,
+  value-only, or label and value; links apply only to values.
 - Render bottom note independently from other compliance content.
 
 ## Visual Rules
