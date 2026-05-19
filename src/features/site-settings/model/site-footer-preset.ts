@@ -72,6 +72,10 @@ function getRecordValue<T extends Record<string, unknown>, K extends keyof T>(
   return isRecord(value) ? (value[key as string] as T[K] | undefined) : undefined
 }
 
+function getArrayValue<T>(value: null | T[] | undefined): T[] {
+  return Array.isArray(value) ? value : []
+}
+
 function mergeOwnerVariables(
   existing: SiteGlobalVariables,
   starter: NonNullable<SiteGlobalVariables>,
@@ -123,8 +127,8 @@ function mergeArrayByKey<T extends Record<string, unknown>>(
   starter: null | T[] | undefined,
   getKey: (item: T) => string,
 ) {
-  const existingItems = Array.isArray(existing) ? existing : []
-  const starterItems = Array.isArray(starter) ? starter : []
+  const existingItems = getArrayValue(existing)
+  const starterItems = getArrayValue(starter)
   const existingByKey = new Map(
     existingItems.map((item) => [getKey(item), item] as const).filter(([key]) => Boolean(key)),
   )
@@ -261,7 +265,7 @@ function cloneFooterData<T>(value: T): T {
 }
 
 function hasCustomVariable(globalVariables: SiteGlobalVariables, key: string) {
-  return globalVariables?.customVariables?.some((item) => item.key === key) ?? false
+  return getArrayValue(globalVariables?.customVariables).some((item) => item.key === key)
 }
 
 function getReferencePath(prefix: string, key: string, property: string) {
@@ -292,11 +296,11 @@ function getFallbackFooter(footer: MaybeSiteFooterData): NonNullable<SiteFooterD
       },
     },
     compliance: footer?.compliance ?? {},
-    contactItems: footer?.contactItems ?? [],
+    contactItems: getArrayValue(footer?.contactItems),
     layoutStyle: footer?.layoutStyle ?? defaultSiteFooterLayoutStyle,
-    legalLinks: footer?.legalLinks ?? [],
-    navigationSections: footer?.navigationSections ?? [],
-    socialLinks: footer?.socialLinks ?? [],
+    legalLinks: getArrayValue(footer?.legalLinks),
+    navigationSections: getArrayValue(footer?.navigationSections),
+    socialLinks: getArrayValue(footer?.socialLinks),
   }
 }
 
@@ -336,30 +340,29 @@ function mergeSocialLinksFromGeneral(args: {
   footerSocialLinks: FooterSocialLink[] | null | undefined
   globalSocialLinks: SocialLink[] | null | undefined
 }): FooterSocialLink[] {
-  const existing = args.footerSocialLinks ?? []
+  const existing = getArrayValue(args.footerSocialLinks)
   const existingPlatforms = new Set(existing.map((item) => item.platform))
   const existingURLs = new Set(existing.map((item) => getTextValue(item.url)).filter(Boolean))
-  const additions =
-    args.globalSocialLinks?.flatMap((item) => {
-      const platform = item.platform
-      const url = getTextValue(item.url)
+  const additions = getArrayValue(args.globalSocialLinks).flatMap((item) => {
+    const platform = item.platform
+    const url = getTextValue(item.url)
 
-      if (!platform || !url || existingPlatforms.has(platform) || existingURLs.has(url)) {
-        return []
-      }
+    if (!platform || !url || existingPlatforms.has(platform) || existingURLs.has(url)) {
+      return []
+    }
 
-      existingPlatforms.add(platform)
-      existingURLs.add(url)
+    existingPlatforms.add(platform)
+    existingURLs.add(url)
 
-      return [
-        {
-          label: getReferencePath('social', platform, 'label'),
-          openInNewTab: item.openInNewTab ?? true,
-          platform,
-          url: getReferencePath('social', platform, 'url'),
-        },
-      ]
-    }) ?? []
+    return [
+      {
+        label: getReferencePath('social', platform, 'label'),
+        openInNewTab: item.openInNewTab ?? true,
+        platform,
+        url: getReferencePath('social', platform, 'url'),
+      },
+    ]
+  })
 
   return [...existing, ...additions]
 }
@@ -401,8 +404,8 @@ function mergeContactItemsFromGeneral(args: {
   footerContactItems: FooterContactItem[] | null | undefined
   globalVariables: SiteGlobalVariables
 }): FooterContactItem[] {
-  const existing = args.footerContactItems ?? []
-  const contactItems = args.globalVariables?.contactItems ?? []
+  const existing = getArrayValue(args.footerContactItems)
+  const contactItems = getArrayValue(args.globalVariables?.contactItems)
   const additions: FooterContactItem[] = []
 
   contactItems.forEach((item) => {

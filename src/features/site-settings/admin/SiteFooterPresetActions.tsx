@@ -2,10 +2,15 @@
 
 import type { UIFieldClientComponent } from 'payload'
 
-import { Button, toast, useField, useLocale } from '@payloadcms/ui'
+import { Button, toast, useField, useFormFields, useLocale } from '@payloadcms/ui'
+import { useMemo } from 'react'
 
 import type { SiteSettings } from '@/features/site-settings/model/site-settings'
 
+import {
+  readSiteSettingsSnapshot,
+  type SiteSettingsFormState,
+} from '@/features/site-settings/admin/site-settings-form-state'
 import { getSiteFooterLabels } from '@/features/site-settings/model/site-footer'
 import {
   getStarterSiteFooterPreset,
@@ -16,6 +21,8 @@ import {
 export const SiteFooterPresetActions: UIFieldClientComponent = () => {
   const locale = useLocale()
   const labels = getSiteFooterLabels(locale?.code)
+  const fields = useFormFields(([formFields]) => formFields as SiteSettingsFormState)
+  const settings = useMemo(() => readSiteSettingsSnapshot<Partial<SiteSettings>>(fields), [fields])
   const footer = useField<SiteSettings['footer']>({ path: 'footer' })
   const globalVariables = useField<SiteSettings['globalVariables']>({ path: 'globalVariables' })
 
@@ -24,7 +31,7 @@ export const SiteFooterPresetActions: UIFieldClientComponent = () => {
 
     footer.setValue(preset.footer)
     globalVariables.setValue(
-      mergeStarterGlobalVariables(globalVariables.value, preset.globalVariables),
+      mergeStarterGlobalVariables(settings.globalVariables, preset.globalVariables),
     )
     toast.success(labels.starterFooterApplied)
   }
@@ -32,8 +39,8 @@ export const SiteFooterPresetActions: UIFieldClientComponent = () => {
   function fillFooterFromGeneral() {
     footer.setValue(
       mergeFooterFromGeneralSettings({
-        footer: footer.value,
-        globalVariables: globalVariables.value,
+        footer: settings.footer,
+        globalVariables: settings.globalVariables,
       }),
     )
     toast.success(labels.footerFilledFromGeneral)

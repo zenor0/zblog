@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getStarterSiteFooterPreset,
+  mergeFooterFromGeneralSettings,
   mergeStarterGlobalVariables,
 } from '@/features/site-settings/model/site-footer-preset'
 
@@ -113,5 +114,35 @@ describe('site footer starter preset', () => {
     )
     expect(merged?.socialLinks?.find((link) => link.platform === 'rss')).toBeUndefined()
     expect(merged?.contactItems?.find((item) => item.key === 'email')).toBeUndefined()
+  })
+
+  it('ignores malformed non-array values when filling footer from General', () => {
+    const merged = mergeFooterFromGeneralSettings({
+      footer: {
+        contactItems: 1,
+        socialLinks: 1,
+      } as any,
+      globalVariables: {
+        contactItems: 1,
+        customVariables: 1,
+        owner: {
+          email: 'owner@example.com',
+        },
+        socialLinks: 1,
+      } as any,
+    })
+
+    expect(merged?.contactItems).toEqual([
+      {
+        label: 'Email',
+        link: {
+          externalUrl: 'mailto:{{owner.email}}',
+          openInNewTab: false,
+          type: 'external',
+        },
+        value: '{{owner.email}}',
+      },
+    ])
+    expect(merged?.socialLinks).toEqual([])
   })
 })

@@ -203,4 +203,89 @@ describe('SiteSettingsRawSectionEditor', () => {
     expect(editor.value).toContain('preset: compact-editorial')
     expect(editor.value).not.toContain('articleLayoutEditorMode')
   })
+
+  it('serializes Payload array row state as YAML arrays and applies arrays back to the form', () => {
+    mockedFormFields = {
+      globalVariables: {
+        value: {
+          contactItems: 1,
+          socialLinks: 1,
+        },
+      },
+      'globalVariables.contactItems': {
+        rows: [{ id: 'contact-press' }],
+        value: 1,
+      },
+      'globalVariables.contactItems.0.key': {
+        value: 'press',
+      },
+      'globalVariables.contactItems.0.label': {
+        value: 'Press',
+      },
+      'globalVariables.contactItems.0.url': {
+        value: 'mailto:press@example.com',
+      },
+      'globalVariables.contactItems.0.value': {
+        value: 'press@example.com',
+      },
+      'globalVariables.socialLinks': {
+        rows: [{ id: 'social-github' }],
+        value: 1,
+      },
+      'globalVariables.socialLinks.0.label': {
+        value: '@zenor0',
+      },
+      'globalVariables.socialLinks.0.platform': {
+        value: 'github',
+      },
+      'globalVariables.socialLinks.0.url': {
+        value: 'https://github.com/zenor0',
+      },
+      siteName: {
+        value: 'ZBlog',
+      },
+    }
+
+    render(
+      <SiteSettingsRawSectionEditor
+        field={{ name: 'generalRawConfig', type: 'ui' } as any}
+        path="generalRawConfig"
+      />,
+    )
+
+    const editor = screen.getByLabelText('General YAML config') as HTMLTextAreaElement
+
+    expect(editor.value).toContain('contactItems:')
+    expect(editor.value).toContain('- key: press')
+    expect(editor.value).toContain('socialLinks:')
+    expect(editor.value).toContain('- label: "@zenor0"')
+    expect(editor.value).not.toContain('contactItems: 1')
+    expect(editor.value).not.toContain('socialLinks: 1')
+
+    fireEvent.change(editor, {
+      target: {
+        value: [
+          'siteName: ZBlog',
+          'globalVariables:',
+          '  contactItems:',
+          '    - key: support',
+          '      label: Support',
+          '      value: support@example.com',
+          '      url: mailto:support@example.com',
+        ].join('\n'),
+      },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply YAML' }))
+
+    expect(fieldStates.globalVariables.setValue).toHaveBeenCalledWith({
+      contactItems: [
+        {
+          key: 'support',
+          label: 'Support',
+          url: 'mailto:support@example.com',
+          value: 'support@example.com',
+        },
+      ],
+    })
+  })
 })
