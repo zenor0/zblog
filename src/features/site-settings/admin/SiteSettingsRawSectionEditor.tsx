@@ -2,12 +2,11 @@
 
 import type { UIFieldClientComponent } from 'payload'
 
-import { CodeEditor, useField, useFormFields } from '@payloadcms/ui'
+import { CodeEditor, useForm, useFormFields } from '@payloadcms/ui'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   buildSiteVariableContext,
-  getSiteSettingsSectionRootKeys,
   mergeSiteSettingsSection,
   parseSiteSettingsSectionYAML,
   serializeSiteSettingsSectionToYAML,
@@ -16,15 +15,13 @@ import {
   type SiteSettingsSectionID,
 } from '@/features/site-settings/model/site-settings-config'
 import {
+  mergeSiteSettingsEditorModes,
   readSiteSettingsSnapshot,
   type SiteSettingsFormState,
 } from '@/features/site-settings/admin/site-settings-form-state'
 
 import './site-settings-raw-section-editor.scss'
 
-type FieldSetter = {
-  setValue: (value: unknown) => void
-}
 type CompletionProviderDisposable = {
   dispose?: () => void
 }
@@ -72,6 +69,7 @@ function formatValidationError(references: string[]) {
 
 export const SiteSettingsRawSectionEditor: UIFieldClientComponent = ({ field, path }) => {
   const fields = useFormFields(([formFields]) => formFields as SiteSettingsFormState)
+  const { reset, setModified } = useForm()
   const section = getSectionFromFieldName(field.name, path)
   const label = siteSettingsSectionLabels[section]
   const settings = useMemo(() => readSiteSettingsSnapshot(fields), [fields])
@@ -84,24 +82,6 @@ export const SiteSettingsRawSectionEditor: UIFieldClientComponent = ({ field, pa
   const [notice, setNotice] = useState<null | string>(null)
   const [isDirty, setIsDirty] = useState(false)
   const completionProviderRef = useRef<CompletionProviderDisposable | null>(null)
-  const siteName = useField<unknown>({ path: 'siteName' })
-  const siteDescription = useField<unknown>({ path: 'siteDescription' })
-  const globalVariables = useField<unknown>({ path: 'globalVariables' })
-  const appearance = useField<unknown>({ path: 'appearance' })
-  const homeHero = useField<unknown>({ path: 'homeHero' })
-  const seo = useField<unknown>({ path: 'seo' })
-  const articleLayout = useField<unknown>({ path: 'articleLayout' })
-  const footer = useField<unknown>({ path: 'footer' })
-  const setters: Record<string, FieldSetter> = {
-    appearance,
-    articleLayout,
-    footer,
-    globalVariables,
-    homeHero,
-    seo,
-    siteDescription,
-    siteName,
-  }
 
   useEffect(() => {
     if (!isDirty) {
@@ -145,7 +125,7 @@ export const SiteSettingsRawSectionEditor: UIFieldClientComponent = ({ field, pa
     })
   }
 
-  function applyYAML() {
+  async function applyYAML() {
     try {
       const parsed = parseSiteSettingsSectionYAML(section, draft)
       const nextSettings = mergeSiteSettingsSection(settings, section, parsed)
@@ -155,11 +135,8 @@ export const SiteSettingsRawSectionEditor: UIFieldClientComponent = ({ field, pa
         throw new Error(formatValidationError(validation.unknownReferences))
       }
 
-      getSiteSettingsSectionRootKeys(section).forEach((rootKey) => {
-        if (Object.prototype.hasOwnProperty.call(parsed, rootKey)) {
-          setters[rootKey]?.setValue((parsed as Record<string, unknown>)[rootKey])
-        }
-      })
+      await reset(mergeSiteSettingsEditorModes(fields, nextSettings))
+      setModified(true)
 
       setError(null)
       setNotice(`${label} YAML applied to the form.`)
