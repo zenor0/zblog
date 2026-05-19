@@ -1,10 +1,11 @@
 import React from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 let mockedFormFields: Record<string, any>
 let mockedCodeEditorProps: any
-const fieldStates: Record<string, { setValue: ReturnType<typeof vi.fn>; value?: unknown }> = {}
+const resetForm = vi.fn()
+const setModified = vi.fn()
 
 vi.mock('@payloadcms/ui', () => ({
   CodeEditor: (props: any) => {
@@ -18,13 +19,11 @@ vi.mock('@payloadcms/ui', () => ({
       />
     )
   },
-  useField: ({ path }: { path: string }) => {
-    fieldStates[path] ??= {
-      setValue: vi.fn(),
-      value: mockedFormFields[path]?.value,
+  useForm: () => {
+    return {
+      reset: resetForm,
+      setModified,
     }
-
-    return fieldStates[path]
   },
   useFormFields: (selector: any) => selector([mockedFormFields]),
 }))
@@ -33,14 +32,11 @@ import { SiteSettingsRawSectionEditor } from '@/features/site-settings/admin/Sit
 
 describe('SiteSettingsRawSectionEditor', () => {
   afterEach(() => {
-    Object.keys(fieldStates).forEach((key) => {
-      delete fieldStates[key]
-    })
     mockedCodeEditorProps = undefined
     vi.clearAllMocks()
   })
 
-  it('renders only the YAML editor for the current section and applies it to Payload form state', () => {
+  it('renders only the YAML editor for the current section and applies it to Payload form state', async () => {
     mockedFormFields = {
       homeHero: {
         value: {
@@ -83,10 +79,16 @@ describe('SiteSettingsRawSectionEditor', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Apply YAML' }))
 
-    expect(fieldStates.homeHero.setValue).toHaveBeenCalledWith({
-      description: 'New description',
-      title: '{{site.name}}',
+    await waitFor(() => {
+      expect(resetForm).toHaveBeenCalledWith({
+        homeHero: {
+          description: 'New description',
+          title: '{{site.name}}',
+        },
+        siteName: 'ZBlog',
+      })
     })
+    expect(setModified).toHaveBeenCalledWith(true)
   })
 
   it('shows YAML errors without writing invalid values', () => {
@@ -116,7 +118,7 @@ describe('SiteSettingsRawSectionEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Apply YAML' }))
 
     expect(screen.getByText(/Invalid YAML/)).toBeTruthy()
-    expect(fieldStates.homeHero.setValue).not.toHaveBeenCalled()
+    expect(resetForm).not.toHaveBeenCalled()
   })
 
   it('registers reference autocomplete suggestions for YAML editing', () => {
@@ -204,7 +206,7 @@ describe('SiteSettingsRawSectionEditor', () => {
     expect(editor.value).not.toContain('articleLayoutEditorMode')
   })
 
-  it('serializes Payload array row state as YAML arrays and applies arrays back to the form', () => {
+  it('serializes Payload array row state as YAML arrays and applies arrays back to the form', async () => {
     mockedFormFields = {
       globalVariables: {
         value: {
@@ -277,15 +279,126 @@ describe('SiteSettingsRawSectionEditor', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Apply YAML' }))
 
-    expect(fieldStates.globalVariables.setValue).toHaveBeenCalledWith({
-      contactItems: [
-        {
-          key: 'support',
-          label: 'Support',
-          url: 'mailto:support@example.com',
-          value: 'support@example.com',
+    await waitFor(() => {
+      expect(resetForm).toHaveBeenCalledWith({
+        globalVariables: {
+          contactItems: [
+            {
+              key: 'support',
+              label: 'Support',
+              url: 'mailto:support@example.com',
+              value: 'support@example.com',
+            },
+          ],
         },
-      ],
+        siteName: 'ZBlog',
+      })
     })
+  })
+
+  it('applies footer YAML through a full form reset so nested rows persist on save', async () => {
+    mockedFormFields = {
+      footer: {
+        value: {
+          brand: {
+            name: 'Old brand',
+          },
+          layoutStyle: 'compact',
+          navigationSections: 1,
+        },
+      },
+      'footer.footerEditorMode': {
+        value: 'yaml',
+      },
+      'footer.brand.name': {
+        value: 'Old brand',
+      },
+      'footer.layoutStyle': {
+        value: 'compact',
+      },
+      'footer.navigationSections': {
+        rows: [{ id: 'old-section' }],
+        value: 1,
+      },
+      'footer.navigationSections.0.id': {
+        value: 'old-section',
+      },
+      'footer.navigationSections.0.links': {
+        rows: [{ id: 'old-link' }],
+        value: 1,
+      },
+      'footer.navigationSections.0.links.0.id': {
+        value: 'old-link',
+      },
+      'footer.navigationSections.0.links.0.label': {
+        value: 'Old link',
+      },
+      'footer.navigationSections.0.links.0.link.internalPath': {
+        value: '/old',
+      },
+      'footer.navigationSections.0.links.0.link.type': {
+        value: 'internal',
+      },
+      'footer.navigationSections.0.title': {
+        value: 'Old section',
+      },
+      siteName: {
+        value: 'ZBlog',
+      },
+    }
+
+    render(
+      <SiteSettingsRawSectionEditor
+        field={{ name: 'footerRawConfig', type: 'ui' } as any}
+        path="footer.footerRawConfig"
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('Footer YAML config'), {
+      target: {
+        value: [
+          'footer:',
+          '  layoutStyle: directory',
+          '  brand:',
+          '    name: New brand',
+          '  navigationSections:',
+          '    - title: New section',
+          '      links:',
+          '        - label: New link',
+          '          link:',
+          '            type: internal',
+          '            internalPath: /new',
+        ].join('\n'),
+      },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Apply YAML' }))
+
+    await waitFor(() => {
+      expect(resetForm).toHaveBeenCalledWith({
+        footer: {
+          brand: {
+            name: 'New brand',
+          },
+          footerEditorMode: 'yaml',
+          layoutStyle: 'directory',
+          navigationSections: [
+            {
+              links: [
+                {
+                  label: 'New link',
+                  link: {
+                    internalPath: '/new',
+                    type: 'internal',
+                  },
+                },
+              ],
+              title: 'New section',
+            },
+          ],
+        },
+        siteName: 'ZBlog',
+      })
+    })
+    expect(setModified).toHaveBeenCalledWith(true)
   })
 })

@@ -16,6 +16,14 @@ const siteSettingsRootKeys = [
   'footer',
 ] as const
 
+const siteSettingsEditorModePaths = [
+  'generalEditorMode',
+  'homepageEditorMode',
+  'seoEditorMode',
+  'articleLayout.articleLayoutEditorMode',
+  'footer.footerEditorMode',
+] as const
+
 function isTransientEditorPath(path: string) {
   return path
     .split('.')
@@ -138,4 +146,21 @@ export function readSiteSettingsSnapshot<T = Record<string, unknown>>(
     })
 
   return stripTransientEditorState(settings) as T
+}
+
+export function mergeSiteSettingsEditorModes<T = Record<string, unknown>>(
+  fields: SiteSettingsFormState | undefined,
+  settings: T,
+): T {
+  const nextSettings = isRecord(settings) ? cloneValue(settings) : {}
+
+  siteSettingsEditorModePaths.forEach((path) => {
+    const value = fields?.[path]?.value
+
+    if (value !== undefined) {
+      setPathValue(nextSettings, path, value)
+    }
+  })
+
+  return nextSettings as T
 }
