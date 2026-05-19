@@ -85,7 +85,6 @@ export type SiteFooterLabels = {
   fillFooterFromGeneral: string
   footerLinks: string
   footerFilledFromGeneral: string
-  localeNavigation: string
   ownerProfileLinks: string
   previewFrameTitle: string
   previewNoContent: string
@@ -103,7 +102,6 @@ const siteFooterLabelsByLocale = {
     fillFooterFromGeneral: 'Fill from General',
     footerFilledFromGeneral: 'Footer filled from General settings.',
     footerLinks: 'Footer links',
-    localeNavigation: 'Locales',
     ownerProfileLinks: 'Owner profile links',
     previewFrameTitle: 'Production footer preview',
     previewNoContent: 'No usable footer content yet.',
@@ -119,7 +117,6 @@ const siteFooterLabelsByLocale = {
     fillFooterFromGeneral: '从 General 填充',
     footerFilledFromGeneral: '已从 General 设置填充页脚。',
     footerLinks: '页脚链接',
-    localeNavigation: '语言',
     ownerProfileLinks: '站点资料链接',
     previewFrameTitle: '生产页脚预览',
     previewNoContent: '还没有可用的页脚内容。',

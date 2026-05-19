@@ -242,7 +242,7 @@ describe('SiteFooter', () => {
     expect(markup).toBe('')
   })
 
-  it('renders localized footer chrome and locale navigation links', () => {
+  it('renders localized footer chrome without locale navigation links', () => {
     const markup = renderToStaticMarkup(
       <SiteFooter
         locale="zh-Hans"
@@ -284,10 +284,10 @@ describe('SiteFooter', () => {
     )
 
     expect(markup).toContain('aria-label="页脚链接"')
-    expect(markup).toContain('aria-label="语言"')
-    expect(markup).toContain('data-footer-locale-nav=""')
-    expect(markup).toContain('aria-current="page"')
-    expect(markup).toContain('href="/zh-hans"')
-    expect(markup).toContain('href="/en"')
+    expect(markup).not.toContain('aria-label="语言"')
+    expect(markup).not.toContain('data-footer-locale-nav=""')
+    expect(markup).not.toContain('>简体中文<')
+    expect(markup).not.toContain('>English<')
+    expect(markup).not.toContain('href="/en"')
   })
 })

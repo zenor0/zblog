@@ -26,7 +26,6 @@ import {
   normalizeSiteFooter,
   resolveSiteFooterLayoutStyle,
 } from '@/features/site-settings/model/site-footer'
-import { buildLocalePath, getLocaleLabel, supportedLocales } from '@/shared/i18n/locales'
 import { cn } from '@/shared/utils/cn'
 
 type FooterInlineItem = {
@@ -44,7 +43,6 @@ type FooterProfileItem = FooterInlineItem & {
 
 type FooterRenderContext = {
   labels: SiteFooterLabels
-  locale?: AppLocale
 }
 
 const socialPlatformIcons: Record<string, LucideIcon> = {
@@ -144,33 +142,6 @@ function getProfileItems(footer: NormalizedSiteFooter): FooterProfileItem[] {
       target: item.target,
     })),
   ]
-}
-
-function FooterLocaleNav(props: FooterRenderContext) {
-  if (!props.locale) {
-    return null
-  }
-
-  return (
-    <nav
-      aria-label={props.labels.localeNavigation}
-      className="flex flex-wrap gap-x-4 gap-y-1"
-      data-footer-locale-nav=""
-    >
-      {supportedLocales.map((locale) => (
-        <Link
-          aria-current={locale.code === props.locale ? 'page' : undefined}
-          className="editorial-link no-underline"
-          href={buildLocalePath(locale.code)}
-          hrefLang={locale.code}
-          key={locale.code}
-          lang={locale.code}
-        >
-          {getLocaleLabel(locale.code)}
-        </Link>
-      ))}
-    </nav>
-  )
 }
 
 function FooterIdentity(props: { footer: NormalizedSiteFooter; showSupportingText?: boolean }) {
@@ -351,8 +322,7 @@ function FooterProfileItems(props: FooterRenderContext & { footer: NormalizedSit
 
 function BalancedFooterMetadata(props: FooterRenderContext & { footer: NormalizedSiteFooter }) {
   const { compliance, legalLinks } = props.footer
-  const hasLeftContent =
-    legalLinks.length > 0 || compliance.filings.length > 0 || Boolean(props.locale)
+  const hasLeftContent = legalLinks.length > 0 || compliance.filings.length > 0
   const hasRightContent = Boolean(compliance.copyright) || Boolean(compliance.note)
 
   if (!hasLeftContent && !hasRightContent) {
@@ -379,7 +349,6 @@ function BalancedFooterMetadata(props: FooterRenderContext & { footer: Normalize
             </dl>
           ) : null}
 
-          <FooterLocaleNav labels={props.labels} locale={props.locale} />
         </div>
       ) : null}
 
@@ -440,7 +409,6 @@ function DirectoryFooter(props: FooterRenderContext & { footer: NormalizedSiteFo
         className="mt-8 border-t border-border pt-5"
         footer={props.footer}
         labels={props.labels}
-        locale={props.locale}
       />
     </div>
   )
@@ -465,8 +433,8 @@ function BalancedFooter(props: FooterRenderContext & { footer: NormalizedSiteFoo
           </div>
         </div>
 
-        <FooterProfileItems footer={props.footer} labels={props.labels} locale={props.locale} />
-        <BalancedFooterMetadata footer={props.footer} labels={props.labels} locale={props.locale} />
+        <FooterProfileItems footer={props.footer} labels={props.labels} />
+        <BalancedFooterMetadata footer={props.footer} labels={props.labels} />
       </div>
     </div>
   )
@@ -489,7 +457,6 @@ function CompactFooter(props: FooterRenderContext & { footer: NormalizedSiteFoot
           className="border-t border-border pt-4"
           footer={props.footer}
           labels={props.labels}
-          locale={props.locale}
         />
       </div>
     </div>
@@ -530,7 +497,6 @@ function LedgerFooter(props: FooterRenderContext & { footer: NormalizedSiteFoote
           className="border-t border-border pt-4"
           footer={props.footer}
           labels={props.labels}
-          locale={props.locale}
         />
       </div>
     </div>
@@ -544,8 +510,7 @@ function FooterMetadata(
   const hasMetadata =
     compliance.filings.length > 0 ||
     Boolean(compliance.copyright) ||
-    Boolean(compliance.note) ||
-    Boolean(props.locale)
+    Boolean(compliance.note)
 
   if (!hasMetadata) {
     return null
@@ -573,8 +538,6 @@ function FooterMetadata(
           {compliance.note ? <p>{compliance.note}</p> : null}
         </div>
       ) : null}
-
-      <FooterLocaleNav labels={props.labels} locale={props.locale} />
     </div>
   )
 }
@@ -590,7 +553,6 @@ export function SiteFooterLayout(props: {
   const labels = props.labels ?? getSiteFooterLabels(props.locale)
   const renderContext: FooterRenderContext = {
     labels,
-    locale: props.locale,
   }
 
   return (
