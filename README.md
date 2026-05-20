@@ -1,42 +1,65 @@
 # ZBlog
 
-ZBlog is a Payload-backed bilingual blog built with Next.js.
+ZBlog is a self-hostable publishing site for articles, notes, and project
+updates. It is designed around a quiet reading experience, practical authoring
+tools, seeded demo content, and a simple path from local development to a
+single-server deployment.
 
-## Quick Start - local setup
+## Preview
 
-To spin up this template locally, follow these steps:
+![ZBlog home page](./docs/assets/readme/home.png)
 
-### Clone
+<details>
+<summary>More screenshots</summary>
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### Posts
 
-### Development
+![ZBlog posts page](./docs/assets/readme/posts.png)
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables.
-3. If you are running without Docker, set `DATABASE_URL=file:.data/zblog.db` and `ZBLOG_STATE_DIR=.data` in `.env`.
-4. `pnpm install && pnpm dev` to install dependencies and start the dev server
-5. open `http://localhost:3000` to open the app in your browser
+### Article
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user.
+![ZBlog article page](./docs/assets/readme/article.png)
 
-## Production Docker
+</details>
 
-The production Docker setup is self-contained and does not require managed cloud services. It runs one Next.js/Payload app container, uses SQLite for the database, stores uploads on the local filesystem, and exposes port `3000` for your own reverse proxy or server panel.
+## Highlights
 
-Required host dependencies:
+- Public pages for posts, projects, archive, about, RSS, and utility content.
+- Admin workspace for writing, media, previews, and site configuration.
+- Markdown-centered article workflow with citations, attachments, and revision history.
+- Local-first setup with seed content for development and screenshots.
+- Docker Compose deployment for a small self-hosted instance.
 
-- Docker Engine
-- Docker Compose
+## Getting Started
 
-Required runtime configuration:
+```bash
+pnpm install
+cp .env.example .env
+```
 
-- `PAYLOAD_SECRET`: set this to a long random string before first production use.
-- `NEXT_PUBLIC_SITE_URL`: set this to the public origin, for example `https://blog.example.com`.
-- `DATABASE_URL`: keep `file:/app/.data/zblog.db` for the bundled SQLite deployment.
-- `ZBLOG_STATE_DIR`: keep `/app/.data` so the database, uploads, previews, and import/export files are stored in the persistent Docker volume.
+For local development, use SQLite and local runtime state:
 
-Run the production app:
+```bash
+DATABASE_URL=file:.data/zblog.db
+ZBLOG_STATE_DIR=.data
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+PAYLOAD_SECRET=replace-with-a-long-random-secret
+```
+
+Seed demo content and start the app:
+
+```bash
+pnpm run seed:blog:fresh
+pnpm dev
+```
+
+Open `http://localhost:3000` for the site and `http://localhost:3000/admin`
+for the admin area.
+
+## Deployment
+
+The included Docker Compose setup runs the app with SQLite and local filesystem
+storage.
 
 ```bash
 cp .env.example .env
@@ -44,48 +67,12 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Then open `http://localhost:3000/admin` or point your reverse proxy at `http://127.0.0.1:3000`.
+Back up the `zblog-data` Docker volume to preserve the database, uploads,
+generated previews, and import/export files.
 
-The persistent state lives in the `zblog-data` Docker volume mounted at `/app/.data`. Back up that volume to preserve:
+## Documentation
 
-- SQLite database: `zblog.db`
-- media uploads: `media/`
-- generated PDF previews: `media-previews/`
-- site data imports and exports: `imports/`, `exports/`
-- seed assets: `seed-assets/`
-
-Admin Data transfer exports are Payload data migration packages with a manifest, structured JSON
-data, and media files. They are useful for moving configuration and content between compatible
-ZBlog installs. For disaster recovery or exact SQLite restoration, back up the full volume,
-including `zblog.db`.
-
-PDF preview rendering is local. The Docker image installs `poppler-utils` and uses `pdftocairo` by default. Automatic translation is optional and disabled unless `TRANSLATION_API_URL` is configured.
-
-## Project docs
-
-- [Project documentation](./docs/README.md): frontend design system, article layout, Markdown rendering, post editor IA, bibliography, footer, localization, and development labs.
-- Runtime state: Docker production stores state under `/app/.data`; host-local development should use `.data`.
-- Local reset: this app is still pre-launch, so local data is disposable. Use `pnpm run db:reset` to remove `.data`, or `pnpm run seed:blog:fresh` to reset and recreate the seeded blog content.
-- Seed profiling: set `ZBLOG_SEED_TIMING=true` when running `seed:blog` to print per-step timings. Most cold-start time is Payload config and SQLite schema initialization; the seed writes are intentionally small.
-
-## How it works
-
-The Payload config is tailored for a bilingual editorial blog. It is pre-configured in the following ways:
-
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
-
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+- [Project documentation](./docs/README.md)
+- Local reset: `pnpm run db:reset`
+- Type check: `pnpm exec tsc --noEmit`
+- Tests: `pnpm run test:int` and `pnpm run test:e2e`

@@ -1,7 +1,7 @@
 {
   "name": "zblog",
   "version": "1.0.0",
-  "description": "A Payload-backed bilingual blog built with Next.js.",
+  "description": "A self-hostable publishing site for articles, notes, and project updates.",
   "license": "MIT",
   "type": "module",
   "scripts": {
