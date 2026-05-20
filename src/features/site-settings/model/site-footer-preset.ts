@@ -29,6 +29,8 @@ const starterCopy = {
     privacy: 'Privacy',
     projects: 'Projects',
     read: 'Read',
+    rss: 'RSS',
+    sitemap: 'Sitemap',
     tagline: 'Notes about technology, products, and everyday work.',
     terms: 'Terms',
   },
@@ -40,6 +42,8 @@ const starterCopy = {
     privacy: '隐私政策',
     projects: '项目',
     read: '阅读',
+    rss: 'RSS',
+    sitemap: '站点地图',
     tagline: '持续记录技术、产品与日常工作。',
     terms: '用户协议',
   },
@@ -221,6 +225,22 @@ export function getStarterSiteFooterPreset(
           link: {
             type: 'internal',
             internalPath: '/terms',
+            openInNewTab: false,
+          },
+        },
+        {
+          label: copy.rss,
+          link: {
+            type: 'internal',
+            internalPath: '/rss.xml',
+            openInNewTab: false,
+          },
+        },
+        {
+          label: copy.sitemap,
+          link: {
+            type: 'external',
+            externalUrl: '/sitemap.xml',
             openInNewTab: false,
           },
         },

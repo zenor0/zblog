@@ -42,6 +42,46 @@ describe('seed site settings', () => {
       },
     ])
     expect(en.footer?.layoutStyle).toBe('balanced')
+    expect(en.footer?.legalLinks).toMatchObject([
+      {
+        label: 'Privacy',
+        link: {
+          internalPath: '/privacy',
+          openInNewTab: false,
+          type: 'internal',
+        },
+      },
+      {
+        label: 'Terms',
+        link: {
+          internalPath: '/terms',
+          openInNewTab: false,
+          type: 'internal',
+        },
+      },
+      {
+        label: 'RSS',
+        link: {
+          internalPath: '/rss.xml',
+          openInNewTab: false,
+          type: 'internal',
+        },
+      },
+      {
+        label: 'Sitemap',
+        link: {
+          externalUrl: '/sitemap.xml',
+          openInNewTab: false,
+          type: 'external',
+        },
+      },
+    ])
+    expect(en.footer?.legalLinks?.map((link) => link.link.type)).toEqual([
+      'internal',
+      'internal',
+      'internal',
+      'external',
+    ])
     expect(en.footer?.socialLinks).toEqual([
       {
         label: '@zenor0',
@@ -85,6 +125,12 @@ describe('seed site settings', () => {
     expect(zh.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
     )
+    expect(zh.footer?.legalLinks?.map((link) => link.label)).toEqual([
+      '隐私政策',
+      '用户协议',
+      'RSS',
+      '站点地图',
+    ])
     expect(zh.globalVariables?.customVariables?.[0]?.value).toBe('持续记录技术、产品与日常工作。')
     expect(zh.globalVariables?.customVariables?.[1]?.value).toBe('hidden')
   })
@@ -144,6 +190,12 @@ describe('seed site settings', () => {
     expect(data.articleLayout?.advanced?.blockGap).toBe('2rem')
     expect(data.articleLayout?.preset).toBe('balanced-editorial')
     expect(data.footer?.bottomBar?.note).toBe('Existing footer note.')
+    expect(data.footer?.legalLinks?.map((link) => link.label)).toEqual([
+      'Privacy',
+      'Terms',
+      'RSS',
+      'Sitemap',
+    ])
     expect(data.footer?.socialLinks?.[0]?.label).toBe('@real')
     expect(data.footer?.socialLinks?.[0]?.url).toBe('https://github.com/real-footer')
     expect(data.footer?.socialLinks?.[1]?.platform).toBe('email')

@@ -20,10 +20,45 @@ describe('site footer starter preset', () => {
     ])
     expect(preset.footer?.socialLinks).toEqual([])
     expect(preset.footer?.contactItems).toEqual([])
-    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual(['Privacy', 'Terms'])
-    expect(preset.footer?.legalLinks?.map((link) => link.link.internalPath)).toEqual([
-      '/privacy',
-      '/terms',
+    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual([
+      'Privacy',
+      'Terms',
+      'RSS',
+      'Sitemap',
+    ])
+    expect(preset.footer?.legalLinks).toEqual([
+      {
+        label: 'Privacy',
+        link: {
+          internalPath: '/privacy',
+          openInNewTab: false,
+          type: 'internal',
+        },
+      },
+      {
+        label: 'Terms',
+        link: {
+          internalPath: '/terms',
+          openInNewTab: false,
+          type: 'internal',
+        },
+      },
+      {
+        label: 'RSS',
+        link: {
+          internalPath: '/rss.xml',
+          openInNewTab: false,
+          type: 'internal',
+        },
+      },
+      {
+        label: 'Sitemap',
+        link: {
+          externalUrl: '/sitemap.xml',
+          openInNewTab: false,
+          type: 'external',
+        },
+      },
     ])
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. All rights reserved.',
@@ -36,7 +71,20 @@ describe('site footer starter preset', () => {
 
     expect(preset.footer?.navigationSections?.[0]?.title).toBe('阅读')
     expect(preset.footer?.navigationSections?.[0]?.links?.[0]?.label).toBe('文章')
-    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual(['隐私政策', '用户协议'])
+    expect(preset.footer?.legalLinks?.map((link) => link.label)).toEqual([
+      '隐私政策',
+      '用户协议',
+      'RSS',
+      '站点地图',
+    ])
+    expect(preset.footer?.legalLinks?.[2]?.link).toMatchObject({
+      internalPath: '/rss.xml',
+      type: 'internal',
+    })
+    expect(preset.footer?.legalLinks?.[3]?.link).toMatchObject({
+      externalUrl: '/sitemap.xml',
+      type: 'external',
+    })
     expect(preset.footer?.compliance?.copyright).toBe(
       'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
     )

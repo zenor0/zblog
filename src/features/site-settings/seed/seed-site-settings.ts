@@ -109,6 +109,22 @@ const seedSettingsDefaults = {
             type: 'internal',
           },
         },
+        {
+          label: 'RSS',
+          link: {
+            internalPath: '/rss.xml',
+            openInNewTab: false,
+            type: 'internal',
+          },
+        },
+        {
+          label: 'Sitemap',
+          link: {
+            externalUrl: '/sitemap.xml',
+            openInNewTab: false,
+            type: 'external',
+          },
+        },
       ],
       navigationSections: [
         {
@@ -290,6 +306,22 @@ const seedSettingsDefaults = {
             internalPath: '/terms',
             openInNewTab: false,
             type: 'internal',
+          },
+        },
+        {
+          label: 'RSS',
+          link: {
+            internalPath: '/rss.xml',
+            openInNewTab: false,
+            type: 'internal',
+          },
+        },
+        {
+          label: '站点地图',
+          link: {
+            externalUrl: '/sitemap.xml',
+            openInNewTab: false,
+            type: 'external',
           },
         },
       ],
