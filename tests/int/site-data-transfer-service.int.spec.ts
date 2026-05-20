@@ -3,9 +3,11 @@ import type { Payload } from 'payload'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  commitSiteDataImport,
   createSiteDataExport,
   deleteSiteDataExportFile,
   getSiteDataExportFile,
+  previewSiteDataImport,
 } from '@/features/site-data-transfer/server/site-data-transfer-service'
 import type { User } from '@/payload-types'
 
@@ -247,5 +249,60 @@ describe('site data transfer service', () => {
     expect(data.versions.posts).toHaveLength(1)
     expect(data.versions.posts[0].parentSlug).toBe('versioned-post')
     expect(payload.findVersions).toHaveBeenCalledTimes(1)
+  })
+
+  it('previews and commits a same-site export as a successful no-op import', async () => {
+    const siteSettings = {
+      siteName: {
+        en: 'ZBlog',
+        'zh-Hans': '知博客',
+      },
+    }
+    const payload = {
+      findGlobal: vi.fn(async () => siteSettings),
+      updateGlobal: vi.fn(),
+    } as unknown as Payload
+    const user = {
+      id: 1,
+      roles: ['admin'],
+    } as User
+
+    const exportResult = await createSiteDataExport({
+      groups: ['site-settings'],
+      payload,
+      user,
+    })
+    createdExports.push(exportResult.file.id)
+
+    const exportedFile = await getSiteDataExportFile(exportResult.file.id)
+    const preview = await previewSiteDataImport({
+      file: new File([exportedFile?.bytes ?? new Uint8Array()], exportResult.file.id, {
+        type: 'application/zip',
+      }),
+      payload,
+      user,
+    })
+    const commit = await commitSiteDataImport({
+      groups: [],
+      payload,
+      token: preview.token,
+      user,
+    })
+
+    expect(preview.summary).toEqual(
+      expect.objectContaining({
+        defaultSelectedGroups: [],
+        hasChanges: false,
+      }),
+    )
+    expect(preview.diff.groups['site-settings']).toEqual(
+      expect.objectContaining({
+        skips: 1,
+        updates: 0,
+      }),
+    )
+    expect(commit.appliedGroups).toEqual([])
+    expect(commit.summary.hasChanges).toBe(false)
+    expect(payload.updateGlobal).not.toHaveBeenCalled()
   })
 })

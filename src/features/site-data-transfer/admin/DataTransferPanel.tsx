@@ -77,6 +77,7 @@ export function DataTransferPanel() {
     () => importPreview?.manifest.groups ?? [],
     [importPreview?.manifest.groups],
   )
+  const importHasChanges = importPreview?.summary.hasChanges ?? false
 
   async function loadExports() {
     setIsLoadingFiles(true)
@@ -217,10 +218,12 @@ export function DataTransferPanel() {
       return
     }
 
-    if (importSelection.length === 0) {
+    if (importHasChanges && importSelection.length === 0) {
       toast.error('Select at least one group to import.')
       return
     }
+
+    const groupsToImport = importHasChanges ? importSelection : []
 
     setIsCommitting(true)
 
@@ -229,7 +232,7 @@ export function DataTransferPanel() {
         `/api/site-data-transfer/imports/${encodeURIComponent(importPreview.token)}/commit`,
         {
           body: JSON.stringify({
-            groups: importSelection,
+            groups: groupsToImport,
           }),
           credentials: 'include',
           headers: {
@@ -244,9 +247,14 @@ export function DataTransferPanel() {
         throw new Error(payload?.message || `Import failed (${response.status}).`)
       }
 
-      toast.success(
-        `Imported ${payload?.appliedGroups?.length ?? importSelection.length} group(s).`,
-      )
+      if (!importHasChanges && groupsToImport.length === 0) {
+        toast.success('No changes to import.')
+      } else {
+        toast.success(
+          `Imported ${payload?.appliedGroups?.length ?? groupsToImport.length} group(s).`,
+        )
+      }
+
       setImportPreview(null)
       setImportSelection([])
 
@@ -400,6 +408,12 @@ export function DataTransferPanel() {
               </span>
             </div>
 
+            {!importHasChanges ? (
+              <p className="site-data-transfer__empty">
+                No changes detected. This export already matches the site.
+              </p>
+            ) : null}
+
             <div className="site-data-transfer__diff-grid">
               {selectableImportGroups.filter(isTransferGroup).map((group) => {
                 const groupDiff = importPreview.diff.groups[group]
@@ -412,6 +426,7 @@ export function DataTransferPanel() {
                   <label className="site-data-transfer__diff-card" key={group}>
                     <input
                       checked={importSelection.includes(group)}
+                      disabled={!importHasChanges}
                       onChange={() => toggleImportGroup(group)}
                       type="checkbox"
                     />
@@ -433,7 +448,11 @@ export function DataTransferPanel() {
               onClick={commitImport}
               size="small"
             >
-              {isCommitting ? 'Importing...' : 'Import selected groups'}
+              {isCommitting
+                ? 'Importing...'
+                : importHasChanges
+                  ? 'Import selected groups'
+                  : 'Finish import'}
             </Button>
           </div>
         ) : null}
