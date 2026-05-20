@@ -13,6 +13,7 @@ import { PostViewDedupe } from './collections/PostViewDedupe'
 import { PostViewMetrics } from './collections/PostViewMetrics'
 import { FrontendVariants } from './globals/FrontendVariants'
 import { SiteSettings } from './globals/SiteSettings'
+import { migrations } from './migrations'
 import { defaultLocale, payloadLocales } from './shared/i18n/locales'
 import { ensureRuntimeDirectories } from './shared/runtime/directories'
 import { getPayloadSecret } from './shared/runtime/env'
@@ -57,6 +58,7 @@ export default buildConfig({
     client: {
       url: process.env.DATABASE_URL || defaultDatabaseURL,
     },
+    prodMigrations: migrations,
   }),
   sharp,
   plugins: [],

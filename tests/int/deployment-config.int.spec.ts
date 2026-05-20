@@ -66,6 +66,15 @@ describe('deployment container config', () => {
     expect(compose.volumes).toHaveProperty('zblog-data')
   })
 
+  it('wires production SQLite migrations for empty Docker volumes', () => {
+    const payloadConfig = readProjectFile('src/payload.config.ts')
+    const migrationsIndex = readProjectFile('src/migrations/index.ts')
+
+    expect(payloadConfig).toContain("from './migrations'")
+    expect(payloadConfig).toContain('prodMigrations: migrations')
+    expect(migrationsIndex).toContain('export const migrations = [')
+  })
+
   it('documents the required and optional production environment variables', () => {
     const envExample = readProjectFile('.env.example')
 
@@ -97,6 +106,8 @@ describe('deployment container config', () => {
     expect(readme).toContain('127.0.0.1:3000')
     expect(readme).toMatch(/Nginx|Caddy|Traefik/)
     expect(readme).toContain('openssl rand -base64 32')
+    expect(readme).toContain('bundled Payload migrations')
+    expect(readme).toContain('Seed data is optional')
     expect(readme).toContain('docker run --rm')
     expect(readme).toContain('zblog-data')
   })
