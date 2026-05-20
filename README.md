@@ -54,6 +54,11 @@ The persistent state lives in the `zblog-data` Docker volume mounted at `/app/.d
 - site data imports and exports: `imports/`, `exports/`
 - seed assets: `seed-assets/`
 
+Admin Data transfer exports are Payload data migration packages with a manifest, structured JSON
+data, and media files. They are useful for moving configuration and content between compatible
+ZBlog installs. For disaster recovery or exact SQLite restoration, back up the full volume,
+including `zblog.db`.
+
 PDF preview rendering is local. The Docker image installs `poppler-utils` and uses `pdftocairo` by default. Automatic translation is optional and disabled unless `TRANSLATION_API_URL` is configured.
 
 ## Project docs

@@ -157,6 +157,26 @@ function cloneWithoutUndefined<T>(value: T): T {
   return value
 }
 
+function isTransientEditorFieldName(key: string) {
+  return key.endsWith('EditorMode') || key.endsWith('RawConfig')
+}
+
+function stripTransientEditorFields(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripTransientEditorFields(item))
+  }
+
+  if (!isRecord(value)) {
+    return value
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !isTransientEditorFieldName(key))
+      .map(([key, item]) => [key, stripTransientEditorFields(item)]),
+  )
+}
+
 function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map((item) => stableStringify(item)).join(',')}]`
@@ -740,28 +760,32 @@ async function buildArchiveData(args: {
 
   if (args.groups.includes('site-settings')) {
     data.globals ??= {}
-    data.globals.siteSettings = (await args.payload.findGlobal({
-      depth: 0,
-      fallbackLocale: false,
-      locale: 'all',
-      overrideAccess: false,
-      req: buildLocalRequest(args.user),
-      slug: 'site-settings',
-      user: args.user,
-    } as never)) as unknown as JsonRecord
+    data.globals.siteSettings = stripTransientEditorFields(
+      await args.payload.findGlobal({
+        depth: 0,
+        fallbackLocale: false,
+        locale: 'all',
+        overrideAccess: false,
+        req: buildLocalRequest(args.user),
+        slug: 'site-settings',
+        user: args.user,
+      } as never),
+    ) as JsonRecord
   }
 
   if (args.groups.includes('frontend-variants')) {
     data.globals ??= {}
-    data.globals.frontendVariants = (await args.payload.findGlobal({
-      depth: 0,
-      fallbackLocale: false,
-      locale: 'all',
-      overrideAccess: false,
-      req: buildLocalRequest(args.user),
-      slug: 'frontend-variants',
-      user: args.user,
-    } as never)) as unknown as JsonRecord
+    data.globals.frontendVariants = stripTransientEditorFields(
+      await args.payload.findGlobal({
+        depth: 0,
+        fallbackLocale: false,
+        locale: 'all',
+        overrideAccess: false,
+        req: buildLocalRequest(args.user),
+        slug: 'frontend-variants',
+        user: args.user,
+      } as never),
+    ) as JsonRecord
   }
 
   if (

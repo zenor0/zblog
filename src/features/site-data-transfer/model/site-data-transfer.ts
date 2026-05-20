@@ -68,13 +68,14 @@ export const siteDataExportPresets = {
     label: 'Configuration + media',
   },
   content: {
-    description: 'Posts, media, and post version history.',
+    description: 'Posts, media, and post version history as a Payload data export.',
     groups: ['posts', 'media', 'post-versions'],
     id: 'content',
-    label: 'Content backup',
+    label: 'Content export',
   },
   full: {
-    description: 'All site data except user accounts and sessions.',
+    description:
+      'All transferable Payload data except user accounts and sessions; not a raw SQLite snapshot.',
     groups: [
       'site-settings',
       'frontend-variants',
@@ -84,7 +85,7 @@ export const siteDataExportPresets = {
       'post-view-metrics',
     ],
     id: 'full',
-    label: 'Full backup',
+    label: 'Full site data export',
   },
 } as const satisfies Record<SiteDataExportPresetID, SiteDataExportPreset>
 
