@@ -205,6 +205,68 @@ describe('seed site settings', () => {
     expect(data.globalVariables?.socialLinks?.[0]?.url).toBe('https://github.com/real')
   })
 
+  it('replaces Payload schema defaults with the seeded current site configuration', () => {
+    const data = buildSeedSiteSettingsData({
+      locale: 'zh-Hans',
+      settings: {
+        appearance: {
+          accentColor: 'oklch(0.62 0.14 190)',
+        },
+        footer: {
+          brand: {
+            description: '{{site.description}}',
+            link: {
+              internalPath: '/',
+              openInNewTab: false,
+              type: 'internal',
+            },
+            name: '{{site.name}}',
+            supportingText: '{{custom.tagline}}',
+          },
+          layoutStyle: 'compact',
+          legalLinks: [
+            {
+              label: '隐私政策',
+              link: {
+                internalPath: '/privacy',
+                openInNewTab: false,
+                type: 'internal',
+              },
+            },
+            {
+              label: '用户协议',
+              link: {
+                internalPath: '/terms',
+                openInNewTab: false,
+                type: 'internal',
+              },
+            },
+          ],
+        },
+        homeHero: {
+          description: '这里会持续发布文章、笔记和项目更新。',
+          eyebrow: '个人博客',
+          title: '记录技术、产品与日常思考',
+        },
+        siteDescription: '一个持续记录技术、产品与日常工作的双语博客。',
+        siteName: 'Personal Blog',
+      } as any,
+    })
+
+    expect(data.siteName).toBe('zblog')
+    expect(data.siteDescription).toBe('')
+    expect(data.homeHero?.description).toBe('你好，世界。')
+    expect(data.homeHero?.title).toBe('坏坏学习')
+    expect(data.appearance?.accentColor).toBe('oklch(0.64 0.14 220)')
+    expect(data.footer?.layoutStyle).toBe('balanced')
+    expect(data.footer?.legalLinks?.map((link) => link.label)).toEqual([
+      '隐私政策',
+      '用户协议',
+      'RSS',
+      '站点地图',
+    ])
+  })
+
   it('reads each locale without fallback before applying seed settings', async () => {
     const payload = {
       findGlobal: vi.fn(async (_args: any) => ({

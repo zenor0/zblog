@@ -4,7 +4,10 @@ import type { SiteSetting } from '@/payload-types'
 import type { AppLocale } from '@/shared/i18n/locales'
 
 import { defaultLocale, localeCodes, normalizeLocale } from '@/shared/i18n/locales'
+import { defaultSiteFooterLayoutStyle } from '@/features/site-settings/model/site-footer-layout'
 import { mergeStarterGlobalVariables } from '@/features/site-settings/model/site-footer-preset'
+import { defaultSiteName } from '@/shared/site/defaults'
+import { defaultFrontendAccentColor } from '@/shared/theme/frontend-theme'
 
 type SeedSettingsPayload = Pick<Payload, 'findGlobal' | 'updateGlobal'>
 type SiteSettingsData = Partial<SiteSetting>
@@ -435,6 +438,64 @@ const seedSettingsDefaults = {
   },
 } satisfies Record<AppLocale, SeedSettingsDefaults>
 
+const defaultLikeSeedSettings = {
+  en: {
+    appearance: {
+      accentColor: [defaultFrontendAccentColor],
+    },
+    footer: {
+      layoutStyle: [defaultSiteFooterLayoutStyle],
+    },
+    homeHero: {
+      description: ['A simple blog for articles, notes, and project updates.'],
+      eyebrow: ['Personal Blog'],
+      title: ['Notes on tech, products, and everyday work'],
+    },
+    seo: {
+      homeDescription: ['A bilingual blog about tech, products, and everyday work.'],
+      homeTitle: ['ZBlog | Notes on tech, products, and everyday work'],
+    },
+    siteDescription: ['A bilingual blog about tech, products, and everyday work.'],
+    siteName: [defaultSiteName, 'ZBlog'],
+  },
+  'zh-Hans': {
+    appearance: {
+      accentColor: [defaultFrontendAccentColor],
+    },
+    footer: {
+      layoutStyle: [defaultSiteFooterLayoutStyle],
+    },
+    homeHero: {
+      description: ['这里会持续发布文章、笔记和项目更新。'],
+      eyebrow: ['个人博客'],
+      title: ['记录技术、产品与日常思考'],
+    },
+    seo: {
+      homeDescription: [
+        '一个持续记录技术、产品与日常工作的双语博客。',
+        '一个持续记录技术、产品与日常工作的博客。',
+      ],
+      homeTitle: ['ZBlog | 记录技术、产品与日常思考'],
+    },
+    siteDescription: ['一个持续记录技术、产品与日常工作的双语博客。'],
+    siteName: [defaultSiteName, 'ZBlog'],
+  },
+} as const satisfies Record<
+  AppLocale,
+  {
+    appearance: {
+      accentColor: readonly string[]
+    }
+    footer: {
+      layoutStyle: readonly string[]
+    }
+    homeHero: Record<keyof NonNullable<SiteSetting['homeHero']>, readonly string[]>
+    seo: Record<'homeDescription' | 'homeTitle', readonly string[]>
+    siteDescription: readonly string[]
+    siteName: readonly string[]
+  }
+>
+
 function getSeedLocale(locale: AppLocale | null | string | undefined): AppLocale {
   return normalizeLocale(locale) ?? defaultLocale
 }
@@ -449,6 +510,22 @@ function hasUsefulValue(value: unknown) {
 
 function preferExisting<T>(existing: T | null | undefined, starter: T): T {
   return hasUsefulValue(existing) ? (existing as T) : starter
+}
+
+function isDefaultLikeValue(value: unknown, defaults: readonly unknown[]) {
+  return defaults.some((defaultValue) => value === defaultValue)
+}
+
+function preferSeedForDefault<T>(
+  existing: T | null | undefined,
+  starter: T,
+  defaults: readonly unknown[],
+): T {
+  if (!hasUsefulValue(existing) || isDefaultLikeValue(existing, defaults)) {
+    return starter
+  }
+
+  return existing as T
 }
 
 function mergeFooterLink(existing: FooterLink | null | undefined, starter: FooterLink): FooterLink {
@@ -505,9 +582,14 @@ function mergeByKey<T extends Record<string, unknown>>(
 function mergeAppearanceSettings(
   existing: SiteSettingsData['appearance'] | null | undefined,
   starter: AppearanceData,
+  defaultLike: (typeof defaultLikeSeedSettings)[AppLocale]['appearance'],
 ): AppearanceData {
   return {
-    accentColor: preferExisting(existing?.accentColor, starter.accentColor ?? null),
+    accentColor: preferSeedForDefault(
+      existing?.accentColor,
+      starter.accentColor ?? null,
+      defaultLike.accentColor,
+    ),
   }
 }
 
@@ -623,6 +705,7 @@ function mergeComplianceFiling(
 function mergeFooterSettings(
   existing: SiteSettingsData['footer'] | null | undefined,
   starter: SiteSettingsData['footer'],
+  defaultLike: (typeof defaultLikeSeedSettings)[AppLocale]['footer'],
 ): SiteSettingsData['footer'] {
   if (!starter) {
     return existing ?? undefined
@@ -646,7 +729,11 @@ function mergeFooterSettings(
     },
     contactItems: mergeByIndex(existing?.contactItems, starter.contactItems, mergeContactItem),
     footerEditorMode: existing?.footerEditorMode ?? starter.footerEditorMode ?? 'form',
-    layoutStyle: preferExisting(existing?.layoutStyle, starter.layoutStyle),
+    layoutStyle: preferSeedForDefault(
+      existing?.layoutStyle,
+      starter.layoutStyle,
+      defaultLike.layoutStyle,
+    ),
     legalLinks: mergeByIndex(existing?.legalLinks, starter.legalLinks, mergeLegalLink),
     navigationSections: mergeByIndex(
       existing?.navigationSections,
@@ -665,34 +752,57 @@ export function buildSeedSiteSettingsData(args: {
 }): SiteSettingsData {
   const locale = getSeedLocale(args.locale)
   const starter = seedSettingsDefaults[locale]
+  const defaultLike = defaultLikeSeedSettings[locale]
 
   return {
-    appearance: mergeAppearanceSettings(args.settings.appearance, starter.appearance),
+    appearance: mergeAppearanceSettings(
+      args.settings.appearance,
+      starter.appearance,
+      defaultLike.appearance,
+    ),
     articleLayout: mergeArticleLayoutSettings(args.settings.articleLayout, starter.articleLayout),
-    footer: mergeFooterSettings(args.settings.footer, starter.footer),
+    footer: mergeFooterSettings(args.settings.footer, starter.footer, defaultLike.footer),
     globalVariables: mergeStarterGlobalVariables(
       args.settings.globalVariables,
       starter.globalVariables,
     ),
     homeHero: {
       ...args.settings.homeHero,
-      description: preferExisting(
+      description: preferSeedForDefault(
         args.settings.homeHero?.description,
         starter.homeHero.description,
+        defaultLike.homeHero.description,
       ),
-      eyebrow: preferExisting(args.settings.homeHero?.eyebrow, starter.homeHero.eyebrow),
-      title: preferExisting(args.settings.homeHero?.title, starter.homeHero.title),
+      eyebrow: preferSeedForDefault(
+        args.settings.homeHero?.eyebrow,
+        starter.homeHero.eyebrow,
+        defaultLike.homeHero.eyebrow,
+      ),
+      title: preferSeedForDefault(
+        args.settings.homeHero?.title,
+        starter.homeHero.title,
+        defaultLike.homeHero.title,
+      ),
     },
     seo: {
       ...args.settings.seo,
-      homeDescription: preferExisting(
+      homeDescription: preferSeedForDefault(
         args.settings.seo?.homeDescription,
         starter.seo.homeDescription,
+        defaultLike.seo.homeDescription,
       ),
-      homeTitle: preferExisting(args.settings.seo?.homeTitle, starter.seo.homeTitle),
+      homeTitle: preferSeedForDefault(
+        args.settings.seo?.homeTitle,
+        starter.seo.homeTitle,
+        defaultLike.seo.homeTitle,
+      ),
     },
-    siteDescription: preferExisting(args.settings.siteDescription, starter.siteDescription),
-    siteName: preferExisting(args.settings.siteName, starter.siteName),
+    siteDescription: preferSeedForDefault(
+      args.settings.siteDescription,
+      starter.siteDescription,
+      defaultLike.siteDescription,
+    ),
+    siteName: preferSeedForDefault(args.settings.siteName, starter.siteName, defaultLike.siteName),
   }
 }
 
