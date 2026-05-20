@@ -128,6 +128,34 @@ describe('frontend visual restraint', () => {
     expect(styles).toContain('background: var(--zblog-accent-line);')
   })
 
+  it('uses the CMS accent as the base for dark frontend surfaces', () => {
+    const styles = readFrontendStyles()
+
+    expect(styles).not.toContain('--background: oklch(0.19 0.008 45);')
+    expect(styles).not.toContain('--card: oklch(0.2 0.008 45);')
+    expect(styles).toMatch(
+      /--zblog-dark-background:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+7%,\s*oklch\(0\.105 0\.01 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /--zblog-dark-card:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+8%,\s*oklch\(0\.145 0\.011 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /html\[data-zblog-theme='dark'\][^{]*\{[^}]*--background:\s*var\(--zblog-dark-background\);/s,
+    )
+    expect(styles).toMatch(
+      /@media \(prefers-color-scheme: dark\)[\s\S]*html:not\(\[data-zblog-theme\]\):not\(\[data-zblog-preview-theme='light'\]\)[^{]*\{[^}]*--background:\s*var\(--zblog-dark-background\);/s,
+    )
+    expect(styles).toMatch(
+      /html\[data-zblog-preview-theme='dark'\][^{]*\{[^}]*--background:\s*var\(--zblog-dark-background\);/s,
+    )
+    expect(styles).toMatch(
+      /html\[data-zblog-theme='dark'\]\s+\[data-frontend-accent\][^{]*\{[^}]*--background:\s*var\(--zblog-dark-background\);/s,
+    )
+    expect(styles).toMatch(
+      /\[data-frontend-accent\]\s*\{[^}]*min-height:\s*100vh;[^}]*background:\s*var\(--background\);/s,
+    )
+  })
+
   it('defines a compact typography scale for dense interface text', () => {
     const styles = readFrontendStyles()
 
