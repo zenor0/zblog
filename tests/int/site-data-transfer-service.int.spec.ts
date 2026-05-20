@@ -11,6 +11,16 @@ import type { User } from '@/payload-types'
 
 const createdExports: string[] = []
 
+async function readExportArchive(fileID: string) {
+  const file = await getSiteDataExportFile(fileID)
+  const archive = unzipSync(new Uint8Array(file?.bytes ?? []))
+
+  return {
+    data: JSON.parse(Buffer.from(archive['data/site-data.json']).toString('utf8')),
+    manifest: JSON.parse(Buffer.from(archive['manifest.json']).toString('utf8')),
+  }
+}
+
 describe('site data transfer service', () => {
   afterEach(async () => {
     await Promise.all(createdExports.splice(0).map((fileID) => deleteSiteDataExportFile(fileID)))
@@ -59,6 +69,119 @@ describe('site data transfer service', () => {
     expect(manifest.kind).toBe('zblog.siteDataExport')
     expect(data.globals.siteSettings.siteName.en).toBe('ZBlog')
     expect(payload.findGlobal).toHaveBeenCalledTimes(2)
+  })
+
+  it('exports site settings as Payload structured values rather than YAML source', async () => {
+    const payload = {
+      findGlobal: vi.fn(async () => ({
+        appearance: {
+          accentColor: 'oklch(0.62 0.14 190)',
+        },
+        footer: {
+          footerEditorMode: 'yaml',
+          navigationSections: [
+            {
+              links: [
+                {
+                  label: {
+                    en: 'Posts',
+                    'zh-Hans': '文章',
+                  },
+                  link: {
+                    internalPath: '/posts',
+                    type: 'internal',
+                  },
+                },
+              ],
+              title: {
+                en: 'Read',
+                'zh-Hans': '阅读',
+              },
+            },
+          ],
+        },
+        homeHero: {
+          description: {
+            en: 'Line one\nLine two',
+            'zh-Hans': '第一行\n第二行',
+          },
+          title: {
+            en: 'Structured settings',
+            'zh-Hans': '结构化配置',
+          },
+        },
+        homepageEditorMode: 'yaml',
+        homepageRawConfig: 'homeHero:\n  title: Should not be exported',
+        siteName: {
+          en: 'ZBlog',
+          'zh-Hans': '知博客',
+        },
+      })),
+    } as unknown as Payload
+    const user = {
+      id: 1,
+      roles: ['admin'],
+    } as User
+
+    const result = await createSiteDataExport({
+      groups: ['site-settings'],
+      payload,
+      user,
+    })
+    createdExports.push(result.file.id)
+
+    const { data } = await readExportArchive(result.file.id)
+
+    expect(data.globals.siteSettings.siteName).toEqual({
+      en: 'ZBlog',
+      'zh-Hans': '知博客',
+    })
+    expect(data.globals.siteSettings.homeHero.description.en).toBe('Line one\nLine two')
+    expect(data.globals.siteSettings.footer.navigationSections[0].links[0].link).toEqual({
+      internalPath: '/posts',
+      type: 'internal',
+    })
+    expect(data.globals.siteSettings.footer.footerEditorMode).toBeUndefined()
+    expect(data.globals.siteSettings.homepageEditorMode).toBeUndefined()
+    expect(data.globals.siteSettings.homepageRawConfig).toBeUndefined()
+  })
+
+  it('exports localized post Markdown content as exact string values', async () => {
+    const markdown = {
+      en: ['# Hello', '', '```ts', 'const answer = 42', '```'].join('\n'),
+      'zh-Hans': ['# 你好', '', '> [!NOTE]', '> 保留 Markdown 原文。'].join('\n'),
+    }
+    const payload = {
+      find: vi.fn(async () => ({
+        docs: [
+          {
+            content: markdown,
+            id: 42,
+            slug: 'markdown-post',
+            title: {
+              en: 'Markdown post',
+              'zh-Hans': 'Markdown 文章',
+            },
+          },
+        ],
+        hasNextPage: false,
+      })),
+    } as unknown as Payload
+    const user = {
+      id: 1,
+      roles: ['admin'],
+    } as User
+
+    const result = await createSiteDataExport({
+      groups: ['posts'],
+      payload,
+      user,
+    })
+    createdExports.push(result.file.id)
+
+    const { data } = await readExportArchive(result.file.id)
+
+    expect(data.collections.posts[0].content).toEqual(markdown)
   })
 
   it('exports post versions from the Payload versions API', async () => {

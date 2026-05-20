@@ -23,6 +23,7 @@
 }
 
 .site-data-transfer__eyebrow,
+.site-data-transfer__intro,
 .site-data-transfer__section-header p,
 .site-data-transfer__file span,
 .site-data-transfer__preview-header span,
@@ -36,6 +37,10 @@
   font-size: 0.8rem;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.site-data-transfer__intro {
+  max-width: 42rem;
 }
 
 .site-data-transfer__section {

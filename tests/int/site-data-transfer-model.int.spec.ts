@@ -11,7 +11,7 @@ import {
 } from '@/features/site-data-transfer/model/site-data-transfer'
 
 describe('site data transfer model', () => {
-  it('keeps full backups admin-safe and excludes user data', () => {
+  it('keeps full exports admin-safe and excludes user data', () => {
     expect(siteDataExportPresets.full.groups).toEqual([
       'site-settings',
       'frontend-variants',
@@ -21,6 +21,13 @@ describe('site data transfer model', () => {
       'post-view-metrics',
     ])
     expect(siteDataTransferGroupIDs).not.toContain('users')
+  })
+
+  it('describes presets as Payload data exports instead of raw database backups', () => {
+    expect(siteDataExportPresets.content.label).toBe('Content export')
+    expect(siteDataExportPresets.full.label).toBe('Full site data export')
+    expect(siteDataExportPresets.content.description).toContain('Payload data')
+    expect(siteDataExportPresets.full.description).toContain('not a raw SQLite snapshot')
   })
 
   it('normalizes selected groups and drops unknown values', () => {

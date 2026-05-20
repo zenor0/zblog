@@ -266,6 +266,10 @@ export function DataTransferPanel() {
         <div>
           <p className="site-data-transfer__eyebrow">Operations</p>
           <h1>Data transfer</h1>
+          <p className="site-data-transfer__intro">
+            Payload data migration packages for schema-aware import. Use volume backups for raw
+            SQLite snapshots.
+          </p>
         </div>
         <Button
           buttonStyle="secondary"
