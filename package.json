@@ -15,6 +15,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "prepare": "husky",
     "db:reset": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/reset-local-state.ts",
+    "docker:init": "cross-env DISABLE_PAYLOAD_HMR=true NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/docker-init.ts",
     "seed:blog": "cross-env DISABLE_PAYLOAD_HMR=true NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/seed-blog.ts",
     "seed:blog:fresh": "cross-env DISABLE_PAYLOAD_HMR=true NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/seed-blog.ts --reset",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",

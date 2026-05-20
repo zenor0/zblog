@@ -74,11 +74,11 @@ docker compose up -d --build
 `NEXT_PUBLIC_SITE_URL` is used while building the image, so rebuild after
 changing the public URL.
 
-On first boot with an empty `zblog-data` volume, the production server runs the
-bundled Payload migrations to create the SQLite schema, including tables such as
-`site_settings`. Seed data is optional; a missing seed can leave the site empty,
-but a `no such table` error means the schema was not initialized or the image was
-built before migrations were bundled.
+On first boot with an empty `zblog-data` volume, Compose runs the one-off
+`zblog-init` service before the app starts. It initializes the SQLite
+schema and site settings, then exits. It does not create demo posts, projects, or media. You
+can rerun it safely with `docker compose run --rm zblog-init`; it skips databases
+that already contain the `site_settings` table.
 
 Back up the `zblog-data` Docker volume to preserve the SQLite database, uploads,
 generated previews, and import/export files:

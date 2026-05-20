@@ -1,12 +1,36 @@
 services:
+  zblog-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: init
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    image: zblog:init
+    restart: 'no'
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      ZBLOG_STATE_DIR: /app/.data
+      DATABASE_URL: file:/app/.data/zblog.db
+      ZBLOG_PDF_PREVIEW_COMMAND: pdftocairo
+      ZBLOG_PDF_RENDER_CONCURRENCY: '4'
+    volumes:
+      - zblog-data:/app/.data
+
   zblog:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
     image: zblog:latest
     restart: unless-stopped
+    depends_on:
+      zblog-init:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:

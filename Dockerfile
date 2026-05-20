@@ -28,12 +28,32 @@ RUN \
   export PAYLOAD_SECRET=zblog-build-placeholder-secret; \
   export ZBLOG_STATE_DIR=/tmp/zblog-build-state; \
   export DATABASE_URL=file:/tmp/zblog-build-state/zblog-build.db; \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  if [ -f yarn.lock ]; then NODE_ENV=development yarn run docker:init && yarn run build; \
+  elif [ -f package-lock.json ]; then NODE_ENV=development npm run docker:init && npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && NODE_ENV=development pnpm run docker:init && pnpm run build; \
   else echo "Lockfile not found." && exit 1; \
   fi
 RUN mkdir -p public
+
+FROM deps AS init
+WORKDIR /app
+
+ENV NODE_ENV=development
+ENV DISABLE_PAYLOAD_HMR=true
+ENV ZBLOG_STATE_DIR=/app/.data
+ENV DATABASE_URL=file:/app/.data/zblog.db
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY . .
+
+RUN mkdir -p .data
+RUN chown nextjs:nodejs .data
+
+USER nextjs
+
+CMD ["node", "--no-deprecation", "--import=tsx/esm", "src/scripts/docker-init.ts"]
 
 FROM base AS runner
 WORKDIR /app
