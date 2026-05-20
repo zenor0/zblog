@@ -59,16 +59,42 @@ for the admin area.
 ## Deployment
 
 The included Docker Compose setup runs the app with SQLite and local filesystem
-storage.
+storage. It is intended for a single server behind an external reverse proxy
+such as Nginx, Caddy, or Traefik. Compose binds the app to `127.0.0.1:3000`;
+terminate TLS in the reverse proxy and forward traffic to that local address.
 
 ```bash
 cp .env.example .env
-# edit PAYLOAD_SECRET and NEXT_PUBLIC_SITE_URL
+openssl rand -base64 32
+# put the generated value in PAYLOAD_SECRET
+# set NEXT_PUBLIC_SITE_URL to the public https:// URL
 docker compose up -d --build
 ```
 
-Back up the `zblog-data` Docker volume to preserve the database, uploads,
-generated previews, and import/export files.
+`NEXT_PUBLIC_SITE_URL` is used while building the image, so rebuild after
+changing the public URL.
+
+Back up the `zblog-data` Docker volume to preserve the SQLite database, uploads,
+generated previews, and import/export files:
+
+```bash
+mkdir -p backups
+docker run --rm \
+  -v zblog_zblog-data:/data:ro \
+  -v "$PWD/backups:/backup" \
+  alpine tar -czf /backup/zblog-data-$(date +%Y%m%d-%H%M%S).tgz -C /data .
+```
+
+Restore a backup into a stopped deployment:
+
+```bash
+docker compose down
+docker run --rm \
+  -v zblog_zblog-data:/data \
+  -v "$PWD/backups:/backup:ro" \
+  alpine sh -c 'rm -rf /data/* && tar -xzf /backup/zblog-data-backup.tgz -C /data'
+docker compose up -d
+```
 
 ## Documentation
 

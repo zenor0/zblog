@@ -17,10 +17,17 @@ RUN \
 
 FROM base AS builder
 WORKDIR /app
+
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 RUN \
+  export NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL"; \
+  export PAYLOAD_SECRET=zblog-build-placeholder-secret; \
+  export ZBLOG_STATE_DIR=/tmp/zblog-build-state; \
+  export DATABASE_URL=file:/tmp/zblog-build-state/zblog-build.db; \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
@@ -50,6 +57,8 @@ RUN mkdir -p .next .data
 RUN chown nextjs:nodejs .next .data
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@libsql+linux-x64-musl@0.4.7 ./node_modules/.pnpm/@libsql+linux-x64-musl@0.4.7
+RUN ln -sfn ../../../@libsql+linux-x64-musl@0.4.7/node_modules/@libsql/linux-x64-musl ./node_modules/.pnpm/libsql@0.4.7/node_modules/@libsql/linux-x64-musl
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs

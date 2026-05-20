@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
     image: zblog:latest
     restart: unless-stopped
     env_file:
@@ -14,7 +16,7 @@ services:
       ZBLOG_PDF_PREVIEW_COMMAND: pdftocairo
       ZBLOG_PDF_RENDER_CONCURRENCY: '4'
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
     volumes:
       - zblog-data:/app/.data
     healthcheck:
