@@ -1191,3 +1191,5 @@ For deeper exploration of specific topics, refer to the context files located in
 ## Dev Principles
 
 - TDD: Write tests before implementation and ensure they pass.
+- Commit messages must use Conventional Commits, for example `feat(posts): add draft preview` or `fix: handle empty article title`.
+- Use one of these commit types: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.

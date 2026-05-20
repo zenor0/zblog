@@ -13,6 +13,7 @@
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "prepare": "husky",
     "db:reset": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/reset-local-state.ts",
     "seed:blog": "cross-env DISABLE_PAYLOAD_HMR=true NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/seed-blog.ts",
     "seed:blog:fresh": "cross-env DISABLE_PAYLOAD_HMR=true NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node ./src/scripts/seed-blog.ts --reset",
@@ -58,6 +59,10 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "@commitlint/lint": "^20.5.3",
+    "@commitlint/types": "^20.5.0",
     "@playwright/test": "1.60.0",
     "@tailwindcss/postcss": "^4.3.0",
     "@testing-library/react": "16.3.2",
@@ -68,7 +73,9 @@
     "esbuild": "0.28.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.2.6",
+    "husky": "^9.1.7",
     "jsdom": "29.1.1",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.15",
     "prettier": "^3.8.3",
     "tailwindcss": "^4.3.0",
