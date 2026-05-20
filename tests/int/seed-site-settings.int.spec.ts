@@ -22,38 +22,97 @@ describe('seed site settings', () => {
       } as any,
     })
 
-    expect(en.siteName).toBe('ZBlog')
-    expect(en.siteDescription).toBe('A bilingual blog about tech, products, and everyday work.')
+    expect(en.siteName).toBe('zblog')
+    expect(en.siteDescription).toBe('')
     expect(en.homeHero?.title).toBe('Notes on tech, products, and everyday work')
     expect(en.seo?.homeTitle).toBe('ZBlog | Notes on tech, products, and everyday work')
-    expect(en.footer?.bottomBar?.note).toBeNull()
-    expect(en.globalVariables?.owner?.name).toBeUndefined()
-    expect(en.globalVariables?.socialLinks).toEqual([])
+    expect(en.appearance?.accentColor).toBe('oklch(0.64 0.14 220)')
+    expect(en.articleLayout?.advanced?.blockGap).toBe('0.5rem')
+    expect(en.footer?.bottomBar?.note).toBe('')
+    expect(en.footer?.compliance?.filings).toEqual([
+      {
+        href: 'https://beian.miit.gov.cn',
+        label: '',
+        value: '中 ICP 备 20xx123456 号',
+      },
+      {
+        href: 'https://github.com/zenor0/zblog',
+        label: '',
+        value: 'Powered by zblog',
+      },
+    ])
+    expect(en.footer?.layoutStyle).toBe('balanced')
+    expect(en.footer?.socialLinks).toEqual([
+      {
+        label: '@zenor0',
+        openInNewTab: true,
+        platform: 'github',
+        url: 'https://github.com/zenor0',
+      },
+      {
+        label: 'zenor0@outlook.com',
+        openInNewTab: true,
+        platform: 'email',
+        url: 'mailto:zenor0@outlook.com',
+      },
+    ])
+    expect(en.globalVariables?.owner?.email).toBe('zenor0@outlook.com')
+    expect(en.globalVariables?.owner?.handle).toBe('@zenor0')
+    expect(en.globalVariables?.owner?.websiteUrl).toBe('blog.zenor0.site')
+    expect(en.globalVariables?.socialLinks).toEqual([
+      {
+        label: '@zenor0',
+        openInNewTab: true,
+        platform: 'github',
+        url: 'https://github.com/zenor0',
+      },
+    ])
     expect(en.globalVariables?.contactItems).toEqual([])
     expect(en.globalVariables?.customVariables?.[0]?.value).toBe(
       'Notes about technology, products, and everyday work.',
     )
     expect(JSON.stringify(en)).not.toMatch(/your-id|hello@example\.com|example\.com/)
 
-    expect(zh.siteName).toBe('ZBlog')
-    expect(zh.siteDescription).toBe('一个持续记录技术、产品与日常工作的双语博客。')
-    expect(zh.homeHero?.title).toBe('记录技术、产品与日常思考')
-    expect(zh.seo?.homeTitle).toBe('ZBlog | 记录技术、产品与日常思考')
-    expect(zh.footer?.bottomBar?.note).toBeNull()
-    expect(zh.globalVariables?.owner?.name).toBeUndefined()
-    expect(zh.globalVariables?.customVariables?.[0]?.value).toBe(
-      '持续记录技术、产品与日常工作。',
+    expect(zh.siteName).toBe('zblog')
+    expect(zh.siteDescription).toBe('')
+    expect(zh.globalVariables?.owner?.bio).toBe('你好，世界。')
+    expect(zh.globalVariables?.owner?.name).toBe('zenor0')
+    expect(zh.homeHero?.description).toBe('你好，世界。')
+    expect(zh.homeHero?.title).toBe('坏坏学习')
+    expect(zh.seo?.homeDescription).toBe('一个持续记录技术、产品与日常工作的博客。')
+    expect(zh.seo?.homeTitle).toBe('ZBlog')
+    expect(zh.footer?.bottomBar?.note).toBe('')
+    expect(zh.footer?.compliance?.copyright).toBe(
+      'Copyright {{site.currentYear}} {{site.name}}. 保留所有权利。',
     )
+    expect(zh.globalVariables?.customVariables?.[0]?.value).toBe('持续记录技术、产品与日常工作。')
+    expect(zh.globalVariables?.customVariables?.[1]?.value).toBe('hidden')
   })
 
-  it('does not overwrite existing current-locale editor copy while filling gaps', () => {
+  it('does not overwrite existing current-locale editor copy or settings while filling gaps', () => {
     const data = buildSeedSiteSettingsData({
       locale: 'en',
       settings: {
+        appearance: {
+          accentColor: '#123456',
+        },
+        articleLayout: {
+          advanced: {
+            blockGap: '2rem',
+          },
+          preset: 'balanced-editorial',
+        },
         footer: {
           bottomBar: {
             note: 'Existing footer note.',
           },
+          socialLinks: [
+            {
+              label: '@real',
+              platform: 'github',
+              url: 'https://github.com/real-footer',
+            },
+          ],
         },
         globalVariables: {
           owner: {
@@ -78,11 +137,19 @@ describe('seed site settings', () => {
     expect(data.siteName).toBe('Existing Site')
     expect(data.siteDescription).toBe('Existing site description.')
     expect(data.homeHero?.title).toBe('Existing hero title')
-    expect(data.homeHero?.description).toBe('A simple blog for articles, notes, and project updates.')
+    expect(data.homeHero?.description).toBe(
+      'A simple blog for articles, notes, and project updates.',
+    )
+    expect(data.appearance?.accentColor).toBe('#123456')
+    expect(data.articleLayout?.advanced?.blockGap).toBe('2rem')
+    expect(data.articleLayout?.preset).toBe('balanced-editorial')
     expect(data.footer?.bottomBar?.note).toBe('Existing footer note.')
+    expect(data.footer?.socialLinks?.[0]?.label).toBe('@real')
+    expect(data.footer?.socialLinks?.[0]?.url).toBe('https://github.com/real-footer')
+    expect(data.footer?.socialLinks?.[1]?.platform).toBe('email')
     expect(data.globalVariables?.owner?.name).toBe('Existing Owner')
     expect(data.globalVariables?.owner?.email).toBe('real@example.com')
-    expect(data.globalVariables?.socialLinks?.[0]?.label).toBeUndefined()
+    expect(data.globalVariables?.socialLinks?.[0]?.label).toBe('@zenor0')
     expect(data.globalVariables?.socialLinks?.[0]?.url).toBe('https://github.com/real')
   })
 
@@ -116,7 +183,14 @@ describe('seed site settings', () => {
     )?.[0] as any
 
     expect(enUpdate?.data.homeHero.title).toBe('Notes on tech, products, and everyday work')
-    expect(enUpdate?.data.footer.bottomBar.note).toBeNull()
-    expect(enUpdate?.data.globalVariables.socialLinks).toEqual([])
+    expect(enUpdate?.data.footer.bottomBar.note).toBe('')
+    expect(enUpdate?.data.globalVariables.socialLinks).toEqual([
+      {
+        label: '@zenor0',
+        openInNewTab: true,
+        platform: 'github',
+        url: 'https://github.com/zenor0',
+      },
+    ])
   })
 })
