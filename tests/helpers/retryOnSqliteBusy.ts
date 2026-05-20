@@ -26,8 +26,8 @@ export async function retryOnSqliteBusy<T>(
     delayMs?: number
   },
 ): Promise<T> {
-  const attempts = options?.attempts ?? 8
-  const delayMs = options?.delayMs ?? 250
+  const attempts = options?.attempts ?? 20
+  const delayMs = options?.delayMs ?? 500
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {

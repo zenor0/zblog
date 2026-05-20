@@ -1,8 +1,7 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test'
-import config from '../../src/payload.config.js'
-import { getPayload } from 'payload'
 import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
 import { createPostPackageFiles } from '../helpers/createPostPackage'
+import { getTestPayload } from '../helpers/getTestPayload'
 import { login } from '../helpers/login'
 import { retryOnSqliteBusy } from '../helpers/retryOnSqliteBusy'
 import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
@@ -10,7 +9,7 @@ import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
 const serverURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
 
 async function cleanupDraftPreviewPost() {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   await retryOnSqliteBusy(async () => {
     await payload.delete({
@@ -25,7 +24,7 @@ async function cleanupDraftPreviewPost() {
 }
 
 async function cleanupPostByID(id: number) {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   await retryOnSqliteBusy(async () => {
     await payload.delete({
@@ -36,7 +35,7 @@ async function cleanupPostByID(id: number) {
 }
 
 async function seedDraftPreviewPost() {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   await cleanupDraftPreviewPost()
 
@@ -58,7 +57,7 @@ async function seedDraftPreviewPost() {
 }
 
 async function seedUntitledDraftPreviewPost() {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   const post = await payload.create({
     collection: 'posts',
@@ -75,7 +74,7 @@ async function seedUntitledDraftPreviewPost() {
 }
 
 async function seedAdminLayoutPost() {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   await retryOnSqliteBusy(async () => {
     await payload.delete({
@@ -122,8 +121,12 @@ async function waitForImportPanelReady(page: Page) {
 }
 
 async function openImportMenu(page: Page) {
-  await page.getByTestId('post-import-trigger').click()
+  const trigger = page.getByTestId('post-import-trigger')
+
+  await expect(trigger).toBeEnabled()
+  await trigger.click()
   await waitForImportPanelReady(page)
+  await expect(page.getByTestId('import-panel')).toBeVisible()
 }
 
 async function activateImportMode(page: Page, mode: 'mdship' | 'zip') {

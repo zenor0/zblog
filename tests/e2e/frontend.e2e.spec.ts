@@ -78,11 +78,62 @@ async function readContrastReports(page: Page, targets: ContrastTarget[]) {
       }
     }
 
+    function parseLab(color: string) {
+      const match = color.match(
+        /^lab\(\s*([^\s]+)\s+([^\s]+)\s+([^\s/)]+)(?:\s*\/\s*[^\s)]+)?\s*\)$/i,
+      )
+
+      if (!match?.[1] || !match[2] || !match[3]) {
+        return null
+      }
+
+      const lightness = match[1].endsWith('%')
+        ? Number.parseFloat(match[1])
+        : Number.parseFloat(match[1])
+      const a = Number.parseFloat(match[2])
+      const b = Number.parseFloat(match[3])
+
+      if (Number.isNaN(lightness) || Number.isNaN(a) || Number.isNaN(b)) {
+        return null
+      }
+
+      const y = (lightness + 16) / 116
+      const x = a / 500 + y
+      const z = y - b / 200
+      const delta = 6 / 29
+
+      function pivot(value: number) {
+        return value > delta ? value ** 3 : 3 * delta ** 2 * (value - 4 / 29)
+      }
+
+      const xValue = 0.95047 * pivot(x)
+      const yValue = pivot(y)
+      const zValue = 1.08883 * pivot(z)
+
+      function toSRGB(value: number) {
+        const gamma = value <= 0.0031308 ? 12.92 * value : 1.055 * Math.pow(value, 1 / 2.4) - 0.055
+
+        return Math.min(255, Math.max(0, gamma * 255))
+      }
+
+      return {
+        b: toSRGB(0.0557 * xValue - 0.204 * yValue + 1.057 * zValue),
+        g: toSRGB(-0.9689 * xValue + 1.8758 * yValue + 0.0415 * zValue),
+        r: toSRGB(3.2406 * xValue - 1.5372 * yValue - 0.4986 * zValue),
+      }
+    }
+
     function normalizeColor(color: string): { b: number; g: number; r: number } {
       const oklch = parseOKLCH(color)
 
       if (oklch) {
         return oklch
+      }
+
+      const lab = parseLab(color)
+
+      if (lab) {
+        return lab
       }
 
       colorContext.fillStyle = '#000000'

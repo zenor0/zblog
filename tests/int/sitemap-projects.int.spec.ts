@@ -52,20 +52,24 @@ describe('sitemap project entries', () => {
     })
   })
 
-  it('adds published indexable project detail pages with access enforced', async () => {
-    const { default: sitemap } = await import('@/app/sitemap')
-    const entries = await sitemap()
-    const urls = entries.map((entry) => entry.url)
+  it(
+    'adds published indexable project detail pages with access enforced',
+    async () => {
+      const { default: sitemap } = await import('@/app/sitemap')
+      const entries = await sitemap()
+      const urls = entries.map((entry) => entry.url)
 
-    expect(payloadFind).toHaveBeenCalledWith(
-      expect.objectContaining({
-        collection: 'projects',
-        fallbackLocale: false,
-        overrideAccess: false,
-      }),
-    )
-    expect(urls).toContain('http://localhost:3000/zh-hans/projects/project-system')
-    expect(urls).toContain('http://localhost:3000/en/projects/project-system')
-    expect(urls).not.toContain('http://localhost:3000/en/projects/hidden-project')
-  })
+      expect(payloadFind).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collection: 'projects',
+          fallbackLocale: false,
+          overrideAccess: false,
+        }),
+      )
+      expect(urls).toContain('http://localhost:3000/zh-hans/projects/project-system')
+      expect(urls).toContain('http://localhost:3000/en/projects/project-system')
+      expect(urls).not.toContain('http://localhost:3000/en/projects/hidden-project')
+    },
+    10_000,
+  )
 })

@@ -1,15 +1,15 @@
 import Link from 'next/link'
 import {
+  AtSign,
+  BriefcaseBusiness,
+  Camera,
+  Code2,
   ExternalLink,
-  Github,
-  Instagram,
-  Linkedin,
   Mail,
   MessageCircle,
+  MonitorPlay,
   Rss,
-  Twitter,
   UserRound,
-  Youtube,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -50,13 +50,13 @@ type FooterRenderContext = {
 const socialPlatformIcons: Record<string, LucideIcon> = {
   discord: MessageCircle,
   email: Mail,
-  github: Github,
-  instagram: Instagram,
-  linkedin: Linkedin,
+  github: Code2,
+  instagram: Camera,
+  linkedin: BriefcaseBusiness,
   other: ExternalLink,
   rss: Rss,
-  x: Twitter,
-  youtube: Youtube,
+  x: AtSign,
+  youtube: MonitorPlay,
 }
 
 const socialPlatformLabels: Record<string, string> = {

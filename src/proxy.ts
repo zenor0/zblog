@@ -23,7 +23,7 @@ function persistLocale(response: NextResponse, locale: string) {
   return response
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const cookieLocale = normalizeLocale(request.cookies.get(localeCookieName)?.value)
 

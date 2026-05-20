@@ -1,5 +1,4 @@
-import { getPayload } from 'payload'
-import config from '../../src/payload.config.js'
+import { getTestPayload } from './getTestPayload'
 import { retryOnSqliteBusy } from './retryOnSqliteBusy'
 
 export const testUser = {
@@ -12,7 +11,7 @@ export const testUser = {
  * Seeds a test user for e2e admin tests.
  */
 export async function seedTestUser(): Promise<void> {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   // Delete existing test user if any
   await retryOnSqliteBusy(async () => {
@@ -37,7 +36,7 @@ export async function seedTestUser(): Promise<void> {
  * Cleans up test user after tests
  */
 export async function cleanupTestUser(): Promise<void> {
-  const payload = await getPayload({ config })
+  const payload = await getTestPayload()
 
   await retryOnSqliteBusy(async () => {
     await payload.delete({
