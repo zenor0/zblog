@@ -6,9 +6,13 @@ const setSourceValue = vi.fn()
 const setFilenameValue = vi.fn()
 
 vi.mock('@payloadcms/ui', () => ({
-  Button: ({ children, buttonStyle: _buttonStyle, margin: _margin, size: _size, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
+  Button: ({
+    children,
+    buttonStyle: _buttonStyle,
+    margin: _margin,
+    size: _size,
+    ...props
+  }: any) => <button {...props}>{children}</button>,
   Collapsible: ({ actions, children, header, isCollapsed, onToggle }: any) => (
     <section>
       <button onClick={() => onToggle?.(!isCollapsed)} type="button">

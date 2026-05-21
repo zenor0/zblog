@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import packageManifest from '../../package.json'
+import packageManifest from '../../../package.json'
 
 describe('package scripts', () => {
   it('uses reset-and-seed scripts instead of local database migrations during development', () => {

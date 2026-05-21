@@ -17,6 +17,8 @@ ZBlog now follows a hybrid layout:
 - `src/features/*/admin/**`: Payload admin implementations owned by that feature.
 - `src/shared/**`: auth helpers, locale primitives, payload client bootstrap, runtime paths, common utilities.
 - `src/components/ui/**`: shadcn primitives and only shadcn primitives.
+- `tests/int/<feature>/**`: integration tests grouped by feature or project area, not flat files directly under `tests/int`.
+- `tests/e2e/<area>/**`: Playwright tests grouped by user-facing area.
 
 ## Dependency Rules
 
@@ -38,3 +40,4 @@ ZBlog now follows a hybrid layout:
 - Payload component path strings should point directly at `src/features/*/admin/**`.
 - `src/lib` is no longer an active module layer.
 - Do not reintroduce `src/components/frontend/*`, `src/components/payload/*`, or `src/lib/*`.
+- Put new integration tests in the closest existing `tests/int/<feature>` folder; create a new shallow folder only when no existing feature area fits.

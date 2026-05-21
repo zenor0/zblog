@@ -28,7 +28,10 @@ type StoredDedupe = {
 }
 
 function createMemoryPayload(
-  args: { postStatus?: 'draft' | 'published'; postVisibility?: 'listed' | 'private' | 'unlisted' } = {},
+  args: {
+    postStatus?: 'draft' | 'published'
+    postVisibility?: 'listed' | 'private' | 'unlisted'
+  } = {},
 ) {
   const metrics: StoredMetric[] = []
   const dedupeEntries: StoredDedupe[] = []

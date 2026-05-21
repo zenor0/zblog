@@ -3,11 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { LocaleSwitcher } from '@/shared/ui/LocaleSwitcher'
-import {
-  applyFrontendTheme,
-  ThemeSwitcher,
-  themeStorageKey,
-} from '@/shared/ui/ThemeSwitcher'
+import { applyFrontendTheme, ThemeSwitcher, themeStorageKey } from '@/shared/ui/ThemeSwitcher'
 
 vi.mock('next/link', () => ({
   default: ({

@@ -48,17 +48,20 @@ describe('PostInsights', () => {
         updatedAt: '2026-04-02T10:00:00.000Z',
       })
 
-    const find = vi.fn().mockResolvedValueOnce({ totalDocs: 3 }).mockResolvedValueOnce({
-      docs: [
-        {
-          lastViewedAt: '2026-04-02T11:00:00.000Z',
-          rawHits: 14,
-          uniqueVisitors: 9,
-          viewCount: 12,
-        },
-      ],
-      totalDocs: 1,
-    })
+    const find = vi
+      .fn()
+      .mockResolvedValueOnce({ totalDocs: 3 })
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            lastViewedAt: '2026-04-02T11:00:00.000Z',
+            rawHits: 14,
+            uniqueVisitors: 9,
+            viewCount: 12,
+          },
+        ],
+        totalDocs: 1,
+      })
 
     const markup = renderToStaticMarkup(
       await (PostInsights as any)({

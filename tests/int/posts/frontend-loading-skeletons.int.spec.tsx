@@ -2,10 +2,7 @@ import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import {
-  HomePageSkeleton,
-  PostArticleSkeleton,
-} from '@/features/posts/ui/FrontendLoadingSkeletons'
+import { HomePageSkeleton, PostArticleSkeleton } from '@/features/posts/ui/FrontendLoadingSkeletons'
 
 function countSkeletonSlots(markup: string) {
   return markup.match(/data-slot="skeleton"/g)?.length ?? 0

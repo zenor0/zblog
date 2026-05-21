@@ -2,7 +2,7 @@ import lint from '@commitlint/lint'
 import type { QualifiedRules } from '@commitlint/types'
 import { describe, expect, it } from 'vitest'
 
-import commitlintConfig from '../../commitlint.config.mjs'
+import commitlintConfig from '../../../commitlint.config.mjs'
 
 const rules = commitlintConfig.rules as QualifiedRules
 

@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { retryOnSqliteBusy } from '../helpers/retryOnSqliteBusy'
+import { retryOnSqliteBusy } from '../../helpers/retryOnSqliteBusy'
 
 describe('retryOnSqliteBusy', () => {
   test('retries when SQLITE_BUSY is nested in the cause chain', async () => {

@@ -29,9 +29,8 @@ vi.mock('@payloadcms/ui', () => ({
 }))
 
 vi.mock('@/features/posts/admin/TranslatePostLocaleAction', () => ({
-  TranslatePostLocaleAction: ({ targetLocale }: { targetLocale: string }) => (
-    React.createElement('button', { type: 'button' }, `Translate ${targetLocale}`)
-  ),
+  TranslatePostLocaleAction: ({ targetLocale }: { targetLocale: string }) =>
+    React.createElement('button', { type: 'button' }, `Translate ${targetLocale}`),
 }))
 
 import { PostTranslationManager } from '@/features/posts/admin/PostTranslationManager'

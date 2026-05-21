@@ -15,9 +15,13 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@payloadcms/ui', () => ({
-  Button: ({ children, buttonStyle: _buttonStyle, margin: _margin, size: _size, ...props }: any) => (
-    <button {...props}>{children}</button>
-  ),
+  Button: ({
+    children,
+    buttonStyle: _buttonStyle,
+    margin: _margin,
+    size: _size,
+    ...props
+  }: any) => <button {...props}>{children}</button>,
   SelectInput: ({ label, onChange, options, value }: any) => (
     <label>
       <span>{label}</span>
@@ -28,7 +32,7 @@ vi.mock('@payloadcms/ui', () => ({
 
           onChange(
             nextValue
-              ? options.find((option: { value: string }) => option.value === nextValue) ?? null
+              ? (options.find((option: { value: string }) => option.value === nextValue) ?? null)
               : null,
           )
         }}

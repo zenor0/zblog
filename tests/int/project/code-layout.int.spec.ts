@@ -3,7 +3,7 @@ import path from 'path'
 
 import { describe, expect, it } from 'vitest'
 
-const projectRoot = path.resolve(__dirname, '../..')
+const projectRoot = path.resolve(__dirname, '../../..')
 
 function resolveProjectPath(relativePath: string) {
   return path.join(projectRoot, relativePath)
@@ -49,12 +49,25 @@ function listSourceFiles(relativeDir: string): string[] {
 
 function extractInternalImports(relativePath: string) {
   const source = readProjectFile(relativePath)
-  const importSpecifiers = [...source.matchAll(/from\s+['"]([^'"]+)['"]/g)].map((match) => match[1] ?? '')
+  const importSpecifiers = [...source.matchAll(/from\s+['"]([^'"]+)['"]/g)].map(
+    (match) => match[1] ?? '',
+  )
 
   return importSpecifiers.filter((specifier) => specifier.startsWith('@/'))
 }
 
 describe('code layout', () => {
+  it('keeps integration tests grouped into feature folders', () => {
+    const directIntegrationSpecs = fs
+      .readdirSync(resolveProjectPath('tests/int'), {
+        withFileTypes: true,
+      })
+      .filter((entry) => entry.isFile() && /\.int\.spec\.tsx?$/.test(entry.name))
+      .map((entry) => entry.name)
+
+    expect(directIntegrationSpecs).toEqual([])
+  })
+
   it('documents the target hybrid feature-first layout', () => {
     const layoutDocPath = 'docs/development/code-layout.md'
 
@@ -256,7 +269,7 @@ describe('code layout', () => {
     const legacyComponentStrings = ['/components/payload/']
 
     for (const filePath of [...listSourceFiles('src'), ...listSourceFiles('tests')]) {
-      if (filePath === 'tests/int/code-layout.int.spec.ts') {
+      if (filePath === 'tests/int/project/code-layout.int.spec.ts') {
         continue
       }
 

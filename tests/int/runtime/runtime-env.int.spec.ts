@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import {
-  getCanonicalSiteURLInput,
-  getPayloadSecret,
-  localSiteURL,
-} from '@/shared/runtime/env'
+import { getCanonicalSiteURLInput, getPayloadSecret, localSiteURL } from '@/shared/runtime/env'
 
 const originalEnv = {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,

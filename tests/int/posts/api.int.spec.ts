@@ -14,7 +14,7 @@ import {
   resolveRuntimePath,
   runtimeStateDir,
 } from '@/shared/runtime/paths'
-import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
+import { createMDshipWorkspaceFiles } from '../../helpers/createMDshipWorkspace'
 
 let payload: Payload
 const testDatabasePath = resolveRuntimePath('zblog.test.db')

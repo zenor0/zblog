@@ -51,9 +51,7 @@ describe('seed blog content', () => {
     expect(Object.keys(seedFallbackDemoCopy)).toEqual(['zh-Hans'])
     expect(seedFallbackDemoCopy['zh-Hans'].excerpt).toContain('语言回退')
 
-    expect(buildZhCitationDemoContent('/media/seed-hero.svg')).toContain(
-      '为什么博客需要显式引用',
-    )
+    expect(buildZhCitationDemoContent('/media/seed-hero.svg')).toContain('为什么博客需要显式引用')
     expect(buildEnCitationDemoContent('/media/seed-hero.svg')).toContain(
       'Why a blog should keep explicit citations',
     )

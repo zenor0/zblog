@@ -200,37 +200,38 @@ describe('RSS feed and discovery routes', () => {
   })
 
   it('adds sitemap metadata, locale alternates, and excludes noindex posts', async () => {
-    payloadMocks.find.mockImplementation(({ collection, locale }: { collection: string; locale: string }) => {
-      if (collection === 'pages') {
-        return Promise.resolve({
-          docs: [
-            pageFixture({
-              slug: 'privacy',
-              title: locale === 'en' ? 'Privacy Policy' : '隐私政策',
-            }),
-            pageFixture({
-              id: 11,
-              slug: 'terms',
-              title: locale === 'en' ? 'Terms of Use' : '用户协议',
-            }),
-            pageFixture({
-              id: 12,
-              seo: {
-                noindex: true,
-              },
-              slug: 'hidden-page',
-            }),
-          ],
-        })
-      }
+    payloadMocks.find.mockImplementation(
+      ({ collection, locale }: { collection: string; locale: string }) => {
+        if (collection === 'pages') {
+          return Promise.resolve({
+            docs: [
+              pageFixture({
+                slug: 'privacy',
+                title: locale === 'en' ? 'Privacy Policy' : '隐私政策',
+              }),
+              pageFixture({
+                id: 11,
+                slug: 'terms',
+                title: locale === 'en' ? 'Terms of Use' : '用户协议',
+              }),
+              pageFixture({
+                id: 12,
+                seo: {
+                  noindex: true,
+                },
+                slug: 'hidden-page',
+              }),
+            ],
+          })
+        }
 
-      if (collection === 'projects') {
-        return Promise.resolve({
-          docs: [],
-        })
-      }
+        if (collection === 'projects') {
+          return Promise.resolve({
+            docs: [],
+          })
+        }
 
-      return Promise.resolve({
+        return Promise.resolve({
           docs: [
             postFixture({
               title: locale === 'en' ? 'Visible post' : '可见文章',
@@ -254,7 +255,8 @@ describe('RSS feed and discovery routes', () => {
             }),
           ],
         })
-    })
+      },
+    )
     siteSettingsMocks.getResolvedSiteSettings.mockImplementation((locale: string) =>
       Promise.resolve(
         siteSettingsFixture({

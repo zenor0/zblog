@@ -41,7 +41,8 @@ const sampleBibliography = `
 
 describe('content utilities', () => {
   it('extracts citation keys in first-seen order', () => {
-    const markdown = 'See [@smith2024] and [@chen2023; @smith2024] for details. Cross-ref [@fig:overview].'
+    const markdown =
+      'See [@smith2024] and [@chen2023; @smith2024] for details. Cross-ref [@fig:overview].'
 
     expect(extractCitationKeys(markdown)).toEqual(['smith2024', 'chen2023'])
     expect(Array.from(buildCitationIndex(markdown).entries())).toEqual([
@@ -228,7 +229,9 @@ describe('content utilities', () => {
   it('builds line-based text diffs', () => {
     const diff = buildTextDiff('old line\nsame line', 'new line\nsame line')
 
-    expect(diff.some((line) => line.type === 'removed' && line.value.includes('old line'))).toBe(true)
+    expect(diff.some((line) => line.type === 'removed' && line.value.includes('old line'))).toBe(
+      true,
+    )
     expect(diff.some((line) => line.type === 'added' && line.value.includes('new line'))).toBe(true)
   })
 })

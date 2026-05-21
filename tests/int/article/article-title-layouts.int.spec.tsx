@@ -39,11 +39,7 @@ describe('article title layouts', () => {
 
   it('keeps the preview label available when explicitly provided', () => {
     const html = renderToStaticMarkup(
-      <PostArticleTitleBlock
-        label="预览模式"
-        meta={<span>草稿预览</span>}
-        title="草稿文章标题"
-      />,
+      <PostArticleTitleBlock label="预览模式" meta={<span>草稿预览</span>} title="草稿文章标题" />,
     )
 
     expect(html).toContain('预览模式')

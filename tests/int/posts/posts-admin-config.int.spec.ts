@@ -20,7 +20,9 @@ describe('Posts collection admin tabs', () => {
     ])
 
     expect(tabsField.tabs[1].fields.some((field: any) => field.name === 'ownedMedia')).toBe(true)
-    expect(tabsField.tabs[3].fields.some((field: any) => field.name === 'postTranslations')).toBe(true)
+    expect(tabsField.tabs[3].fields.some((field: any) => field.name === 'postTranslations')).toBe(
+      true,
+    )
   })
 
   it('adds a publication visibility field for public listing rules', () => {

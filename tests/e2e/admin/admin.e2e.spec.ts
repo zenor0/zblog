@@ -1,10 +1,10 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test'
-import { createMDshipWorkspaceFiles } from '../helpers/createMDshipWorkspace'
-import { createPostPackageFiles } from '../helpers/createPostPackage'
-import { getTestPayload } from '../helpers/getTestPayload'
-import { login } from '../helpers/login'
-import { retryOnSqliteBusy } from '../helpers/retryOnSqliteBusy'
-import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
+import { createMDshipWorkspaceFiles } from '../../helpers/createMDshipWorkspace'
+import { createPostPackageFiles } from '../../helpers/createPostPackage'
+import { getTestPayload } from '../../helpers/getTestPayload'
+import { login } from '../../helpers/login'
+import { retryOnSqliteBusy } from '../../helpers/retryOnSqliteBusy'
+import { seedTestUser, cleanupTestUser, testUser } from '../../helpers/seedUser'
 
 const serverURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
 
@@ -103,7 +103,8 @@ async function submitImport(page: Page) {
   const response = await Promise.all([
     page.waitForResponse(
       (candidate) =>
-        candidate.request().method() === 'POST' && candidate.url().includes('/api/post-package-import'),
+        candidate.request().method() === 'POST' &&
+        candidate.url().includes('/api/post-package-import'),
       {
         timeout: 30_000,
       },
@@ -175,7 +176,9 @@ test.describe('Admin Panel', () => {
   test('can navigate to list view', async () => {
     await page.goto(`${serverURL}/admin/collections/users`)
     await expect(page).toHaveURL(
-      new RegExp(`^${serverURL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/admin/collections/users(?:\\?depth=1&limit=10)?$`),
+      new RegExp(
+        `^${serverURL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/admin/collections/users(?:\\?depth=1&limit=10)?$`,
+      ),
     )
   })
 
@@ -189,7 +192,9 @@ test.describe('Admin Panel', () => {
   test('can open the posts collection and create view with overview first', async () => {
     await page.goto(`${serverURL}/admin/collections/posts`)
     await expect(page).toHaveURL(
-      new RegExp(`^${serverURL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/admin/collections/posts(?:\\?depth=1&limit=10)?$`),
+      new RegExp(
+        `^${serverURL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/admin/collections/posts(?:\\?depth=1&limit=10)?$`,
+      ),
     )
 
     await page.goto(`${serverURL}/admin/collections/posts/create`)
