@@ -31,8 +31,8 @@ async function runDockerInit(args: { databasePath: string; stateDir: string }) {
         ...process.env,
         DATABASE_URL: `file:${args.databasePath}`,
         NODE_ENV: 'development',
-        NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',
         PAYLOAD_SECRET: 'test-docker-init-secret',
+        SITE_URL: 'http://localhost:3000',
         ZBLOG_STATE_DIR: args.stateDir,
       },
       timeout: 60_000,
@@ -56,7 +56,7 @@ afterEach(async () => {
 })
 
 describe('docker init script', () => {
-  it('initializes schema and site settings for an empty SQLite database', async () => {
+  it('initializes schema without seeding content for an empty SQLite database', async () => {
     const { databasePath, stateDir } = await createTempState()
 
     const { stdout } = await runDockerInit({
@@ -72,10 +72,14 @@ describe('docker init script', () => {
       const settings = db.prepare('select count(*) as count from site_settings').get() as {
         count: number
       }
+      const pages = db.prepare('select count(*) as count from pages').get() as {
+        count: number
+      }
 
       expect(stdout).toContain('"status":"initialized"')
       expect(table).toMatchObject({ name: 'site_settings' })
-      expect(settings.count).toBeGreaterThan(0)
+      expect(settings.count).toBe(0)
+      expect(pages.count).toBe(0)
     } finally {
       db.close()
     }

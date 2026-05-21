@@ -68,6 +68,7 @@ function siteSettingsFixture(overrides: Partial<SiteSetting> = {}): SiteSetting 
     id: 1,
     siteName: 'ZBlog',
     siteDescription: 'Notes about building products.',
+    siteURL: 'https://zblog.example',
     updatedAt: '2026-03-25T12:00:00.000Z',
     createdAt: '2026-03-20T12:00:00.000Z',
     ...overrides,
@@ -76,7 +77,7 @@ function siteSettingsFixture(overrides: Partial<SiteSetting> = {}): SiteSetting 
 
 describe('RSS feed and discovery routes', () => {
   beforeEach(() => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://zblog.example'
+    delete process.env.NEXT_PUBLIC_SITE_URL
     payloadMocks.find.mockReset()
     payloadMocks.getPayloadClient.mockReset()
     siteSettingsMocks.getResolvedSiteSettings.mockReset()
@@ -87,7 +88,11 @@ describe('RSS feed and discovery routes', () => {
   })
 
   afterEach(() => {
-    process.env.NEXT_PUBLIC_SITE_URL = originalSiteURL
+    if (originalSiteURL === undefined) {
+      delete process.env.NEXT_PUBLIC_SITE_URL
+    } else {
+      process.env.NEXT_PUBLIC_SITE_URL = originalSiteURL
+    }
   })
 
   it('builds escaped RSS XML with channel metadata, links, summaries, and categories', () => {
@@ -108,6 +113,7 @@ describe('RSS feed and discovery routes', () => {
       selfPath: '/en/rss.xml',
       siteDescription: 'Notes <tech> & products.',
       siteName: 'Z & Blog',
+      siteURL: 'https://zblog.example',
     })
 
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>')
@@ -318,8 +324,8 @@ describe('RSS feed and discovery routes', () => {
     expect(entries.some((entry) => entry.url.includes('private-post'))).toBe(false)
   })
 
-  it('keeps robots pointed at the sitemap while blocking private surfaces', () => {
-    const result = robots()
+  it('keeps robots pointed at the sitemap while blocking private surfaces', async () => {
+    const result = await robots()
     const rule = Array.isArray(result.rules) ? result.rules[0] : result.rules
 
     expect(result.host).toBe('https://zblog.example')

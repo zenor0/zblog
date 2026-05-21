@@ -177,11 +177,13 @@ describe('seed site settings', () => {
         },
         siteDescription: 'Existing site description.',
         siteName: 'Existing Site',
+        siteURL: 'https://existing.example',
       } as any,
     })
 
     expect(data.siteName).toBe('Existing Site')
     expect(data.siteDescription).toBe('Existing site description.')
+    expect(data.siteURL).toBe('https://existing.example')
     expect(data.homeHero?.title).toBe('Existing hero title')
     expect(data.homeHero?.description).toBe(
       'A simple blog for articles, notes, and project updates.',

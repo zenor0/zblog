@@ -42,7 +42,7 @@ For local development, use SQLite and local runtime state:
 ```bash
 DATABASE_URL=file:.data/zblog.db
 ZBLOG_STATE_DIR=.data
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SITE_URL=http://localhost:3000
 PAYLOAD_SECRET=replace-with-a-long-random-secret
 ```
 
@@ -67,17 +67,18 @@ terminate TLS in the reverse proxy and forward traffic to that local address.
 cp .env.example .env
 openssl rand -base64 32
 # put the generated value in PAYLOAD_SECRET
-# set NEXT_PUBLIC_SITE_URL to the public https:// URL
 docker compose up -d --build
 ```
 
-`NEXT_PUBLIC_SITE_URL` is used while building the image, so rebuild after
-changing the public URL.
+After the first startup, open `/admin` and set the public URL under
+Site settings. `SITE_URL` remains available as a runtime fallback before that
+admin value is configured.
 
 On startup, the app container automatically initializes an empty `zblog-data`
-volume before launching the server. It initializes the SQLite schema and site settings,
-then starts the app. It does not create demo posts, projects, or media. You can
-rerun the same initializer safely with
+volume before launching the server. It initializes the SQLite schema only, then
+starts the app. It does not seed site settings, pages, demo posts, projects, or
+media; import a site data archive from the admin area when you want starter
+content. You can rerun the same initializer safely with
 `docker compose run --rm zblog sh -c 'NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs'`;
 it skips databases that already contain the `site_settings` table.
 

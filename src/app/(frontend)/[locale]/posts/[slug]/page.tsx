@@ -75,6 +75,7 @@ export async function generateMetadata(props: {
       index: shouldIndex,
     },
     siteName: siteSettings.siteName,
+    siteURL: siteSettings.siteURL,
     title: resolved.post.seo?.metaTitle || resolved.post.title,
   })
 }
@@ -135,6 +136,7 @@ export default async function PostPage(props: {
         publishedAt: resolved.post.publishedAt,
         siteDescription: siteSettings.siteDescription,
         siteName: siteSettings.siteName,
+        siteURL: siteSettings.siteURL,
         title: resolved.post.seo?.metaTitle || resolved.post.title,
       })
     : null

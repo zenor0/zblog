@@ -6,8 +6,7 @@ import { pathToFileURL } from 'node:url'
 
 import Database from 'libsql'
 
-import { seedSiteSettings } from '@/features/site-settings/seed/seed-site-settings'
-import { seedSitePages } from '@/features/pages/seed/seed-site-pages'
+import { defaultLocale } from '@/shared/i18n/locales'
 
 const siteSettingsTable = 'site_settings'
 
@@ -42,7 +41,9 @@ export function resolveFileDatabasePath(databaseURL = process.env.DATABASE_URL):
     throw new Error('Docker database initialization requires a persistent SQLite file.')
   }
 
-  const rawPath = value.startsWith('file://') ? new URL(value).pathname : value.slice('file:'.length)
+  const rawPath = value.startsWith('file://')
+    ? new URL(value).pathname
+    : value.slice('file:'.length)
   const decodedPath = decodeURIComponent(rawPath)
 
   if (!decodedPath) {
@@ -93,7 +94,7 @@ export function getDockerBootstrapDecision(tableNames: string[]): DockerBootstra
   }
 }
 
-async function initializePayloadSchemaAndSettings() {
+async function initializePayloadSchema() {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('docker:init must run with NODE_ENV unset or set to development.')
   }
@@ -110,8 +111,12 @@ async function initializePayloadSchemaAndSettings() {
   })
 
   try {
-    await seedSiteSettings(payload)
-    await seedSitePages(payload)
+    await payload.findGlobal({
+      slug: 'site-settings',
+      depth: 0,
+      fallbackLocale: false,
+      locale: defaultLocale,
+    })
   } finally {
     await payload.destroy()
   }
@@ -135,7 +140,7 @@ export async function bootstrapDockerDatabase(): Promise<DockerBootstrapResult> 
     )
   }
 
-  await initializePayloadSchemaAndSettings()
+  await initializePayloadSchema()
 
   return {
     databasePath,

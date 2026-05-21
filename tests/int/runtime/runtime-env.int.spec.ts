@@ -38,23 +38,36 @@ describe('runtime env helpers', () => {
     expect(getPayloadSecret()).toBe('configured-secret')
   })
 
-  it('requires a canonical site URL in production and keeps a local fallback elsewhere', () => {
+  it('falls back to the local site URL when no canonical URL is configured', () => {
     delete process.env.NEXT_PUBLIC_SITE_URL
     delete process.env.SITE_URL
     setEnv('NODE_ENV', 'production')
 
-    expect(() => getCanonicalSiteURLInput()).toThrow(/NEXT_PUBLIC_SITE_URL|SITE_URL/)
+    expect(getCanonicalSiteURLInput()).toBe(localSiteURL)
 
     setEnv('NODE_ENV', 'development')
 
     expect(getCanonicalSiteURLInput()).toBe(localSiteURL)
   })
 
-  it('prefers NEXT_PUBLIC_SITE_URL over SITE_URL when both are configured', () => {
+  it('prefers explicit site settings, then SITE_URL, then legacy NEXT_PUBLIC_SITE_URL', () => {
     process.env.NEXT_PUBLIC_SITE_URL = ' https://public.example.test '
     process.env.SITE_URL = 'https://server.example.test'
     setEnv('NODE_ENV', 'production')
 
+    expect(getCanonicalSiteURLInput(' https://settings.example.test ')).toBe(
+      'https://settings.example.test',
+    )
+    expect(getCanonicalSiteURLInput()).toBe('https://server.example.test')
+
+    delete process.env.SITE_URL
+
     expect(getCanonicalSiteURLInput()).toBe('https://public.example.test')
+  })
+
+  it('rejects invalid canonical site URL inputs', () => {
+    expect(() => getCanonicalSiteURLInput('https://example.test/blog')).toThrow(/origin/)
+    expect(() => getCanonicalSiteURLInput('ftp://example.test')).toThrow(/http/)
+    expect(() => getCanonicalSiteURLInput('https://user@example.test')).toThrow(/credentials/)
   })
 })

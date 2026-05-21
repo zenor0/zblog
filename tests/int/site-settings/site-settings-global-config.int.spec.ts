@@ -34,8 +34,15 @@ describe('site settings global config schema', () => {
     const globalVariables = fields.find((field: any) => field.name === 'globalVariables') as any
     const appearance = fields.find((field: any) => field.name === 'appearance') as any
     const siteName = fields.find((field: any) => field.name === 'siteName') as any
+    const siteURL = fields.find((field: any) => field.name === 'siteURL') as any
 
     expect(siteName.localized).toBe(true)
+    expect(siteURL.localized).toBeUndefined()
+    expect(siteURL.type).toBe('text')
+    expect(typeof siteURL.validate).toBe('function')
+    expect(siteURL.validate('https://example.com')).toBe(true)
+    expect(siteURL.validate('http://localhost:3000')).toBe(true)
+    expect(siteURL.validate('https://example.com/blog')).toMatch(/origin/)
     expect(globalVariables.type).toBe('group')
     expect(globalVariables.fields.map((field: any) => field.name)).toEqual([
       'owner',

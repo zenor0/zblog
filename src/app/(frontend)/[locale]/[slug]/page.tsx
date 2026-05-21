@@ -61,11 +61,14 @@ export async function generateMetadata(props: {
       index: !resolved.usedFallback && isPageIndexable(resolved.page),
     },
     siteName: siteSettings.siteName,
+    siteURL: siteSettings.siteURL,
     title: resolved.page.seo?.metaTitle || resolved.page.title,
   })
 }
 
-export default async function CMSPage(props: { params: Promise<{ locale: string; slug: string }> }) {
+export default async function CMSPage(props: {
+  params: Promise<{ locale: string; slug: string }>
+}) {
   const { locale: localeParam, slug } = await props.params
   const locale = requireLocale(localeParam)
   const preview = await draftMode()

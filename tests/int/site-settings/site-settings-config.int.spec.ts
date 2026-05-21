@@ -13,6 +13,7 @@ describe('site settings config helpers', () => {
   const settings = {
     siteName: 'ZBlog',
     siteDescription: 'Notes about building products.',
+    siteURL: 'https://zblog.example',
     globalVariables: {
       owner: {
         bio: 'Builder and writer.',
@@ -79,6 +80,7 @@ describe('site settings config helpers', () => {
 
     expect(context['site.name']).toBe('ZBlog')
     expect(context['site.description']).toBe('Notes about building products.')
+    expect(context['site.url']).toBe('https://zblog.example')
     expect(context['site.currentYear']).toBe(String(new Date().getFullYear()))
     expect(context['owner.name']).toBe('Zenoro')
     expect(context['owner.handle']).toBe('@zenor0')
@@ -155,10 +157,16 @@ describe('site settings config helpers', () => {
 
     expect(generalYaml).toContain('appearance:')
     expect(generalYaml).toContain('accentColor: "#14b8a6"')
+    expect(generalYaml).toContain('siteURL: https://zblog.example')
 
     const parsedGeneral = parseSiteSettingsSectionYAML(
       'general',
-      ['siteName: ZBlog', 'appearance:', '  accentColor: "#0f766e"'].join('\n'),
+      [
+        'siteName: ZBlog',
+        'siteURL: https://parsed.example',
+        'appearance:',
+        '  accentColor: "#0f766e"',
+      ].join('\n'),
     )
 
     expect(parsedGeneral).toEqual({
@@ -166,6 +174,7 @@ describe('site settings config helpers', () => {
         accentColor: '#0f766e',
       },
       siteName: 'ZBlog',
+      siteURL: 'https://parsed.example',
     })
   })
 

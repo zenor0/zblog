@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
 import {
   JetBrains_Mono,
@@ -17,7 +16,6 @@ import {
   localeRequestHeaderName,
   normalizeLocale,
 } from '@/shared/i18n/locales'
-import { getSiteURL } from '@/shared/content/seo'
 
 import './styles.css'
 
@@ -52,10 +50,6 @@ const cjkSerif = Noto_Serif_SC({
   variable: '--font-cjk-serif',
   weight: ['400', '500', '600', '700'],
 })
-
-export const metadata: Metadata = {
-  metadataBase: getSiteURL(),
-}
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props

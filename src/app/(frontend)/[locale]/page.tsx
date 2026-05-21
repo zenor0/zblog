@@ -41,6 +41,7 @@ export async function generateMetadata(props: {
       siteSettings.siteDescription || siteSettings.homeHero?.description || home('heroDescription'),
     fallbackImage: defaultSocialImage,
     siteName: siteSettings.siteName,
+    siteURL: siteSettings.siteURL,
     title,
   })
 }
@@ -83,6 +84,7 @@ export default async function LocalizedHomePage(props: { params: Promise<{ local
     image: defaultSocialImage,
     locale,
     siteName: siteSettings.siteName,
+    siteURL: siteSettings.siteURL,
   })
 
   return (

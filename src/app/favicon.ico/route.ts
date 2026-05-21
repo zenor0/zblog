@@ -66,11 +66,13 @@ async function resolveConfiguredFavicon() {
     return {
       iconURL,
       siteName: settings.siteName || defaultSiteName,
+      siteURL: settings.siteURL,
     }
   } catch {
     return {
       iconURL: null,
       siteName: defaultSiteName,
+      siteURL: null,
     }
   }
 }
@@ -79,7 +81,7 @@ export async function GET() {
   const favicon = await resolveConfiguredFavicon()
 
   if (favicon.iconURL) {
-    return Response.redirect(new URL(favicon.iconURL, getSiteURL()).toString(), 307)
+    return Response.redirect(new URL(favicon.iconURL, getSiteURL(favicon.siteURL)).toString(), 307)
   }
 
   return new Response(buildFallbackFaviconSVG(favicon.siteName), {

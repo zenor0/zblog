@@ -22,25 +22,32 @@ describe('deployment container config', () => {
   it('builds a standalone Next.js server for the production Docker image', () => {
     const dockerfile = readProjectFile('Dockerfile')
     const nextConfig = readProjectFile('next.config.mjs')
+    const robotsRoute = readProjectFile('src/app/robots.ts')
     const sitemapRoute = readProjectFile('src/app/sitemap.ts')
 
     expect(nextConfig).toMatch(/output:\s*['"]standalone['"]/)
+    expect(robotsRoute).toMatch(/dynamic\s*=\s*['"]force-dynamic['"]/)
     expect(sitemapRoute).toMatch(/dynamic\s*=\s*['"]force-dynamic['"]/)
-    expect(dockerfile).toContain('ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000')
-    expect(dockerfile).toContain('NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL"')
     expect(dockerfile).toContain('PAYLOAD_SECRET=zblog-build-placeholder-secret')
     expect(dockerfile).toContain('ZBLOG_STATE_DIR=/tmp/zblog-build-state')
     expect(dockerfile).toContain('DATABASE_URL=file:/tmp/zblog-build-state/zblog-build.db')
-    expect(dockerfile).toContain('@libsql+linux-x64-musl@0.4.7')
-    expect(dockerfile).toContain('ln -sfn ../../../@libsql+linux-x64-musl@0.4.7')
+    expect(dockerfile).toContain('FROM deps AS prod-deps')
+    expect(dockerfile).toContain('pnpm prune --prod')
     expect(dockerfile).toContain('--outfile=docker-init.mjs')
+    expect(dockerfile).toContain('--external:@payloadcms/db-sqlite')
     expect(dockerfile).toContain('--external:libsql')
     expect(dockerfile).toContain('--external:sharp')
-    expect(dockerfile).toContain('drizzle-kit@0.31.7')
+    expect(dockerfile).toContain(
+      'COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules',
+    )
     expect(dockerfile).toContain('COPY --from=builder --chown=nextjs:nodejs /app/docker-init.mjs')
     expect(dockerfile).toContain(
       'CMD ["sh", "-c", "NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs && exec node server.js"]',
     )
+    expect(dockerfile).not.toContain('ARG NEXT_PUBLIC_SITE_URL')
+    expect(dockerfile).not.toContain('NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL"')
+    expect(dockerfile).not.toMatch(/node_modules\/\.pnpm\/[^\s]+@\d/)
+    expect(dockerfile).not.toContain('ln -sfn')
     expect(dockerfile).not.toContain('FROM deps AS init')
     expect(dockerfile).not.toContain('--import=tsx/esm", "src/scripts/docker-init.ts"')
     expect(dockerfile).not.toContain('ENV PAYLOAD_SECRET')
@@ -57,9 +64,6 @@ describe('deployment container config', () => {
 
     expect(serviceNames).toEqual(['zblog'])
     expect(zblog?.build).toEqual({
-      args: {
-        NEXT_PUBLIC_SITE_URL: '${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}',
-      },
       context: '.',
       dockerfile: 'Dockerfile',
       target: 'runner',
@@ -77,7 +81,7 @@ describe('deployment container config', () => {
     expect(compose.volumes).toHaveProperty('zblog-data')
   })
 
-  it('uses Docker bootstrap instead of production migrations before first release', () => {
+  it('uses Docker schema bootstrap without seeding content before first release', () => {
     const packageJSON = JSON.parse(readProjectFile('package.json')) as {
       scripts?: Record<string, string>
     }
@@ -88,6 +92,9 @@ describe('deployment container config', () => {
     expect(payloadConfig).not.toContain("from './migrations'")
     expect(payloadConfig).not.toContain('prodMigrations')
     expect(dockerInitScript).toContain('bootstrapDockerDatabase')
+    expect(dockerInitScript).toContain('payload.findGlobal')
+    expect(dockerInitScript).not.toContain('seedSiteSettings')
+    expect(dockerInitScript).not.toContain('seedSitePages')
     expect(fs.existsSync(path.join(rootDir, 'src/migrations'))).toBe(false)
   })
 
@@ -96,7 +103,8 @@ describe('deployment container config', () => {
 
     expect(envExample).toContain('DATABASE_URL=file:/app/.data/zblog.db')
     expect(envExample).toContain('ZBLOG_STATE_DIR=/app/.data')
-    expect(envExample).toContain('NEXT_PUBLIC_SITE_URL=https://example.com')
+    expect(envExample).toContain('SITE_URL=https://example.com')
+    expect(envExample).not.toContain('NEXT_PUBLIC_SITE_URL')
     expect(envExample).toContain('PAYLOAD_SECRET=')
     expect(envExample).toContain('ZBLOG_PDF_PREVIEW_COMMAND=pdftocairo')
     expect(envExample).toContain('ZBLOG_PDF_RENDER_CONCURRENCY=4')
@@ -124,7 +132,10 @@ describe('deployment container config', () => {
     expect(readme).toContain('openssl rand -base64 32')
     expect(readme).toContain('automatically initializes')
     expect(readme).toContain('docker-init.mjs')
-    expect(readme).toContain('schema and site settings')
+    expect(readme).toContain('schema only')
+    expect(readme).toContain('does not seed')
+    expect(readme).toContain('Site settings')
+    expect(readme).not.toContain('rebuild after')
     expect(readme).toContain('docker run --rm')
     expect(readme).toContain('zblog-data')
   })

@@ -49,6 +49,7 @@ function isSitemapRenderableProject(project: null | Project): project is Project
 function buildSitemapAlternates(args: {
   locales: readonly AppLocale[]
   pathname: string
+  siteURL?: null | string
 }): NonNullable<SitemapEntry['alternates']> {
   const xDefaultLocale = args.locales.includes(defaultLocale)
     ? defaultLocale
@@ -56,14 +57,14 @@ function buildSitemapAlternates(args: {
   const languages = Object.fromEntries(
     args.locales.map((locale) => [
       locale,
-      buildAbsoluteURL(buildLocalePath(locale, args.pathname)),
+      buildAbsoluteURL(buildLocalePath(locale, args.pathname), args.siteURL),
     ]),
   )
 
   return {
     languages: {
       ...languages,
-      'x-default': buildAbsoluteURL(buildLocalePath(xDefaultLocale, args.pathname)),
+      'x-default': buildAbsoluteURL(buildLocalePath(xDefaultLocale, args.pathname), args.siteURL),
     },
   }
 }
@@ -82,80 +83,78 @@ function getPageSitemapPriority(page: Page) {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayloadClient()
-  const [
-    localizedSiteSettings,
-    localizedPageGroups,
-    localizedPostGroups,
-    localizedProjectGroups,
-  ] = await Promise.all([
-    Promise.all(
-      localeCodes.map(async (locale) => {
-        const settings = await getResolvedSiteSettings(locale)
+  const [localizedSiteSettings, localizedPageGroups, localizedPostGroups, localizedProjectGroups] =
+    await Promise.all([
+      Promise.all(
+        localeCodes.map(async (locale) => {
+          const settings = await getResolvedSiteSettings(locale)
 
-        return {
+          return {
+            locale,
+            settings,
+          }
+        }),
+      ),
+      Promise.all(
+        localeCodes.map(async (locale) => ({
           locale,
-          settings,
-        }
-      }),
-    ),
-    Promise.all(
-      localeCodes.map(async (locale) => ({
-        locale,
-        pages: await getPublishedPages(locale),
-      })),
-    ),
-    Promise.all(
-      localeCodes.map(async (locale) => {
-        const result = await payload.find({
-          collection: 'posts',
-          depth: 0,
-          fallbackLocale: false,
-          limit: 1000,
-          locale,
-          overrideAccess: false,
-          sort: '-updatedAt',
-          where: publishedListedPostWhere,
-        })
+          pages: await getPublishedPages(locale),
+        })),
+      ),
+      Promise.all(
+        localeCodes.map(async (locale) => {
+          const result = await payload.find({
+            collection: 'posts',
+            depth: 0,
+            fallbackLocale: false,
+            limit: 1000,
+            locale,
+            overrideAccess: false,
+            sort: '-updatedAt',
+            where: publishedListedPostWhere,
+          })
 
-        return {
-          locale,
-          posts: result.docs.filter(isSitemapRenderablePost),
-        }
-      }),
-    ),
-    Promise.all(
-      localeCodes.map(async (locale) => {
-        const result = await payload.find({
-          collection: 'projects',
-          depth: 0,
-          fallbackLocale: false,
-          limit: 1000,
-          locale,
-          overrideAccess: false,
-          sort: 'sortOrder',
-          where: {
-            _status: {
-              equals: 'published',
+          return {
+            locale,
+            posts: result.docs.filter(isSitemapRenderablePost),
+          }
+        }),
+      ),
+      Promise.all(
+        localeCodes.map(async (locale) => {
+          const result = await payload.find({
+            collection: 'projects',
+            depth: 0,
+            fallbackLocale: false,
+            limit: 1000,
+            locale,
+            overrideAccess: false,
+            sort: 'sortOrder',
+            where: {
+              _status: {
+                equals: 'published',
+              },
             },
-          },
-        })
+          })
 
-        return {
-          locale,
-          projects: result.docs.filter(isSitemapRenderableProject),
-        }
-      }),
-    ),
-  ])
+          return {
+            locale,
+            projects: result.docs.filter(isSitemapRenderableProject),
+          }
+        }),
+      ),
+    ])
+  const siteURL = localizedSiteSettings.find(({ settings }) => settings.siteURL)?.settings.siteURL
   const localizedHomeEntries = localizedSiteSettings.map(({ locale, settings }) => ({
     alternates: buildSitemapAlternates({
       locales: localeCodes,
       pathname: '',
+      siteURL,
     }),
     changeFrequency: 'daily' as const,
     lastModified: settings.updatedAt ?? new Date().toISOString(),
     priority: 1,
-    url: buildAbsoluteURL(buildLocalePath(locale)),
+    url: buildAbsoluteURL(buildLocalePath(locale), siteURL),
   }))
   const localizedUtilityPageEntries = localizedSiteSettings.flatMap(({ locale, settings }) =>
     utilityPageSitemapConfigs.map((config) => {
@@ -165,11 +164,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         alternates: buildSitemapAlternates({
           locales: localeCodes,
           pathname,
+          siteURL,
         }),
         changeFrequency: config.changeFrequency,
         lastModified: settings.updatedAt ?? new Date().toISOString(),
         priority: config.priority,
-        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname), siteURL),
       }
     }),
   )
@@ -193,11 +193,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         alternates: buildSitemapAlternates({
           locales: pageLocalesBySlug.get(slug) ?? [locale],
           pathname,
+          siteURL,
         }),
         changeFrequency: 'monthly' as const,
         lastModified: page.updatedAt ?? page.publishedAt ?? new Date().toISOString(),
         priority: getPageSitemapPriority(page),
-        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname), siteURL),
       }
     }),
   )
@@ -232,11 +233,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         alternates: buildSitemapAlternates({
           locales: localesBySlug.get(slug) ?? [locale],
           pathname,
+          siteURL,
         }),
         changeFrequency: 'weekly' as const,
         lastModified: post.updatedAt ?? post.publishedAt ?? new Date().toISOString(),
         priority: 0.7,
-        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname), siteURL),
       }
     }),
   )
@@ -249,11 +251,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         alternates: buildSitemapAlternates({
           locales: projectLocalesBySlug.get(slug) ?? [locale],
           pathname,
+          siteURL,
         }),
         changeFrequency: 'monthly' as const,
         lastModified: getProjectTimestamp(project) ?? new Date().toISOString(),
         priority: 0.6,
-        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname), siteURL),
       }
     }),
   )

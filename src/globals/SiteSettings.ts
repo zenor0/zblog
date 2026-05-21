@@ -25,6 +25,7 @@ import {
   defaultFrontendAccentColor,
   validateFrontendAccentColor,
 } from '@/shared/theme/frontend-theme'
+import { validateCanonicalSiteURL } from '@/shared/runtime/env'
 
 const localizedHeroDefaults = {
   en: {
@@ -969,6 +970,16 @@ export const SiteSettings: GlobalConfig = {
                 defaultValue: ({ locale }) => getLocalizedHeroDefault(locale, 'siteDescription'),
                 label: 'Site description',
                 localized: true,
+              },
+              {
+                name: 'siteURL',
+                type: 'text',
+                admin: {
+                  description:
+                    'Public site origin used for canonical URLs, RSS, sitemap, robots, and social metadata. Leave blank to use SITE_URL or localhost.',
+                },
+                label: 'Public site URL',
+                validate: validateCanonicalSiteURL,
               },
               {
                 name: 'globalVariables',

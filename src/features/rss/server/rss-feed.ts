@@ -70,8 +70,11 @@ function normalizeSiteName(value: null | string | undefined) {
   return hasText(value) ? value.trim() : 'ZBlog'
 }
 
-function getPostURL(locale: AppLocale, post: Post) {
-  return buildAbsoluteURL(buildLocalePath(locale, `/posts/${encodeURIComponent(post.slug.trim())}`))
+function getPostURL(locale: AppLocale, post: Post, siteURL?: null | string) {
+  return buildAbsoluteURL(
+    buildLocalePath(locale, `/posts/${encodeURIComponent(post.slug.trim())}`),
+    siteURL,
+  )
 }
 
 function getPostDescription(post: Post) {
@@ -122,13 +125,14 @@ export function buildRSSFeed(args: {
   selfPath: string
   siteDescription?: null | string
   siteName: string
+  siteURL?: null | string
 }) {
   const siteName = normalizeSiteName(args.siteName)
   const siteDescription = hasText(args.siteDescription) ? args.siteDescription.trim() : siteName
-  const channelURL = buildAbsoluteURL(buildLocalePath(args.locale))
-  const selfURL = buildAbsoluteURL(args.selfPath)
+  const channelURL = buildAbsoluteURL(buildLocalePath(args.locale), args.siteURL)
+  const selfURL = buildAbsoluteURL(args.selfPath, args.siteURL)
   const items = args.posts.map((post) => {
-    const postURL = getPostURL(args.locale, post)
+    const postURL = getPostURL(args.locale, post, args.siteURL)
     const pubDate = getPostDate(post)
     const categories =
       post.tags
@@ -178,6 +182,7 @@ export async function getRSSFeedResponse(args: { locale: AppLocale; selfPath?: s
     selfPath: args.selfPath ?? getRSSFeedPath(args.locale),
     siteDescription: settings.siteDescription,
     siteName: settings.siteName,
+    siteURL: settings.siteURL,
   })
 
   return new Response(xml, {

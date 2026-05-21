@@ -803,6 +803,7 @@ export function buildSeedSiteSettingsData(args: {
       defaultLike.siteDescription,
     ),
     siteName: preferSeedForDefault(args.settings.siteName, starter.siteName, defaultLike.siteName),
+    siteURL: args.settings.siteURL,
   }
 }
 

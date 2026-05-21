@@ -23,6 +23,7 @@ export function buildUtilityPageMetadata(args: {
     fallbackDescription: args.settings.siteDescription,
     pathname: buildUtilityPagePath(args.slug),
     siteName: args.settings.siteName,
+    siteURL: args.settings.siteURL,
     title: copy.title,
   })
 }

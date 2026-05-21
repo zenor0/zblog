@@ -9,6 +9,7 @@ const siteSettingsRootKeys = [
   'appearance',
   'siteName',
   'siteDescription',
+  'siteURL',
   'globalVariables',
   'homeHero',
   'seo',

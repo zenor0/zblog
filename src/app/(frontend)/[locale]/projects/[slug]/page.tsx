@@ -77,6 +77,7 @@ export async function generateMetadata(props: {
       index: !resolved.usedFallback && !resolved.project.seo?.noindex,
     },
     siteName: siteSettings.siteName,
+    siteURL: siteSettings.siteURL,
     title: resolved.project.seo?.metaTitle || resolved.project.title,
   })
 }

@@ -34,6 +34,10 @@ type StructuredDataRecord = {
   [key: string]: unknown
 }
 
+type SiteURLInput = {
+  siteURL?: null | string
+}
+
 function collapseWhitespace(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
@@ -76,6 +80,7 @@ function getOpenGraphLocale(locale: AppLocale) {
 
 function resolveSourceImage(
   image: MetadataImageSource | null | undefined,
+  siteURL?: null | string,
 ): ResolvedMetadataImage | null {
   if (!image?.url || typeof image.url !== 'string') {
     return null
@@ -84,7 +89,7 @@ function resolveSourceImage(
   return {
     alt: normalizeText(image.alt),
     height: typeof image.height === 'number' ? image.height : undefined,
-    url: buildAbsoluteURL(image.url),
+    url: buildAbsoluteURL(image.url, siteURL),
     width: typeof image.width === 'number' ? image.width : undefined,
   }
 }
@@ -98,46 +103,54 @@ function buildOpenGraphImageObject(image: ResolvedMetadataImage) {
   }
 }
 
-export function getSiteURL(): URL {
-  const siteURL = getCanonicalSiteURLInput()
+export function getSiteURL(siteURLInput?: null | string): URL {
+  const siteURL = getCanonicalSiteURLInput(siteURLInput)
 
   return new URL(siteURL.endsWith('/') ? siteURL : `${siteURL}/`)
 }
 
-export function buildAbsoluteURL(pathname = '/'): string {
+export function buildAbsoluteURL(pathname = '/', siteURLInput?: null | string): string {
   const normalizedPathname = pathname.startsWith('/') ? pathname : `/${pathname}`
 
-  return new URL(normalizedPathname, getSiteURL()).toString()
+  return new URL(normalizedPathname, getSiteURL(siteURLInput)).toString()
 }
 
-export function buildLocaleAlternates(args: {
-  canonicalLocale: AppLocale
-  pathname?: string
-  locales?: readonly AppLocale[]
-  xDefaultPath?: string
-}): Metadata['alternates'] {
+export function buildLocaleAlternates(
+  args: {
+    canonicalLocale: AppLocale
+    pathname?: string
+    locales?: readonly AppLocale[]
+    xDefaultPath?: string
+  } & SiteURLInput,
+): Metadata['alternates'] {
   const pathname = args.pathname ?? ''
   const locales = args.locales ?? supportedLocales.map((locale) => locale.code)
   const languages = Object.fromEntries(
-    locales.map((locale) => [locale, buildAbsoluteURL(buildLocalePath(locale, pathname))]),
+    locales.map((locale) => [
+      locale,
+      buildAbsoluteURL(buildLocalePath(locale, pathname), args.siteURL),
+    ]),
   )
 
   return {
-    canonical: buildAbsoluteURL(buildLocalePath(args.canonicalLocale, pathname)),
+    canonical: buildAbsoluteURL(buildLocalePath(args.canonicalLocale, pathname), args.siteURL),
     languages: {
       ...languages,
-      'x-default': buildAbsoluteURL(args.xDefaultPath ?? buildLocalePath(defaultLocale, pathname)),
+      'x-default': buildAbsoluteURL(
+        args.xDefaultPath ?? buildLocalePath(defaultLocale, pathname),
+        args.siteURL,
+      ),
     },
     types: {
-      'application/rss+xml': buildAbsoluteURL(buildLocalePath(args.canonicalLocale, '/rss.xml')),
+      'application/rss+xml': buildAbsoluteURL(
+        buildLocalePath(args.canonicalLocale, '/rss.xml'),
+        args.siteURL,
+      ),
     },
   }
 }
 
-export function buildPageTitle(args: {
-  pageTitle?: null | string
-  siteName: string
-}) {
+export function buildPageTitle(args: { pageTitle?: null | string; siteName: string }) {
   const siteName = normalizeText(args.siteName) ?? defaultSiteName
   const pageTitle = normalizeText(args.pageTitle)
 
@@ -176,6 +189,7 @@ export function buildDefaultSocialImageURL(args: {
   description?: null | string
   eyebrow?: null | string
   locale: AppLocale
+  siteURL?: null | string
   title: string
 }) {
   const searchParams = new URLSearchParams({
@@ -186,7 +200,8 @@ export function buildDefaultSocialImageURL(args: {
     }),
   })
   const description = normalizeText(args.description)
-  const eyebrow = normalizeText(args.eyebrow) ?? `${getLocaleLabel(args.locale)} · ${defaultSiteName}`
+  const eyebrow =
+    normalizeText(args.eyebrow) ?? `${getLocaleLabel(args.locale)} · ${defaultSiteName}`
 
   searchParams.set('eyebrow', eyebrow)
 
@@ -194,7 +209,7 @@ export function buildDefaultSocialImageURL(args: {
     searchParams.set('description', description)
   }
 
-  return buildAbsoluteURL(`/api/og?${searchParams.toString()}`)
+  return buildAbsoluteURL(`/api/og?${searchParams.toString()}`, args.siteURL)
 }
 
 export function resolveMetadataImage(args: {
@@ -203,9 +218,12 @@ export function resolveMetadataImage(args: {
   fallbackImage?: MetadataImageSource | null
   image?: MetadataImageSource | null
   locale: AppLocale
+  siteURL?: null | string
   title: string
 }): ResolvedMetadataImage {
-  const explicitImage = resolveSourceImage(args.image) ?? resolveSourceImage(args.fallbackImage)
+  const explicitImage =
+    resolveSourceImage(args.image, args.siteURL) ??
+    resolveSourceImage(args.fallbackImage, args.siteURL)
 
   if (explicitImage) {
     return explicitImage
@@ -217,6 +235,7 @@ export function resolveMetadataImage(args: {
       description: args.description,
       eyebrow: args.eyebrow,
       locale: args.locale,
+      siteURL: args.siteURL,
       title: args.title,
     }),
   }
@@ -235,6 +254,7 @@ export function buildPageMetadata(args: {
   publishedTime?: null | string
   robots?: Metadata['robots']
   siteName: string
+  siteURL?: null | string
   title?: null | string
   xDefaultPath?: string
 }) {
@@ -247,12 +267,16 @@ export function buildPageMetadata(args: {
     fallback: args.fallbackDescription,
     value: args.description,
   })
-  const canonicalURL = buildAbsoluteURL(buildLocalePath(args.canonicalLocale, args.pathname))
+  const canonicalURL = buildAbsoluteURL(
+    buildLocalePath(args.canonicalLocale, args.pathname),
+    args.siteURL,
+  )
   const metadataImage = resolveMetadataImage({
     description,
     fallbackImage: args.fallbackImage,
     image: args.image,
     locale: args.canonicalLocale,
+    siteURL: args.siteURL,
     title: pageTitle,
   })
   const alternateLocales = (args.locales ?? supportedLocales.map((locale) => locale.code))
@@ -264,6 +288,7 @@ export function buildPageMetadata(args: {
       canonicalLocale: args.canonicalLocale,
       locales: args.locales,
       pathname: args.pathname,
+      siteURL: args.siteURL,
       xDefaultPath: args.xDefaultPath,
     }),
     description,
@@ -294,16 +319,18 @@ function buildOrganizationData(args: {
   description?: null | string
   image?: MetadataImageSource | null
   siteName: string
+  siteURL?: null | string
 }) {
-  const image = resolveSourceImage(args.image)
+  const image = resolveSourceImage(args.image, args.siteURL)
+  const siteOrigin = getSiteURL(args.siteURL).origin
 
   return {
-    '@id': `${getSiteURL().origin}#organization`,
+    '@id': `${siteOrigin}#organization`,
     '@type': 'Organization',
     description: normalizeText(args.description),
     image: image?.url,
     name: args.siteName,
-    url: getSiteURL().origin,
+    url: siteOrigin,
   } satisfies StructuredDataRecord
 }
 
@@ -312,8 +339,9 @@ export function buildHomeStructuredData(args: {
   image?: MetadataImageSource | null
   locale: AppLocale
   siteName: string
+  siteURL?: null | string
 }) {
-  const localizedURL = buildAbsoluteURL(buildLocalePath(args.locale))
+  const localizedURL = buildAbsoluteURL(buildLocalePath(args.locale), args.siteURL)
   const organization = buildOrganizationData(args)
 
   return {
@@ -345,18 +373,21 @@ export function buildArticleStructuredData(args: {
   publishedAt?: null | string
   siteDescription?: null | string
   siteName: string
+  siteURL?: null | string
   title: string
 }) {
-  const canonicalURL = buildAbsoluteURL(buildLocalePath(args.locale, args.pathname))
+  const canonicalURL = buildAbsoluteURL(buildLocalePath(args.locale, args.pathname), args.siteURL)
   const organization = buildOrganizationData({
     description: args.siteDescription,
     image: args.image,
     siteName: args.siteName,
+    siteURL: args.siteURL,
   })
   const image = resolveMetadataImage({
     description: args.description ?? args.siteDescription,
     image: args.image,
     locale: args.locale,
+    siteURL: args.siteURL,
     title: args.title,
   })
   const authorName = normalizeText(args.authorName) ?? args.siteName

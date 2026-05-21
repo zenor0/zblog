@@ -59,164 +59,171 @@ export type SupportedTimezones =
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+  | 'Pacific/Fiji'
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
-  };
-  blocks: {};
+    users: UserAuthOperations
+  }
+  blocks: {}
   collections: {
-    users: User;
-    media: Media;
-    posts: Post;
-    pages: Page;
-    projects: Project;
-    'post-view-metrics': PostViewMetric;
-    'post-view-dedupe': PostViewDedupe;
-    'payload-kv': PayloadKv;
-    'payload-jobs': PayloadJob;
-    'payload-locked-documents': PayloadLockedDocument;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
+    users: User
+    media: Media
+    posts: Post
+    pages: Page
+    projects: Project
+    'post-view-metrics': PostViewMetric
+    'post-view-dedupe': PostViewDedupe
+    'payload-kv': PayloadKv
+    'payload-jobs': PayloadJob
+    'payload-locked-documents': PayloadLockedDocument
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
   collectionsJoins: {
     posts: {
-      ownedMedia: 'media';
-    };
-  };
+      ownedMedia: 'media'
+    }
+  }
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
-    projects: ProjectsSelect<false> | ProjectsSelect<true>;
-    'post-view-metrics': PostViewMetricsSelect<false> | PostViewMetricsSelect<true>;
-    'post-view-dedupe': PostViewDedupeSelect<false> | PostViewDedupeSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
-  };
+    users: UsersSelect<false> | UsersSelect<true>
+    media: MediaSelect<false> | MediaSelect<true>
+    posts: PostsSelect<false> | PostsSelect<true>
+    pages: PagesSelect<false> | PagesSelect<true>
+    projects: ProjectsSelect<false> | ProjectsSelect<true>
+    'post-view-metrics': PostViewMetricsSelect<false> | PostViewMetricsSelect<true>
+    'post-view-dedupe': PostViewDedupeSelect<false> | PostViewDedupeSelect<true>
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>
+    'payload-locked-documents':
+      | PayloadLockedDocumentsSelect<false>
+      | PayloadLockedDocumentsSelect<true>
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>
+  }
   db: {
-    defaultIDType: number;
-  };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('zh-Hans' | 'en') | ('zh-Hans' | 'en')[];
+    defaultIDType: number
+  }
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('zh-Hans' | 'en')
+    | ('zh-Hans' | 'en')[]
   globals: {
-    'site-settings': SiteSetting;
-    'frontend-variants': FrontendVariant;
-  };
+    'site-settings': SiteSetting
+    'frontend-variants': FrontendVariant
+  }
   globalsSelect: {
-    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
-    'frontend-variants': FrontendVariantsSelect<false> | FrontendVariantsSelect<true>;
-  };
-  locale: 'zh-Hans' | 'en';
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>
+    'frontend-variants': FrontendVariantsSelect<false> | FrontendVariantsSelect<true>
+  }
+  locale: 'zh-Hans' | 'en'
   widgets: {
-    collections: CollectionsWidget;
-  };
-  user: User;
+    collections: CollectionsWidget
+  }
+  user: User
   jobs: {
     tasks: {
-      schedulePublish: TaskSchedulePublish;
+      schedulePublish: TaskSchedulePublish
       inline: {
-        input: unknown;
-        output: unknown;
-      };
-    };
-    workflows: unknown;
-  };
+        input: unknown
+        output: unknown
+      }
+    }
+    workflows: unknown
+  }
 }
 export interface UserAuthOperations {
   forgotPassword: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
   login: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
   registerFirstUser: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
   unlock: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
-  roles: ('admin' | 'editor')[];
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
+  id: number
+  roles: ('admin' | 'editor')[]
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
   sessions?:
     | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
+        id: string
+        createdAt?: string | null
+        expiresAt: string
       }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
+    | null
+  password?: string | null
+  collection: 'users'
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
-  alt: string;
-  caption?: string | null;
-  credit?: string | null;
-  previewSVGStatus?: ('pending' | 'ready' | 'failed') | null;
-  previewSVGURL?: string | null;
-  previewSVGFilename?: string | null;
-  previewSVGError?: string | null;
-  previewSVGGeneratedAt?: string | null;
-  importKey?: string | null;
-  ownerPost?: (number | null) | Post;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  id: number
+  alt: string
+  caption?: string | null
+  credit?: string | null
+  previewSVGStatus?: ('pending' | 'ready' | 'failed') | null
+  previewSVGURL?: string | null
+  previewSVGFilename?: string | null
+  previewSVGError?: string | null
+  previewSVGGeneratedAt?: string | null
+  importKey?: string | null
+  ownerPost?: (number | null) | Post
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
-  title: string;
-  excerpt?: string | null;
+  id: number
+  title: string
+  excerpt?: string | null
   /**
    * Markdown is supported here, including blockquotes, fenced code, tables, GitHub-style callouts via > [!NOTE], and citations via [@citation-key].
    */
-  content: string;
+  content: string
   ownedMedia?: {
-    docs?: (number | Media)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  heroImage?: (number | null) | Media;
+    docs?: (number | Media)[]
+    hasNextPage?: boolean
+    totalDocs?: number
+  }
+  heroImage?: (number | null) | Media
   /**
    * Store one BibTeX source directly on this post. Structured editing is available for safe, common entries.
    */
@@ -224,640 +231,640 @@ export interface Post {
     /**
      * Optional original filename for the BibTeX source stored on this post.
      */
-    filename?: string | null;
+    filename?: string | null
     /**
      * Paste BibTeX source here. Citation keys used in the current locale content are validated against this text.
      */
-    source?: string | null;
-  };
+    source?: string | null
+  }
   attachments?:
     | {
-        file: number | Media;
-        label?: string | null;
-        description?: string | null;
-        id?: string | null;
+        file: number | Media
+        label?: string | null
+        description?: string | null
+        id?: string | null
       }[]
-    | null;
-  translationStatus?: ('original' | 'machine' | 'reviewed') | null;
-  translatedFromLocale?: string | null;
-  translatedAt?: string | null;
-  translationProvider?: string | null;
+    | null
+  translationStatus?: ('original' | 'machine' | 'reviewed') | null
+  translatedFromLocale?: string | null
+  translatedAt?: string | null
+  translationProvider?: string | null
   seo?: {
     /**
      * Optional SEO title override for the current locale. Leave blank to reuse the post title.
      */
-    metaTitle?: string | null;
+    metaTitle?: string | null
     /**
      * Optional SEO description override for the current locale. Leave blank to reuse the excerpt or a summary derived from the post body.
      */
-    metaDescription?: string | null;
+    metaDescription?: string | null
     /**
      * Optional social sharing image override. Leave blank to reuse the hero image, then the site default image.
      */
-    metaImage?: (number | null) | Media;
+    metaImage?: (number | null) | Media
     /**
      * Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published posts.
      */
-    noindex?: boolean | null;
-  };
+    noindex?: boolean | null
+  }
   /**
    * Listed posts appear in public indexes. Unlisted posts are public by direct URL only. Private posts are visible to editors only.
    */
-  visibility: 'listed' | 'unlisted' | 'private';
-  slug: string;
+  visibility: 'listed' | 'unlisted' | 'private'
+  slug: string
   tags?:
     | {
-        value: string;
-        id?: string | null;
+        value: string
+        id?: string | null
       }[]
-    | null;
-  publishedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+    | null
+  publishedAt?: string | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
-  title: string;
-  eyebrow?: string | null;
-  description: string;
+  id: number
+  title: string
+  eyebrow?: string | null
+  description: string
   /**
    * Markdown is supported here, including headings, lists, links, tables, code blocks, and GitHub-style callouts via > [!NOTE].
    */
-  content: string;
-  effectiveDateLabel?: string | null;
+  content: string
+  effectiveDateLabel?: string | null
   seo?: {
     /**
      * Optional SEO title override for the current locale. Leave blank to reuse the page title.
      */
-    metaTitle?: string | null;
+    metaTitle?: string | null
     /**
      * Optional SEO description override for the current locale. Leave blank to reuse the page description or body summary.
      */
-    metaDescription?: string | null;
+    metaDescription?: string | null
     /**
      * Optional social sharing image override. Leave blank to reuse the site default image.
      */
-    metaImage?: (number | null) | Media;
+    metaImage?: (number | null) | Media
     /**
      * Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published pages.
      */
-    noindex?: boolean | null;
-  };
+    noindex?: boolean | null
+  }
   /**
    * Single top-level URL segment only, for example "about". Reserved system paths like posts, projects, and archive cannot be used.
    */
-  slug: string;
-  publishedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  slug: string
+  publishedAt?: string | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
-  id: number;
-  title: string;
-  summary: string;
+  id: number
+  title: string
+  summary: string
   /**
    * Short project notes rendered on the project detail page. Keep this lighter than a full article.
    */
-  details?: string | null;
-  coverImage?: (number | null) | Media;
-  status: 'active' | 'shipped' | 'paused' | 'archived';
+  details?: string | null
+  coverImage?: (number | null) | Media
+  status: 'active' | 'shipped' | 'paused' | 'archived'
   /**
    * Concise timeline label, for example "2026" or "2025 - ongoing".
    */
-  timeframe?: string | null;
-  featured?: boolean | null;
+  timeframe?: string | null
+  featured?: boolean | null
   /**
    * Lower numbers appear first. Featured projects still sort before non-featured projects.
    */
-  sortOrder?: number | null;
+  sortOrder?: number | null
   links?:
     | {
-        label: string;
-        url: string;
-        description?: string | null;
-        id?: string | null;
+        label: string
+        url: string
+        description?: string | null
+        id?: string | null
       }[]
-    | null;
+    | null
   seo?: {
     /**
      * Optional SEO title override for the current locale. Leave blank to reuse the project title.
      */
-    metaTitle?: string | null;
+    metaTitle?: string | null
     /**
      * Optional SEO description override for the current locale. Leave blank to reuse the project summary.
      */
-    metaDescription?: string | null;
+    metaDescription?: string | null
     /**
      * Optional social sharing image override. Leave blank to reuse the cover image, then the site default image.
      */
-    metaImage?: (number | null) | Media;
+    metaImage?: (number | null) | Media
     /**
      * Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published projects.
      */
-    noindex?: boolean | null;
-  };
-  slug: string;
+    noindex?: boolean | null
+  }
+  slug: string
   tags?:
     | {
-        value: string;
-        id?: string | null;
+        value: string
+        id?: string | null
       }[]
-    | null;
-  publishedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+    | null
+  publishedAt?: string | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "post-view-metrics".
  */
 export interface PostViewMetric {
-  id: number;
-  metricKey: string;
-  post: number | Post;
-  locale: 'zh-Hans' | 'en';
-  viewCount: number;
-  rawHits: number;
-  uniqueVisitors: number;
-  lastViewedAt?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  metricKey: string
+  post: number | Post
+  locale: 'zh-Hans' | 'en'
+  viewCount: number
+  rawHits: number
+  uniqueVisitors: number
+  lastViewedAt?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "post-view-dedupe".
  */
 export interface PostViewDedupe {
-  id: number;
-  dedupeKey: string;
-  post: number | Post;
-  locale: 'zh-Hans' | 'en';
-  firstSeenAt: string;
-  lastSeenAt: string;
-  expiresAt: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  dedupeKey: string
+  post: number | Post
+  locale: 'zh-Hans' | 'en'
+  firstSeenAt: string
+  lastSeenAt: string
+  expiresAt: string
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
-  key: string;
+  id: number
+  key: string
   data:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
+    | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: number;
+  id: number
   /**
    * Input data provided to the job
    */
   input?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
+    | null
   taskStatus?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  completedAt?: string | null;
-  totalTried?: number | null;
+    | null
+  completedAt?: string | null
+  totalTried?: number | null
   /**
    * If hasError is true this job will not be retried
    */
-  hasError?: boolean | null;
+  hasError?: boolean | null
   /**
    * If hasError is true, this is the error that caused it
    */
   error?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
+    | null
   /**
    * Task execution log
    */
   log?:
     | {
-        executedAt: string;
-        completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
-        taskID: string;
+        executedAt: string
+        completedAt: string
+        taskSlug: 'inline' | 'schedulePublish'
+        taskID: string
         input?:
           | {
-              [k: string]: unknown;
+              [k: string]: unknown
             }
           | unknown[]
           | string
           | number
           | boolean
-          | null;
+          | null
         output?:
           | {
-              [k: string]: unknown;
+              [k: string]: unknown
             }
           | unknown[]
           | string
           | number
           | boolean
-          | null;
-        state: 'failed' | 'succeeded';
+          | null
+        state: 'failed' | 'succeeded'
         error?:
           | {
-              [k: string]: unknown;
+              [k: string]: unknown
             }
           | unknown[]
           | string
           | number
           | boolean
-          | null;
-        id?: string | null;
+          | null
+        id?: string | null
       }[]
-    | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
-  queue?: string | null;
-  waitUntil?: string | null;
-  processing?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  taskSlug?: ('inline' | 'schedulePublish') | null
+  queue?: string | null
+  waitUntil?: string | null
+  processing?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: number
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'users'
+        value: number | User
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'media'
+        value: number | Media
       } | null)
     | ({
-        relationTo: 'posts';
-        value: number | Post;
+        relationTo: 'posts'
+        value: number | Post
       } | null)
     | ({
-        relationTo: 'pages';
-        value: number | Page;
+        relationTo: 'pages'
+        value: number | Page
       } | null)
     | ({
-        relationTo: 'projects';
-        value: number | Project;
+        relationTo: 'projects'
+        value: number | Project
       } | null)
     | ({
-        relationTo: 'post-view-metrics';
-        value: number | PostViewMetric;
+        relationTo: 'post-view-metrics'
+        value: number | PostViewMetric
       } | null)
     | ({
-        relationTo: 'post-view-dedupe';
-        value: number | PostViewDedupe;
-      } | null);
-  globalSlug?: string | null;
+        relationTo: 'post-view-dedupe'
+        value: number | PostViewDedupe
+      } | null)
+  globalSlug?: string | null
   user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  updatedAt: string;
-  createdAt: string;
+    relationTo: 'users'
+    value: number | User
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: number
   user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: number | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  roles?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
+  roles?: T
+  updatedAt?: T
+  createdAt?: T
+  email?: T
+  resetPasswordToken?: T
+  resetPasswordExpiration?: T
+  salt?: T
+  hash?: T
+  loginAttempts?: T
+  lockUntil?: T
   sessions?:
     | T
     | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+        id?: T
+        createdAt?: T
+        expiresAt?: T
+      }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  caption?: T;
-  credit?: T;
-  previewSVGStatus?: T;
-  previewSVGURL?: T;
-  previewSVGFilename?: T;
-  previewSVGError?: T;
-  previewSVGGeneratedAt?: T;
-  importKey?: T;
-  ownerPost?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
+  alt?: T
+  caption?: T
+  credit?: T
+  previewSVGStatus?: T
+  previewSVGURL?: T
+  previewSVGFilename?: T
+  previewSVGError?: T
+  previewSVGGeneratedAt?: T
+  importKey?: T
+  ownerPost?: T
+  updatedAt?: T
+  createdAt?: T
+  url?: T
+  thumbnailURL?: T
+  filename?: T
+  mimeType?: T
+  filesize?: T
+  width?: T
+  height?: T
+  focalX?: T
+  focalY?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  excerpt?: T;
-  content?: T;
-  ownedMedia?: T;
-  heroImage?: T;
+  title?: T
+  excerpt?: T
+  content?: T
+  ownedMedia?: T
+  heroImage?: T
   bibliography?:
     | T
     | {
-        filename?: T;
-        source?: T;
-      };
+        filename?: T
+        source?: T
+      }
   attachments?:
     | T
     | {
-        file?: T;
-        label?: T;
-        description?: T;
-        id?: T;
-      };
-  translationStatus?: T;
-  translatedFromLocale?: T;
-  translatedAt?: T;
-  translationProvider?: T;
+        file?: T
+        label?: T
+        description?: T
+        id?: T
+      }
+  translationStatus?: T
+  translatedFromLocale?: T
+  translatedAt?: T
+  translationProvider?: T
   seo?:
     | T
     | {
-        metaTitle?: T;
-        metaDescription?: T;
-        metaImage?: T;
-        noindex?: T;
-      };
-  visibility?: T;
-  slug?: T;
+        metaTitle?: T
+        metaDescription?: T
+        metaImage?: T
+        noindex?: T
+      }
+  visibility?: T
+  slug?: T
   tags?:
     | T
     | {
-        value?: T;
-        id?: T;
-      };
-  publishedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
+        value?: T
+        id?: T
+      }
+  publishedAt?: T
+  updatedAt?: T
+  createdAt?: T
+  _status?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  eyebrow?: T;
-  description?: T;
-  content?: T;
-  effectiveDateLabel?: T;
+  title?: T
+  eyebrow?: T
+  description?: T
+  content?: T
+  effectiveDateLabel?: T
   seo?:
     | T
     | {
-        metaTitle?: T;
-        metaDescription?: T;
-        metaImage?: T;
-        noindex?: T;
-      };
-  slug?: T;
-  publishedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
+        metaTitle?: T
+        metaDescription?: T
+        metaImage?: T
+        noindex?: T
+      }
+  slug?: T
+  publishedAt?: T
+  updatedAt?: T
+  createdAt?: T
+  _status?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects_select".
  */
 export interface ProjectsSelect<T extends boolean = true> {
-  title?: T;
-  summary?: T;
-  details?: T;
-  coverImage?: T;
-  status?: T;
-  timeframe?: T;
-  featured?: T;
-  sortOrder?: T;
+  title?: T
+  summary?: T
+  details?: T
+  coverImage?: T
+  status?: T
+  timeframe?: T
+  featured?: T
+  sortOrder?: T
   links?:
     | T
     | {
-        label?: T;
-        url?: T;
-        description?: T;
-        id?: T;
-      };
+        label?: T
+        url?: T
+        description?: T
+        id?: T
+      }
   seo?:
     | T
     | {
-        metaTitle?: T;
-        metaDescription?: T;
-        metaImage?: T;
-        noindex?: T;
-      };
-  slug?: T;
+        metaTitle?: T
+        metaDescription?: T
+        metaImage?: T
+        noindex?: T
+      }
+  slug?: T
   tags?:
     | T
     | {
-        value?: T;
-        id?: T;
-      };
-  publishedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
+        value?: T
+        id?: T
+      }
+  publishedAt?: T
+  updatedAt?: T
+  createdAt?: T
+  _status?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "post-view-metrics_select".
  */
 export interface PostViewMetricsSelect<T extends boolean = true> {
-  metricKey?: T;
-  post?: T;
-  locale?: T;
-  viewCount?: T;
-  rawHits?: T;
-  uniqueVisitors?: T;
-  lastViewedAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  metricKey?: T
+  post?: T
+  locale?: T
+  viewCount?: T
+  rawHits?: T
+  uniqueVisitors?: T
+  lastViewedAt?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "post-view-dedupe_select".
  */
 export interface PostViewDedupeSelect<T extends boolean = true> {
-  dedupeKey?: T;
-  post?: T;
-  locale?: T;
-  firstSeenAt?: T;
-  lastSeenAt?: T;
-  expiresAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  dedupeKey?: T
+  post?: T
+  locale?: T
+  firstSeenAt?: T
+  lastSeenAt?: T
+  expiresAt?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
+  key?: T
+  data?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
-  input?: T;
-  taskStatus?: T;
-  completedAt?: T;
-  totalTried?: T;
-  hasError?: T;
-  error?: T;
+  input?: T
+  taskStatus?: T
+  completedAt?: T
+  totalTried?: T
+  hasError?: T
+  error?: T
   log?:
     | T
     | {
-        executedAt?: T;
-        completedAt?: T;
-        taskSlug?: T;
-        taskID?: T;
-        input?: T;
-        output?: T;
-        state?: T;
-        error?: T;
-        id?: T;
-      };
-  taskSlug?: T;
-  queue?: T;
-  waitUntil?: T;
-  processing?: T;
-  updatedAt?: T;
-  createdAt?: T;
+        executedAt?: T
+        completedAt?: T
+        taskSlug?: T
+        taskID?: T
+        input?: T
+        output?: T
+        state?: T
+        error?: T
+        id?: T
+      }
+  taskSlug?: T
+  queue?: T
+  waitUntil?: T
+  processing?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-  document?: T;
-  globalSlug?: T;
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  document?: T
+  globalSlug?: T
+  user?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-  user?: T;
-  key?: T;
-  value?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  user?: T
+  key?: T
+  value?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-  name?: T;
-  batch?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  name?: T
+  batch?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * Configure the homepage hero copy and the structured footer content shown on the frontend.
@@ -866,10 +873,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
-  id: number;
-  generalEditorMode?: ('form' | 'yaml') | null;
-  siteName: string;
-  siteDescription?: string | null;
+  id: number
+  generalEditorMode?: ('form' | 'yaml') | null
+  siteName: string
+  siteDescription?: string | null
+  /**
+   * Public site origin used for canonical URLs, RSS, sitemap, robots, and social metadata. Leave blank to use SITE_URL or localhost.
+   */
+  siteURL?: string | null
   /**
    * Shared variables used by other site setting sections. Use {{site.name}}, {{site.currentYear}}, {{owner.name}}, {{custom.tagline}}, or social/contact paths in text fields.
    */
@@ -878,37 +889,46 @@ export interface SiteSetting {
      * Reusable owner identity for SEO, footer, homepage, previews, and the future setup wizard.
      */
     owner?: {
-      name?: string | null;
+      name?: string | null
       /**
        * Public handle or account name.
        */
-      handle?: string | null;
-      email?: string | null;
-      bio?: string | null;
-      websiteUrl?: string | null;
-      avatar?: (number | null) | Media;
-    };
+      handle?: string | null
+      email?: string | null
+      bio?: string | null
+      websiteUrl?: string | null
+      avatar?: (number | null) | Media
+    }
     /**
      * Shared media references. YAML uses Payload media IDs, while frontend output resolves the relationship when Payload populates it.
      */
     assets?: {
-      logo?: (number | null) | Media;
-      icon?: (number | null) | Media;
-      avatar?: (number | null) | Media;
-      defaultSocialImage?: (number | null) | Media;
-    };
+      logo?: (number | null) | Media
+      icon?: (number | null) | Media
+      avatar?: (number | null) | Media
+      defaultSocialImage?: (number | null) | Media
+    }
     /**
      * Shared social profiles. They can be referenced as {{social.github.label}} and {{social.github.url}}.
      */
     socialLinks?:
       | {
-          platform: 'github' | 'x' | 'linkedin' | 'youtube' | 'instagram' | 'discord' | 'rss' | 'email' | 'other';
-          label: string;
-          url: string;
-          openInNewTab?: boolean | null;
-          id?: string | null;
+          platform:
+            | 'github'
+            | 'x'
+            | 'linkedin'
+            | 'youtube'
+            | 'instagram'
+            | 'discord'
+            | 'rss'
+            | 'email'
+            | 'other'
+          label: string
+          url: string
+          openInNewTab?: boolean | null
+          id?: string | null
         }[]
-      | null;
+      | null
     /**
      * Reusable contact variables, referenced as {{contact.press.value}} or {{contact.press.url}}.
      */
@@ -917,13 +937,13 @@ export interface SiteSetting {
           /**
            * Reference key, for example press or newsletter.
            */
-          key: string;
-          label?: string | null;
-          value?: string | null;
-          url?: string | null;
-          id?: string | null;
+          key: string
+          label?: string | null
+          value?: string | null
+          url?: string | null
+          id?: string | null
         }[]
-      | null;
+      | null
     /**
      * Small string variables for repeated copy. Reference them with {{custom.variableKey}}.
      */
@@ -932,13 +952,13 @@ export interface SiteSetting {
           /**
            * Reference key after custom., for example tagline.
            */
-          key: string;
-          value?: string | null;
-          description?: string | null;
-          id?: string | null;
+          key: string
+          value?: string | null
+          description?: string | null
+          id?: string | null
         }[]
-      | null;
-  };
+      | null
+  }
   /**
    * Frontend visual accents used for links, progress indicators, media chrome, and small brand details.
    */
@@ -946,35 +966,35 @@ export interface SiteSetting {
     /**
      * Pick a visual accent preset, choose a hex color, or enter a safe oklch() value. The frontend falls back to the default teal accent if omitted.
      */
-    accentColor?: string | null;
-  };
-  homepageEditorMode?: ('form' | 'yaml') | null;
+    accentColor?: string | null
+  }
+  homepageEditorMode?: ('form' | 'yaml') | null
   homeHero?: {
-    eyebrow?: string | null;
-    title?: string | null;
-    description?: string | null;
-  };
-  seoEditorMode?: ('form' | 'yaml') | null;
+    eyebrow?: string | null
+    title?: string | null
+    description?: string | null
+  }
+  seoEditorMode?: ('form' | 'yaml') | null
   seo?: {
     /**
      * Optional SEO title override for the localized homepage. Leave blank to reuse the homepage hero title.
      */
-    homeTitle?: string | null;
+    homeTitle?: string | null
     /**
      * Optional SEO description override for the localized homepage. Leave blank to reuse the site description.
      */
-    homeDescription?: string | null;
-    defaultSocialImage?: (number | null) | Media;
-  };
+    homeDescription?: string | null
+    defaultSocialImage?: (number | null) | Media
+  }
   /**
    * Configure the code-owned article design preset and a small set of safe spacing overrides.
    */
   articleLayout: {
-    articleLayoutEditorMode?: ('form' | 'yaml') | null;
+    articleLayoutEditorMode?: ('form' | 'yaml') | null
     /**
      * Choose the default article design preset for public article pages.
      */
-    preset: 'compact-editorial' | 'balanced-editorial' | 'current';
+    preset: 'compact-editorial' | 'balanced-editorial' | 'current'
     /**
      * Optional font stack overrides. Leave blank to inherit the selected design preset.
      */
@@ -982,7 +1002,9 @@ export interface SiteSetting {
       /**
        * Western body text font stack.
        */
-      latinFont?: ('source-sans-3' | 'system-sans' | 'inter' | 'ibm-plex-sans' | 'newsreader' | 'georgia') | null;
+      latinFont?:
+        | ('source-sans-3' | 'system-sans' | 'inter' | 'ibm-plex-sans' | 'newsreader' | 'georgia')
+        | null
       /**
        * Chinese body text fallback stack.
        */
@@ -995,16 +1017,16 @@ export interface SiteSetting {
             | 'system-cjk-sans'
             | 'system-cjk-serif'
           )
-        | null;
+        | null
       /**
        * Heading font stack. The default keeps headings in a serif voice.
        */
-      headingFont?: ('editorial-serif' | 'system-serif' | 'display-sans' | 'body-sans') | null;
+      headingFont?: ('editorial-serif' | 'system-serif' | 'display-sans' | 'body-sans') | null
       /**
        * Inline and block code font stack.
        */
-      codeFont?: ('jetbrains-mono' | 'source-code-pro' | 'system-mono' | 'ui-mono') | null;
-    };
+      codeFont?: ('jetbrains-mono' | 'source-code-pro' | 'system-mono' | 'ui-mono') | null
+    }
     /**
      * Optional safe CSS token overrides. Sliders start from the selected preset defaults.
      */
@@ -1012,167 +1034,176 @@ export interface SiteSetting {
       /**
        * Controls both the reading column and prose max width.
        */
-      contentWidth?: string | null;
+      contentWidth?: string | null
       /**
        * Body text size in rem.
        */
-      bodyFontSize?: string | null;
+      bodyFontSize?: string | null
       /**
        * Unitless body line-height ratio.
        */
-      bodyLineHeight?: string | null;
+      bodyLineHeight?: string | null
       /**
        * Vertical gap between consecutive paragraphs.
        */
-      paragraphGap?: string | null;
+      paragraphGap?: string | null
       /**
        * Default vertical flow gap between ordinary article elements.
        */
-      flowGap?: string | null;
+      flowGap?: string | null
       /**
        * Outer vertical gap for figures, tables, code blocks, and callouts.
        */
-      blockGap?: string | null;
+      blockGap?: string | null
       /**
        * Internal gap between media/table surfaces and their captions.
        */
-      captionGap?: string | null;
+      captionGap?: string | null
       /**
        * Desktop gap between the reading column and the table of contents rail.
        */
-      gridGap?: string | null;
-    };
-  };
+      gridGap?: string | null
+    }
+  }
   footer: {
-    footerEditorMode?: ('form' | 'yaml') | null;
+    footerEditorMode?: ('form' | 'yaml') | null
     /**
      * Controls the frontend footer layout. Preview every option under /dev/footer-layouts.
      */
-    layoutStyle: 'compact' | 'directory' | 'ledger' | 'balanced';
+    layoutStyle: 'compact' | 'directory' | 'ledger' | 'balanced'
     /**
      * Top-left identity in the footer directory layer. Keep this concise so the navigation groups can balance beside it.
      */
     brand: {
-      logo?: (number | null) | Media;
-      name?: string | null;
+      logo?: (number | null) | Media
+      name?: string | null
       /**
        * Short one-line description shown under the brand name.
        */
-      description?: string | null;
+      description?: string | null
       /**
        * Optional secondary line shown below the brand description.
        */
-      supportingText?: string | null;
+      supportingText?: string | null
       link: {
-        type: 'internal' | 'external';
+        type: 'internal' | 'external'
         /**
          * Enter a locale-agnostic path such as /posts or /about.
          */
-        internalPath?: string | null;
-        externalUrl?: string | null;
-        openInNewTab?: boolean | null;
-      };
-    };
+        internalPath?: string | null
+        externalUrl?: string | null
+        openInNewTab?: boolean | null
+      }
+    }
     /**
      * Top directory layer. Sections auto-flow across the right side of the footer and rebalance as entries are added.
      */
     navigationSections?:
       | {
-          title: string;
+          title: string
           links?:
             | {
-                label: string;
-                description?: string | null;
+                label: string
+                description?: string | null
                 link: {
-                  type: 'internal' | 'external';
+                  type: 'internal' | 'external'
                   /**
                    * Enter a locale-agnostic path such as /posts or /about.
                    */
-                  internalPath?: string | null;
-                  externalUrl?: string | null;
-                  openInNewTab?: boolean | null;
-                };
-                id?: string | null;
+                  internalPath?: string | null
+                  externalUrl?: string | null
+                  openInNewTab?: boolean | null
+                }
+                id?: string | null
               }[]
-            | null;
-          id?: string | null;
+            | null
+          id?: string | null
         }[]
-      | null;
+      | null
     /**
      * Middle profile layer. Platform controls the icon; label should be the visible account or handle.
      */
     socialLinks?:
       | {
-          platform: 'github' | 'x' | 'linkedin' | 'youtube' | 'instagram' | 'discord' | 'rss' | 'email' | 'other';
+          platform:
+            | 'github'
+            | 'x'
+            | 'linkedin'
+            | 'youtube'
+            | 'instagram'
+            | 'discord'
+            | 'rss'
+            | 'email'
+            | 'other'
           /**
            * Visible account label or handle instead of repeating the platform name.
            */
-          label: string;
-          url: string;
-          openInNewTab?: boolean | null;
-          id?: string | null;
+          label: string
+          url: string
+          openInNewTab?: boolean | null
+          id?: string | null
         }[]
-      | null;
+      | null
     /**
      * Middle profile layer. Use this for email, newsletter, or other owner contact records.
      */
     contactItems?:
       | {
-          label: string;
-          value: string;
+          label: string
+          value: string
           link: {
-            type: 'internal' | 'external';
+            type: 'internal' | 'external'
             /**
              * Enter a locale-agnostic path such as /posts or /about.
              */
-            internalPath?: string | null;
-            externalUrl?: string | null;
-            openInNewTab?: boolean | null;
-          };
-          id?: string | null;
+            internalPath?: string | null
+            externalUrl?: string | null
+            openInNewTab?: boolean | null
+          }
+          id?: string | null
         }[]
-      | null;
+      | null
     /**
      * Bottom-left metadata layer. Use for privacy, terms, and other low-frequency legal links.
      */
     legalLinks?:
       | {
-          label: string;
+          label: string
           link: {
-            type: 'internal' | 'external';
+            type: 'internal' | 'external'
             /**
              * Enter a locale-agnostic path such as /posts or /about.
              */
-            internalPath?: string | null;
-            externalUrl?: string | null;
-            openInNewTab?: boolean | null;
-          };
-          id?: string | null;
+            internalPath?: string | null
+            externalUrl?: string | null
+            openInNewTab?: boolean | null
+          }
+          id?: string | null
         }[]
-      | null;
+      | null
     /**
      * Bottom metadata layer. Filings render on the left; copyright renders on the right on desktop.
      */
     compliance?: {
-      copyright?: string | null;
+      copyright?: string | null
       filings?:
         | {
-            label?: string | null;
-            value?: string | null;
-            href?: string | null;
-            id?: string | null;
+            label?: string | null
+            value?: string | null
+            href?: string | null
+            id?: string | null
           }[]
-        | null;
-    };
+        | null
+    }
     /**
      * Bottom-right note shown with the copyright line, commonly used for powered-by or ownership text.
      */
     bottomBar?: {
-      note?: string | null;
-    };
-  };
-  updatedAt?: string | null;
-  createdAt?: string | null;
+      note?: string | null
+    }
+  }
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * Select code-owned frontend component variants without changing site content.
@@ -1181,237 +1212,238 @@ export interface SiteSetting {
  * via the `definition` "frontend-variants".
  */
 export interface FrontendVariant {
-  id: number;
+  id: number
   /**
    * Code-owned frontend surfaces and their active variants. Variants must already exist in the deployed code.
    */
   values:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+    | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
-  generalEditorMode?: T;
-  siteName?: T;
-  siteDescription?: T;
+  generalEditorMode?: T
+  siteName?: T
+  siteDescription?: T
+  siteURL?: T
   globalVariables?:
     | T
     | {
         owner?:
           | T
           | {
-              name?: T;
-              handle?: T;
-              email?: T;
-              bio?: T;
-              websiteUrl?: T;
-              avatar?: T;
-            };
+              name?: T
+              handle?: T
+              email?: T
+              bio?: T
+              websiteUrl?: T
+              avatar?: T
+            }
         assets?:
           | T
           | {
-              logo?: T;
-              icon?: T;
-              avatar?: T;
-              defaultSocialImage?: T;
-            };
+              logo?: T
+              icon?: T
+              avatar?: T
+              defaultSocialImage?: T
+            }
         socialLinks?:
           | T
           | {
-              platform?: T;
-              label?: T;
-              url?: T;
-              openInNewTab?: T;
-              id?: T;
-            };
+              platform?: T
+              label?: T
+              url?: T
+              openInNewTab?: T
+              id?: T
+            }
         contactItems?:
           | T
           | {
-              key?: T;
-              label?: T;
-              value?: T;
-              url?: T;
-              id?: T;
-            };
+              key?: T
+              label?: T
+              value?: T
+              url?: T
+              id?: T
+            }
         customVariables?:
           | T
           | {
-              key?: T;
-              value?: T;
-              description?: T;
-              id?: T;
-            };
-      };
+              key?: T
+              value?: T
+              description?: T
+              id?: T
+            }
+      }
   appearance?:
     | T
     | {
-        accentColor?: T;
-      };
-  homepageEditorMode?: T;
+        accentColor?: T
+      }
+  homepageEditorMode?: T
   homeHero?:
     | T
     | {
-        eyebrow?: T;
-        title?: T;
-        description?: T;
-      };
-  seoEditorMode?: T;
+        eyebrow?: T
+        title?: T
+        description?: T
+      }
+  seoEditorMode?: T
   seo?:
     | T
     | {
-        homeTitle?: T;
-        homeDescription?: T;
-        defaultSocialImage?: T;
-      };
+        homeTitle?: T
+        homeDescription?: T
+        defaultSocialImage?: T
+      }
   articleLayout?:
     | T
     | {
-        articleLayoutEditorMode?: T;
-        preset?: T;
+        articleLayoutEditorMode?: T
+        preset?: T
         typography?:
           | T
           | {
-              latinFont?: T;
-              cjkFont?: T;
-              headingFont?: T;
-              codeFont?: T;
-            };
+              latinFont?: T
+              cjkFont?: T
+              headingFont?: T
+              codeFont?: T
+            }
         advanced?:
           | T
           | {
-              contentWidth?: T;
-              bodyFontSize?: T;
-              bodyLineHeight?: T;
-              paragraphGap?: T;
-              flowGap?: T;
-              blockGap?: T;
-              captionGap?: T;
-              gridGap?: T;
-            };
-      };
+              contentWidth?: T
+              bodyFontSize?: T
+              bodyLineHeight?: T
+              paragraphGap?: T
+              flowGap?: T
+              blockGap?: T
+              captionGap?: T
+              gridGap?: T
+            }
+      }
   footer?:
     | T
     | {
-        footerEditorMode?: T;
-        layoutStyle?: T;
+        footerEditorMode?: T
+        layoutStyle?: T
         brand?:
           | T
           | {
-              logo?: T;
-              name?: T;
-              description?: T;
-              supportingText?: T;
+              logo?: T
+              name?: T
+              description?: T
+              supportingText?: T
               link?:
                 | T
                 | {
-                    type?: T;
-                    internalPath?: T;
-                    externalUrl?: T;
-                    openInNewTab?: T;
-                  };
-            };
+                    type?: T
+                    internalPath?: T
+                    externalUrl?: T
+                    openInNewTab?: T
+                  }
+            }
         navigationSections?:
           | T
           | {
-              title?: T;
+              title?: T
               links?:
                 | T
                 | {
-                    label?: T;
-                    description?: T;
+                    label?: T
+                    description?: T
                     link?:
                       | T
                       | {
-                          type?: T;
-                          internalPath?: T;
-                          externalUrl?: T;
-                          openInNewTab?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-            };
+                          type?: T
+                          internalPath?: T
+                          externalUrl?: T
+                          openInNewTab?: T
+                        }
+                    id?: T
+                  }
+              id?: T
+            }
         socialLinks?:
           | T
           | {
-              platform?: T;
-              label?: T;
-              url?: T;
-              openInNewTab?: T;
-              id?: T;
-            };
+              platform?: T
+              label?: T
+              url?: T
+              openInNewTab?: T
+              id?: T
+            }
         contactItems?:
           | T
           | {
-              label?: T;
-              value?: T;
+              label?: T
+              value?: T
               link?:
                 | T
                 | {
-                    type?: T;
-                    internalPath?: T;
-                    externalUrl?: T;
-                    openInNewTab?: T;
-                  };
-              id?: T;
-            };
+                    type?: T
+                    internalPath?: T
+                    externalUrl?: T
+                    openInNewTab?: T
+                  }
+              id?: T
+            }
         legalLinks?:
           | T
           | {
-              label?: T;
+              label?: T
               link?:
                 | T
                 | {
-                    type?: T;
-                    internalPath?: T;
-                    externalUrl?: T;
-                    openInNewTab?: T;
-                  };
-              id?: T;
-            };
+                    type?: T
+                    internalPath?: T
+                    externalUrl?: T
+                    openInNewTab?: T
+                  }
+              id?: T
+            }
         compliance?:
           | T
           | {
-              copyright?: T;
+              copyright?: T
               filings?:
                 | T
                 | {
-                    label?: T;
-                    value?: T;
-                    href?: T;
-                    id?: T;
-                  };
-            };
+                    label?: T
+                    value?: T
+                    href?: T
+                    id?: T
+                  }
+            }
         bottomBar?:
           | T
           | {
-              note?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+              note?: T
+            }
+      }
+  updatedAt?: T
+  createdAt?: T
+  globalType?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "frontend-variants_select".
  */
 export interface FrontendVariantsSelect<T extends boolean = true> {
-  values?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+  values?: T
+  updatedAt?: T
+  createdAt?: T
+  globalType?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1419,9 +1451,9 @@ export interface FrontendVariantsSelect<T extends boolean = true> {
  */
 export interface CollectionsWidget {
   data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
+    [k: string]: unknown
+  }
+  width: 'full'
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1429,34 +1461,33 @@ export interface CollectionsWidget {
  */
 export interface TaskSchedulePublish {
   input: {
-    type?: ('publish' | 'unpublish') | null;
-    locale?: string | null;
+    type?: ('publish' | 'unpublish') | null
+    locale?: string | null
     doc?:
       | ({
-          relationTo: 'posts';
-          value: number | Post;
+          relationTo: 'posts'
+          value: number | Post
         } | null)
       | ({
-          relationTo: 'pages';
-          value: number | Page;
+          relationTo: 'pages'
+          value: number | Page
         } | null)
       | ({
-          relationTo: 'projects';
-          value: number | Project;
-        } | null);
-    global?: string | null;
-    user?: (number | null) | User;
-  };
-  output?: unknown;
+          relationTo: 'projects'
+          value: number | Project
+        } | null)
+    global?: string | null
+    user?: (number | null) | User
+  }
+  output?: unknown
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-  [k: string]: unknown;
+  [k: string]: unknown
 }
-
 
 declare module 'payload' {
   export interface GeneratedTypes extends Config {}

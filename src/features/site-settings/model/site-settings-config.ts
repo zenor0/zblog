@@ -32,7 +32,7 @@ export const siteSettingsSectionLabels: Record<SiteSettingsSectionID, string> = 
 const sectionRootKeys = {
   articleLayout: ['articleLayout'],
   footer: ['footer'],
-  general: ['siteName', 'siteDescription', 'globalVariables', 'appearance'],
+  general: ['siteName', 'siteDescription', 'siteURL', 'globalVariables', 'appearance'],
   homepage: ['homeHero'],
   seo: ['seo'],
 } as const satisfies Record<SiteSettingsSectionID, readonly string[]>
@@ -165,6 +165,7 @@ export function buildSiteVariableContext(settings: unknown): SiteSettingsReferen
 
   setContextValue(context, 'site.name', normalizeText(data.siteName))
   setContextValue(context, 'site.description', normalizeText(data.siteDescription))
+  setContextValue(context, 'site.url', normalizeText(data.siteURL))
   setContextValue(context, 'site.currentYear', String(new Date().getFullYear()))
   setContextValue(context, 'owner.name', normalizeText(owner.name))
   setContextValue(context, 'owner.handle', normalizeText(owner.handle))

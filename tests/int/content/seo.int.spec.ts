@@ -33,13 +33,14 @@ describe('seo utilities', () => {
         index: true,
       },
       siteName: 'ZBlog',
+      siteURL: 'https://zblog.example',
       title: 'SEO in Payload',
     })
 
     expect(metadata.title).toBe('SEO in Payload | ZBlog')
-    expect(metadata.alternates?.canonical).toBe('http://localhost:3000/en/posts/seo-in-payload')
+    expect(metadata.alternates?.canonical).toBe('https://zblog.example/en/posts/seo-in-payload')
     expect(metadata.alternates?.types?.['application/rss+xml']).toBe(
-      'http://localhost:3000/en/rss.xml',
+      'https://zblog.example/en/rss.xml',
     )
     expect(metadata.twitter?.card).toBe('summary_large_image')
     expect(metadata.openGraph?.type).toBe('article')
@@ -65,6 +66,7 @@ describe('seo utilities', () => {
       publishedAt: '2026-03-23T12:00:00.000Z',
       siteDescription: 'A bilingual blog about tech, products, and everyday work.',
       siteName: 'ZBlog',
+      siteURL: 'https://zblog.example',
       title: 'SEO in Payload',
     })
 
@@ -75,8 +77,8 @@ describe('seo utilities', () => {
     const article = graph.find((entry) => entry['@type'] === 'BlogPosting')
 
     expect(article?.headline).toBe('SEO in Payload')
-    expect(article?.mainEntityOfPage).toBe('http://localhost:3000/en/posts/seo-in-payload')
-    expect(article?.image).toEqual(['http://localhost:3000/media/seo-cover.png'])
+    expect(article?.mainEntityOfPage).toBe('https://zblog.example/en/posts/seo-in-payload')
+    expect(article?.image).toEqual(['https://zblog.example/media/seo-cover.png'])
     expect(article?.author).toEqual({
       '@type': 'Person',
       name: 'Zenoro',
