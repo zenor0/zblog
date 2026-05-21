@@ -87,6 +87,22 @@ function pruneUndefined(value: unknown): unknown {
   )
 }
 
+function stripPayloadArrayRowIDs(value: unknown, isArrayRow = false): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripPayloadArrayRowIDs(item, true))
+  }
+
+  if (!isRecord(value)) {
+    return value
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !(isArrayRow && key === 'id'))
+      .map(([key, item]) => [key, stripPayloadArrayRowIDs(item)]),
+  )
+}
+
 function normalizeText(value: unknown) {
   return typeof value === 'string' ? value : ''
 }
@@ -338,7 +354,7 @@ export function serializeSiteSettingsSectionToYAML(
     sectionRootKeys[section].map((key) => [key, cloneValue(data[key])]),
   )
 
-  return stringify(pruneUndefined(sectionData), {
+  return stringify(stripPayloadArrayRowIDs(pruneUndefined(sectionData)), {
     indent: 2,
     lineWidth: 0,
   })
@@ -377,7 +393,7 @@ export function parseSiteSettingsSectionYAML(
     }
   })
 
-  return value as Partial<SiteSetting>
+  return stripPayloadArrayRowIDs(value) as Partial<SiteSetting>
 }
 
 export function mergeSiteSettingsSection(

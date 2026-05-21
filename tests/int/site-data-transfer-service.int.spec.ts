@@ -148,6 +148,144 @@ describe('site data transfer service', () => {
     expect(data.globals.siteSettings.homepageRawConfig).toBeUndefined()
   })
 
+  it('preserves site setting URL values while dropping Payload array row IDs', async () => {
+    const siteSettings = {
+      footer: {
+        socialLinks: [
+          {
+            id: 'footer-social-github',
+            label: {
+              en: 'GitHub',
+              'zh-Hans': 'GitHub',
+            },
+            platform: 'github',
+            url: '{{social.github.url}}',
+          },
+          {
+            id: 'footer-social-rss',
+            label: {
+              en: 'RSS',
+              'zh-Hans': 'RSS',
+            },
+            platform: 'rss',
+            url: '/rss.xml',
+          },
+        ],
+      },
+      globalVariables: {
+        socialLinks: [
+          {
+            id: 'general-social-github',
+            label: {
+              en: 'GitHub',
+              'zh-Hans': 'GitHub',
+            },
+            platform: 'github',
+            url: 'https://github.com/acme',
+          },
+        ],
+      },
+      siteName: {
+        en: 'ZBlog',
+        'zh-Hans': '知博客',
+      },
+    }
+    const importedCalls: unknown[] = []
+    const payload = {
+      findGlobal: vi.fn(async () => ({
+        siteName: {
+          en: 'Fresh site',
+          'zh-Hans': '新站点',
+        },
+      })),
+      updateGlobal: vi.fn(async (args) => {
+        importedCalls.push(args)
+        return args.data
+      }),
+    } as unknown as Payload
+    const user = {
+      id: 1,
+      roles: ['admin'],
+    } as User
+
+    vi.mocked(payload.findGlobal).mockResolvedValueOnce(siteSettings as never)
+
+    const exportResult = await createSiteDataExport({
+      groups: ['site-settings'],
+      payload,
+      user,
+    })
+    createdExports.push(exportResult.file.id)
+
+    const { data } = await readExportArchive(exportResult.file.id)
+
+    expect(data.globals.siteSettings.globalVariables.socialLinks[0]).toEqual({
+      label: {
+        en: 'GitHub',
+        'zh-Hans': 'GitHub',
+      },
+      platform: 'github',
+      url: 'https://github.com/acme',
+    })
+    expect(data.globals.siteSettings.footer.socialLinks).toEqual([
+      {
+        label: {
+          en: 'GitHub',
+          'zh-Hans': 'GitHub',
+        },
+        platform: 'github',
+        url: '{{social.github.url}}',
+      },
+      {
+        label: {
+          en: 'RSS',
+          'zh-Hans': 'RSS',
+        },
+        platform: 'rss',
+        url: '/rss.xml',
+      },
+    ])
+
+    const exportedFile = await getSiteDataExportFile(exportResult.file.id)
+    const preview = await previewSiteDataImport({
+      file: new File([exportedFile?.bytes ?? new Uint8Array()], exportResult.file.id, {
+        type: 'application/zip',
+      }),
+      payload,
+      user,
+    })
+
+    await commitSiteDataImport({
+      groups: ['site-settings'],
+      payload,
+      token: preview.token,
+      user,
+    })
+
+    expect(importedCalls[0]).toMatchObject({
+      data: {
+        footer: {
+          socialLinks: [
+            {
+              url: '{{social.github.url}}',
+            },
+            {
+              url: '/rss.xml',
+            },
+          ],
+        },
+        globalVariables: {
+          socialLinks: [
+            {
+              url: 'https://github.com/acme',
+            },
+          ],
+        },
+      },
+      slug: 'site-settings',
+    })
+  })
+
   it('exports localized post Markdown content as exact string values', async () => {
     const markdown = {
       en: ['# Hello', '', '```ts', 'const answer = 42', '```'].join('\n'),
