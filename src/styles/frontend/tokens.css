@@ -112,26 +112,26 @@
   --zblog-accent-text: color-mix(in oklch, var(--zblog-accent) 56%, var(--foreground));
   --zblog-dark-background: color-mix(
     in oklch,
-    var(--zblog-accent) 7%,
-    oklch(0.105 0.01 245)
+    var(--zblog-accent) 3%,
+    oklch(0.075 0.006 245)
   );
-  --zblog-dark-card: color-mix(in oklch, var(--zblog-accent) 8%, oklch(0.145 0.011 245));
+  --zblog-dark-card: color-mix(in oklch, var(--zblog-accent) 4%, oklch(0.105 0.007 245));
   --zblog-dark-secondary: color-mix(
     in oklch,
-    var(--zblog-accent) 8%,
-    oklch(0.205 0.01 245)
+    var(--zblog-accent) 4%,
+    oklch(0.155 0.007 245)
   );
-  --zblog-dark-muted: color-mix(in oklch, var(--zblog-accent) 9%, oklch(0.195 0.01 245));
-  --zblog-dark-accent: color-mix(in oklch, var(--zblog-accent) 13%, oklch(0.225 0.01 245));
+  --zblog-dark-muted: color-mix(in oklch, var(--zblog-accent) 5%, oklch(0.145 0.007 245));
+  --zblog-dark-accent: color-mix(in oklch, var(--zblog-accent) 7%, oklch(0.18 0.007 245));
   --zblog-dark-sidebar: color-mix(
     in oklch,
-    var(--zblog-accent) 7%,
-    oklch(0.13 0.011 245)
+    var(--zblog-accent) 3%,
+    oklch(0.095 0.007 245)
   );
   --zblog-dark-sidebar-accent: color-mix(
     in oklch,
-    var(--zblog-accent) 11%,
-    oklch(0.215 0.01 245)
+    var(--zblog-accent) 6%,
+    oklch(0.17 0.007 245)
   );
 }
 

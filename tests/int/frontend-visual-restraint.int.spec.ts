@@ -134,10 +134,25 @@ describe('frontend visual restraint', () => {
     expect(styles).not.toContain('--background: oklch(0.19 0.008 45);')
     expect(styles).not.toContain('--card: oklch(0.2 0.008 45);')
     expect(styles).toMatch(
-      /--zblog-dark-background:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+7%,\s*oklch\(0\.105 0\.01 245\)\s*\);/s,
+      /--zblog-dark-background:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+3%,\s*oklch\(0\.075 0\.006 245\)\s*\);/s,
     )
     expect(styles).toMatch(
-      /--zblog-dark-card:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+8%,\s*oklch\(0\.145 0\.011 245\)\s*\);/s,
+      /--zblog-dark-card:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+4%,\s*oklch\(0\.105 0\.007 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /--zblog-dark-secondary:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+4%,\s*oklch\(0\.155 0\.007 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /--zblog-dark-muted:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+5%,\s*oklch\(0\.145 0\.007 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /--zblog-dark-accent:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+7%,\s*oklch\(0\.18 0\.007 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /--zblog-dark-sidebar:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+3%,\s*oklch\(0\.095 0\.007 245\)\s*\);/s,
+    )
+    expect(styles).toMatch(
+      /--zblog-dark-sidebar-accent:\s*color-mix\(\s*in oklch,\s*var\(--zblog-accent\)\s+6%,\s*oklch\(0\.17 0\.007 245\)\s*\);/s,
     )
     expect(styles).toMatch(
       /html\[data-zblog-theme='dark'\][^{]*\{[^}]*--background:\s*var\(--zblog-dark-background\);/s,
