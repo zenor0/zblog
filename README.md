@@ -74,11 +74,12 @@ docker compose up -d --build
 `NEXT_PUBLIC_SITE_URL` is used while building the image, so rebuild after
 changing the public URL.
 
-On first boot with an empty `zblog-data` volume, Compose runs the one-off
-`zblog-init` service before the app starts. It initializes the SQLite
-schema and site settings, then exits. It does not create demo posts, projects, or media. You
-can rerun it safely with `docker compose run --rm zblog-init`; it skips databases
-that already contain the `site_settings` table.
+On startup, the app container automatically initializes an empty `zblog-data`
+volume before launching the server. It initializes the SQLite schema and site settings,
+then starts the app. It does not create demo posts, projects, or media. You can
+rerun the same initializer safely with
+`docker compose run --rm zblog sh -c 'NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs'`;
+it skips databases that already contain the `site_settings` table.
 
 Back up the `zblog-data` Docker volume to preserve the SQLite database, uploads,
 generated previews, and import/export files:

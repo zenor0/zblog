@@ -33,39 +33,29 @@ describe('deployment container config', () => {
     expect(dockerfile).toContain('DATABASE_URL=file:/tmp/zblog-build-state/zblog-build.db')
     expect(dockerfile).toContain('@libsql+linux-x64-musl@0.4.7')
     expect(dockerfile).toContain('ln -sfn ../../../@libsql+linux-x64-musl@0.4.7')
-    expect(dockerfile).toContain('FROM deps AS init')
+    expect(dockerfile).toContain('--outfile=docker-init.mjs')
+    expect(dockerfile).toContain('--external:libsql')
+    expect(dockerfile).toContain('--external:sharp')
+    expect(dockerfile).toContain('drizzle-kit@0.31.7')
+    expect(dockerfile).toContain('COPY --from=builder --chown=nextjs:nodejs /app/docker-init.mjs')
     expect(dockerfile).toContain(
-      'CMD ["node", "--no-deprecation", "--import=tsx/esm", "src/scripts/docker-init.ts"]',
+      'CMD ["sh", "-c", "NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs && exec node server.js"]',
     )
+    expect(dockerfile).not.toContain('FROM deps AS init')
+    expect(dockerfile).not.toContain('--import=tsx/esm", "src/scripts/docker-init.ts"')
     expect(dockerfile).not.toContain('ENV PAYLOAD_SECRET')
     expect(dockerfile).not.toContain('ARG PAYLOAD_SECRET')
   })
 
-  it('runs a production app service after a one-off database init service', () => {
+  it('runs a single production app service that initializes its database before startup', () => {
     const compose = parse(readProjectFile('docker-compose.yml')) as {
       services?: Record<string, Record<string, unknown>>
       volumes?: Record<string, unknown>
     }
     const serviceNames = Object.keys(compose.services ?? {})
-    const zblogInit = compose.services?.['zblog-init']
     const zblog = compose.services?.zblog
 
-    expect(serviceNames).toEqual(['zblog-init', 'zblog'])
-    expect(zblogInit?.build).toEqual({
-      args: {
-        NEXT_PUBLIC_SITE_URL: '${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}',
-      },
-      context: '.',
-      dockerfile: 'Dockerfile',
-      target: 'init',
-    })
-    expect(zblogInit?.restart).toBe('no')
-    expect(zblogInit?.volumes).toContain('zblog-data:/app/.data')
-    expect(zblogInit?.environment).toMatchObject({
-      DATABASE_URL: 'file:/app/.data/zblog.db',
-      NODE_ENV: 'development',
-      ZBLOG_STATE_DIR: '/app/.data',
-    })
+    expect(serviceNames).toEqual(['zblog'])
     expect(zblog?.build).toEqual({
       args: {
         NEXT_PUBLIC_SITE_URL: '${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}',
@@ -75,11 +65,7 @@ describe('deployment container config', () => {
       target: 'runner',
     })
     expect(zblog?.command).toBeUndefined()
-    expect(zblog?.depends_on).toEqual({
-      'zblog-init': {
-        condition: 'service_completed_successfully',
-      },
-    })
+    expect(zblog?.depends_on).toBeUndefined()
     expect(zblog?.restart).toBe('unless-stopped')
     expect(zblog?.ports).toContain('127.0.0.1:3000:3000')
     expect(zblog?.volumes).toContain('zblog-data:/app/.data')
@@ -136,7 +122,8 @@ describe('deployment container config', () => {
     expect(readme).toContain('127.0.0.1:3000')
     expect(readme).toMatch(/Nginx|Caddy|Traefik/)
     expect(readme).toContain('openssl rand -base64 32')
-    expect(readme).toContain('zblog-init')
+    expect(readme).toContain('automatically initializes')
+    expect(readme).toContain('docker-init.mjs')
     expect(readme).toContain('schema and site settings')
     expect(readme).toContain('docker run --rm')
     expect(readme).toContain('zblog-data')

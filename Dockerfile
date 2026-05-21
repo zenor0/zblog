@@ -33,27 +33,13 @@ RUN \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && NODE_ENV=development pnpm run docker:init && pnpm run build; \
   else echo "Lockfile not found." && exit 1; \
   fi
+RUN \
+  if [ -f yarn.lock ]; then yarn esbuild src/scripts/docker-init.ts --bundle --platform=node --target=node22 --format=esm --external:libsql --external:sharp --banner:js="import { createRequire as __createRequire } from 'node:module'; var require = __createRequire(import.meta.url);" --outfile=docker-init.mjs; \
+  elif [ -f package-lock.json ]; then npx esbuild src/scripts/docker-init.ts --bundle --platform=node --target=node22 --format=esm --external:libsql --external:sharp --banner:js="import { createRequire as __createRequire } from 'node:module'; var require = __createRequire(import.meta.url);" --outfile=docker-init.mjs; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm exec esbuild src/scripts/docker-init.ts --bundle --platform=node --target=node22 --format=esm --external:libsql --external:sharp --banner:js="import { createRequire as __createRequire } from 'node:module'; var require = __createRequire(import.meta.url);" --outfile=docker-init.mjs; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 RUN mkdir -p public
-
-FROM deps AS init
-WORKDIR /app
-
-ENV NODE_ENV=development
-ENV DISABLE_PAYLOAD_HMR=true
-ENV ZBLOG_STATE_DIR=/app/.data
-ENV DATABASE_URL=file:/app/.data/zblog.db
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY . .
-
-RUN mkdir -p .data
-RUN chown nextjs:nodejs .data
-
-USER nextjs
-
-CMD ["node", "--no-deprecation", "--import=tsx/esm", "src/scripts/docker-init.ts"]
 
 FROM base AS runner
 WORKDIR /app
@@ -77,12 +63,30 @@ RUN mkdir -p .next .data
 RUN chown nextjs:nodejs .next .data
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/docker-init.mjs ./docker-init.mjs
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@libsql+linux-x64-musl@0.4.7 ./node_modules/.pnpm/@libsql+linux-x64-musl@0.4.7
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@drizzle-team+brocli@0.10.2 ./node_modules/.pnpm/@drizzle-team+brocli@0.10.2
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@esbuild+linux-x64@0.18.20 ./node_modules/.pnpm/@esbuild+linux-x64@0.18.20
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@esbuild+linux-x64@0.25.12 ./node_modules/.pnpm/@esbuild+linux-x64@0.25.12
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@esbuild-kit+core-utils@3.3.2 ./node_modules/.pnpm/@esbuild-kit+core-utils@3.3.2
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/@esbuild-kit+esm-loader@2.6.5 ./node_modules/.pnpm/@esbuild-kit+esm-loader@2.6.5
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/buffer-from@1.1.2 ./node_modules/.pnpm/buffer-from@1.1.2
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/debug@4.4.3 ./node_modules/.pnpm/debug@4.4.3
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/drizzle-kit@0.31.7 ./node_modules/.pnpm/drizzle-kit@0.31.7
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/esbuild-register@3.6.0_esbuild@0.25.12 ./node_modules/.pnpm/esbuild-register@3.6.0_esbuild@0.25.12
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/esbuild@0.18.20 ./node_modules/.pnpm/esbuild@0.18.20
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/esbuild@0.25.12 ./node_modules/.pnpm/esbuild@0.25.12
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/get-tsconfig@4.14.0 ./node_modules/.pnpm/get-tsconfig@4.14.0
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/ms@2.1.3 ./node_modules/.pnpm/ms@2.1.3
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/resolve-pkg-maps@1.0.0 ./node_modules/.pnpm/resolve-pkg-maps@1.0.0
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/source-map-support@0.5.21 ./node_modules/.pnpm/source-map-support@0.5.21
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.pnpm/source-map@0.6.1 ./node_modules/.pnpm/source-map@0.6.1
 RUN ln -sfn ../../../@libsql+linux-x64-musl@0.4.7/node_modules/@libsql/linux-x64-musl ./node_modules/.pnpm/libsql@0.4.7/node_modules/@libsql/linux-x64-musl
+RUN ln -sfn .pnpm/drizzle-kit@0.31.7/node_modules/drizzle-kit ./node_modules/drizzle-kit
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs && exec node server.js"]
