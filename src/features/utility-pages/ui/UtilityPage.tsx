@@ -39,3 +39,22 @@ export function UtilityPageShell(props: { children?: ReactNode; copy: UtilityPag
     </div>
   )
 }
+
+export function UtilityPageSkeleton() {
+  return (
+    <div className="page-frame frontend-shell" data-utility-page-skeleton="">
+      <header className="grid gap-4 border-b border-border pb-10">
+        <div className="h-3 w-16 animate-pulse bg-muted" />
+        <div className="grid gap-4">
+          <div className="h-12 w-full max-w-2xl animate-pulse bg-muted" />
+          <div className="h-5 w-full max-w-xl animate-pulse bg-muted" />
+        </div>
+      </header>
+      <div className="grid max-w-3xl gap-4 py-10">
+        <div className="h-5 animate-pulse bg-muted" />
+        <div className="h-5 w-11/12 animate-pulse bg-muted" />
+        <div className="h-5 w-4/5 animate-pulse bg-muted" />
+      </div>
+    </div>
+  )
+}

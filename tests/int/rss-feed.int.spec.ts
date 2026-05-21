@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { Post, SiteSetting } from '@/payload-types'
+import type { Page, Post, SiteSetting } from '@/payload-types'
 
 const payloadMocks = vi.hoisted(() => ({
   find: vi.fn(),
@@ -46,6 +46,21 @@ function postFixture(overrides: Partial<Post> = {}): Post {
     visibility: 'listed',
     ...overrides,
   } as Post
+}
+
+function pageFixture(overrides: Partial<Page> = {}): Page {
+  return {
+    id: 10,
+    content: '## Policy\n\nEditable page content.',
+    createdAt: '2026-03-20T12:00:00.000Z',
+    description: 'Editable page summary.',
+    publishedAt: '2026-03-25T12:00:00.000Z',
+    slug: 'privacy',
+    title: 'Privacy Policy',
+    updatedAt: '2026-03-25T12:00:00.000Z',
+    _status: 'published',
+    ...overrides,
+  } as Page
 }
 
 function siteSettingsFixture(overrides: Partial<SiteSetting> = {}): SiteSetting {
@@ -185,32 +200,61 @@ describe('RSS feed and discovery routes', () => {
   })
 
   it('adds sitemap metadata, locale alternates, and excludes noindex posts', async () => {
-    payloadMocks.find.mockImplementation(({ locale }: { locale: string }) =>
-      Promise.resolve({
-        docs: [
-          postFixture({
-            title: locale === 'en' ? 'Visible post' : '可见文章',
-          }),
-          postFixture({
-            id: 2,
-            seo: {
-              noindex: true,
-            },
-          slug: 'hidden-post',
-        }),
-        postFixture({
-          id: 3,
-          slug: 'unlisted-post',
-          visibility: 'unlisted',
-        }),
-        postFixture({
-          id: 4,
-          slug: 'private-post',
-          visibility: 'private',
-        }),
-      ],
-    }),
-    )
+    payloadMocks.find.mockImplementation(({ collection, locale }: { collection: string; locale: string }) => {
+      if (collection === 'pages') {
+        return Promise.resolve({
+          docs: [
+            pageFixture({
+              slug: 'privacy',
+              title: locale === 'en' ? 'Privacy Policy' : '隐私政策',
+            }),
+            pageFixture({
+              id: 11,
+              slug: 'terms',
+              title: locale === 'en' ? 'Terms of Use' : '用户协议',
+            }),
+            pageFixture({
+              id: 12,
+              seo: {
+                noindex: true,
+              },
+              slug: 'hidden-page',
+            }),
+          ],
+        })
+      }
+
+      if (collection === 'projects') {
+        return Promise.resolve({
+          docs: [],
+        })
+      }
+
+      return Promise.resolve({
+          docs: [
+            postFixture({
+              title: locale === 'en' ? 'Visible post' : '可见文章',
+            }),
+            postFixture({
+              id: 2,
+              seo: {
+                noindex: true,
+              },
+              slug: 'hidden-post',
+            }),
+            postFixture({
+              id: 3,
+              slug: 'unlisted-post',
+              visibility: 'unlisted',
+            }),
+            postFixture({
+              id: 4,
+              slug: 'private-post',
+              visibility: 'private',
+            }),
+          ],
+        })
+    })
     siteSettingsMocks.getResolvedSiteSettings.mockImplementation((locale: string) =>
       Promise.resolve(
         siteSettingsFixture({
@@ -252,6 +296,7 @@ describe('RSS feed and discovery routes', () => {
       changeFrequency: 'monthly',
       priority: 0.2,
     })
+    expect(entries.some((entry) => entry.url.includes('hidden-page'))).toBe(false)
     expect(enPosts).toMatchObject({
       changeFrequency: 'daily',
       priority: 0.8,

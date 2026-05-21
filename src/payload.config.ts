@@ -8,6 +8,7 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+import { Pages } from './collections/Pages'
 import { Projects } from './collections/Projects'
 import { PostViewDedupe } from './collections/PostViewDedupe'
 import { PostViewMetrics } from './collections/PostViewMetrics'
@@ -41,7 +42,7 @@ export default buildConfig({
       },
     },
   },
-  collections: [Users, Media, Posts, Projects, PostViewMetrics, PostViewDedupe],
+  collections: [Users, Media, Posts, Pages, Projects, PostViewMetrics, PostViewDedupe],
   globals: [SiteSettings, FrontendVariants],
   editor: lexicalEditor(),
   localization: {

@@ -55,6 +55,11 @@ type ExportedPostRecord = JsonRecord & {
   sourceID: number | string
 }
 
+type ExportedPageRecord = JsonRecord & {
+  slug?: string
+  sourceID: number | string
+}
+
 type ExportedPostVersionRecord = JsonRecord & {
   parentSlug?: string
   parentSourceID?: number | string
@@ -71,6 +76,7 @@ type ExportedPostMetricRecord = JsonRecord & {
 type SiteDataArchiveData = {
   collections?: {
     media?: ExportedMediaRecord[]
+    pages?: ExportedPageRecord[]
     postViewMetrics?: ExportedPostMetricRecord[]
     posts?: ExportedPostRecord[]
   }
@@ -310,6 +316,14 @@ function isUsableLocalePostData(data: JsonRecord): boolean {
   return getString(data.title) !== undefined && getString(data.content) !== undefined
 }
 
+function isUsableLocalePageData(data: JsonRecord): boolean {
+  return (
+    getString(data.title) !== undefined &&
+    getString(data.description) !== undefined &&
+    getString(data.content) !== undefined
+  )
+}
+
 function safeExportFilename(filename: string): boolean {
   return exportFilePattern.test(filename) && path.basename(filename) === filename
 }
@@ -389,7 +403,7 @@ async function findAllVersions<TDoc = JsonRecord>(
 }
 
 async function findOneByField(args: {
-  collection: 'media' | 'post-view-metrics' | 'posts'
+  collection: 'media' | 'pages' | 'post-view-metrics' | 'posts'
   field: string
   payload: Payload
   user: User
@@ -415,6 +429,16 @@ async function findOneByField(args: {
 async function findPostBySlug(payload: Payload, user: User, slug: string) {
   return findOneByField({
     collection: 'posts',
+    field: 'slug',
+    payload,
+    user,
+    value: slug,
+  })
+}
+
+async function findPageBySlug(payload: Payload, user: User, slug: string) {
+  return findOneByField({
+    collection: 'pages',
     field: 'slug',
     payload,
     user,
@@ -616,6 +640,62 @@ function getPostComparableData(post: ExportedPostRecord): unknown {
   })
 }
 
+function buildSharedPageData(page: ExportedPageRecord, maps: RelationshipMaps): JsonRecord {
+  const rewritten = rewriteRelationships(page, maps) as JsonRecord
+  const seo = isRecord(rewritten.seo) ? rewritten.seo : undefined
+
+  return cloneWithoutUndefined({
+    _status: normalizeStatus(rewritten._status),
+    publishedAt: rewritten.publishedAt,
+    seo: seo
+      ? {
+          metaImage: getRelationID(seo.metaImage),
+        }
+      : undefined,
+    slug: rewritten.slug,
+  })
+}
+
+function buildPageLocaleData(page: ExportedPageRecord, locale: AppLocale): JsonRecord {
+  const seo = isRecord(page.seo) ? page.seo : {}
+
+  return cloneWithoutUndefined({
+    content: getLocaleValue(page.content, locale),
+    description: getLocaleValue(page.description, locale),
+    effectiveDateLabel: getLocaleValue(page.effectiveDateLabel, locale),
+    eyebrow: getLocaleValue(page.eyebrow, locale),
+    seo: {
+      metaDescription: getLocaleValue(seo.metaDescription, locale),
+      metaTitle: getLocaleValue(seo.metaTitle, locale),
+      noindex: getLocaleValue(seo.noindex, locale),
+    },
+    title: getLocaleValue(page.title, locale),
+  })
+}
+
+function getCreatePageLocale(page: ExportedPageRecord): AppLocale {
+  const defaultData = buildPageLocaleData(page, defaultLocale)
+
+  if (isUsableLocalePageData(defaultData)) {
+    return defaultLocale
+  }
+
+  return (
+    localeCodes.find((locale) => isUsableLocalePageData(buildPageLocaleData(page, locale))) ??
+    defaultLocale
+  )
+}
+
+function getPageComparableData(page: ExportedPageRecord): unknown {
+  return stripSystemFields({
+    ...buildSharedPageData(page, {
+      media: new Map(),
+      posts: new Map(),
+    }),
+    ...Object.fromEntries(localeCodes.map((locale) => [locale, buildPageLocaleData(page, locale)])),
+  })
+}
+
 async function collectMediaExport(args: {
   archiveEntries: Record<string, Uint8Array>
   payload: Payload
@@ -696,6 +776,25 @@ async function collectPostsExport(payload: Payload, user: User): Promise<Exporte
     ...post,
     sourceID: post.id as number | string,
   })) as ExportedPostRecord[]
+}
+
+async function collectPagesExport(payload: Payload, user: User): Promise<ExportedPageRecord[]> {
+  const pages = await findAll<JsonRecord>(payload, {
+    collection: 'pages',
+    depth: 0,
+    draft: true,
+    fallbackLocale: false,
+    locale: 'all',
+    overrideAccess: false,
+    req: buildLocalRequest(user),
+    sort: 'slug',
+    user,
+  })
+
+  return pages.map((page) => ({
+    ...page,
+    sourceID: page.id as number | string,
+  })) as ExportedPageRecord[]
 }
 
 async function collectPostVersionsExport(args: {
@@ -807,6 +906,11 @@ async function buildArchiveData(args: {
     ) as JsonRecord
   }
 
+  if (args.groups.includes('pages')) {
+    data.collections ??= {}
+    data.collections.pages = await collectPagesExport(args.payload, args.user)
+  }
+
   if (
     args.groups.includes('posts') ||
     args.groups.includes('post-versions') ||
@@ -868,6 +972,10 @@ function countGroupRecords(data: SiteDataArchiveData, group: SiteDataTransferGro
 
   if (group === 'posts') {
     return data.collections?.posts?.length ?? 0
+  }
+
+  if (group === 'pages') {
+    return data.collections?.pages?.length ?? 0
   }
 
   if (group === 'media') {
@@ -1220,6 +1328,31 @@ async function createImportDiff(args: {
     }
   }
 
+  if (diff.groups.pages) {
+    for (const page of data.collections?.pages ?? []) {
+      const slug = getString(page.slug)
+
+      if (!slug) {
+        diff.groups.pages.conflicts += 1
+        diff.groups.pages.warnings.push('A page in the import package is missing a slug.')
+        continue
+      }
+
+      const existing = await findPageBySlug(args.payload, args.user, slug)
+
+      if (!existing) {
+        diff.groups.pages.creates += 1
+        continue
+      }
+
+      if (hashValue(stripSystemFields(existing)) === hashValue(getPageComparableData(page))) {
+        diff.groups.pages.skips += 1
+      } else {
+        diff.groups.pages.updates += 1
+      }
+    }
+  }
+
   if (diff.groups.posts) {
     for (const post of data.collections?.posts ?? []) {
       const slug = getString(post.slug)
@@ -1469,6 +1602,88 @@ async function importGlobalGroup(args: {
     slug: args.slug,
     user: args.user,
   } as never)
+}
+
+async function importPagesGroup(args: {
+  archive: ParsedArchive
+  maps: RelationshipMaps
+  payload: Payload
+  user: User
+}) {
+  for (const page of args.archive.data.collections?.pages ?? []) {
+    const slug = getString(page.slug)
+
+    if (!slug) {
+      continue
+    }
+
+    const existing = await findPageBySlug(args.payload, args.user, slug)
+    const createLocale = getCreatePageLocale(page)
+    const createLocaleData = buildPageLocaleData(page, createLocale)
+    const sharedData = buildSharedPageData(page, args.maps)
+    const draft = normalizeStatus(page._status) !== 'published'
+    let storedPage = existing
+
+    if (!existing) {
+      if (!isUsableLocalePageData(createLocaleData)) {
+        continue
+      }
+
+      storedPage = (await args.payload.create({
+        collection: 'pages',
+        data: {
+          ...sharedData,
+          ...createLocaleData,
+        },
+        draft,
+        locale: createLocale,
+        overrideAccess: false,
+        req: buildLocalRequest(args.user, createLocale),
+        user: args.user,
+      } as never)) as unknown as JsonRecord
+    } else {
+      storedPage = (await args.payload.update({
+        collection: 'pages',
+        data: {
+          ...sharedData,
+          ...createLocaleData,
+        },
+        draft,
+        id: existing.id as number | string,
+        locale: createLocale,
+        overrideAccess: false,
+        req: buildLocalRequest(args.user, createLocale),
+        user: args.user,
+      } as never)) as unknown as JsonRecord
+    }
+
+    if (!storedPage?.id) {
+      continue
+    }
+
+    for (const locale of localeCodes) {
+      if (locale === createLocale) {
+        continue
+      }
+
+      const localeData = buildPageLocaleData(page, locale)
+
+      if (!isUsableLocalePageData(localeData)) {
+        continue
+      }
+
+      await args.payload.update({
+        collection: 'pages',
+        data: localeData,
+        draft,
+        id: storedPage.id as number | string,
+        locale,
+        overrideAccess: false,
+        req: buildLocalRequest(args.user, locale),
+        user: args.user,
+      } as never)
+    }
+  }
 }
 
 async function importPostsGroup(args: {
@@ -1750,6 +1965,15 @@ export async function commitSiteDataImport(args: {
       maps,
       payload: args.payload,
       slug: 'frontend-variants',
+      user: args.user,
+    })
+  }
+
+  if (appliedGroups.includes('pages')) {
+    await importPagesGroup({
+      archive,
+      maps,
+      payload: args.payload,
       user: args.user,
     })
   }

@@ -31,6 +31,7 @@ type ImportCommitResponse = {
 const groupLabels: Record<SiteDataTransferGroupID, string> = {
   'frontend-variants': 'Frontend variants',
   media: 'Media',
+  pages: 'Pages',
   posts: 'Posts',
   'post-versions': 'Post versions',
   'post-view-metrics': 'Post view metrics',

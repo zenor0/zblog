@@ -15,6 +15,7 @@ describe('site data transfer model', () => {
     expect(siteDataExportPresets.full.groups).toEqual([
       'site-settings',
       'frontend-variants',
+      'pages',
       'posts',
       'media',
       'post-versions',
@@ -32,8 +33,8 @@ describe('site data transfer model', () => {
 
   it('normalizes selected groups and drops unknown values', () => {
     expect(
-      normalizeDataTransferGroups(['posts', 'users', 'media', 'posts', 'site-settings']),
-    ).toEqual(['site-settings', 'posts', 'media'])
+      normalizeDataTransferGroups(['posts', 'users', 'media', 'pages', 'posts', 'site-settings']),
+    ).toEqual(['site-settings', 'pages', 'posts', 'media'])
   })
 
   it('rejects unsafe archive paths', () => {

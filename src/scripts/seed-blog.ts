@@ -29,6 +29,7 @@ import {
   seedMarkdownShowcaseZhTitle,
 } from '@/features/posts/seed/seed-blog-content'
 import { seedSiteSettings } from '@/features/site-settings/seed/seed-site-settings'
+import { seedSitePages } from '@/features/pages/seed/seed-site-pages'
 import { seedProjectCopy, seedProjectSlugs } from '@/features/projects/seed/seed-project-content'
 import { seedAssetsDir } from '@/shared/runtime/paths'
 
@@ -472,6 +473,7 @@ async function main() {
 
     await timed('backfill user roles', () => backfillUserRoles(initializedPayload))
     await timed('seed site settings', () => seedSiteSettings(initializedPayload))
+    await timed('seed site pages', () => seedSitePages(initializedPayload))
     await timed('delete existing seed content', () => deleteExistingSeedContent(initializedPayload))
 
     const assetPaths = await timed('ensure seed assets', ensureSeedAssets)

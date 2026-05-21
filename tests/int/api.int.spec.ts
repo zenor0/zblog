@@ -117,12 +117,17 @@ describe('API', () => {
       collection: 'posts',
       overrideAccess: false,
     })
+    const pages = await payload.find({
+      collection: 'pages',
+      overrideAccess: false,
+    })
     const projects = await payload.find({
       collection: 'projects',
       overrideAccess: false,
     })
 
     expect(posts.docs).toEqual([])
+    expect(pages.docs).toEqual([])
     expect(projects.docs).toEqual([])
     expect('bibliography-files' in payload.collections).toBe(false)
   })

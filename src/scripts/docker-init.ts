@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url'
 import Database from 'libsql'
 
 import { seedSiteSettings } from '@/features/site-settings/seed/seed-site-settings'
+import { seedSitePages } from '@/features/pages/seed/seed-site-pages'
 
 const siteSettingsTable = 'site_settings'
 
@@ -110,6 +111,7 @@ async function initializePayloadSchemaAndSettings() {
 
   try {
     await seedSiteSettings(payload)
+    await seedSitePages(payload)
   } finally {
     await payload.destroy()
   }

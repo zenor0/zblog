@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     posts: Post;
+    pages: Page;
     projects: Project;
     'post-view-metrics': PostViewMetric;
     'post-view-dedupe': PostViewDedupe;
@@ -88,6 +89,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     'post-view-metrics': PostViewMetricsSelect<false> | PostViewMetricsSelect<true>;
     'post-view-dedupe': PostViewDedupeSelect<false> | PostViewDedupeSelect<true>;
@@ -269,6 +271,47 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  eyebrow?: string | null;
+  description: string;
+  /**
+   * Markdown is supported here, including headings, lists, links, tables, code blocks, and GitHub-style callouts via > [!NOTE].
+   */
+  content: string;
+  effectiveDateLabel?: string | null;
+  seo?: {
+    /**
+     * Optional SEO title override for the current locale. Leave blank to reuse the page title.
+     */
+    metaTitle?: string | null;
+    /**
+     * Optional SEO description override for the current locale. Leave blank to reuse the page description or body summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * Optional social sharing image override. Leave blank to reuse the site default image.
+     */
+    metaImage?: (number | null) | Media;
+    /**
+     * Prevent this locale from appearing in search results or the sitemap. Leave disabled for normal published pages.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Single top-level URL segment only, for example "about". Reserved system paths like posts, projects, and archive cannot be used.
+   */
+  slug: string;
   publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -495,6 +538,10 @@ export interface PayloadLockedDocument {
         value: number | Post;
       } | null)
     | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
         relationTo: 'projects';
         value: number | Project;
       } | null)
@@ -642,6 +689,30 @@ export interface PostsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  eyebrow?: T;
+  description?: T;
+  content?: T;
+  effectiveDateLabel?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        metaImage?: T;
+        noindex?: T;
+      };
+  slug?: T;
   publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1364,6 +1435,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'posts';
           value: number | Post;
+        } | null)
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
         } | null)
       | ({
           relationTo: 'projects';

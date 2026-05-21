@@ -4,6 +4,7 @@ export const siteDataExportManifestVersion = 1
 export const siteDataTransferGroupIDs = [
   'site-settings',
   'frontend-variants',
+  'pages',
   'posts',
   'media',
   'post-versions',
@@ -69,7 +70,7 @@ export const siteDataExportPresets = {
   },
   content: {
     description: 'Posts, media, and post version history as a Payload data export.',
-    groups: ['posts', 'media', 'post-versions'],
+    groups: ['pages', 'posts', 'media', 'post-versions'],
     id: 'content',
     label: 'Content export',
   },
@@ -79,6 +80,7 @@ export const siteDataExportPresets = {
     groups: [
       'site-settings',
       'frontend-variants',
+      'pages',
       'posts',
       'media',
       'post-versions',

@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next'
 
 import { isPostIndexable } from '@/features/posts/server/queries'
 import { isPostListed, publishedListedPostWhere } from '@/features/posts/model/post-visibility'
+import { getPublishedPages } from '@/features/pages/server/queries'
+import { buildPagePath } from '@/features/pages/model/page-slugs'
 import { getProjectTimestamp, isProjectIndexable } from '@/features/projects/server/queries'
 import { getResolvedSiteSettings } from '@/features/site-settings/model/site-settings'
 import {
@@ -11,7 +13,7 @@ import {
 import { buildLocalePath, defaultLocale, localeCodes, type AppLocale } from '@/shared/i18n/locales'
 import { getPayloadClient } from '@/shared/payload/client'
 import { buildAbsoluteURL } from '@/shared/content/seo'
-import type { Post, Project } from '@/payload-types'
+import type { Page, Post, Project } from '@/payload-types'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,9 +76,18 @@ function buildProjectPath(slug: string) {
   return `/projects/${encodeURIComponent(slug.trim())}`
 }
 
+function getPageSitemapPriority(page: Page) {
+  return page.slug === 'privacy' || page.slug === 'terms' ? 0.2 : 0.5
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayloadClient()
-  const [localizedSiteSettings, localizedPostGroups, localizedProjectGroups] = await Promise.all([
+  const [
+    localizedSiteSettings,
+    localizedPageGroups,
+    localizedPostGroups,
+    localizedProjectGroups,
+  ] = await Promise.all([
     Promise.all(
       localeCodes.map(async (locale) => {
         const settings = await getResolvedSiteSettings(locale)
@@ -86,6 +97,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           settings,
         }
       }),
+    ),
+    Promise.all(
+      localeCodes.map(async (locale) => ({
+        locale,
+        pages: await getPublishedPages(locale),
+      })),
     ),
     Promise.all(
       localeCodes.map(async (locale) => {
@@ -156,6 +173,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }),
   )
+  const pageLocalesBySlug = new Map<string, AppLocale[]>()
+
+  localizedPageGroups.forEach(({ locale, pages }) => {
+    pages.forEach((page) => {
+      const slug = page.slug.trim()
+      const locales = pageLocalesBySlug.get(slug) ?? []
+
+      locales.push(locale)
+      pageLocalesBySlug.set(slug, locales)
+    })
+  })
+  const localizedPageEntries = localizedPageGroups.flatMap(({ locale, pages }) =>
+    pages.map((page) => {
+      const slug = page.slug.trim()
+      const pathname = buildPagePath(slug)
+
+      return {
+        alternates: buildSitemapAlternates({
+          locales: pageLocalesBySlug.get(slug) ?? [locale],
+          pathname,
+        }),
+        changeFrequency: 'monthly' as const,
+        lastModified: page.updatedAt ?? page.publishedAt ?? new Date().toISOString(),
+        priority: getPageSitemapPriority(page),
+        url: buildAbsoluteURL(buildLocalePath(locale, pathname)),
+      }
+    }),
+  )
   const localesBySlug = new Map<string, AppLocale[]>()
 
   localizedPostGroups.forEach(({ locale, posts }) => {
@@ -216,6 +261,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...localizedHomeEntries,
     ...localizedUtilityPageEntries,
+    ...localizedPageEntries,
     ...localizedPostEntries,
     ...localizedProjectEntries,
   ]
