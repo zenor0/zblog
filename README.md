@@ -75,11 +75,12 @@ Site settings. `SITE_URL` remains available as a runtime fallback before that
 admin value is configured.
 
 On startup, the app container automatically initializes an empty `zblog-data`
-volume before launching the server. It initializes the SQLite schema only, then
-starts the app. It does not seed site settings, pages, demo posts, projects, or
-media; import a site data archive from the admin area when you want starter
+volume before launching the server. The image carries a SQLite template with
+schema only, generated at build time, and `docker-init.mjs` copies that template
+into a new volume. It does not seed site settings, pages, demo posts, projects,
+or media; import a site data archive from the admin area when you want starter
 content. You can rerun the same initializer safely with
-`docker compose run --rm zblog sh -c 'NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs'`;
+`docker compose run --rm zblog sh -c 'node --no-deprecation ./docker-init.mjs'`;
 it skips databases that already contain the `site_settings` table.
 
 Back up the `zblog-data` Docker volume to preserve the SQLite database, uploads,

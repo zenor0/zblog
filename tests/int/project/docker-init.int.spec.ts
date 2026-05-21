@@ -18,10 +18,34 @@ async function createTempState() {
   return {
     databasePath: path.join(stateDir, 'zblog.db'),
     stateDir,
+    templateDatabasePath: path.join(stateDir, 'docker-template.db'),
   }
 }
 
-async function runDockerInit(args: { databasePath: string; stateDir: string }) {
+async function runDockerBuildTemplate(args: { stateDir: string; templateDatabasePath: string }) {
+  return execFileAsync(
+    process.execPath,
+    ['--no-deprecation', '--import=tsx/esm', 'src/scripts/docker-build-template.ts'],
+    {
+      cwd: rootDir,
+      env: {
+        ...process.env,
+        DATABASE_URL: `file:${args.templateDatabasePath}`,
+        NODE_ENV: 'development',
+        PAYLOAD_SECRET: 'test-docker-template-secret',
+        SITE_URL: 'http://localhost:3000',
+        ZBLOG_STATE_DIR: args.stateDir,
+      },
+      timeout: 60_000,
+    },
+  )
+}
+
+async function runDockerInit(args: {
+  databasePath: string
+  stateDir: string
+  templateDatabasePath?: string
+}) {
   return execFileAsync(
     process.execPath,
     ['--no-deprecation', '--import=tsx/esm', 'src/scripts/docker-init.ts'],
@@ -33,6 +57,11 @@ async function runDockerInit(args: { databasePath: string; stateDir: string }) {
         NODE_ENV: 'development',
         PAYLOAD_SECRET: 'test-docker-init-secret',
         SITE_URL: 'http://localhost:3000',
+        ...(args.templateDatabasePath
+          ? {
+              ZBLOG_DOCKER_TEMPLATE_DB_PATH: args.templateDatabasePath,
+            }
+          : {}),
         ZBLOG_STATE_DIR: args.stateDir,
       },
       timeout: 60_000,
@@ -56,12 +85,47 @@ afterEach(async () => {
 })
 
 describe('docker init script', () => {
-  it('initializes schema without seeding content for an empty SQLite database', async () => {
-    const { databasePath, stateDir } = await createTempState()
+  it('builds a Docker schema template without seeding content', async () => {
+    const { stateDir, templateDatabasePath } = await createTempState()
+
+    const { stdout } = await runDockerBuildTemplate({
+      stateDir,
+      templateDatabasePath,
+    })
+    const db = openDatabase(templateDatabasePath)
+
+    try {
+      const table = db
+        .prepare("select name from sqlite_master where type = 'table' and name = 'site_settings'")
+        .get()
+      const settings = db.prepare('select count(*) as count from site_settings').get() as {
+        count: number
+      }
+      const pages = db.prepare('select count(*) as count from pages').get() as {
+        count: number
+      }
+
+      expect(stdout).toContain('"status":"built"')
+      expect(table).toMatchObject({ name: 'site_settings' })
+      expect(settings.count).toBe(0)
+      expect(pages.count).toBe(0)
+    } finally {
+      db.close()
+    }
+  }, 60_000)
+
+  it('copies the schema template for an empty SQLite database', async () => {
+    const { databasePath, stateDir, templateDatabasePath } = await createTempState()
+
+    await runDockerBuildTemplate({
+      stateDir,
+      templateDatabasePath,
+    })
 
     const { stdout } = await runDockerInit({
       databasePath,
       stateDir,
+      templateDatabasePath,
     })
     const db = openDatabase(databasePath)
 

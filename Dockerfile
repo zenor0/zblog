@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 FROM node:22.17.0-alpine AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PNPM_HOME=/pnpm
@@ -8,10 +10,8 @@ RUN apk add --no-cache libc6-compat poppler-utils
 WORKDIR /app
 
 COPY .npmrc* package.json pnpm-lock.yaml ./
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
-
-FROM deps AS prod-deps
-RUN corepack enable pnpm && pnpm prune --prod --ignore-scripts
+RUN --mount=type=cache,id=zblog-pnpm-store,target=/pnpm/store \
+  corepack enable pnpm && pnpm config set store-dir /pnpm/store && pnpm i --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
@@ -22,10 +22,10 @@ COPY . .
 RUN \
   export PAYLOAD_SECRET=zblog-build-placeholder-secret; \
   export ZBLOG_STATE_DIR=/tmp/zblog-build-state; \
-  export DATABASE_URL=file:/tmp/zblog-build-state/zblog-build.db; \
-  corepack enable pnpm && NODE_ENV=development pnpm run docker:init && pnpm run build
+  export DATABASE_URL=file:/app/docker-template.db; \
+  corepack enable pnpm && NODE_ENV=development pnpm run docker:build-template && pnpm run build
 RUN \
-  corepack enable pnpm && pnpm exec esbuild src/scripts/docker-init.ts --bundle --platform=node --target=node22 --format=esm --external:@payloadcms/db-sqlite --external:libsql --external:sharp --banner:js="import { createRequire as __createRequire } from 'node:module'; var require = __createRequire(import.meta.url);" --outfile=docker-init.mjs
+  corepack enable pnpm && pnpm exec esbuild src/scripts/docker-init.ts --bundle --platform=node --target=node22 --format=esm --external:libsql --banner:js="import { createRequire as __createRequire } from 'node:module'; var require = __createRequire(import.meta.url);" --outfile=docker-init.mjs
 RUN mkdir -p public
 
 FROM base AS runner
@@ -51,11 +51,11 @@ RUN chown nextjs:nodejs .next .data
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/docker-init.mjs ./docker-init.mjs
-COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/docker-template.db ./docker-template.db
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs && exec node server.js"]
+CMD ["sh", "-c", "node --no-deprecation ./docker-init.mjs && exec node server.js"]

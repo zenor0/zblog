@@ -6,9 +6,7 @@ import { pathToFileURL } from 'node:url'
 
 import Database from 'libsql'
 
-import { defaultLocale } from '@/shared/i18n/locales'
-
-const siteSettingsTable = 'site_settings'
+export const dockerSchemaReadyTable = 'site_settings'
 
 type BootstrapAction = 'fail' | 'init' | 'skip'
 
@@ -20,6 +18,7 @@ export type DockerBootstrapDecision = {
 export type DockerBootstrapResult = {
   databasePath: string
   status: 'initialized' | 'skipped'
+  templateDatabasePath?: string
 }
 
 function formatJSON(value: unknown): string {
@@ -53,6 +52,16 @@ export function resolveFileDatabasePath(databaseURL = process.env.DATABASE_URL):
   return path.isAbsolute(decodedPath) ? decodedPath : path.resolve(process.cwd(), decodedPath)
 }
 
+export function resolveDockerTemplateDatabasePath(
+  templateDatabasePath = process.env.ZBLOG_DOCKER_TEMPLATE_DB_PATH,
+): string {
+  const configuredPath = templateDatabasePath?.trim() || 'docker-template.db'
+
+  return path.isAbsolute(configuredPath)
+    ? configuredPath
+    : path.resolve(process.cwd(), configuredPath)
+}
+
 export async function readSQLiteUserTables(databasePath: string): Promise<string[]> {
   await fs.mkdir(path.dirname(databasePath), {
     recursive: true,
@@ -74,17 +83,17 @@ export async function readSQLiteUserTables(databasePath: string): Promise<string
 }
 
 export function getDockerBootstrapDecision(tableNames: string[]): DockerBootstrapDecision {
-  if (tableNames.includes(siteSettingsTable)) {
+  if (tableNames.includes(dockerSchemaReadyTable)) {
     return {
       action: 'skip',
-      reason: `${siteSettingsTable} already exists`,
+      reason: `${dockerSchemaReadyTable} already exists`,
     }
   }
 
   if (tableNames.length > 0) {
     return {
       action: 'fail',
-      reason: `existing tables found without ${siteSettingsTable}: ${tableNames.join(', ')}`,
+      reason: `existing tables found without ${dockerSchemaReadyTable}: ${tableNames.join(', ')}`,
     }
   }
 
@@ -94,32 +103,39 @@ export function getDockerBootstrapDecision(tableNames: string[]): DockerBootstra
   }
 }
 
-async function initializePayloadSchema() {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('docker:init must run with NODE_ENV unset or set to development.')
+async function removeSQLiteSidecars(databasePath: string): Promise<void> {
+  await Promise.all(
+    [`${databasePath}-shm`, `${databasePath}-wal`].map((sidecarPath) =>
+      fs.rm(sidecarPath, {
+        force: true,
+      }),
+    ),
+  )
+}
+
+export async function copyDockerTemplateDatabase(args: {
+  databasePath: string
+  templateDatabasePath: string
+}): Promise<void> {
+  if (args.databasePath === args.templateDatabasePath) {
+    throw new Error('Docker database path and template database path must be different.')
   }
 
-  process.env.DISABLE_PAYLOAD_HMR ??= 'true'
+  await fs.access(args.templateDatabasePath)
 
-  const [{ getPayload }, configModule] = await Promise.all([
-    import('payload'),
-    import('@/payload.config'),
-  ])
+  const templateTableNames = await readSQLiteUserTables(args.templateDatabasePath)
 
-  const payload = await getPayload({
-    config: await configModule.default,
+  if (!templateTableNames.includes(dockerSchemaReadyTable)) {
+    throw new Error(
+      `Docker template database is missing ${dockerSchemaReadyTable}: ${args.templateDatabasePath}`,
+    )
+  }
+
+  await fs.mkdir(path.dirname(args.databasePath), {
+    recursive: true,
   })
-
-  try {
-    await payload.findGlobal({
-      slug: 'site-settings',
-      depth: 0,
-      fallbackLocale: false,
-      locale: defaultLocale,
-    })
-  } finally {
-    await payload.destroy()
-  }
+  await removeSQLiteSidecars(args.databasePath)
+  await fs.copyFile(args.templateDatabasePath, args.databasePath)
 }
 
 export async function bootstrapDockerDatabase(): Promise<DockerBootstrapResult> {
@@ -140,11 +156,17 @@ export async function bootstrapDockerDatabase(): Promise<DockerBootstrapResult> 
     )
   }
 
-  await initializePayloadSchema()
+  const templateDatabasePath = resolveDockerTemplateDatabasePath()
+
+  await copyDockerTemplateDatabase({
+    databasePath,
+    templateDatabasePath,
+  })
 
   return {
     databasePath,
     status: 'initialized',
+    templateDatabasePath,
   }
 }
 

@@ -30,19 +30,22 @@ describe('deployment container config', () => {
     expect(sitemapRoute).toMatch(/dynamic\s*=\s*['"]force-dynamic['"]/)
     expect(dockerfile).toContain('PAYLOAD_SECRET=zblog-build-placeholder-secret')
     expect(dockerfile).toContain('ZBLOG_STATE_DIR=/tmp/zblog-build-state')
-    expect(dockerfile).toContain('DATABASE_URL=file:/tmp/zblog-build-state/zblog-build.db')
-    expect(dockerfile).toContain('FROM deps AS prod-deps')
-    expect(dockerfile).toContain('pnpm prune --prod')
+    expect(dockerfile).toContain('DATABASE_URL=file:/app/docker-template.db')
+    expect(dockerfile).toContain('pnpm run docker:build-template')
     expect(dockerfile).toContain('--outfile=docker-init.mjs')
-    expect(dockerfile).toContain('--external:@payloadcms/db-sqlite')
     expect(dockerfile).toContain('--external:libsql')
-    expect(dockerfile).toContain('--external:sharp')
     expect(dockerfile).toContain(
-      'COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules',
+      'COPY --from=builder --chown=nextjs:nodejs /app/docker-template.db ./docker-template.db',
     )
-    expect(dockerfile).toContain('COPY --from=builder --chown=nextjs:nodejs /app/docker-init.mjs')
+    expect(dockerfile).not.toContain('FROM deps AS prod-deps')
+    expect(dockerfile).not.toContain('pnpm prune --prod')
+    expect(dockerfile).not.toContain('--external:@payloadcms/db-sqlite')
+    expect(dockerfile).not.toContain('--external:sharp')
     expect(dockerfile).toContain(
-      'CMD ["sh", "-c", "NODE_ENV=development DISABLE_PAYLOAD_HMR=true node --no-deprecation ./docker-init.mjs && exec node server.js"]',
+      'COPY --from=builder --chown=nextjs:nodejs /app/docker-init.mjs ./docker-init.mjs',
+    )
+    expect(dockerfile).toContain(
+      'CMD ["sh", "-c", "node --no-deprecation ./docker-init.mjs && exec node server.js"]',
     )
     expect(dockerfile).not.toContain('ARG NEXT_PUBLIC_SITE_URL')
     expect(dockerfile).not.toContain('NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL"')
@@ -87,14 +90,20 @@ describe('deployment container config', () => {
     }
     const payloadConfig = readProjectFile('src/payload.config.ts')
     const dockerInitScript = readProjectFile('src/scripts/docker-init.ts')
+    const dockerBuildTemplateScript = readProjectFile('src/scripts/docker-build-template.ts')
 
     expect(packageJSON.scripts?.['docker:init']).toContain('docker-init.ts')
+    expect(packageJSON.scripts?.['docker:build-template']).toContain('docker-build-template.ts')
     expect(payloadConfig).not.toContain("from './migrations'")
     expect(payloadConfig).not.toContain('prodMigrations')
     expect(dockerInitScript).toContain('bootstrapDockerDatabase')
-    expect(dockerInitScript).toContain('payload.findGlobal')
+    expect(dockerInitScript).toContain('ZBLOG_DOCKER_TEMPLATE_DB_PATH')
+    expect(dockerInitScript).not.toContain('payload.findGlobal')
+    expect(dockerBuildTemplateScript).toContain('payload.findGlobal')
     expect(dockerInitScript).not.toContain('seedSiteSettings')
     expect(dockerInitScript).not.toContain('seedSitePages')
+    expect(dockerBuildTemplateScript).not.toContain('seedSiteSettings')
+    expect(dockerBuildTemplateScript).not.toContain('seedSitePages')
     expect(fs.existsSync(path.join(rootDir, 'src/migrations'))).toBe(false)
   })
 
@@ -106,6 +115,7 @@ describe('deployment container config', () => {
     expect(envExample).toContain('SITE_URL=https://example.com')
     expect(envExample).not.toContain('NEXT_PUBLIC_SITE_URL')
     expect(envExample).toContain('PAYLOAD_SECRET=')
+    expect(envExample).toContain('ZBLOG_DOCKER_TEMPLATE_DB_PATH=/app/docker-template.db')
     expect(envExample).toContain('ZBLOG_PDF_PREVIEW_COMMAND=pdftocairo')
     expect(envExample).toContain('ZBLOG_PDF_RENDER_CONCURRENCY=4')
     expect(envExample).toContain('TRANSLATION_API_URL=')
