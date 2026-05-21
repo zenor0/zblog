@@ -354,7 +354,12 @@ describe('SiteSettingsRawSectionEditor', () => {
       />,
     )
 
-    fireEvent.change(screen.getByLabelText('Footer YAML config'), {
+    const editor = screen.getByLabelText('Footer YAML config') as HTMLTextAreaElement
+
+    expect(editor.value).not.toContain('id: old-section')
+    expect(editor.value).not.toContain('id: old-link')
+
+    fireEvent.change(editor, {
       target: {
         value: [
           'footer:',

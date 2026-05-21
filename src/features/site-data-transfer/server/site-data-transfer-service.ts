@@ -206,37 +206,52 @@ function normalizeZipEntries(entries: Record<string, Uint8Array>): Record<string
   )
 }
 
-function stripSystemFields(value: unknown): unknown {
+const payloadDocumentSystemFieldNames = new Set(['createdAt', 'id', 'updatedAt'])
+const uploadGeneratedSystemFieldNames = new Set([
+  'height',
+  'mimeType',
+  'previewSVGError',
+  'previewSVGFilename',
+  'previewSVGGeneratedAt',
+  'previewSVGStatus',
+  'previewSVGURL',
+  'sizes',
+  'thumbnailURL',
+  'url',
+  'width',
+])
+
+type StripSystemFieldsOptions = {
+  stripUploadFields?: boolean
+}
+
+function shouldStripSystemField(key: string, options: StripSystemFieldsOptions) {
+  return (
+    payloadDocumentSystemFieldNames.has(key) ||
+    (options.stripUploadFields === true && uploadGeneratedSystemFieldNames.has(key))
+  )
+}
+
+function stripSystemFields(value: unknown, options: StripSystemFieldsOptions = {}): unknown {
   if (Array.isArray(value)) {
-    return value.map((item) => stripSystemFields(item))
+    return value.map((item) => stripSystemFields(item, options))
   }
 
   if (!isRecord(value)) {
     return value
   }
 
-  const ignored = new Set([
-    'createdAt',
-    'height',
-    'id',
-    'mimeType',
-    'previewSVGError',
-    'previewSVGFilename',
-    'previewSVGGeneratedAt',
-    'previewSVGStatus',
-    'previewSVGURL',
-    'sizes',
-    'thumbnailURL',
-    'updatedAt',
-    'url',
-    'width',
-  ])
-
   return Object.fromEntries(
     Object.entries(value)
-      .filter(([key]) => !ignored.has(key))
-      .map(([key, item]) => [key, stripSystemFields(item)]),
+      .filter(([key]) => !shouldStripSystemField(key, options))
+      .map(([key, item]) => [key, stripSystemFields(item, options)]),
   )
+}
+
+function stripMediaSystemFields(value: unknown): unknown {
+  return stripSystemFields(value, {
+    stripUploadFields: true,
+  })
 }
 
 function getID(value: unknown): null | string {
@@ -760,31 +775,35 @@ async function buildArchiveData(args: {
 
   if (args.groups.includes('site-settings')) {
     data.globals ??= {}
-    data.globals.siteSettings = stripTransientEditorFields(
-      await args.payload.findGlobal({
-        depth: 0,
-        fallbackLocale: false,
-        locale: 'all',
-        overrideAccess: false,
-        req: buildLocalRequest(args.user),
-        slug: 'site-settings',
-        user: args.user,
-      } as never),
+    data.globals.siteSettings = stripSystemFields(
+      stripTransientEditorFields(
+        await args.payload.findGlobal({
+          depth: 0,
+          fallbackLocale: false,
+          locale: 'all',
+          overrideAccess: false,
+          req: buildLocalRequest(args.user),
+          slug: 'site-settings',
+          user: args.user,
+        } as never),
+      ),
     ) as JsonRecord
   }
 
   if (args.groups.includes('frontend-variants')) {
     data.globals ??= {}
-    data.globals.frontendVariants = stripTransientEditorFields(
-      await args.payload.findGlobal({
-        depth: 0,
-        fallbackLocale: false,
-        locale: 'all',
-        overrideAccess: false,
-        req: buildLocalRequest(args.user),
-        slug: 'frontend-variants',
-        user: args.user,
-      } as never),
+    data.globals.frontendVariants = stripSystemFields(
+      stripTransientEditorFields(
+        await args.payload.findGlobal({
+          depth: 0,
+          fallbackLocale: false,
+          locale: 'all',
+          overrideAccess: false,
+          req: buildLocalRequest(args.user),
+          slug: 'frontend-variants',
+          user: args.user,
+        } as never),
+      ),
     ) as JsonRecord
   }
 
@@ -1190,8 +1209,8 @@ async function createImportDiff(args: {
         continue
       }
 
-      const comparableExisting = stripSystemFields(existing)
-      const comparableImport = stripSystemFields(media)
+      const comparableExisting = stripMediaSystemFields(existing)
+      const comparableImport = stripMediaSystemFields(media)
 
       if (hashValue(comparableExisting) === hashValue(comparableImport)) {
         diff.groups.media.skips += 1
